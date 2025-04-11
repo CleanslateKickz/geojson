@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Script is running!'); // Basic log to check if the script is executing
+
     const repoOwner = 'CleanslateKickz';
     const repoName = 'geojson';
 
