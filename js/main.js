@@ -7,6 +7,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${path}`;
 
         try {
+            console.log(`Fetching files from: ${apiUrl}`); // Log the API URL
+
             const response = await fetch(apiUrl);
 
             if (!response.ok) {
@@ -15,6 +17,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             const items = await response.json();
+            console.log(`API response for ${path}:`, items); // Log the API response
+
             let files = [];
 
             for (const item of items) {
@@ -36,7 +40,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Function to fetch GeoJSON files from the repository
     async function fetchGeoJSONFiles() {
         const allFiles = await fetchFiles();
+        console.log('All files fetched:', allFiles); // Log all fetched files
         const geojsonFiles = allFiles.filter(file => file.name.endsWith('.geojson'));
+        console.log('GeoJSON files:', geojsonFiles); // Log the filtered GeoJSON files
         return geojsonFiles;
     }
 
