@@ -8,6 +8,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
         try {
             const response = await fetch(apiUrl);
+
+            if (!response.ok) {
+                console.error(`GitHub API error: ${response.status} ${response.statusText}`);
+                return [];
+            }
+
             const items = await response.json();
             let files = [];
 
@@ -107,7 +113,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const categoryElement = document.createElement('div');
         categoryElement.className = 'category-card';
         categoryElement.innerHTML = `
-            <h3><i class="fas ${category.icon}"></i> ${category.name}</h3>
+            <h3><i class="fas ${category.icon}\"></i> ${category.name}</h3>
             <p>${category.description}</p>
         `;
         categoryGrid.appendChild(categoryElement);
