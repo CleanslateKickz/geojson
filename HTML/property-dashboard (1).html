@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Property Ownership Portfolio Insights</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f9fafb;
+    }
+    .dashboard {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 18px 10px;
+    }
+    .dashboard-title {
+      font-size: 2em;
+      font-weight: bold;
+      margin-bottom: 10px;
+      text-align: center;
+      color: #222;
+    }
+    .controls {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+    .kpi-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: center;
+      margin-bottom: 18px;
+    }
+    .kpi-card {
+      background: #fff;
+      border-radius: 7px;
+      box-shadow: 0 2px 7px rgba(0,0,0,0.07);
+      padding: 14px 22px;
+      min-width: 160px;
+      text-align: center;
+      flex: 1 1 160px;
+      max-width: 220px;
+    }
+    .kpi-label {
+      color: #6c757d;
+      font-size: 1em;
+    }
+    .kpi-value {
+      font-size: 1.6em;
+      font-weight: 600;
+      color: #198754;
+      margin-top: 3px;
+    }
+    .viz-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 18px;
+      align-items: stretch;
+    }
+    .viz-card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.08);
+      padding: 14px 12px 18px 12px;
+      height: 340px;
+      display: flex;
+      flex-direction: column;
+    }
+    .viz-title {
+      font-size: 1.08em;
+      font-weight: 500;
+      color: #2c3e50;
+      margin-bottom: 5px;
+      text-align: center;
+    }
+    canvas {
+      max-width: 100%;
+      height: 250px !important;
+      margin: 0;
+      display: block;
+    }
+    .no-data {
+      color: #bbb;
+      font-style: italic;
+      text-align: center;
+      margin: 30px 0;
+    }
+    select {
+      font-size: 1em;
+      padding: 4px 8px;
+      border-radius: 5px;
+      border: 1px solid #b3b8c0;
+    }
+    @media (max-width: 700px) {
+      .viz-grid { grid-template-columns: 1fr; }
+      .viz-card { height: 320px; }
+      canvas { height: 180px !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <div class="dashboard-title">Property Ownership Portfolio Insights</div>
+    <div class="controls">
+      <div>
+        <label for="classifyFilter">Classify Color: </label>
+        <select id="classifyFilter">
+          <option value="ALL">All</option>
+        </select>
+      </div>
+      <div>
+        <label for="ownerFilter">Owner: </label>
+        <select id="ownerFilter">
+          <option value="ALL">All</option>
+        </select>
+      </div>
+    </div>
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-label">Centers w/ Properties</div>
+        <div class="kpi-value" id="kpi-centers">-</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">% Properties IPA</div>
+        <div class="kpi-value" id="kpi-props-ipa-pct">-</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Largest Owner Portfolio</div>
+        <div class="kpi-value" id="kpi-top-owner">-</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Most Active Center</div>
+        <div class="kpi-value" id="kpi-top-center">-</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Centers Fully IPA</div>
+        <div class="kpi-value" id="kpi-centers-ipa">-</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Centers Single Non-IPA Owner</div>
+        <div class="kpi-value" id="kpi-centers-single-nonipa">-</div>
+      </div>
+    </div>
+    <div class="viz-grid">
+      <div class="viz-card">
+        <div class="viz-title">Property Classification Mix</div>
+        <canvas id="classPie"></canvas>
+        <div class="no-data" id="nodata-classpie" style="display:none;">No data</div>
+      </div>
+      <div class="viz-card">
+        <div class="viz-title">Top 10 Owners by Property Count</div>
+        <canvas id="ownerBar"></canvas>
+        <div class="no-data" id="nodata-ownerbar" style="display:none;">No data</div>
+      </div>
+      <div class="viz-card">
+        <div class="viz-title">Top 10 Centers by Property Count</div>
+        <canvas id="centerBar"></canvas>
+        <div class="no-data" id="nodata-centerbar" style="display:none;">No data</div>
+      </div>
+      <div class="viz-card">
+        <div class="viz-title">Ownership Structure of Centers</div>
+        <canvas id="centerStacked"></canvas>
+        <div class="no-data" id="nodata-centerstacked" style="display:none;">No data</div>
+      </div>
+      <div class="viz-card">
+        <div class="viz-title">Avg. Last Sale Price by Classification</div>
+        <canvas id="avgSaleByClassChart"></canvas>
+        <div class="no-data" id="nodata-avgSaleByClass" style="display:none;">No data</div>
+      </div>
+      <div class="viz-card">
+        <div class="viz-title">% IPA vs. Non-IPA Properties per Center (Top 10)</div>
+        <canvas id="centerIpaPct"></canvas>
+        <div class="no-data" id="nodata-centerIpaPct" style="display:none;">No data</div>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Color palette and classify options
+    const classifyOptions = [
+      "IPA", "Never", "Call Relationship", "Broker/Eh", "Eric", "Contact", "Not Interested/DNC", "Call Again", "Unknown"
+    ];
+    const colorPalette = [
+      "#198754", "#0d6efd", "#f39c12", "#e74c3c", "#6f42c1", "#20c997", "#fd7e14", "#343a40", "#a3a3a3"
+    ];
+    let allProps = [];
+    let charts = {};
+    let currentClassify = "ALL";
+    let currentOwner = "ALL";
+    // --- Populate filter dropdowns
+    function populateFilters(records) {
+      const classifySet = new Set(classifyOptions);
+      const ownerSet = new Set();
+      records.forEach(r => {
+        if (r.Classify_Color) classifySet.add(r.Classify_Color);
+        if (r.PrimaryOwner) ownerSet.add(r.PrimaryOwner);
+      });
+      // Classify Color filter
+      const classifyFilter = document.getElementById('classifyFilter');
+      classifyFilter.innerHTML = "<option value='ALL'>All</option>" +
+        Array.from(classifySet).map(opt => `<option>${opt}</option>`).join('');
+      // Owner filter
+      const ownerFilter = document.getElementById('ownerFilter');
+      ownerFilter.innerHTML = "<option value='ALL'>All</option>" +
+        Array.from(ownerSet).sort().map(opt => `<option>${opt}</option>`).join('');
+    }
+    // --- Listen for filter changes
+    document.getElementById('classifyFilter').addEventListener('change', e => {
+      currentClassify = e.target.value;
+      processData();
+    });
+    document.getElementById('ownerFilter').addEventListener('change', e => {
+      currentOwner = e.target.value;
+      processData();
+    });
+    // --- Grist hook
+    grist.ready();
+    grist.onRecords((records) => {
+      allProps = Array.isArray(records) ? records : [];
+      populateFilters(allProps);
+      processData();
+    });
+    // --- Data processing and chart-building
+    function processData() {
+      let props = allProps.filter(p => {
+        const byClass = (currentClassify === "ALL" || p.Classify_Color === currentClassify);
+        const byOwner = (currentOwner === "ALL" || p.PrimaryOwner === currentOwner);
+        return byClass && byOwner;
+      });
+      if (!props.length) {
+        setNoDataAll();
+        setKPIs({});
+        return;
+      }
+      // Group by center
+      const centerMap = {};
+      const centerNameMap = {};
+      const ownerSet = new Set();
+      let ipaPropertyCount = 0;
+      let centersOwnedEntirelyByIPA = 0;
+      let centersOwnedEntirelyBySameNonIPA = 0;
+      let mostActiveCenter = {name: "", count: 0};
+      let centerIpaPct = [];
+      props.forEach(p => {
+        const cId = p.Center_ID, cName = p.Properties__Center_Name || `ID:${cId}`;
+        if (!centerMap[cId]) centerMap[cId] = [];
+        centerMap[cId].push(p);
+        centerNameMap[cId] = cName;
+        if(p.PrimaryOwner) ownerSet.add(p.PrimaryOwner);
+        if (p.Classify_Color === "IPA") ipaPropertyCount++;
+      });
+      // Center ownership analysis
+      let fullyOwnedBy = {}; // owner -> [centerName]
+      Object.entries(centerMap).forEach(([cId, propsArr]) => {
+        if (!propsArr.length) return;
+        const firstOwner = propsArr[0].PrimaryOwner;
+        const allIPA = propsArr.every(p => p.Classify_Color === "IPA");
+        const allSame = propsArr.every(p => p.PrimaryOwner === firstOwner && firstOwner);
+        const allNonIPA = allSame && !allIPA;
+        if (allIPA) centersOwnedEntirelyByIPA++;
+        else if (allNonIPA) centersOwnedEntirelyBySameNonIPA++;
+        if (allSame && firstOwner) {
+          if (!fullyOwnedBy[firstOwner]) fullyOwnedBy[firstOwner] = [];
+          fullyOwnedBy[firstOwner].push(centerNameMap[cId]);
+        }
+        // Center activity
+        if (propsArr.length > mostActiveCenter.count) {
+          mostActiveCenter = {name: centerNameMap[cId], count: propsArr.length};
+        }
+        // IPA % per center
+        let ipaCount = propsArr.filter(p => p.Classify_Color === "IPA").length;
+        centerIpaPct.push({
+          name: centerNameMap[cId],
+          ipaPct: 100 * ipaCount / propsArr.length,
+          nonIpaPct: 100 - (100 * ipaCount / propsArr.length),
+          total: propsArr.length,
+        });
+      });
+      // Top owners
+      let ownerCounts = {};
+      props.forEach(p => {
+        if (p.PrimaryOwner) {
+          if (!ownerCounts[p.PrimaryOwner]) ownerCounts[p.PrimaryOwner] = 0;
+          ownerCounts[p.PrimaryOwner]++;
+        }
+      });
+      let ownerSorted = Object.entries(ownerCounts).sort((a,b)=>b[1]-a[1]);
+      let topOwner = ownerSorted.length ? `${ownerSorted[0][0]} (${ownerSorted[0][1]})` : '-';
+      // Top centers
+      let centerCounts = Object.entries(centerMap).map(([cid, arr]) => [centerNameMap[cid], arr.length])
+        .sort((a,b)=>b[1]-a[1]);
+      let topCenter = centerCounts.length ? `${centerCounts[0][0]} (${centerCounts[0][1]})` : '-';
+      // KPIs
+      setKPIs({
+        centers: Object.keys(centerMap).length,
+        centersIPA: centersOwnedEntirelyByIPA,
+        centersSingleNonIPA: centersOwnedEntirelyBySameNonIPA,
+        propsIPA: (props.length ? `${((ipaPropertyCount/props.length)*100).toFixed(1)}%` : "0%"),
+        owners: ownerSet.size,
+        topOwner, topCenter
+      });
+      // --- Chart 1: Classification Pie (Portfolio mix) ---
+      let classCounts = {};
+      props.forEach(p => {
+        let c = p.Classify_Color || "Unknown";
+        classCounts[c] = (classCounts[c]||0)+1;
+      });
+      let pieLabels = Object.keys(classCounts);
+      let pieData = Object.values(classCounts);
+      let pieColors = pieLabels.map((l,i) => colorPalette[i%colorPalette.length]);
+      updatePieChart("classPie", pieLabels, pieData, pieColors, "nodata-classpie");
+      // --- Chart 2: Owner Portfolio Bar (Top 10) ---
+      let ownerBarData = ownerSorted.slice(0,10);
+      updateBarChart(
+        "ownerBar",
+        ownerBarData.map(x=>x[0]),
+        ownerBarData.map(x=>x[1]),
+        "# Properties",
+        {colors: colorPalette, nodata:"nodata-ownerbar", yLabel:"# Properties", xLabel:"Owner", indexAxis:'x', rotate:45, stackBar: false}
+      );
+      // --- Chart 3: Top 10 Centers By Property Count ---
+      let centerBarData = centerCounts.slice(0,10);
+      updateBarChart(
+        "centerBar",
+        centerBarData.map(x=>x[0]),
+        centerBarData.map(x=>x[1]),
+        "# Properties",
+        {colors: colorPalette, nodata:"nodata-centerbar", yLabel:"# Properties", xLabel:"Center", indexAxis:'x', rotate:45, stackBar: false}
+      );
+      // --- Chart 4: Stacked Ownership Structure of Centers (Top 10) ---
+      let stackedCenters = Object.entries(centerMap)
+        .sort((a, b) => b[1].length - a[1].length)
+        .slice(0, 10);
+      let stackedLabels = stackedCenters.map(([cId, arr]) => centerNameMap[cId]);
+      let ownersList = Array.from(new Set(stackedCenters.flatMap(([cId, arr])=>arr.map(p=>p.PrimaryOwner||"Unknown"))));
+      let stackedData = ownersList.map(owner =>
+        stackedCenters.map(([cId, arr]) => arr.filter(p=>p.PrimaryOwner===owner).length)
+      );
+      let stackedColors = ownersList.map((o,i)=>colorPalette[i%colorPalette.length]);
+      updateStackedBarChart("centerStacked", stackedLabels, ownersList, stackedData, stackedColors, "nodata-centerstacked");
+      // --- Chart 5: Avg Sale Price by Classification ---
+      let saleByClass = {};
+      props.forEach(p => {
+        let c = p.Classify_Color || "Unknown";
+        let price = Number(p.Last_Sale_Price);
+        if (!isNaN(price) && price > 0) {
+          if (!saleByClass[c]) saleByClass[c] = {sum:0, count:0};
+          saleByClass[c].sum += price;
+          saleByClass[c].count++;
+        }
+      });
+      let avgSaleLabels = Object.keys(saleByClass);
+      let avgSaleData = avgSaleLabels.map(k => saleByClass[k].sum / saleByClass[k].count);
+      updateBarChart(
+        "avgSaleByClassChart",
+        avgSaleLabels,
+        avgSaleData,
+        "Avg Sale Price ($)",
+        {colors: colorPalette, nodata:"nodata-avgSaleByClass", yLabel:"Avg Sale Price ($)", xLabel:"Classification", indexAxis:'y', rotate:0, stackBar: false, formatCurrency: true}
+      );
+      // --- Chart 6: IPA vs Non-IPA Properties per Center (Top 10) ---
+      let ipaPctTop = centerIpaPct.sort((a,b)=>b.total-a.total).slice(0,10);
+      updateStackedBarChart(
+        "centerIpaPct",
+        ipaPctTop.map(x=>x.name),
+        ["IPA", "Non-IPA"],
+        [
+          ipaPctTop.map(x=>x.ipaPct),
+          ipaPctTop.map(x=>x.nonIpaPct)
+        ],
+        ["#198754", "#fd7e14"],
+        "nodata-centerIpaPct",
+        true // percent
+      );
+    }
+    // --- Chart helpers ---
+    function updateBarChart(canvasId, labels, data, label, opts={}) {
+      const ctx = document.getElementById(canvasId).getContext('2d');
+      document.getElementById(opts.nodata).style.display = (!labels.length ? '' : 'none');
+      if (charts[canvasId]) charts[canvasId].destroy();
+      if (!labels.length) return;
+      let formatter = opts.formatCurrency
+        ? value => "$" + Math.round(value).toLocaleString()
+        : value => value;
+      charts[canvasId] = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label,
+            data,
+            backgroundColor: opts.colors || colorPalette,
+            borderRadius: 4,
+          }]
+        },
+        options: {
+          indexAxis: opts.indexAxis || 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              title: {display: !!opts.xLabel, text: opts.xLabel},
+              beginAtZero: true,
+              ticks: { callback: formatter },
+              grid: { color: '#f0f0f0' }
+            },
+            y: {
+              title: {display: !!opts.yLabel, text: opts.yLabel},
+              beginAtZero: true,
+              ticks: { callback: formatter },
+              grid: { color: '#f0f0f0' }
+            }
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  let val = context.parsed.x !== undefined ? context.parsed.x : context.parsed.y;
+                  return (opts.formatCurrency ? "$" + Math.round(val).toLocaleString() : val);
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+    function updatePieChart(canvasId, labels, data, colors, nodataId) {
+      const ctx = document.getElementById(canvasId).getContext('2d');
+      document.getElementById(nodataId).style.display = (!labels.length ? '' : 'none');
+      if (charts[canvasId]) charts[canvasId].destroy();
+      if (!labels.length) return;
+      charts[canvasId] = new Chart(ctx, {
+        type: 'pie',
+        data: {labels, datasets: [{data, backgroundColor: colors}]},
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {position: 'right'},
+            tooltip: {callbacks: {
+              label: ctx => `${ctx.label}: ${ctx.raw}`
+            }}
+          }
+        }
+      });
+    }
+    function updateStackedBarChart(canvasId, labels, owners, dataArr, colors, nodataId, percentMode=false) {
+      const ctx = document.getElementById(canvasId).getContext('2d');
+      document.getElementById(nodataId).style.display = (!labels.length ? '' : 'none');
+      if (charts[canvasId]) charts[canvasId].destroy();
+      if (!labels.length) return;
+      charts[canvasId] = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: owners.map((owner, i) => ({
+            label: owner,
+            data: dataArr[i],
+            backgroundColor: colors[i % colors.length],
+            stack: 'stack1'
+          }))
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              stacked: true,
+              beginAtZero: true,
+              max: percentMode ? 100 : undefined,
+              ticks: percentMode ? { callback: v => v + "%" } : {}
+            },
+            y: {
+              stacked: true
+            }
+          },
+          plugins: {
+            legend: { display: true, position: 'right'},
+            tooltip: percentMode
+              ? { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.raw.toFixed(1)}%` } }
+              : {}
+          }
+        }
+      });
+    }
+    function setKPIs({centers=0, centersIPA=0, centersSingleNonIPA=0, propsIPA=0, owners=0, topOwner="-", topCenter="-"}) {
+      document.getElementById('kpi-centers').textContent = centers;
+      document.getElementById('kpi-centers-ipa').textContent = centersIPA;
+      document.getElementById('kpi-centers-single-nonipa').textContent = centersSingleNonIPA;
+      document.getElementById('kpi-props-ipa-pct').textContent = propsIPA;
+      document.getElementById('kpi-owners').textContent = owners;
+      document.getElementById('kpi-top-owner').textContent = topOwner;
+      document.getElementById('kpi-top-center').textContent = topCenter;
+    }
+    function setNoDataAll() {
+      [
+        'nodata-classpie','nodata-ownerbar','nodata-centerbar','nodata-centerstacked',
+        'nodata-avgSaleByClass','nodata-centerIpaPct'
+      ].forEach(id=>document.getElementById(id).style.display='');
+      setKPIs({});
+      Object.values(charts).forEach(c=>c && c.destroy());
+      charts = {};
+    }
+  </script>
+</body>
+</html>
