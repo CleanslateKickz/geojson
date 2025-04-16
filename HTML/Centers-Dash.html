@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shopping Center Dashboard</title>
+<!-- Include Grist API -->
+<script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+
+<!-- Include Chart.js for charts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Include Leaflet.js for maps -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+
+<style>
+  body {
+    font-family: sans-serif;
+    padding: 15px;
+    background-color: #f8f9fa;
+    color: #212529;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    box-sizing: border-box;
+    margin: 0;
+  }
+  .dashboard-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 15px;
+    flex-grow: 1; /* Allow grid to take available space */
+    overflow: auto; /* Add scroll if content overflows */
+    padding-bottom: 15px; /* Space at the bottom */
+  }
+  .kpi-container {
+    display: flex;
+    justify-content: space-around;
+    background-color: #fff;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    margin-bottom: 15px;
+    grid-column: 1 / -1; /* Span full width */
+  }
+  .kpi {
+    text-align: center;
+  }
+  .kpi .value {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #007bff;
+  }
+  .kpi .label {
+    font-size: 0.9em;
+    color: #6c757d;
+  }
+  .chart-container, .map-container, .details-container {
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    min-height: 250px; /* Ensure minimum height */
+    display: flex; /* Use flexbox for content alignment */
+    flex-direction: column; /* Stack title and content vertically */
+  }
+   .map-container {
+     min-height: 350px; /* Make map taller */
+   }
+  .details-container h3 {
+    margin-top: 0;
+    color: #495057;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+  }
+  .details-content {
+      overflow-y: auto; /* Allow scrolling if content overflows */
+      flex-grow: 1; /* Allow content to take available space */
+  }
+  .details-content p {
+    margin: 5px 0;
+    font-size: 0.95em;
+  }
+   .details-content strong {
+      color: #343a40;
+   }
+  #map {
+    height: 100%; /* Make map fill its container */
+    width: 100%;
+    border-radius: 4px;
+    flex-grow: 1; /* Allow map to take available space */
+  }
+  canvas {
+    max-width: 100%;
+    max-height: 250px; /* Limit chart height */
+    margin: 0 auto; /* Center chart if container is wider */
+    display: block;
+  }
+  h2, h3 {
+      margin-top: 0;
+      color: #495057;
+  }
+  .loading, .no-data, .no-selection {
+      text-align: center;
+      padding: 20px;
+      color: #6c757d;
+      font-style: italic;
+  }
+
+  /* Style map popups */
+  .leaflet-popup-content-wrapper {
+    border-radius: 5px;
+  }
+  .leaflet-popup-content {
+      font-size: 13px;
+      line-height: 1.4;
+  }
+  .leaflet-popup-content p { margin: 5px 0;}
+  .leaflet-popup-content strong { color: #333; }
+
+  /* Custom icons */
+  .center-icon {
+    background-color: #007bff; /* Blue */
+    border: 1px solid #fff;
+    border-radius: 50%;
+    width: 10px !important;
+    height: 10px !important;
+    box-shadow: 0 0 3px rgba(0,0,0,0.5);
+  }
+  .property-icon {
+    background-color: #28a745; /* Green */
+    border: 1px solid #fff;
+    border-radius: 50%;
+    width: 8px !important;
+    height: 8px !important;
+    box-shadow: 0 0 2px rgba(0,0,0,0.3);
+  }
+</style>
+</head>
+<body>
+
+<div class="kpi-container">
+  <div class="kpi">
+    <div class="value" id="total-centers">-</div>
+    <div class="label">Total Centers</div>
+  </div>
+  <div class="kpi">
+    <div class="value" id="total-rba">-</div>
+    <div class="label">Total RBA/GLA</div>
+  </div>
+  <div class="kpi">
+    <div class="value" id="avg-leased">-</div>
+    <div class="label">Avg. % Leased</div>
+  </div>
+</div>
+
+<div class="dashboard-container">
+  <div class="details-container">
+    <h3>Selection Details</h3>
+    <div id="selection-details" class="details-content">
+        <p class="no-selection">Select a Center or Property row in Grist to see details here.</p>
+    </div>
+  </div>
+
+  <div class="map-container">
+    <h3>Map View</h3>
+    <div id="map"></div>
+    <div id="map-loading" class="loading">Loading map...</div>
+  </div>
+
+  <div class="chart-container">
+    <h3>Centers by Type</h3>
+    <canvas id="centersByTypeChart"></canvas>
+    <div id="centersByType-nodata" class="no-data" style="display: none;">No data available.</div>
+  </div>
+
+  <div class="chart-container">
+    <h3>Centers by State</h3>
+    <canvas id="centersByStateChart"></canvas>
+    <div id="centersByState-nodata" class="no-data" style="display: none;">No data available.</div>
+  </div>
+
+  <!-- Add more chart or insight containers here as needed -->
+
+</div>
+
+<script>
+(function() {
+  let allCenters = [];
+  let allProperties = [];
+  let selectedRecord = null;
+  let centersByTypeChart = null;
+  let centersByStateChart = null;
+  let map = null;
+  let centerMarkers = L.layerGroup();
+  let propertyMarkers = L.layerGroup();
+
+  // --- Initialization ---
+  grist.ready();
+  grist.onRecord(updateSelection); // Listen for single record selection
+  // Use onRecords to fetch initial/updated data for linked table, but rely on docApi for full fetch
+  grist.onRecords(handleDataUpdate);
+
+  // Initial data fetch for both tables
+  fetchAllData();
+
+  // --- Data Fetching ---
+  function fetchAllData() {
+    console.log("Fetching all data...");
+    Promise.all([
+      grist.docApi.fetchTable('Centers'),
+      grist.docApi.fetchTable('Properties_')
+    ])
+    .then(([centers, properties]) => {
+      console.log("Data fetched successfully.");
+      allCenters = centers;
+      allProperties = properties;
+      // Initial processing after fetching all data
+      processData();
+      initializeMap(); // Initialize map only after first successful fetch
+      updateDashboard();
+    })
+    .catch(error => {
+      console.error("Error fetching table data:", error);
+      document.getElementById('selection-details').innerHTML = '<p class="error">Error loading data. Check table names ("Centers", "Properties_") and permissions.</p>';
+    });
+  }
+
+  // This function is called by grist.onRecords when the data *linked* to the widget changes
+  // We might re-trigger a full fetch or just update based on the partial data provided
+  function handleDataUpdate(records, mappings) {
+      console.log("Grist data update received (onRecords). Re-fetching all data for consistency.");
+      // Simplest approach: re-fetch everything when linked data changes
+      // More advanced: Try to merge 'records' selectively, but that's complex.
+      fetchAllData();
+  }
+
+
+  // --- Data Processing ---
+  function processData() {
+    if (!allCenters || allCenters.length === 0) {
+        console.warn("No center data available for processing.");
+        // Display no data messages for charts
+        document.getElementById('centersByType-nodata').style.display = 'block';
+        document.getElementById('centersByState-nodata').style.display = 'block';
+        if (centersByTypeChart) centersByTypeChart.destroy();
+        if (centersByStateChart) centersByStateChart.destroy();
+        centersByTypeChart = null;
+        centersByStateChart = null;
+        return; // Stop processing if no center data
+    } else {
+        document.getElementById('centersByType-nodata').style.display = 'none';
+        document.getElementById('centersByState-nodata').style.display = 'none';
+    }
+
+    // Calculate KPIs
+    const totalCenters = allCenters.length;
+    const totalRba = allCenters.reduce((sum, center) => sum + (parseFloat(center.RBA_GLA) || 0), 0);
+    const validLeased = allCenters.filter(center => typeof center.Percent_Leased === 'number');
+    const avgLeased = validLeased.length > 0
+        ? (validLeased.reduce((sum, center) => sum + center.Percent_Leased, 0) / validLeased.length) * 100 // Assuming Percent_Leased is 0 to 1
+        : 0;
+
+    document.getElementById('total-centers').textContent = totalCenters;
+    document.getElementById('total-rba').textContent = formatNumber(totalRba);
+    document.getElementById('avg-leased').textContent = `${avgLeased.toFixed(1)}%`;
+
+    // Process data for charts
+    const centersByType = aggregateData(allCenters, 'Center_Type');
+    const centersByState = aggregateData(allCenters, 'State');
+
+    // Update Charts
+    updateBarChart('centersByTypeChart', centersByType, centersByTypeChart, (chartInstance) => centersByTypeChart = chartInstance);
+    updateBarChart('centersByStateChart', centersByState, centersByStateChart, (chartInstance) => centersByStateChart = chartInstance);
+
+    // Update Map Markers
+    updateMapMarkers();
+  }
+
+  // --- Selection Handling ---
+  function updateSelection(record, mappings) {
+    console.log("Record selected:", record);
+    selectedRecord = record;
+    updateDashboard(); // Re-render dashboard sections based on new selection
+  }
+
+  // --- Dashboard Updates ---
+  function updateDashboard() {
+    updateSelectionDetails();
+    highlightMapSelection();
+  }
+
+  function updateSelectionDetails() {
+    const detailsDiv = document.getElementById('selection-details');
+    if (!selectedRecord || !selectedRecord.id) {
+      detailsDiv.innerHTML = '<p class="no-selection">Select a Center or Property row in Grist to see details here.</p>';
+      return;
+    }
+
+    // Try to determine if it's a Center or Property
+    // Check for a field unique to Centers (e.g., `Properties_in_Center`) or Properties (e.g., `Property_Id`)
+    let detailsHtml = '';
+    let recordData = null;
+    let recordType = '';
+
+    // Check if selectedRecord matches a known Center
+    recordData = allCenters.find(c => c.id === selectedRecord.id);
+    if (recordData) {
+        recordType = 'Center';
+        detailsHtml = `
+        <p><strong>Name:</strong> ${recordData.Center_Name || 'N/A'}</p>
+        <p><strong>Type:</strong> ${recordData.Center_Type || 'N/A'}</p>
+        <p><strong>Address:</strong> ${recordData.Address || ''}, ${recordData.City || ''}, ${recordData.State || ''} ${recordData.Zip || ''}</p>
+        <p><strong>RBA/GLA:</strong> ${formatNumber(recordData.RBA_GLA)} sqft</p>
+        <p><strong>% Leased:</strong> ${( (recordData.Percent_Leased || 0) * 100).toFixed(1)}%</p>
+        <p><strong>Year Built:</strong> ${recordData.Year_Built || 'N/A'}</p>
+        <p><strong>Properties in Center:</strong> ${recordData.Properties_in_Center || 'N/A'}</p>
+        <p><strong>Anchor Tenants:</strong> ${recordData.Anchor_Tenants || 'N/A'}</p>
+      `;
+      // Add link if formula exists
+      if (recordData.Center_CoStar_URL) {
+           detailsHtml += `<p><strong>CoStar URL:</strong> <a href="${recordData.Center_CoStar_URL}" target="_blank">Link</a></p>`;
+      }
+
+    } else {
+      // Check if selectedRecord matches a known Property
+      recordData = allProperties.find(p => p.id === selectedRecord.id);
+      if (recordData) {
+          recordType = 'Property';
+          // Fetch related center info if needed (using Center_ID reference)
+          const parentCenter = allCenters.find(c => c.id === recordData.Center_ID); // Center_ID is the reference ID
+          const parentCenterName = parentCenter ? parentCenter.Center_Name : 'Unknown Center';
+
+          detailsHtml = `
+            <p><strong>Property Name:</strong> ${recordData.Property_Name || recordData.Name || 'N/A'}</p>
+            <p><strong>Parent Center:</strong> ${parentCenterName}</p>
+            <p><strong>Address:</strong> ${recordData.Property_Address || recordData.Address || 'N/A'}</p>
+            <p><strong>RBA/GLA:</strong> ${formatNumber(recordData.RBA_GLA)} sqft</p>
+            <p><strong>Last Sale Price:</strong> ${formatCurrency(recordData.Last_Sale_Price)}</p>
+            <p><strong>Last Sale Date:</strong> ${formatDate(recordData.Last_Sale_Date)}</p>
+            <p><strong>Owner:</strong> ${recordData.PrimaryOwner || 'N/A'}</p>
+            <p><strong>Tenants:</strong> ${recordData.Tenants || 'N/A'}</p>
+            <p><strong>Year Built:</strong> ${recordData.YearB || 'N/A'}</p>
+          `;
+          // Add links if they exist
+          if (recordData.CoStar) detailsHtml += `<p><strong>CoStar URL:</strong> <a href="${recordData.CoStar}" target="_blank">Link</a></p>`;
+          if (recordData.MyMap_URL) detailsHtml += `<p><strong>MyMap URL:</strong> <a href="${recordData.MyMap_URL}" target="_blank">Link</a></p>`;
+          if (recordData.Street_View) detailsHtml += `<p><strong>Street View:</strong> <a href="${recordData.Street_View}" target="_blank">Link</a></p>`;
+
+      } else {
+           detailsHtml = '<p class="no-selection">Selected record not found in Center or Property data.</p>';
+           console.warn("Selected record ID not found in fetched data:", selectedRecord.id);
+      }
+    }
+
+    detailsDiv.innerHTML = detailsHtml;
+  }
+
+  // --- Charting ---
+  function aggregateData(data, key) {
+    return data.reduce((acc, item) => {
+      const group = item[key] || 'Unknown'; // Group by the key field
+      acc[group] = (acc[group] || 0) + 1; // Count occurrences
+      return acc;
+    }, {});
+  }
+
+  function updateBarChart(canvasId, data, chartInstance, setChartInstance) {
+    const ctx = document.getElementById(canvasId)?.getContext('2d');
+    if (!ctx) {
+        console.error(`Canvas element with ID ${canvasId} not found.`);
+        return;
+    }
+
+    const labels = Object.keys(data);
+    const values = Object.values(data);
+
+    if (labels.length === 0) {
+        document.getElementById(`${canvasId}-nodata`).style.display = 'block';
+        if (chartInstance) chartInstance.destroy();
+        setChartInstance(null);
+        return;
+    } else {
+         document.getElementById(`${canvasId}-nodata`).style.display = 'none';
+    }
+
+    if (chartInstance) {
+      // Update existing chart
+      chartInstance.data.labels = labels;
+      chartInstance.data.datasets[0].data = values;
+      chartInstance.update();
+    } else {
+      // Create new chart
+      const newChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Count',
+            data: values,
+            backgroundColor: 'rgba(0, 123, 255, 0.6)', // Blue color
+            borderColor: 'rgba(0, 123, 255, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false, // Allow chart to resize height
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                 stepSize: 1 // Ensure whole numbers for counts
+              }
+            }
+          },
+          plugins: {
+              legend: {
+                  display: false // Hide legend for simple bar charts
+              }
+          }
+        }
+      });
+      setChartInstance(newChart);
+    }
+  }
+
+  // --- Mapping ---
+  function initializeMap() {
+      if (map) return; // Already initialized
+
+      const mapLoadingDiv = document.getElementById('map-loading');
+      try {
+          map = L.map('map').setView([39.8283, -98.5795], 4); // Center of US
+
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+              maxZoom: 19,
+              attribution: '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          }).addTo(map);
+
+          centerMarkers.addTo(map);
+          propertyMarkers.addTo(map);
+
+          mapLoadingDiv.style.display = 'none';
+          console.log("Map initialized.");
+          updateMapMarkers(); // Add markers now that map is ready
+      } catch (e) {
+          console.error("Failed to initialize map:", e);
+          document.getElementById('map').innerHTML = '<p class="error">Failed to load map.</p>';
+          mapLoadingDiv.style.display = 'none';
+      }
+  }
+
+  function updateMapMarkers() {
+      if (!map) {
+          console.log("Map not initialized yet, skipping marker update.");
+          return; // Don't update markers if map isn't ready
+      }
+      console.log("Updating map markers...");
+
+      centerMarkers.clearLayers();
+      propertyMarkers.clearLayers();
+
+      // Add Center Markers
+      allCenters.forEach(center => {
+          if (isValidCoordinate(center.Latitude) && isValidCoordinate(center.Longitude)) {
+              const marker = L.marker([center.Latitude, center.Longitude], {
+                  icon: L.divIcon({ className: 'center-icon', iconSize: [10, 10] }),
+                  gristId: center.id, // Custom property to link marker to Grist record
+                  recordType: 'Center'
+              }).bindPopup(`
+                  <strong>${center.Center_Name || 'Center'}</strong><br>
+                  Type: ${center.Center_Type || 'N/A'}<br>
+                  RBA: ${formatNumber(center.RBA_GLA)} sqft
+              `);
+              marker.on('click', () => handleMarkerClick(center.id));
+              centerMarkers.addLayer(marker);
+          }
+      });
+
+      // Add Property Markers
+      allProperties.forEach(prop => {
+          if (isValidCoordinate(prop.Latitude) && isValidCoordinate(prop.Longitude)) {
+              const marker = L.marker([prop.Latitude, prop.Longitude], {
+                   icon: L.divIcon({ className: 'property-icon', iconSize: [8, 8] }),
+                   gristId: prop.id, // Custom property
+                   recordType: 'Property'
+              }).bindPopup(`
+                  <strong>${prop.Property_Name || prop.Name || 'Property'}</strong><br>
+                  Address: ${prop.Property_Address || prop.Address || 'N/A'}<br>
+                  RBA: ${formatNumber(prop.RBA_GLA)} sqft
+              `);
+              marker.on('click', () => handleMarkerClick(prop.id));
+              propertyMarkers.addLayer(marker);
+          }
+      });
+
+      // Adjust map view if needed (optional)
+      // fitMapToBounds(); // You might want this initially or conditionally
+      console.log(`Markers added: ${centerMarkers.getLayers().length} centers, ${propertyMarkers.getLayers().length} properties`);
+  }
+
+  function highlightMapSelection() {
+    if (!map || !selectedRecord || !selectedRecord.id) return;
+
+    let selectedLayer = null;
+    let recordData = null;
+
+    // Find marker in Centers
+    centerMarkers.eachLayer(layer => {
+        if (layer.options.gristId === selectedRecord.id) {
+            selectedLayer = layer;
+            recordData = allCenters.find(c => c.id === selectedRecord.id);
+        }
+    });
+
+    // If not found in centers, check properties
+    if (!selectedLayer) {
+        propertyMarkers.eachLayer(layer => {
+            if (layer.options.gristId === selectedRecord.id) {
+                selectedLayer = layer;
+                recordData = allProperties.find(p => p.id === selectedRecord.id);
+            }
+        });
+    }
+
+    if (selectedLayer && recordData && isValidCoordinate(recordData.Latitude) && isValidCoordinate(recordData.Longitude)) {
+        map.setView([recordData.Latitude, recordData.Longitude], 15); // Zoom closer
+        selectedLayer.openPopup();
+    }
+  }
+
+  function handleMarkerClick(recordId) {
+      console.log("Marker clicked, record ID:", recordId);
+      // Tell Grist to select the corresponding row
+      grist.setCursorPos({ rowId: recordId }).catch(e => console.error("Error setting cursor position:", e));
+      // Note: This will trigger the `grist.onRecord` listener, which then calls `updateDashboard`
+  }
+
+  function fitMapToBounds() {
+      if (!map) return;
+      const allMarkers = [...centerMarkers.getLayers(), ...propertyMarkers.getLayers()];
+      if (allMarkers.length > 0) {
+          const group = L.featureGroup(allMarkers);
+          map.fitBounds(group.getBounds().pad(0.1)); // Add padding
+      } else {
+           map.setView([39.8283, -98.5795], 4); // Reset to default view if no markers
+      }
+  }
+
+
+  // --- Utility Functions ---
+  function formatNumber(num) {
+    if (num === null || num === undefined || isNaN(num)) return 'N/A';
+    return Math.round(num).toLocaleString(); // Add commas for thousands
+  }
+
+  function formatCurrency(num) {
+      if (num === null || num === undefined || isNaN(num)) return 'N/A';
+      return '$' + Math.round(num).toLocaleString();
+  }
+
+  function formatDate(dateValue) {
+      // Grist dates are often seconds since epoch, sometimes milliseconds, or string dates
+      if (!dateValue) return 'N/A';
+      try {
+          let date;
+          if (typeof dateValue === 'number') {
+              // Assume seconds since epoch if it's a typical Unix timestamp range
+              // Convert to milliseconds
+               date = new Date(dateValue * 1000);
+          } else if (typeof dateValue === 'string') {
+              date = new Date(dateValue); // Try parsing string directly
+          } else {
+              return 'Invalid Date';
+          }
+
+          if (isNaN(date.getTime())) {
+              return 'Invalid Date';
+          }
+          // Format as YYYY-MM-DD
+          return date.toISOString().split('T')[0];
+      } catch (e) {
+          console.error("Error formatting date:", dateValue, e);
+          return 'Error';
+      }
+  }
+
+   function isValidCoordinate(coord) {
+       return typeof coord === 'number' && !isNaN(coord) && coord !== 0; // Basic check, assuming 0,0 is unlikely valid data
+   }
+
+})();
+</script>
+
+</body>
+</html>
