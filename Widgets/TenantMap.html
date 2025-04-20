@@ -56,17 +56,17 @@
             var map = L.map('map').setView([37.7749, -122.4194], 6);
             var baseLayers = {
                 "Google Satellite": L.tileLayer('http://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}', {
-                    attribution: 'Google Satellite',
+                    attribution: '',
                     maxZoom: 20
                 }),
                 "Jawg Streets": L.tileLayer('https://tile.jawg.io/jawg-streets/{z}/{x}/{y}{r}.png?access-token=bs12XjUq7hHD2pgakKp7AcM1Y3Dk7BkLvf162PpbLxMsvgyclXR5HLnYEnI2Zkoa', {
                     attribution: '',
                 }),
                 "Maptiler Satellite": L.tileLayer('https://api.maptiler.com/tiles/satellite-v2/{z}/{x}/{y}.jpg?key=TbsQ5qLxJHC20Jv4Th7E', {
-                    attribution: 'MapTiler Satellite',
+                    attribution: '',
                 }),
                 "StadiaMaps": L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}@2x.jpg', {
-                    attribution: 'StadiaMaps',
+                    attribution: '',
                 })
             };
             baseLayers["Google Satellite"].addTo(map); // Default layer
