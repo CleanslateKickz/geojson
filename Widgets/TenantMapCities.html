@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Tenant Locations Map with Clustering, Search, and Logo Markers</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+        <!-- Leaflet CSS -->
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+        <!-- Clustering CSS -->
+        <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+        <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+        <!-- Search Control CSS -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/leaflet.esri.geocoder/2.1.0/esri-leaflet-geocoder.css">
+        <style>
+            body { margin:0; padding:0; }
+            #map {
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                right: 0;
+                left: 0;
+            }
+            .logo-overlay {
+                width: 25px;
+                height: 25px;
+            }
+            /* Popup Adjustment */
+            .leaflet-popup-content {
+                width: 200px;
+            }
+            .tenant-name {
+                cursor: pointer;
+                color: #0366d6;
+                text-decoration: underline;
+            }
+            .tenant-name:hover {
+                opacity: 0.8;
+            }
+            .copy-notification {
+                position: fixed;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background-color: rgba(0, 0, 0, 0.8);
+                color: white;
+                padding: 10px 20px;
+                border-radius: 5px;
+                display: none;
+                z-index: 1000;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="map"></div>
+        <div class="copy-notification" id="copyNotification">Copied to clipboard!</div>
+        <!-- Leaflet, Clustering, and ESRI Geocoder Scripts -->
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+        <script src="https://cdn.jsdelivr.net/leaflet.esri/2.0.0/esri-leaflet.js"></script>
+        <script src="https://cdn.jsdelivr.net/leaflet.esri.geocoder/2.1.0/esri-leaflet-geocoder.js"></script>
+        <script>
+            grist.ready({ columns: ['Latitude', 'Longitude', 'Tenant_Name_Logo_URL', 'Tenant_Name'], requiredAccess: 'read table' });
+
+            // Copy to clipboard function
+            function copyToClipboard(text) {
+                navigator.clipboard.writeText(text).then(() => {
+                    const notification = document.getElementById('copyNotification');
+                    notification.style.display = 'block';
+                    setTimeout(() => {
+                        notification.style.display = 'none';
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy text: ', err);
+                });
+            }
+
+            // Function to Create a Marker with Custom Icon from URL
+            function createCustomMarker(latlng, url, title) {
+                return L.marker(latlng, {
+                    icon: L.icon({
+                        iconUrl: url,
+                        iconSize: [35, 35],
+                        iconAnchor: [17.5, 35],
+                    })
+                }).bindPopup(`<span class="tenant-name" onclick="copyToClipboard('${title}')">${title}</span>`);
+            }
+
+            // Initialize Map and Define Base Layers
+            var map = L.map('map').setView([37.7749, -122.4194], 6);
+
+            // Base layer (aquarelle style without labels)
+            var baseLayer = L.tileLayer('https://api.maptiler.com/maps/aquarelle/{z}/{x}/{y}.png?key=TbsQ5qLxJHC20Jv4Th7E', {
+                attribution: ''
+            }).addTo(map);
+
+            // City labels overlay
+            var cityLabels = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', {
+                attribution: '',
+                pane: 'overlayPane'
+            }).addTo(map);
+
+            // Marker Cluster Group for Tenant Locations
+            var tenantMarkers = L.markerClusterGroup({
+                maxClusterRadius: 35,
+                disableClusteringAtZoom: 15
+            });
+
+            // Function to Add Tenant Markers with Logos
+            function addTenantMarkers(records) {
+                tenantMarkers.clearLayers();
+                records.forEach(record => {
+                    const mapped = grist.mapColumnNames(record);
+                    if (mapped && mapped.Latitude && mapped.Longitude) {
+                        const { Latitude, Longitude, Tenant_Name_Logo_URL, Tenant_Name } = mapped;
+                        if (!isNaN(parseFloat(Latitude)) && !isNaN(parseFloat(Longitude))) {
+                            if (Tenant_Name_Logo_URL) {
+                                const marker = createCustomMarker([Latitude, Longitude], Tenant_Name_Logo_URL, Tenant_Name);
+                                tenantMarkers.addLayer(marker);
+                            } else {
+                                const fallback = L.marker([Latitude, Longitude])
+                                    .bindPopup(`<span class="tenant-name" onclick="copyToClipboard('${Tenant_Name}')">${Tenant_Name}</span>`);
+                                tenantMarkers.addLayer(fallback);
+                            }
+                        }
+                    }
+                });
+                map.addLayer(tenantMarkers);
+                if (tenantMarkers.getLayers().length > 0) {
+                    map.fitBounds(tenantMarkers.getBounds());
+                }
+            }
+
+            // Layer Control
+            L.control.layers({
+                'Base Map': baseLayer
+            }, {
+                'City Labels': cityLabels,
+                'Tenant Locations': tenantMarkers
+            }, {
+                position: 'topright',
+                collapsed: false
+            }).addTo(map);
+
+            // Search Control
+            var searchControl = L.esri.Geocoding.geosearch({
+                providers: [L.esri.Geocoding.arcgisOnlineProvider()],
+                position: 'topleft'
+            }).addTo(map);
+
+            var searchResults = L.layerGroup().addTo(map);
+            searchControl.on('results', function(data) {
+                searchResults.clearLayers();
+                for (var i = data.results.length - 1; i >= 0; i--) {
+                    searchResults.addLayer(L.marker(data.results[i].latlng));
+                }
+            });
+
+            // Grist Records Handler
+            grist.onRecords(function(records, mappings) {
+                addTenantMarkers(records);
+            });
+        </script>
+    </body>
+</html>
