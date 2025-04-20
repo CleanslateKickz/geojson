@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Tenant Locations Map with Clustering, Search, and Logo Markers</title>
+        <title>Tenant Locations Map with Modern Pop-ups</title>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
@@ -21,13 +21,30 @@
                 right: 0;
                 left: 0;
             }
-            .logo-overlay {
-                width: 25px;
-                height: 25px;
+            /* Modern Popup Styling */
+            .custom-popup {
+                font-family: Arial, sans-serif;
+                font-size: 14px;
+                color: #333;
+                padding: 10px;
+                border-radius: 8px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                background-color: #fff;
+                line-height: 1.5;
+                cursor: pointer;
             }
-            /* Popup Adjustment */
-            .leaflet-popup-content {
-                width: 200px;
+            .custom-popup:hover {
+                background-color: #f9f9f9;
+            }
+            .custom-popup h4 {
+                margin: 0;
+                font-size: 16px;
+                color: #007BFF;
+            }
+            .copied-message {
+                color: green;
+                margin-top: 5px;
+                font-size: 12px;
             }
         </style>
     </head>
@@ -39,17 +56,33 @@
         <script src="https://cdn.jsdelivr.net/leaflet.esri/2.0.0/esri-leaflet.js"></script>
         <script src="https://cdn.jsdelivr.net/leaflet.esri.geocoder/2.1.0/esri-leaflet-geocoder.js"></script>
         <script>
-            grist.ready({ columns: ['Latitude', 'Longitude', 'Tenant_Name_Logo_URL', 'Tenant_Name'], requiredAccess: 'read table' });
+            grist.ready({ columns: ['Latitude', 'Longitude', 'Tenant_Name_Logo_URL', 'Owner'], requiredAccess: 'read table' });
 
-            // **Function to Create a Marker with Custom Icon from URL**
-            function createCustomMarker(latlng, url, title) {
+            // **Function to Create a Marker with Custom Icon and Popup**
+            function createCustomMarker(latlng, iconUrl, owner) {
+                const popupContent = `
+                    <div class="custom-popup" onclick="copyToClipboard('${owner}')">
+                        <h4>${owner}</h4>
+                        <div class="copied-message" id="copied-msg-${owner}" style="display:none;">Copied to clipboard!</div>
+                    </div>
+                `;
                 return L.marker(latlng, {
                     icon: L.icon({
-                        iconUrl: url,
-                        iconSize: [35, 35], // Adjust based on your logos' sizes
-                        iconAnchor: [17.5, 35], // Adjust for proper pin positioning
+                        iconUrl: iconUrl,
+                        iconSize: [35, 35], // Adjust marker size
+                        iconAnchor: [17.5, 35] // Anchor point for proper positioning
                     })
-                }).bindPopup(title); // Simple popup with tenant name
+                }).bindPopup(popupContent, { maxWidth: 300 });
+            }
+
+            function copyToClipboard(text) {
+                navigator.clipboard.writeText(text).then(() => {
+                    const copiedMsg = document.getElementById(`copied-msg-${text}`);
+                    if (copiedMsg) {
+                        copiedMsg.style.display = 'block';
+                        setTimeout(() => { copiedMsg.style.display = 'none'; }, 2000);
+                    }
+                }).catch(err => console.error('Failed to copy text: ', err));
             }
 
             // **Initialize Map and Define Base Layers**
@@ -77,25 +110,22 @@
                 disableClusteringAtZoom: 15 // Stop clustering at zoom level 15
             });
 
-            // **Function to Add Tenant Markers with Logos**
+            // **Function to Add Tenant Markers with Custom Icons**
             function addTenantMarkers(records) {
                 tenantMarkers.clearLayers(); // Clear before adding new markers
                 records.forEach(record => {
                     const mapped = grist.mapColumnNames(record);
                     if (mapped && mapped.Latitude && mapped.Longitude) {
-                        const { Latitude, Longitude, Tenant_Name_Logo_URL, Tenant_Name } = mapped;
+                        const { Latitude, Longitude, Tenant_Name_Logo_URL, Owner } = mapped;
                         if (!isNaN(parseFloat(Latitude)) && !isNaN(parseFloat(Longitude))) {
-                            if (Tenant_Name_Logo_URL) {
-                                const marker = createCustomMarker([Latitude, Longitude], Tenant_Name_Logo_URL, Tenant_Name);
+                            if (Tenant_Name_Logo_URL && Owner) {
+                                const marker = createCustomMarker([Latitude, Longitude], Tenant_Name_Logo_URL, Owner);
                                 tenantMarkers.addLayer(marker);
                             } else {
-                                console.warn(`No Logo URL for ${Tenant_Name} at (${Latitude}, ${Longitude})`);
-                                // **Fallback Marker**
-                                const fallback = L.marker([Latitude, Longitude]).bindPopup(Tenant_Name);
-                                tenantMarkers.addLayer(fallback);
+                                console.warn(`Missing data for marker at (${Latitude}, ${Longitude})`);
                             }
                         } else {
-                            console.error("Invalid latitude or longitude for", Tenant_Name);
+                            console.error("Invalid latitude or longitude for", Owner);
                         }
                     }
                 });
