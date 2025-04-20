@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Tenant Locations Map with Clustering, Search, and Logo Markers</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- Leaflet CSS -->
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+        <!-- Clustering CSS -->
+        <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+        <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+        <!-- Search Control CSS -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/leaflet.esri.geocoder/2.1.0/esri-leaflet-geocoder.css">
+        <style>
+            body { margin:0; padding:0; }
+            #map {
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                right: 0;
+                left: 0;
+            }
+            .logo-overlay {
+                width: 25px;
+                height: 25px;
+            }
+            /* Popup Adjustment */
+            .leaflet-popup-content {
+                width: 200px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="map"></div>
+        <!-- Leaflet, Clustering, and ESRI Geocoder Scripts -->
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+        <script src="https://cdn.jsdelivr.net/leaflet.esri/2.0.0/esri-leaflet.js"></script>
+        <script src="https://cdn.jsdelivr.net/leaflet.esri.geocoder/2.1.0/esri-leaflet-geocoder.js"></script>
+        <script>
+            grist.ready({ columns: ['Latitude', 'Longitude', 'Tenant_Name_Logo_URL', 'Tenant_Name'], requiredAccess: 'read table' });
+
+            // **Function to Create a Marker with Custom Icon from URL**
+            function createCustomMarker(latlng, url, title) {
+                return L.marker(latlng, {
+                    icon: L.icon({
+                        iconUrl: url,
+                        iconSize: [35, 35], // Adjust based on your logos' sizes
+                        iconAnchor: [17.5, 35], // Adjust for proper pin positioning
+                    })
+                }).bindPopup(title); // Simple popup with tenant name
+            }
+
+            // **Initialize Map and Define Base Layers**
+            var map = L.map('map').setView([37.7749, -122.4194], 6);
+            var baseLayers = {
+                "Google Satellite": L.tileLayer('http://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}', {
+                    attribution: 'Google Satellite',
+                    maxZoom: 20
+                }),
+                "Jawg Streets": L.tileLayer('https://tile.jawg.io/jawg-streets/{z}/{x}/{y}{r}.png?access-token=bs12XjUq7hHD2pgakKp7AcM1Y3Dk7BkLvf162PpbLxMsvgyclXR5HLnYEnI2Zkoa', {
+                    attribution: '',
+                }),
+                "Maptiler Satellite": L.tileLayer('https://api.maptiler.com/tiles/satellite-v2/{z}/{x}/{y}.jpg?key=TbsQ5qLxJHC20Jv4Th7E', {
+                    attribution: 'MapTiler Satellite',
+                }),
+                "StadiaMaps": L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}@2x.jpg', {
+                    attribution: 'StadiaMaps',
+                })
+            };
+            baseLayers["Google Satellite"].addTo(map); // Default layer
+
+            // **Marker Cluster Group for Tenant Locations**
+            var tenantMarkers = L.markerClusterGroup({
+                maxClusterRadius: 35,
+                disableClusteringAtZoom: 15 // Stop clustering at zoom level 15
+            });
+
+            // **Function to Add Tenant Markers with Logos**
+            function addTenantMarkers(records) {
+                tenantMarkers.clearLayers(); // Clear before adding new markers
+                records.forEach(record => {
+                    const mapped = grist.mapColumnNames(record);
+                    if (mapped && mapped.Latitude && mapped.Longitude) {
+                        const { Latitude, Longitude, Tenant_Name_Logo_URL, Tenant_Name } = mapped;
+                        if (!isNaN(parseFloat(Latitude)) && !isNaN(parseFloat(Longitude))) {
+                            if (Tenant_Name_Logo_URL) {
+                                const marker = createCustomMarker([Latitude, Longitude], Tenant_Name_Logo_URL, Tenant_Name);
+                                tenantMarkers.addLayer(marker);
+                            } else {
+                                console.warn(`No Logo URL for ${Tenant_Name} at (${Latitude}, ${Longitude})`);
+                                // **Fallback Marker**
+                                const fallback = L.marker([Latitude, Longitude]).bindPopup(Tenant_Name);
+                                tenantMarkers.addLayer(fallback);
+                            }
+                        } else {
+                            console.error("Invalid latitude or longitude for", Tenant_Name);
+                        }
+                    }
+                });
+                map.addLayer(tenantMarkers); // Ensure layer is added after update
+                if (tenantMarkers.getLayers().length > 0) {
+                    map.fitBounds(tenantMarkers.getBounds()); // Fit map to markers on update
+                }
+            }
+
+            // **Layer Control with Base and Overlay Layers**
+            L.control.layers(baseLayers, {
+                "Tenant Locations": tenantMarkers
+            }, {
+                position: 'topright',
+                collapsed: false
+            }).addTo(map);
+
+            // **Search Control Initialization**
+            var searchControl = L.esri.Geocoding.geosearch({
+                providers: [L.esri.Geocoding.arcgisOnlineProvider()],
+                position: 'topleft'
+            }).addTo(map);
+
+            var searchResults = L.layerGroup().addTo(map);
+            searchControl.on('results', function(data) {
+                searchResults.clearLayers();
+                for (var i = data.results.length - 1; i >= 0; i--) {
+                    searchResults.addLayer(L.marker(data.results[i].latlng));
+                }
+            });
+
+            // **Grist Records Handler with Map Initialization**
+            grist.onRecords(function(records, mappings) {
+                if (!map._layers) { // Ensure map layers are initialized
+                    // Already initialized in the enhanced version above
+                }
+                addTenantMarkers(records);
+            });
+        </script>
+    </body>
+</html>
