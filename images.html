@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Images Gallery</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #fafafa; }
+    .gallery { display: flex; flex-wrap: wrap; gap: 24px; }
+    .item { background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 16px; box-shadow: 0 2px 8px #eee; width: 220px; text-align: center; }
+    .item img { width: 180px; height: auto; margin-bottom: 10px; }
+    .url-box { 
+      background: #f3f3f3; 
+      border: 1px solid #ccc; 
+      border-radius: 4px; 
+      padding: 6px 8px; 
+      font-family: monospace; 
+      font-size: 0.95em; 
+      cursor: pointer; 
+      margin-top: 8px;
+      user-select: all;
+      transition: background 0.2s;
+    }
+    .url-box.copied {
+      background: #d3ffd3;
+      border-color: #7dd87d;
+    }
+  </style>
+</head>
+<body>
+  <h1>Images Gallery</h1>
+  <div id="gallery" class="gallery"></div>
+  <p style="margin-top:30px;font-size:0.95em;color:#888;">
+    <b>Note:</b> If you add new images to the <a href="https://github.com/CleanslateKickz/geojson/tree/main/Images" target="_blank">Images folder</a>, refresh this page to see them.
+  </p>
+  <script>
+    // Replace this with your repo info
+    const repoOwner = "CleanslateKickz";
+    const repoName = "geojson";
+    const imagesDir = "Images";
+    const baseURL = `https://${repoOwner.toLowerCase()}.github.io/${repoName}/`;
+
+    async function fetchImages() {
+      const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${imagesDir}`;
+      const resp = await fetch(apiUrl);
+      if (!resp.ok) {
+        document.getElementById('gallery').innerHTML = `<b>Error loading images.</b> (${resp.status})`;
+        return [];
+      }
+      const files = await resp.json();
+      // Only include .png, .jpg, .jpeg, .gif, .webp
+      return files.filter(f => f.type === "file" && /\.(png|jpg|jpeg|gif|webp)$/i.test(f.name));
+    }
+
+    function createGalleryItem(file) {
+      // Double slash in URL is okay for GitHub Pages
+      const imgUrl = `${baseURL}${imagesDir}/${file.name}`;
+      const item = document.createElement('div');
+      item.className = "item";
+      item.innerHTML = `
+        <img src="${imgUrl}" alt="${file.name}">
+        <div class="url-box" title="Click to copy">${imgUrl}</div>
+      `;
+      item.querySelector('.url-box').onclick = function() {
+        navigator.clipboard.writeText(imgUrl).then(() => {
+          this.classList.add('copied');
+          this.textContent = "Copied!";
+          setTimeout(() => {
+            this.classList.remove('copied');
+            this.textContent = imgUrl;
+          }, 1200);
+        });
+      };
+      return item;
+    }
+
+    async function initGallery() {
+      const gallery = document.getElementById('gallery');
+      gallery.innerHTML = "Loading...";
+      const images = await fetchImages();
+      if (!images.length) {
+        gallery.innerHTML = "<i>No images found in the Images folder.</i>";
+        return;
+      }
+      gallery.innerHTML = "";
+      images.forEach(file => {
+        gallery.appendChild(createGalleryItem(file));
+      });
+    }
+
+    initGallery();
+  </script>
+</body>
+</html>
