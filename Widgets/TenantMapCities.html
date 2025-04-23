@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Tenant Locations Map with Clustering, Search, and Logo Markers</title>
+        <title>Tenant Locations Map with Clustering, Search, and Dynamic Logo Markers</title>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
@@ -20,10 +20,6 @@
                 bottom: 0;
                 right: 0;
                 left: 0;
-            }
-            .logo-overlay {
-                width: 25px;
-                height: 25px;
             }
             /* Popup Adjustment */
             .leaflet-popup-content {
@@ -49,6 +45,20 @@
                 display: none;
                 z-index: 1000;
             }
+            .custom-div-icon {
+                background: transparent;
+                border: none;
+            }
+            /* Add new styles for the zoom level display */
+            .zoom-level-control {
+                background: white;
+                padding: 5px 10px;
+                border: 1px solid #999;
+                border-radius: 4px;
+                font-family: Arial, sans-serif;
+                box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+                background: rgba(255, 255, 255, 0.9);
+            }
         </style>
     </head>
     <body>
@@ -60,10 +70,19 @@
         <script src="https://cdn.jsdelivr.net/leaflet.esri/2.0.0/esri-leaflet.js"></script>
         <script src="https://cdn.jsdelivr.net/leaflet.esri.geocoder/2.1.0/esri-leaflet-geocoder.js"></script>
         <script>
-            grist.ready({ columns: ['Latitude', 'Longitude', 'Tenant_Name_Logo_URL', 'Tenant_Name'], requiredAccess: 'read table' });
+            grist.ready({ 
+                columns: [
+                    'Latitude', 
+                    'Longitude', 
+                    'Tenant_Name_Logo_URL', 
+                    'Tenant_Name',
+                    'Logo_Type' // Optional column to specify logo type (wide, circle, etc.)
+                ], 
+                requiredAccess: 'read table' 
+            });
 
-            // Copy to clipboard function
-            function copyToClipboard(text) {
+            // Copy to clipboard function made globally accessible
+            window.copyToClipboard = function(text) {
                 navigator.clipboard.writeText(text).then(() => {
                     const notification = document.getElementById('copyNotification');
                     notification.style.display = 'block';
@@ -75,61 +94,266 @@
                 });
             }
 
-            // Function to Create a Marker with Custom Icon from URL
-            function createCustomMarker(latlng, url, title) {
-                return L.marker(latlng, {
-                    icon: L.icon({
-                        iconUrl: url,
-                        iconSize: [35, 35],
-                        iconAnchor: [17.5, 35],
-                    })
-                }).bindPopup(`<span class="tenant-name" onclick="copyToClipboard('${title}')">${title}</span>`);
-            }
-
+            // Map zoom constants
+            const baseZoom = 13;
+            const maxZoom = 18; // Maximum expected zoom level
+            const baseHeight = 30; // Base height for logos at baseZoom level
+            const minLogoHeight = 20; // Minimum height for logos at highest zoom
+            
             // Initialize Map and Define Base Layers
-            var map = L.map('map').setView([37.7749, -122.4194], 6);
+            let map = L.map('map').setView([37.7749, -122.4194], 6);
 
             // Base layer (aquarelle style without labels)
-            var baseLayer = L.tileLayer('https://api.maptiler.com/maps/aquarelle/{z}/{x}/{y}.png?key=TbsQ5qLxJHC20Jv4Th7E', {
+            let baseLayer = L.tileLayer('https://api.maptiler.com/maps/aquarelle/{z}/{x}/{y}.png?key=TbsQ5qLxJHC20Jv4Th7E', {
                 attribution: ''
             }).addTo(map);
 
             // City labels overlay
-            var cityLabels = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', {
+            let cityLabels = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', {
                 attribution: '',
                 pane: 'overlayPane'
             }).addTo(map);
 
             // Marker Cluster Group for Tenant Locations
-            var tenantMarkers = L.markerClusterGroup({
-                maxClusterRadius: 35,
-                disableClusteringAtZoom: 15
+            let tenantMarkers = L.markerClusterGroup({
+                maxClusterRadius: 15,
+                disableClusteringAtZoom: 12
             });
+
+            // Store all tenant data for re-rendering on zoom
+            let tenantData = [];
+            
+            // Cache for loaded images to avoid reloading on every zoom
+            let imageCache = {};
+
+            // Function to create a marker with scaled logo based on zoom level
+            function createLogoMarker(tenant, zoomLevel) {
+                // Use cached image dimensions if available
+                if (imageCache[tenant.url]) {
+                    createMarkerWithDimensions(tenant, zoomLevel, imageCache[tenant.url]);
+                    return;
+                }
+                
+                // Load image to get dimensions
+                const img = new Image();
+                img.onload = function() {
+                    // Cache the dimensions
+                    imageCache[tenant.url] = {
+                        width: img.width,
+                        height: img.height
+                    };
+                    
+                    createMarkerWithDimensions(tenant, zoomLevel, imageCache[tenant.url]);
+                };
+                img.onerror = function() {
+                    console.error("Error loading image:", tenant.url);
+                    // Add a fallback marker in case of image loading error
+                    const fallback = L.marker([tenant.lat, tenant.lng])
+                        .bindPopup(`<span class="tenant-name" onclick="copyToClipboard('${tenant.name}')">${tenant.name}</span>`);
+                    tenantMarkers.addLayer(fallback);
+                };
+                img.src = tenant.url;
+            }
+            
+            // Helper function to create marker with known dimensions - MODIFIED for better scaling
+            function createMarkerWithDimensions(tenant, zoomLevel, dimensions) {
+                const aspectRatio = dimensions.width / dimensions.height;
+                
+                // Apply logo type adjustments if available
+                let adjustedRatio = aspectRatio;
+                let sizeMultiplier = 1.0; // Base size multiplier
+
+                if (tenant.logoType) {
+                    switch (tenant.logoType.toLowerCase()) {
+                        case 'wide':
+                            adjustedRatio = Math.max(aspectRatio, 2.0);
+                            sizeMultiplier = 1.3;
+                            break;
+                        case 'circle':
+                            adjustedRatio = Math.min(Math.max(aspectRatio, 0.9), 1.1);
+                            sizeMultiplier = 1.0;
+                            break;
+                        case 'tall':
+                            adjustedRatio = Math.min(aspectRatio, 0.7);
+                            sizeMultiplier = 1.1;
+                            break;
+                        case 'square':
+                            adjustedRatio = Math.min(Math.max(aspectRatio, 0.9), 1.1);
+                            sizeMultiplier = 1.0;
+                            break;
+                        case 'extra-wide':
+                            adjustedRatio = Math.max(aspectRatio, 2.5);
+                            sizeMultiplier = 1.4;
+                            break;
+                        case 'compact':
+                            adjustedRatio = Math.min(Math.max(aspectRatio, 0.8), 1.2);
+                            sizeMultiplier = 0.6;
+                            break;
+                        case 'extra-tall':
+                            adjustedRatio = Math.min(aspectRatio, 0.5);
+                            sizeMultiplier = 1.2;
+                            break;
+                        case 'tiny':
+                            adjustedRatio = aspectRatio;
+                            sizeMultiplier = 0.4;
+                            break;
+                        case 'small':
+                            adjustedRatio = aspectRatio;
+                            sizeMultiplier = 0.6;
+                            break;
+                        case 'large':
+                            adjustedRatio = aspectRatio;
+                            sizeMultiplier = 1.4;
+                            break;
+                        default:
+                            adjustedRatio = aspectRatio;
+                            sizeMultiplier = 0.8;
+                    }
+                } else {
+                    // No logo type specified - use smaller default size
+                    sizeMultiplier = 0.8;
+                }
+                
+                // *** MODIFIED SCALING LOGIC ***
+                // As zoom level increases, logo size decreases relatively to the view
+                // Calculate how far we are from baseZoom
+                const zoomDiff = zoomLevel - baseZoom;
+                
+                // Scaling factor decreases as zoom level increases
+                // The higher the zoom level, the smaller the relative size
+                // For example, at zoom 13: factor = 1, at zoom 14: factor = 0.85, at zoom 15: factor = 0.7
+                let scaleFactor;
+                
+                if (zoomLevel <= baseZoom) {
+                    // Below or at base zoom, use regular scaling
+                    scaleFactor = 1.0;
+                } else {
+                    // Above base zoom, reduce size as zoom increases
+                    // This creates an inverse relationship - higher zoom means smaller relative size
+                    const reductionPerLevel = 0.15; // Reduce by 15% per zoom level
+                    scaleFactor = Math.max(0.4, 1 - (zoomDiff * reductionPerLevel)); 
+                }
+                
+                // Calculate the final height
+                const targetHeight = baseHeight * scaleFactor * sizeMultiplier;
+                const scaledWidth = targetHeight * adjustedRatio;
+
+                const icon = L.divIcon({
+                    html: `<div style="
+                        width: ${scaledWidth}px;
+                        height: ${targetHeight}px;
+                        background-image: url('${tenant.url}');
+                        background-size: contain;
+                        background-repeat: no-repeat;
+                        background-position: center;
+                    "></div>`,
+                    iconSize: [scaledWidth, targetHeight],
+                    iconAnchor: [scaledWidth/2, targetHeight/2],
+                    popupAnchor: [0, -targetHeight/2],
+                    className: 'custom-div-icon'
+                });
+
+                const marker = L.marker([tenant.lat, tenant.lng], { icon })
+                    .bindPopup(`<span class="tenant-name" onclick="copyToClipboard('${tenant.name}')">${tenant.name}</span>`);
+                
+                tenantMarkers.addLayer(marker);
+            }
 
             // Function to Add Tenant Markers with Logos
             function addTenantMarkers(records) {
+                // Clear existing data
+                tenantData = [];
                 tenantMarkers.clearLayers();
+                
+                // Process all records
                 records.forEach(record => {
                     const mapped = grist.mapColumnNames(record);
                     if (mapped && mapped.Latitude && mapped.Longitude) {
-                        const { Latitude, Longitude, Tenant_Name_Logo_URL, Tenant_Name } = mapped;
-                        if (!isNaN(parseFloat(Latitude)) && !isNaN(parseFloat(Longitude))) {
+                        const { Latitude, Longitude, Tenant_Name_Logo_URL, Tenant_Name, Logo_Type } = mapped;
+                        
+                        // Parse coordinates and validate
+                        const lat = parseFloat(Latitude);
+                        const lng = parseFloat(Longitude);
+                        
+                        if (!isNaN(lat) && !isNaN(lng)) {
                             if (Tenant_Name_Logo_URL) {
-                                const marker = createCustomMarker([Latitude, Longitude], Tenant_Name_Logo_URL, Tenant_Name);
-                                tenantMarkers.addLayer(marker);
+                                // Store tenant data for re-rendering on zoom
+                                tenantData.push({
+                                    lat: lat,
+                                    lng: lng,
+                                    url: Tenant_Name_Logo_URL,
+                                    name: Tenant_Name,
+                                    logoType: Logo_Type || '' // Store logo type if available
+                                });
                             } else {
-                                const fallback = L.marker([Latitude, Longitude])
+                                // Add standard marker for tenants without logos
+                                const fallback = L.marker([lat, lng])
                                     .bindPopup(`<span class="tenant-name" onclick="copyToClipboard('${Tenant_Name}')">${Tenant_Name}</span>`);
                                 tenantMarkers.addLayer(fallback);
                             }
                         }
                     }
                 });
+                
+                // Initial render of markers
+                renderMarkers();
+                
+                // Add marker cluster group to map and fit bounds
                 map.addLayer(tenantMarkers);
+                
+                // Only fit bounds if there are markers
                 if (tenantMarkers.getLayers().length > 0) {
-                    map.fitBounds(tenantMarkers.getBounds());
+                    try {
+                        map.fitBounds(tenantMarkers.getBounds());
+                    } catch (e) {
+                        console.error("Error fitting bounds:", e);
+                    }
                 }
             }
+
+            // Function to clear and re-render all markers at current zoom level
+            function renderMarkers() {
+                // Clear existing markers
+                tenantMarkers.clearLayers();
+                
+                // Get current zoom level
+                const currentZoom = map.getZoom();
+                
+                // Re-render tenants with logos using dynamic sizing
+                tenantData.forEach(tenant => createLogoMarker(tenant, currentZoom));
+                
+                // Make sure cluster is still added to the map
+                if (!map.hasLayer(tenantMarkers)) {
+                    map.addLayer(tenantMarkers);
+                }
+            }
+
+            // Create a custom control for zoom level display
+            L.Control.ZoomLevel = L.Control.extend({
+                options: {
+                    position: 'bottomleft'
+                },
+
+                onAdd: function(map) {
+                    this._container = L.DomUtil.create('div', 'zoom-level-control');
+                    this._map = map;
+                    this._updateContent();
+                    return this._container;
+                },
+
+                _updateContent: function() {
+                    this._container.innerHTML = 'Zoom Level: ' + this._map.getZoom();
+                }
+            });
+
+            // Create and add the zoom level control to the map
+            let zoomLevelControl = new L.Control.ZoomLevel();
+            map.addControl(zoomLevelControl);
+
+            // Update zoom level display whenever zoom changes
+            map.on('zoomend', function() {
+                zoomLevelControl._updateContent();
+            });
 
             // Layer Control
             L.control.layers({
@@ -143,18 +367,21 @@
             }).addTo(map);
 
             // Search Control
-            var searchControl = L.esri.Geocoding.geosearch({
+            let searchControl = L.esri.Geocoding.geosearch({
                 providers: [L.esri.Geocoding.arcgisOnlineProvider()],
                 position: 'topleft'
             }).addTo(map);
 
-            var searchResults = L.layerGroup().addTo(map);
+            let searchResults = L.layerGroup().addTo(map);
             searchControl.on('results', function(data) {
                 searchResults.clearLayers();
                 for (var i = data.results.length - 1; i >= 0; i--) {
                     searchResults.addLayer(L.marker(data.results[i].latlng));
                 }
             });
+
+            // Listen for zoom events to update marker sizes
+            map.on('zoomend', renderMarkers);
 
             // Grist Records Handler
             grist.onRecords(function(records, mappings) {
