@@ -49,6 +49,16 @@
                 background: transparent;
                 border: none;
             }
+            /* Add new styles for the zoom level display */
+            .zoom-level-control {
+                background: white;
+                padding: 5px 10px;
+                border: 1px solid #999;
+                border-radius: 4px;
+                font-family: Arial, sans-serif;
+                box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+                background: rgba(255, 255, 255, 0.9);
+            }
         </style>
     </head>
     <body>
@@ -104,8 +114,8 @@
 
             // Marker Cluster Group for Tenant Locations
             let tenantMarkers = L.markerClusterGroup({
-                maxClusterRadius: 25,
-                disableClusteringAtZoom: 15
+                maxClusterRadius: 15,
+                disableClusteringAtZoom: 12
             });
 
             // Store all tenant data for re-rendering on zoom
@@ -192,6 +202,11 @@
                             // For logos that need to be very small
                             adjustedRatio = aspectRatio;
                             sizeMultiplier = 0.4; // 60% smaller than base size
+                            break;
+                        case 'small':
+                            // For logos that need to be small
+                            adjustedRatio = aspectRatio;
+                            sizeMultiplier = 0.6; // 40% smaller than base size
                             break;
                         case 'large':
                             // For logos that need to be larger while maintaining aspect ratio
@@ -301,6 +316,33 @@
                     map.addLayer(tenantMarkers);
                 }
             }
+
+            // Create a custom control for zoom level display
+            L.Control.ZoomLevel = L.Control.extend({
+                options: {
+                    position: 'bottomleft'
+                },
+
+                onAdd: function(map) {
+                    this._container = L.DomUtil.create('div', 'zoom-level-control');
+                    this._map = map;
+                    this._updateContent();
+                    return this._container;
+                },
+
+                _updateContent: function() {
+                    this._container.innerHTML = 'Zoom Level: ' + this._map.getZoom();
+                }
+            });
+
+            // Create and add the zoom level control to the map
+            let zoomLevelControl = new L.Control.ZoomLevel();
+            map.addControl(zoomLevelControl);
+
+            // Update zoom level display whenever zoom changes
+            map.on('zoomend', function() {
+                zoomLevelControl._updateContent();
+            });
 
             // Layer Control
             L.control.layers({
