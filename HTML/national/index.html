@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Custom CSS (Merged styles) -->
+    <link rel="stylesheet" href="style.css" />
+    <title>Property Lookup Map</title>
+    </head>
+    <body class="min-h-screen">
+
+        <!-- Map Container -->
+        <div id="map" class="w-full h-screen"></div>
+
+        <!-- Loading Indicator -->
+        <div id="loading-indicator" class="loading-overlay">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Loading...</div>
+        </div>
+
+        <!-- Central Address Search Box -->
+        <div id="central-search" class="central-search-container">
+            <input type="text" id="address-search-input" class="search-input" placeholder="Enter address" />
+            <button id="search-button" class="search-button" title="Search Address">🔍</button>
+        </div>
+
+        <!-- County Info Card (Fixed Position) -->
+        <div id="county-info" class="county-info-card hidden">
+            <h3 id="county-name"></h3>
+            <div class="county-button-container">
+                <a id="tax-button" href="#" class="info-button" target="_blank">Tax</a>
+                <a id="gis-button" href="#" class="info-button gis-button" target="_blank">GIS</a>
+            </div>
+        </div>
+
+        <!-- Layer Controls -->
+        <div class="layer-controls">
+            <button id="street-layer" class="layer-button">Street</button>
+            <button id="satellite-layer" class="layer-button">Satellite</button>
+            <button id="hybrid-layer" class="layer-button active">Hybrid</button>
+        </div>
+
+        <!-- Leaflet JS -->
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <!-- County Data -->
+        <script src="county-data.js"></script>
+        <!-- Custom JS -->
+        <script src="standalone-map.js"></script>
+    </body>
+</html>
