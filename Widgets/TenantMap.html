@@ -25,29 +25,35 @@
             .leaflet-popup-content {
                 width: 200px;
             }
-            /* Modified Popup Styles */
+            /* Modified Popup Styles for Minimal Look */
             .leaflet-popup-content-wrapper {
-                background-color: #f0f0f0; /* Light grey background */
+                background-color: #fff; /* White background */
                 color: #333; /* Dark grey text */
                 font-family: Arial, sans-serif;
-                border: 1px solid #999; /* Grey border */
-                border-radius: 5px; /* Rounded corners */
+                border: none; /* No border */
+                box-shadow: 0 1px 3px rgba(0,0,0,0.2); /* Subtle shadow */
+                padding: 2px; /* Reduced padding */
             }
             .leaflet-popup-content {
-                margin: 10px;
+                margin: 2px; /* Reduced margin */
             }
             .leaflet-popup-tip-container {
-                width: 20px;
-                height: 10px;
+                width: 16px;
+                height: 8px;
             }
             .leaflet-popup-tip {
-                background: #f0f0f0;
-                border: 1px solid #999;
+                background: #fff;
+                border: none;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.2); /* Subtle shadow */
             }
             .tenant-name {
                 cursor: pointer;
                 color: #0366d6;
                 text-decoration: underline;
+                font-size: 14px; /* Smaller font size */
+                display: block; /* Ensure it takes full width */
+                padding: 2px 0; /* Minimal padding */
+                margin: 0; /* Remove extra margins */
             }
             .tenant-name:hover {
                 opacity: 0.8;
