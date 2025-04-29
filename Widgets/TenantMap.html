@@ -23,7 +23,7 @@
             }
             /* Popup Adjustment */
             .leaflet-popup-content {
-                width: 200px;
+                width: auto; /* Adjusted width to content */
             }
             /* Modified Popup Styles for Minimal Look */
             .leaflet-popup-content-wrapper {
@@ -32,10 +32,13 @@
                 font-family: Arial, sans-serif;
                 border: none; /* No border */
                 box-shadow: 0 1px 3px rgba(0,0,0,0.2); /* Subtle shadow */
-                padding: 2px; /* Reduced padding */
+                padding: 5px; /* Adjusted padding */
             }
             .leaflet-popup-content {
-                margin: 2px; /* Reduced margin */
+                margin: 0; /* Removed margin */
+                display: flex; /* Use flexbox */
+                justify-content: center; /* Center content horizontally */
+                align-items: center; /* Center content vertically */
             }
             .leaflet-popup-tip-container {
                 width: 16px;
@@ -51,9 +54,10 @@
                 color: #0366d6;
                 text-decoration: underline;
                 font-size: 14px; /* Smaller font size */
-                display: block; /* Ensure it takes full width */
-                padding: 2px 0; /* Minimal padding */
-                margin: 0; /* Remove extra margins */
+                display: inline-block; /* Changed to inline-block */
+                padding: 0; /* Removed padding */
+                margin: 0; /* Removed extra margins */
+                white-space: nowrap; /* Prevent text wrapping */
             }
             .tenant-name:hover {
                 opacity: 0.8;
@@ -91,7 +95,7 @@
         <div class="copy-notification" id="copyNotification">Copied to clipboard!</div>
         <!-- Leaflet, Clustering, and ESRI Geocoder Scripts -->
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-        <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+        <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.js"></script>
         <script src="https://cdn.jsdelivr.net/leaflet.esri/2.0.0/esri-leaflet.js"></script>
         <script src="https://cdn.jsdelivr.net/leaflet.esri.geocoder/2.1.0/esri-leaflet-geocoder.js"></script>
         <script>
