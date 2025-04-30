@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Leaflet Minimap CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-minimap@3.6.1/dist/Control.MiniMap.min.css" />
+    <!-- Custom CSS (Merged styles) -->
+    <link rel="stylesheet" href="style.css" />
+    <title>National Property Lookup Map</title>
+    </head>
+    <body class="min-h-screen">
+
+        <!-- Map Container -->
+        <div id="map" class="w-full h-screen"></div>
+
+        <!-- Loading Indicator -->
+        <div id="loading-indicator" class="loading-overlay">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Loading...</div>
+        </div>
+
+        <!-- Central Address Search Box -->
+        <div id="central-search" class="central-search-container">
+            <input type="text" id="address-search-input" class="search-input" placeholder="Enter address" />
+            <button id="search-button" class="search-button" title="Search Address">🔍</button>
+        </div>
+
+        <!-- County Info Card (Fixed Position) -->
+        <div id="county-info" class="county-info-card hidden">
+            <h3 id="county-name"></h3>
+            <div class="county-button-container">
+                <a id="tax-button" href="#" class="info-button" target="_blank">Tax</a>
+                <a id="gis-button" href="#" class="info-button gis-button" target="_blank">GIS</a>
+            </div>
+        </div>
+
+        <!-- State Info Card (Fixed Position) -->
+        <div id="state-info" class="state-info-card hidden">
+            <h3 id="state-name"></h3>
+            <div class="state-button-container">
+                <a id="sos-button" href="#" class="info-button sos-button" target="_blank">Secretary of State</a>
+            </div>
+        </div>
+
+        <!-- Layer Controls -->
+        <div class="layer-controls">
+            <button id="street-layer" class="layer-button">Street</button>
+            <button id="satellite-layer" class="layer-button">Satellite</button>
+            <button id="hybrid-layer" class="layer-button active">Hybrid</button>
+        </div>
+
+        <!-- Boundary Controls -->
+        <div class="boundary-controls">
+            <button id="county-boundary-toggle" class="boundary-button hidden">Counties</button>
+            <button id="state-boundary-toggle" class="boundary-button">States</button>
+        </div>
+        
+        <!-- Zoom Display and Copy Mode Toggle are added via JS as Leaflet controls -->
+
+        <!-- Leaflet JS -->
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <!-- Leaflet Minimap JS -->
+        <script src="https://unpkg.com/leaflet-minimap@3.6.1/dist/Control.MiniMap.min.js"></script>
+        <!-- County Data -->
+        <script src="county-data.js"></script>
+        <!-- State Data -->
+        <script src="state-data.js"></script>
+        <!-- Custom JS -->
+        <script src="standalone-map.js"></script>
+    </body>
+</html>

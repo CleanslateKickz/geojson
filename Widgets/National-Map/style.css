@@ -1,0 +1,594 @@
+/* Merged and Simplified Styles */
+
+/* General Body & Font */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  overflow: hidden; /* Prevent body scroll */
+  background-color: #B9DFF8; /* Match body bg */
+}
+
+/* Hide Leaflet Attribution */
+.leaflet-control-attribution {
+  display: none !important;
+}
+
+/* Map Container */
+#map {
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1; /* Base layer */
+}
+
+/* Loading Overlay */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.85);
+  display: none; /* Hidden by default, shown by JS */
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  backdrop-filter: blur(4px);
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top-color: #3b82f6; /* Blue accent */
+  animation: spin 1s ease-in-out infinite;
+  margin-bottom: 16px;
+}
+
+.loading-text {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+  text-align: center;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Map Controls Positioning & Styling */
+.leaflet-control-zoom {
+    margin-top: 10px !important;
+    margin-left: 10px !important;
+}
+.leaflet-control-zoom a {
+  width: 36px; height: 36px; line-height: 36px; font-size: 1.3em;
+  border-radius: 6px; box-shadow: 0 1px 5px rgba(0,0,0,0.2);
+  background-color: white; color: #333;
+}
+.leaflet-control-zoom a:hover { background-color: #f4f4f4; }
+
+
+/* Central Address Search Box (Prominent, matches image) */
+.central-search-container {
+  position: absolute;
+  top: 20px; /* Position below zoom control */
+  left: 50%;
+  transform: translateX(-50%); /* Center horizontally */
+  z-index: 1001; /* Above the map, below county info */
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  padding: 8px 12px; /* Adjusted padding */
+  max-width: 90%; /* Allow it to be responsive */
+  width: 350px; /* Matches image width */
+}
+
+.central-search-container .search-input {
+  flex-grow: 1; /* Allow input to fill available space */
+  padding: 8px 0;
+  font-size: 16px; /* Larger font */
+  border: none; /* Remove default border */
+  border-radius: 4px;
+  outline: none;
+  margin-right: 8px; /* Space between input and button */
+}
+
+.central-search-container .search-input::placeholder {
+  color: #9ca3af; /* Placeholder color */
+}
+
+.central-search-container .search-button {
+  width: 40px; /* Larger button */
+  height: 40px;
+  font-size: 20px; /* Larger icon */
+  border-radius: 4px; /* Matches input border-radius */
+  background-color: #4b6a9b; /* Primary blue */
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.central-search-container .search-button:hover {
+  background-color: #3a5580; /* Darker blue on hover */
+}
+
+
+/* County info card (Fixed Position, matches image) */
+.county-info-card {
+  position: absolute;
+  top: 20px; /* Position below search bar */
+  right: 10px;
+  left: auto; /* Ensure it's right-aligned */
+  bottom: auto;
+  background-color: rgba(255, 255, 255, 0.9); /* Slightly more opaque */
+  border-radius: 12px;
+  padding: 10px; /* Slightly more padding */
+  box-shadow: 0 6px 12px rgba(0,0,0,0.2); /* Stronger shadow */
+  z-index: 1002; /* Above search bar and state info */
+  width: auto;
+  min-width: 180px; /* Minimum width */
+  transition: all 0.3s ease;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  backdrop-filter: blur(10px);
+}
+.county-info-card.hidden { display: none; }
+.county-info-card h3 { margin: 0 0 12px 0; font-size: 18px; /* Larger font */ font-weight: 700; color: #1e40af; text-align: center; }
+.county-button-container { display: flex; gap: 10px; /* More space between buttons */ }
+.info-button {
+    padding: 10px 15px; /* Larger padding */
+    background-color: #4b6a9b; /* Primary button color */
+    color: white;
+    border-radius: 8px; /* More rounded */
+    text-decoration: none;
+    flex: 1;
+    text-align: center;
+    font-size: 15px; /* Larger font */
+    font-weight: 600;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 60px; /* Ensure buttons don't get too small */
+}
+.info-button:hover { background-color: #3a5580; transform: translateY(-1px); box-shadow: 0 3px 6px rgba(0,0,0,0.15); }
+.gis-button { background-color: #64748b; }
+.gis-button:hover { background-color: #475569; }
+.sos-button { background-color: #4c1d95; }
+.sos-button:hover { background-color: #6d28d9; }
+.info-button.disabled { background-color: #9ca3af; opacity: 0.7; cursor: not-allowed; pointer-events: none; }
+
+/* State info card (Fixed Position, similar to county card) */
+.state-info-card {
+  position: absolute;
+  top: 20px; /* Position at same level as county card */
+  right: 10px; 
+  left: auto;
+  bottom: auto;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  padding: 10px;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+  z-index: 1001; /* Below county info to ensure county is on top */
+  width: auto;
+  min-width: 210px; /* Slightly wider for Secretary of State text */
+  transition: all 0.3s ease;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  backdrop-filter: blur(10px);
+}
+.state-info-card.hidden { display: none; }
+.state-info-card h3 { margin: 0 0 12px 0; font-size: 18px; font-weight: 700; color: #4c1d95; text-align: center; }
+.state-button-container { display: flex; gap: 10px; }
+
+/* Map Legend - Removed */
+.legend { display: none !important; }
+
+
+/* Layer Controls */
+.layer-controls { 
+  position: absolute; 
+  bottom: 30px; 
+  right: 10px; 
+  background-color: white; 
+  border-radius: 8px; 
+  overflow: hidden; 
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15); 
+  z-index: 1001; 
+}
+.layer-button { 
+  display: block; 
+  width: 100%; 
+  padding: 10px 15px; 
+  background: none; 
+  border: none; 
+  text-align: left; 
+  cursor: pointer; 
+  font-size: 14px; 
+  border-bottom: 1px solid #eee; 
+  color: #333; 
+  transition: background-color 0.2s ease; 
+}
+.layer-button:last-child { 
+  border-bottom: none; 
+}
+.layer-button.active { 
+  background-color: #e0f2fe; 
+  color: #0c4a6e; 
+  font-weight: 600; 
+} /* Light blue for active */
+.layer-button:hover:not(.active) { 
+  background-color: #f3f4f6; 
+} /* Light grey hover */
+
+/* Boundary Controls */
+.boundary-controls { 
+  position: absolute; 
+  bottom: 30px; 
+  left: 10px; 
+  background-color: white; 
+  border-radius: 8px; 
+  overflow: hidden; 
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15); 
+  z-index: 1001; 
+}
+.boundary-button { 
+  display: block; 
+  width: 100%; 
+  padding: 10px 15px; 
+  background: none; 
+  border: none; 
+  text-align: left; 
+  cursor: pointer; 
+  font-size: 14px; 
+  border-bottom: 1px solid #eee; 
+  color: #333; 
+  transition: background-color 0.2s ease; 
+}
+.boundary-button:last-child { 
+  border-bottom: none; 
+}
+.boundary-button.active { 
+  background-color: #e0f2fe; 
+  color: #0c4a6e; 
+  font-weight: 600; 
+}
+.boundary-button:hover:not(.active) { 
+  background-color: #f3f4f6; 
+}
+.boundary-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Sidebar Toggle Button - Removed */
+.sidebar-toggle-button { display: none !important; }
+
+
+/* Toast Notifications */
+.toast-notification {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease-in-out;
+  z-index: 10000;
+}
+
+.toast-notification.active {
+  transform: translateX(-50%) translateY(0);
+}
+
+.toast-notification.info { background-color: #3b82f6; /* Blue */ }
+.toast-notification.success { background-color: #10b981; /* Green */ }
+.toast-notification.warning { background-color: #f59e0b; /* Amber */ }
+.toast-notification.error { background-color: #ef4444; /* Red */ }
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .central-search-container {
+    width: 280px;
+    top: 10px;
+    padding: 6px 10px;
+  }
+  
+  .central-search-container .search-input {
+    font-size: 14px;
+  }
+  
+  .central-search-container .search-button {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+  
+  .county-info-card {
+    right: 5px;
+    padding: 12px;
+    min-width: 160px;
+    max-width: 80vw;
+  }
+  
+  .state-info-card {
+    right: 5px;
+    padding: 12px;
+    min-width: 180px;
+    max-width: 80vw;
+  }
+  
+  .county-info-card h3,
+  .state-info-card h3 {
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+  
+  .info-button {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+  
+  .layer-controls {
+    bottom: 20px;
+    right: 5px;
+  }
+
+  .boundary-controls {
+    bottom: 20px;
+    left: 5px;
+  }
+  
+  .leaflet-control-minimap {
+    width: 100px !important;
+    height: 100px !important;
+  }
+}
+
+.leaflet-control-copy-mode {
+  background-color: white;
+  border-radius: 5px;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.2);
+  padding: 4px;
+}
+
+.leaflet-control-copy-mode button {
+  border: none;
+  background: none;
+  font-size: 12px;
+  font-weight: 500;
+  color: #444;
+  cursor: pointer;
+  padding: 5px 10px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  transition: background-color 0.2s ease;
+}
+
+.leaflet-control-copy-mode button:hover {
+  background-color: #f0f0f0;
+  color: #222;
+}
+
+.leaflet-control-container .leaflet-bottomleft {
+  margin-bottom: 30px;
+}
+
+.leaflet-control-container .leaflet-bottomright {
+  margin-bottom: 30px;
+}
+
+.leaflet-control-zoom-display {
+  background-color: white;
+  border-radius: 5px;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.2);
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #444;
+  margin-bottom: 8px;
+}
+
+.leaflet-control-zoom-display b {
+  color: #222;
+  font-weight: 600;
+}
+
+.hidden { display: none !important; }
+
+/* Search marker styling */
+.search-marker-icon {
+  position: relative;
+}
+
+.search-marker-icon .marker-pin {
+  width: 30px;
+  height: 30px;
+  border-radius: 50% 50% 50% 0;
+  background-color: #3b82f6;
+  transform: rotate(-45deg);
+  box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.4);
+  animation: pulse 1s ease-out infinite;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.search-marker-icon .marker-pulse {
+  height: 14px;
+  width: 14px;
+  background-color: rgba(59, 130, 246, 0.6);
+  border-radius: 50%;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes pulse {
+  0% { transform: translate(-50%, -50%) rotate(-45deg) scale(0.9); }
+  70% { transform: translate(-50%, -50%) rotate(-45deg) scale(1); box-shadow: 0 0 0 12px rgba(59, 130, 246, 0.1); }
+  100% { transform: translate(-50%, -50%) rotate(-45deg) scale(0.9); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+  padding: 4px 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.leaflet-popup-content {
+  margin: 12px 18px;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.search-popup-content {
+  font-family: inherit;
+  padding: 4px 0;
+}
+
+.search-popup-name {
+  font-weight: 700;
+  font-size: 15px;
+  color: #1e40af;
+  margin-bottom: 5px;
+  word-break: break-word;
+}
+
+.search-popup-address {
+  font-size: 14px;
+  color: #334155;
+  margin-bottom: 8px;
+  word-break: break-word;
+}
+
+.search-popup-instruction {
+  font-size: 13px;
+  color: #64748b;
+  font-style: italic;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #e2e8f0;
+}
+
+/* Coordinates Popup Styling */
+.coords-popup .leaflet-popup-content-wrapper {
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 6px;
+  padding: 0;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(4px);
+  min-width: 230px;
+}
+
+.coords-popup .leaflet-popup-content {
+  margin: 12px 16px;
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 13px;
+  color: #333;
+}
+
+.coords-popup .leaflet-popup-content b {
+  color: #1e40af;
+}
+
+.coords-popup .leaflet-popup-tip {
+  background-color: rgba(255, 255, 255, 0.95);
+}
+
+.coords-popup .leaflet-popup-close-button {
+  color: #64748b;
+}
+
+.coords-popup.error .leaflet-popup-content-wrapper,
+.coords-popup.error .leaflet-popup-tip {
+  background-color: rgba(254, 226, 226, 0.95);
+  border: 1px solid #fee2e2;
+}
+
+.coords-popup.warning .leaflet-popup-content-wrapper {
+  background-color: rgba(254, 243, 199, 0.95); 
+  border: 1px solid #fef3c7;
+}
+
+.coords-popup.error .leaflet-popup-tip,
+.coords-popup.warning .leaflet-popup-tip {
+  display: none;
+}
+
+/* Leaflet Custom Controls Styling */
+.leaflet-control-custom {
+  margin-top: 10px;
+  margin-bottom: 0 !important;
+  background-color: white;
+  border-radius: 5px;
+  border: none;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.15);
+  padding: 6px 8px;
+  color: #333;
+  font-size: 12px;
+  text-align: center;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto !important;
+}
+
+.leaflet-control-zoom-display {
+  padding: 6px 10px;
+  min-width: 65px;
+}
+
+.leaflet-control-zoom-display b {
+  font-weight: 600;
+  margin-left: 2px;
+}
+
+.leaflet-control-copy-mode {
+  padding: 0;
+}
+
+.leaflet-control-copy-mode button {
+  min-width: 80px;
+  padding: 6px 10px;
+  color: #333;
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+.leaflet-control-copy-mode button:hover {
+  background-color: #f0f0f0;
+}
+
+.leaflet-control-container .leaflet-bottomleft {
+  margin-bottom: 40px;
+}
+
+.leaflet-control-container .leaflet-bottomright {
+  margin-bottom: 40px;
+}
