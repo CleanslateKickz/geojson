@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ArcGIS URL Formatter</title>
+  <style>
+    :root {
+      --bg: #f8f9fa;
+      --fg: #212529;
+      --accent: #007bff;
+      --border: #ced4da;
+      --warning: #dc3545;
+      --success: #28a745;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      margin: 0;
+      padding: 2rem;
+      max-width: 720px;
+      margin-inline: auto;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      margin-bottom: 1rem;
+      color: var(--fg);
+    }
+
+    label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    input[type="text"] {
+      width: calc(100% - 110px);
+      padding: 0.6rem;
+      font-size: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      margin-bottom: 0.5rem;
+    }
+
+    .input-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    button.copy-btn {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      background-color: var(--accent);
+      border: none;
+      color: white;
+      border-radius: 5px;
+      transition: background-color 0.2s;
+    }
+
+    button.copy-btn:hover {
+      background-color: #0056b3;
+    }
+
+    .output-group {
+      margin-bottom: 2rem;
+    }
+
+    .warning {
+      color: var(--warning);
+      font-weight: 500;
+      margin-top: -1rem;
+      margin-bottom: 2rem;
+    }
+
+    .success {
+      color: var(--success);
+      font-weight: 500;
+    }
+
+    input:read-only {
+      background-color: #e9ecef;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>ArcGIS URL Formatter</h1>
+
+  <label for="inputUrl">Paste ArcGIS FeatureServer or MapServer URL:</label>
+  <input type="text" id="inputUrl" placeholder="https://.../FeatureServer/4" />
+
+  <div id="warningMsg" class="warning"></div>
+
+    <div class="output-group">
+        <label for="geojsonUrl">Raw GeoJSON Query URL:</label>
+        <div class="input-group">
+            <input type="text" id="geojsonUrl" readonly />
+            <button class="copy-btn" data-copy-target="geojsonUrl">Copy</button>
+        </div>
+    </div>
+
+    <div class="output-group">
+        <label for="arcgisUrl">ArcGIS Viewer URL (Paste into ArcGIS Online):</label>
+        <div class="input-group">
+            <input type="text" id="arcgisUrl" readonly />
+            <button class="copy-btn" data-copy-target="arcgisUrl">Copy</button>
+        </div>
+    </div>
+
+    <script>
+        const inputEl = document.getElementById('inputUrl');
+        const geojsonEl = document.getElementById('geojsonUrl');
+        const arcgisEl = document.getElementById('arcgisUrl');
+        const warning = document.getElementById('warningMsg');
+
+        inputEl.addEventListener('input', () => {
+            const url = inputEl.value.trim();
+            warning.textContent = '';
+            geojsonEl.value = '';
+            arcgisEl.value = '';
+
+            const pattern = /^https?:\/\/.+\/(FeatureServer|MapServer)(\/\d+)?\/?$/;
+            if (!pattern.test(url)) {
+                warning.textContent = '⚠️ URL does not match expected ArcGIS FeatureServer or MapServer format.';
+                return;
+            }
+
+            const isFeatureServer = url.includes('FeatureServer');
+            const layerMatch = url.match(/\/(\d+)\/*$/);
+            const layerNumber = layerMatch ? layerMatch[1] : null;
+
+            // Output GeoJSON if FeatureServer with layer
+            if (isFeatureServer && layerNumber !== null) {
+                const base = url.replace(/\/+$/, '');
+                geojsonEl.value = `${base}/query?where=1=1&outFields=*&f=geojson`;
+            } else {
+                geojsonEl.value = '⚠️ Only FeatureServer URLs with a layer number can generate a GeoJSON query URL.';
+            }
+
+            // ArcGIS Viewer URL: strip layer number if present
+            arcgisEl.value = url.replace(/\/\d+\/?$/, '');
+        });
+
+        // Copy buttons
+        document.querySelectorAll('.copy-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetId = btn.getAttribute('data-copy-target');
+                const target = document.getElementById(targetId);
+                if (target && target.value) {
+                    navigator.clipboard.writeText(target.value).then(() => {
+                        btn.textContent = 'Copied!';
+                        setTimeout(() => {
+                            btn.textContent = 'Copy';
+                        }, 1500);
+                    });
+                }
+            });
+        });
+    </script>
+    </body>
+</html>
