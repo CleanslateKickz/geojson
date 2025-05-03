@@ -6,48 +6,109 @@
     <title>GeoJSON Repository - CleanslateKickz</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.css">
 </head>
 <body>
     <header>
         <div class="container">
             <h1><i class="fas fa-map-marked-alt"></i> GeoJSON Repository</h1>
             <p>A collection of GeoJSON files for Leaflet map projects</p>
+            <div class="repo-stats">
+                <span id="repoStars"><i class="fas fa-star"></i> <span>-</span></span>
+                <span id="repoForks"><i class="fas fa-code-branch"></i> <span>-</span></span>
+                <span id="lastUpdate"><i class="fas fa-clock"></i> <span>Loading...</span></span>
+            </div>
         </div>
     </header>
 
     <main class="container">
         <div class="search-container">
-            <input type="text" id="searchInput" placeholder="Search files...">
+            <input type="text" id="searchInput" placeholder="Search files and widgets...">
             <i class="fas fa-search search-icon"></i>
+            <div class="search-filters">
+                <select id="contentTypeFilter">
+                    <option value="all">All Content</option>
+                    <option value="geojson">GeoJSON Files</option>
+                    <option value="widgets">Widgets</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="widgets-section">
+            <h2><i class="fas fa-puzzle-piece"></i> Interactive Widgets</h2>
+            <div class="widgets-grid" id="widgetsGrid">
+                <div class="widget-card" data-widget="ArcGIS URL Formatter.html">
+                    <h3><i class="fas fa-link"></i> ArcGIS URL Formatter</h3>
+                    <p>Format and validate ArcGIS URLs for your GeoJSON data</p>
+                    <button class="launch-widget">Launch Widget</button>
+                </div>
+                <div class="widget-card" data-widget="DynamicSizeTenant.html">
+                    <h3><i class="fas fa-expand"></i> Dynamic Size Tenant</h3>
+                    <p>Dynamic sizing tool for tenant mapping</p>
+                    <button class="launch-widget">Launch Widget</button>
+                </div>
+                <div class="widget-card" data-widget="TenantMap.html">
+                    <h3><i class="fas fa-map"></i> Tenant Map</h3>
+                    <p>Interactive tenant mapping interface</p>
+                    <button class="launch-widget">Launch Widget</button>
+                </div>
+                <div class="widget-card" data-widget="TenantMapCities.html">
+                    <h3><i class="fas fa-city"></i> Tenant Map Cities</h3>
+                    <p>City-specific tenant mapping tool</p>
+                    <button class="launch-widget">Launch Widget</button>
+                </div>
+            </div>
         </div>
 
         <div class="categories">
-            <h2>Categories</h2>
+            <h2><i class="fas fa-folder"></i> Categories</h2>
             <div class="category-grid" id="categoryGrid">
                 <!-- Categories will be dynamically added here -->
             </div>
         </div>
 
         <div class="recent-files">
-            <h2>Recent Files</h2>
+            <h2><i class="fas fa-clock"></i> Recent Files</h2>
             <div class="files-list" id="recentFiles">
                 <!-- Recent files will be dynamically added here -->
+                <div class="loading-placeholder">Loading repository contents...</div>
             </div>
         </div>
 
-        <div class="images-section">
-            <h2>Images</h2>
-            <p>View a gallery of images from the repository:</p>
-            <a href="images.html">Go to Images Gallery</a>
+        <!-- Widget Modal -->
+        <div class="widget-modal" id="widgetModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="widgetTitle">Widget</h3>
+                    <span class="close-modal">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <iframe id="widgetFrame" frameborder="0"></iframe>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preview Modal -->
+        <div class="preview-modal" id="previewModal">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <h3>GeoJSON Preview</h3>
+                <div id="previewContent"></div>
+            </div>
         </div>
     </main>
 
     <footer>
         <div class="container">
             <p>© 2025 CleanslateKickz | <a href="https://github.com/CleanslateKickz" target="_blank"><i class="fab fa-github"></i> GitHub</a></p>
+            <div class="api-status">
+                <span id="apiStatus"><i class="fas fa-circle"></i> API Status: Connected</span>
+            </div>
         </div>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>
