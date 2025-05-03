@@ -64,7 +64,9 @@ function initGrist() {
     const mapped = grist.mapColumnNames(records);
 
     showError("");
-    const options = mapped.map(record => record.OptionsToSelect).filter(option => option !== null && option !== undefined);
+    const options = Array.from(new Set(
+  mapped.map(record => record.OptionsToSelect).filter(option => option !== null && option !== undefined)
+));
     
     if (options.length === 0) {
       showError("No valid options found");
