@@ -25,32 +25,25 @@ document.addEventListener('DOMContentLoaded', function() {
         NProgress.done();
     }
 
-    // Widget handling
+    // Widget handling remains the same
     function initializeWidgets() {
         const widgetModal = document.getElementById('widgetModal');
         const widgetFrame = document.getElementById('widgetFrame');
         const widgetTitle = document.getElementById('widgetTitle');
         const closeButtons = document.querySelectorAll('.close-modal');
 
-        // Launch widget buttons
         document.querySelectorAll('.launch-widget').forEach(button => {
             button.addEventListener('click', function() {
                 const widgetCard = this.closest('.widget-card');
                 const widgetFile = widgetCard.dataset.widget;
                 const widgetName = widgetCard.querySelector('h3').textContent;
                 
-                // Set the widget title
                 widgetTitle.textContent = widgetName;
-                
-                // Load the widget in the iframe
                 widgetFrame.src = `Widgets/${widgetFile}`;
-                
-                // Show the modal
                 widgetModal.style.display = 'block';
             });
         });
 
-        // Close modal functionality
         closeButtons.forEach(button => {
             button.addEventListener('click', function() {
                 const modal = this.closest('.widget-modal, .preview-modal');
@@ -63,7 +56,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
 
-        // Click outside to close
         window.addEventListener('click', function(event) {
             if (event.target === widgetModal) {
                 widgetModal.style.display = 'none';
@@ -72,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Search and filter functionality
+    // Search functionality remains the same
     function initializeSearch() {
         const searchInput = document.getElementById('searchInput');
         const contentTypeFilter = document.getElementById('contentTypeFilter');
@@ -81,7 +73,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const searchTerm = searchInput.value.toLowerCase();
             const contentType = contentTypeFilter.value;
             
-            // Filter widgets
             document.querySelectorAll('.widget-card').forEach(widget => {
                 const title = widget.querySelector('h3').textContent.toLowerCase();
                 const description = widget.querySelector('p').textContent.toLowerCase();
@@ -91,12 +82,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 widget.style.display = isMatchingSearch && isMatchingType ? 'block' : 'none';
             });
             
-            // Filter files
             document.querySelectorAll('.file-item').forEach(file => {
                 const fileName = file.querySelector('.file-info strong').textContent.toLowerCase();
                 const isMatchingSearch = fileName.includes(searchTerm);
                 const isMatchingType = contentType === 'all' || 
-                                     (contentType === 'geojson' && fileName.endsWith('.geojson'));
+                                    (contentType === 'geojson' && fileName.endsWith('.geojson'));
                 
                 file.style.display = isMatchingSearch && isMatchingType ? 'flex' : 'none';
             });
@@ -106,66 +96,116 @@ document.addEventListener('DOMContentLoaded', function() {
         contentTypeFilter.addEventListener('change', filterContent);
     }
 
-    // Keep your existing functions (fetchFiles, fetchGeoJSONFiles, renderRecentFiles)
-
-    // Example implementation for listing GeoJSON files in the repo root
-async function fetchGeoJSONFiles() {
-    const url = "https://api.github.com/repos/CleanslateKickz/geojson/contents/";
-    const response = await fetch(url);
-    const files = await response.json();
-    // Only keep .geojson files
-    return files.filter(file => file.name.endsWith('.geojson'));
-}
-
-async function renderRecentFiles() {
-    NProgress.start();
-    const recentFilesContainer = document.getElementById('recentFiles');
-    recentFilesContainer.innerHTML = '<div class="loading-placeholder">Loading repository contents...</div>';
-    try {
-        const files = await fetchGeoJSONFiles();
-        if (files.length === 0) {
-            recentFilesContainer.innerHTML = '<div>No GeoJSON files found in the repository.</div>';
-            return;
+    // Updated GeoJSON file fetching function
+    async function fetchGeoJSONFiles() {
+        try {
+            const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/`;
+            const headers = {
+                'Accept': 'application/vnd.github.v3+json'
+            };
+            
+            const response = await fetch(url, { headers });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const files = await response.json();
+            // Filter for .geojson files and return relevant information
+            return files.filter(file => 
+                file.name.toLowerCase().endsWith('.geojson')
+            ).map(file => ({
+                name: file.name,
+                size: file.size,
+                download_url: file.download_url,
+                html_url: file.html_url
+            }));
+        } catch (error) {
+            console.error('Error fetching GeoJSON files:', error);
+            throw error;
         }
-        recentFilesContainer.innerHTML = '';
-        files.forEach(file => {
-            const el = document.createElement('div');
-            el.className = 'file-item';
-            el.innerHTML = `
-                <div class="file-info">
-                    <strong>${file.name}</strong>
-                    <span class="file-size">${(file.size / 1024).toFixed(1)} KB</span>
-                </div>
-                <div class="file-actions">
-                    <a href="${file.download_url}" target="_blank" class="btn-preview">Download</a>
-                    <button class="btn-preview" data-url="${file.download_url}">Preview</button>
-                </div>
-            `;
-            recentFilesContainer.appendChild(el);
-        });
-        // Add preview modal behavior
-        document.querySelectorAll('.btn-preview').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const url = this.dataset.url;
-                if (url) {
-                    fetch(url)
-                        .then(res => res.json())
-                        .then(data => {
-                            document.getElementById('previewContent').textContent = JSON.stringify(data, null, 2);
-                            document.getElementById('previewModal').style.display = 'block';
-                        })
-                        .catch(err => {
-                            document.getElementById('previewContent').textContent = 'Error loading file: ' + err;
-                            document.getElementById('previewModal').style.display = 'block';
-                        });
+    }
+
+    // Updated rendering function with better error handling and preview functionality
+    async function renderRecentFiles() {
+        NProgress.start();
+        const recentFilesContainer = document.getElementById('recentFiles');
+        recentFilesContainer.innerHTML = '<div class="loading-placeholder">Loading repository contents...</div>';
+        
+        try {
+            const files = await fetchGeoJSONFiles();
+            
+            if (files.length === 0) {
+                recentFilesContainer.innerHTML = '<div class="no-files">No GeoJSON files found in the repository.</div>';
+                return;
+            }
+
+            recentFilesContainer.innerHTML = '';
+            files.forEach(file => {
+                const fileSize = file.size < 1024 ? 
+                    `${file.size} B` : 
+                    `${(file.size / 1024).toFixed(1)} KB`;
+
+                const el = document.createElement('div');
+                el.className = 'file-item';
+                el.innerHTML = `
+                    <div class="file-info">
+                        <strong>${file.name}</strong>
+                        <span class="file-size">${fileSize}</span>
+                    </div>
+                    <div class="file-actions">
+                        <a href="${file.download_url}" class="btn-download" download="${file.name}">
+                            <i class="fas fa-download"></i> Download
+                        </a>
+                        <button class="btn-preview" data-url="${file.download_url}">
+                            <i class="fas fa-eye"></i> Preview
+                        </button>
+                    </div>
+                `;
+                recentFilesContainer.appendChild(el);
+            });
+
+            // Add preview functionality
+            document.querySelectorAll('.btn-preview').forEach(btn => {
+                btn.addEventListener('click', async function() {
+                    const url = this.dataset.url;
+                    const previewModal = document.getElementById('previewModal');
+                    const previewContent = document.getElementById('previewContent');
+                    
+                    if (!url) return;
+
+                    try {
+                        previewContent.innerHTML = '<div class="loading-placeholder">Loading preview...</div>';
+                        previewModal.style.display = 'block';
+                        
+                        const response = await fetch(url);
+                        if (!response.ok) throw new Error('Failed to load file');
+                        
+                        const data = await response.json();
+                        previewContent.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                    } catch (err) {
+                        previewContent.innerHTML = `<div class="error">Error loading preview: ${err.message}</div>`;
+                    }
+                });
+            });
+
+            // Close preview modal when clicking outside
+            const previewModal = document.getElementById('previewModal');
+            window.addEventListener('click', function(event) {
+                if (event.target === previewModal) {
+                    previewModal.style.display = 'none';
                 }
             });
-        });
-    } catch (err) {
-        recentFilesContainer.innerHTML = '<div>Error loading files.</div>';
+
+        } catch (err) {
+            recentFilesContainer.innerHTML = `
+                <div class="error">
+                    <i class="fas fa-exclamation-circle"></i>
+                    Error loading files: ${err.message}
+                </div>
+            `;
+        }
+        NProgress.done();
     }
-    NProgress.done();
-}
 
     // Initialize everything
     initializeRepo();
@@ -173,7 +213,7 @@ async function renderRecentFiles() {
     initializeSearch();
     renderRecentFiles();
 
-    // Categories remain the same
+    // Categories section remains the same
     const categories = [
         {
             name: 'Administrative Boundaries',
@@ -197,7 +237,6 @@ async function renderRecentFiles() {
         }
     ];
 
-    // Render categories
     const categoryGrid = document.getElementById('categoryGrid');
     categories.forEach(category => {
         const categoryElement = document.createElement('div');
