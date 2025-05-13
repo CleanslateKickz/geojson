@@ -104,26 +104,33 @@ function initGrist() {
     
     // If "Show All" is selected
     if (selectedValue === '-1') {
-      grist.clearSelection();
-      return;
+        // Clear the selection AND set selected rows to ALL record IDs
+        const allIds = allRecords.map(record => record.id);
+        grist.setSelectedRows(allIds);
+        
+        // Save selection if we have a session ID
+        if (sessionID.length > 0) {
+            sessionStorage.setItem(sessionID + "_Dropdown_Item", selectedValue);
+        }
+        return;
     }
 
     // Filter to show only records matching the selected value
     const matchingIds = allRecords
-      .filter(record => {
-        const mapped = grist.mapColumnNames(record);
-        return mapped.OptionsToSelect === selectedValue;
-      })
-      .map(record => record.id);
+        .filter(record => {
+            const mapped = grist.mapColumnNames(record);
+            return mapped.OptionsToSelect === selectedValue;
+        })
+        .map(record => record.id);
     
     // Apply the filter
     grist.setSelectedRows(matchingIds);
     
     // Save selection if we have a session ID
     if (sessionID.length > 0) {
-      sessionStorage.setItem(sessionID + "_Dropdown_Item", selectedValue);
+        sessionStorage.setItem(sessionID + "_Dropdown_Item", selectedValue);
     }
-  });
+});
 }
 
 document.addEventListener('DOMContentLoaded', initGrist);
