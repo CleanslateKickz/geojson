@@ -24,7 +24,7 @@ function updateDropdown(options) {
     
     options.forEach((option, index) => {
       const optionElement = document.createElement('option');
-      optionElement.value = String(index);
+      optionElement.value = String(option);  // Changed to use the actual value instead of index
       optionElement.textContent = String(option);
       dropdown.appendChild(optionElement);
     });    
@@ -48,7 +48,7 @@ function initGrist() {
       document.getElementById("container").style.display = 'none';
       document.getElementById("config").style.display = '';
       document.getElementById("sessionid").value = sessionID;
-    },
+    }
   });
 
   grist.onOptions((customOptions, _) => {
@@ -71,7 +71,8 @@ function initGrist() {
 
     showError("");
     const options = Array.from(new Set(
-      mapped.map(record => record.OptionsToSelect).filter(option => option !== null && option !== undefined)
+      mapped.map(record => record.OptionsToSelect)
+        .filter(option => option !== null && option !== undefined)
     ));
     
     if (options.length === 0) {
@@ -90,43 +91,37 @@ function initGrist() {
   });
 
   grist.onRecord(function (record) {
+    if (!record) return;
     const mapped = grist.mapColumnNames(record);
     const dropdown = document.getElementById('dropdown');
-    const index = allRecords.findIndex(r => r.id === record.id);
-    if (index !== -1) {
-      dropdown.value = String(index);
+    if (mapped && mapped.OptionsToSelect) {
+      dropdown.value = String(mapped.OptionsToSelect);
     }
   });
 
   document.getElementById('dropdown').addEventListener('change', function(event) {    
-    const selectedIndex = parseInt(event.target.value);
+    const selectedValue = event.target.value;
     
     // If "Show All" is selected
-    if (selectedIndex === -1) {
+    if (selectedValue === '-1') {
       grist.clearSelection();
       return;
     }
 
-    const selectedRecord = allRecords[selectedIndex];
-    if (selectedRecord) {
-      const mapped = grist.mapColumnNames(selectedRecord);
-      const selectedValue = mapped.OptionsToSelect;
-      
-      // Set cursor to the selected record
-      grist.setCursorPos({rowId: selectedRecord.id});
-      
-      // Filter to show only records matching the selected value
-      const matchingIds = allRecords
-        .filter(record => grist.mapColumnNames(record).OptionsToSelect === selectedValue)
-        .map(record => record.id);
-      
-      // Apply the filter
-      grist.setSelectedRows(matchingIds);
-      
-      // Save selection if we have a session ID
-      if (sessionID.length > 0) {
-        sessionStorage.setItem(sessionID + "_Dropdown_Item", selectedIndex);
-      }
+    // Filter to show only records matching the selected value
+    const matchingIds = allRecords
+      .filter(record => {
+        const mapped = grist.mapColumnNames(record);
+        return mapped.OptionsToSelect === selectedValue;
+      })
+      .map(record => record.id);
+    
+    // Apply the filter
+    grist.setSelectedRows(matchingIds);
+    
+    // Save selection if we have a session ID
+    if (sessionID.length > 0) {
+      sessionStorage.setItem(sessionID + "_Dropdown_Item", selectedValue);
     }
   });
 }
