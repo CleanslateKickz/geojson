@@ -16,6 +16,12 @@ function updateDropdown(options) {
     optionElement.textContent = 'No options available';
     dropdown.appendChild(optionElement);
   } else {
+    // Add a "Show All" option at the beginning
+    const allOption = document.createElement('option');
+    allOption.value = '-1';
+    allOption.textContent = 'Show All';
+    dropdown.appendChild(allOption);
+    
     options.forEach((option, index) => {
       const optionElement = document.createElement('option');
       optionElement.value = String(index);
@@ -61,19 +67,18 @@ function initGrist() {
     }
     
     allRecords = records;
-    const mapped = grist.mapColumnNames(records);
+    const mapped = records.map(r => grist.mapColumnNames(r));
 
     showError("");
     const options = Array.from(new Set(
-  mapped.map(record => record.OptionsToSelect).filter(option => option !== null && option !== undefined)
-));
+      mapped.map(record => record.OptionsToSelect).filter(option => option !== null && option !== undefined)
+    ));
     
     if (options.length === 0) {
       showError("No valid options found");
     }
     updateDropdown(options);
 
-    //if session ID defined, use it to auto select the dropdown value
     if (sessionID.length > 0) {
       const selection = sessionStorage.getItem(sessionID + "_Dropdown_Item");
       if (selection) {
@@ -95,27 +100,35 @@ function initGrist() {
 
   document.getElementById('dropdown').addEventListener('change', function(event) {    
     const selectedIndex = parseInt(event.target.value);
-    const selectedRecord = allRecords[selectedIndex];
-    const selectedValue = selectedRecord ? selectedRecord.OptionsToSelect : null;
     
-    if (selectedRecord) {
-        // Set cursor to the selected record
-        grist.setCursorPos({rowId: selectedRecord.id});
-        
-        // Filter to show only records matching the selected value
-        const matchingRecords = allRecords.filter(record => 
-            grist.mapColumnNames(record).OptionsToSelect === selectedValue
-        );
-        const matchingIds = matchingRecords.map(record => record.id);
-        
-        // Apply the filter
-        grist.setSelectedRows(matchingIds);
-        
-        // Save selection if we have a session ID
-        if (sessionID.length > 0) {
-            sessionStorage.setItem(sessionID + "_Dropdown_Item", selectedIndex);
-        }
+    // If "Show All" is selected
+    if (selectedIndex === -1) {
+      grist.clearSelection();
+      return;
     }
-});
+
+    const selectedRecord = allRecords[selectedIndex];
+    if (selectedRecord) {
+      const mapped = grist.mapColumnNames(selectedRecord);
+      const selectedValue = mapped.OptionsToSelect;
+      
+      // Set cursor to the selected record
+      grist.setCursorPos({rowId: selectedRecord.id});
+      
+      // Filter to show only records matching the selected value
+      const matchingIds = allRecords
+        .filter(record => grist.mapColumnNames(record).OptionsToSelect === selectedValue)
+        .map(record => record.id);
+      
+      // Apply the filter
+      grist.setSelectedRows(matchingIds);
+      
+      // Save selection if we have a session ID
+      if (sessionID.length > 0) {
+        sessionStorage.setItem(sessionID + "_Dropdown_Item", selectedIndex);
+      }
+    }
+  });
+}
 
 document.addEventListener('DOMContentLoaded', initGrist);
