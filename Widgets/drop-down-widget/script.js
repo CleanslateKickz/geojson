@@ -96,11 +96,26 @@ function initGrist() {
   document.getElementById('dropdown').addEventListener('change', function(event) {    
     const selectedIndex = parseInt(event.target.value);
     const selectedRecord = allRecords[selectedIndex];
+    const selectedValue = selectedRecord ? selectedRecord.OptionsToSelect : null;
+    
     if (selectedRecord) {
-      grist.setCursorPos({rowId: selectedRecord.id});
-      if (sessionID.length > 0) sessionStorage.setItem(sessionID + "_Dropdown_Item", selectedIndex);
+        // Set cursor to the selected record
+        grist.setCursorPos({rowId: selectedRecord.id});
+        
+        // Filter to show only records matching the selected value
+        const matchingRecords = allRecords.filter(record => 
+            grist.mapColumnNames(record).OptionsToSelect === selectedValue
+        );
+        const matchingIds = matchingRecords.map(record => record.id);
+        
+        // Apply the filter
+        grist.setSelectedRows(matchingIds);
+        
+        // Save selection if we have a session ID
+        if (sessionID.length > 0) {
+            sessionStorage.setItem(sessionID + "_Dropdown_Item", selectedIndex);
+        }
     }
-  });
-}
+});
 
 document.addEventListener('DOMContentLoaded', initGrist);
