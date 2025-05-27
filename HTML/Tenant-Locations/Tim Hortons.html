@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Number of Tim Hortons Restaurant Locations in the USA - 2025</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        /* General Body and Container Styles */
+        body {
+            font-family: 'Roboto', Arial, sans-serif; /* Fallback to Arial, as Roboto was used in original */
+            line-height: 1.6;
+            color: #333;
+            margin: 0; /* Remove default body margin */
+            padding: 0 20px; /* Add horizontal padding to prevent squeezing */
+            background-color: #f7f9fc; /* Light background similar to the site */
+        }
+        .container {
+            max-width: 1200px; /* Keep max-width for content */
+            margin: 0 auto; /* Center the container */
+            padding: 20px 0; /* Adjust vertical padding */
+        }
+
+        /* Header Section (Banner) Styles */
+        .Lir-bg {
+            background-image: url('https://www.locationscloud.com/wp-content/uploads/2024/07/Location-Intelligence-main-banner.jpg'); /* Background from original HTML */
+            background-size: cover;
+            background-position: center;
+            color: #fff; /* White text on blue background */
+            padding: 80px 0; /* Adjust padding to give space */
+            text-align: center;
+            position: relative;
+            overflow: hidden; /* To contain pseudo-elements if added */
+        }
+        .Lir-bg::before { /* Semi-transparent overlay to make text pop */
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(6, 116, 236, 0.7); /* Blue overlay color (from site's primary color) */
+            z-index: 1;
+        }
+        .Lir-bg .main {
+            position: relative;
+            z-index: 2; /* Ensure text is above the overlay */
+            max-width: 900px; /* Constrain text width as in PDF */
+            margin: 0 auto;
+            padding: 0 20px; /* Add padding to main content within banner */
+        }
+        .Lir-bg h1 {
+            font-size: 2.8em; /* Larger, more impactful title */
+            color: #fff;
+            margin-bottom: 20px;
+            font-weight: 700; /* Bolder as in PDF */
+        }
+        .Lir-bg p {
+            font-size: 1.1em;
+            color: #e0e0e0;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        .Lir-bg .date-info {
+            font-weight: normal; /* Less bold than in original, for softer look */
+            color: #f0f0f0;
+            font-size: 0.9em;
+            display: block; /* Ensure it takes its own line */
+            margin-top: 15px;
+        }
+        .Lir-bg .date-report {
+            font-weight: bold;
+        }
+        .Lir-bg .brand-logo {
+            margin-top: 40px;
+            width: 250px; /* Adjust size as seen in PDF */
+            height: auto;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Breadcrumb Styles (as seen at bottom of PDF page 1) */
+        .breadcrumb-reports-in {
+            list-style: none;
+            padding: 10px 0;
+            margin: 20px 0;
+            font-size: 0.9em;
+            color: #666;
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .breadcrumb-reports-in li {
+            margin-right: 5px;
+        }
+        .breadcrumb-reports-in li a {
+            color: #0674EC;
+            text-decoration: none;
+        }
+        .breadcrumb-reports-in li.active {
+            font-weight: bold;
+            color: #333;
+        }
+        .breadcrumb-reports-in li + li::before {
+            content: '/\00a0'; /* Forward slash with non-breaking space */
+            padding-right: 5px;
+            color: #999;
+        }
+
+        /* General Content Section */
+        .template-section-wrap {
+            padding: 40px; /* Increased padding around the content */
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05); /* Soft shadow for the main content block */
+            margin-top: -60px; /* Pulls it up slightly over the banner */
+            position: relative;
+            z-index: 3; /* Above banner */
+        }
+
+        /* Headings within content */
+        h2.sb-title-reports, h3.title--h3 {
+            color: #2E3D62; /* Darker blue from the site */
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        h2.sb-title-reports {
+            font-size: 2em;
+        }
+        h3.title--h3 {
+            font-size: 1.6em;
+        }
+
+        /* Images */
+        .main-content-r img {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            margin: 25px auto; /* Centered with vertical spacing */
+            border: 1px solid #eee; /* Light border around map image */
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        /* Three Stat Boxes */
+        .box__loc {
+            display: flex;
+            flex-wrap: wrap; /* Allows wrapping on smaller screens */
+            justify-content: center; /* Centers boxes when they wrap */
+            gap: 20px; /* Space between boxes */
+            margin: 40px 0;
+        }
+        .iner--wrp {
+            background-color: #f8f8f8; /* Light background for boxes */
+            border-radius: 8px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08); /* More prominent shadow */
+            flex: 1; /* Allow boxes to grow/shrink */
+            min-width: 280px; /* Minimum width before wrapping */
+            max-width: 32%; /* Max width for desktop 3-column layout */
+            box-sizing: border-box;
+        }
+        .iner--wrp img {
+            width: 70px; /* Smaller icon size */
+            height: 70px;
+            margin-bottom: 15px;
+            display: inline-block; /* Ensure it's not block level and breaks flow */
+        }
+        .iner--wrp h5 {
+            font-size: 2.2em; /* Larger numbers */
+            color: #0674EC;
+            margin: 0 0 5px 0;
+            font-weight: 700;
+        }
+        .iner--wrp p {
+            font-size: 0.9em;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 0;
+        }
+
+        /* Top 3 States Section */
+        .top-ten-state .row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px; /* Space between state boxes */
+            justify-content: center;
+        }
+        .box-state-wrp, .box-state-wrp-1, .box-state-wrp-2 {
+            border-radius: 8px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            flex: 1;
+            min-width: 300px; /* Minimum width for state boxes */
+            max-width: 32%;
+            box-sizing: border-box;
+        }
+        .number--box, .number--box-1, .number--box-2 {
+            font-size: 2.5em; /* Very large number */
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        .state-ll {
+            font-size: 1.8em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #2E3D62;
+        }
+        .top-ten-state p {
+            font-size: 0.95em;
+            color: #555;
+            line-height: 1.4;
+        }
+
+        /* Specific colors for top 3 state boxes based on PDF */
+        .box-state-wrp { /* New York */
+            background-color: #e6f7e6; /* Light green */
+            color: #008000;
+        }
+        .number--box { color: #008000; }
+
+        .box-state-wrp-1 { /* Michigan */
+            background-color: #e6f0ff; /* Light blue */
+            color: #0056b3;
+        }
+        .number--box-1 { color: #0056b3; }
+
+        .box-state-wrp-2 { /* Ohio */
+            background-color: #fff3e6; /* Light orange */
+            color: #cc6600;
+        }
+        .number--box-2 { color: #cc6600; }
+
+        /* General Table Styles */
+        .table-items {
+            margin-top: 30px;
+            margin-bottom: 30px;
+        }
+        .scroll-report {
+            overflow-x: auto; /* Allows horizontal scrolling on small screens */
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling for touch devices */
+        }
+        .table-items table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px; /* Ensure table doesn't get too narrow */
+            background-color: #fff;
+        }
+        .table-items th, .table-items td {
+            border: 1px solid #e0e0e0;
+            padding: 12px 15px;
+            text-align: left;
+            font-size: 0.9em;
+        }
+        .table-items thead th {
+            /* Adjusted Blue: less bright and obnoxious */
+            background-color: #6a9bd6; /* A softer, muted blue */
+            color: #fff;
+            font-weight: 600;
+            white-space: nowrap; /* Prevent header text from wrapping */
+        }
+        .table-items tbody tr:nth-child(even) {
+            background-color: #f9f9f9; /* Zebra striping */
+        }
+        .table-items tbody tr:hover {
+            background-color: #f0f0f0; /* Hover effect */
+        }
+        .d-percent {
+            font-size: 0.8em;
+            color: #888;
+        }
+
+        /* Icon Text Callout */
+        .icn--text {
+            background-color: #e6f7ff; /* Light blue background */
+            border-left: 5px solid #0674EC; /* Blue left border */
+            padding: 15px 20px;
+            margin: 40px 0;
+            display: flex;
+            align-items: center;
+            font-size: 1.1em;
+            color: #333;
+            border-radius: 4px;
+        }
+        .icn--text i {
+            margin-right: 15px;
+            color: #0674EC;
+            font-size: 1.5em;
+        }
+        .icn--text strong {
+            color: #0674EC;
+        }
+
+        /* States Without Locations Section */
+        .list-states ul {
+            list-style: none;
+            padding: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); /* 3 columns on larger screens */
+            gap: 10px;
+            margin-top: 20px;
+            margin-bottom: 40px;
+        }
+        .list-states li {
+            background-color: #f9f9f9;
+            padding: 10px 15px;
+            border-radius: 5px;
+            border: 1px solid #eee;
+            font-size: 0.95em;
+            color: #444;
+            transition: all 0.3s ease; /* Smooth transition for hover effects */
+        }
+        .list-states li:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); /* Raised card with shadow effect */
+            transform: translateY(-3px); /* Slight lift effect */
+            background-color: #eef5ff; /* Light blue on hover */
+        }
+
+        /* Competitor Analysis Table */
+        .competitor--sec .lc-table th:nth-child(3) {
+            text-align: left; /* Ensure competitors column is left-aligned */
+        }
+        .competitor--sec .sm-text {
+            display: block; /* Ensure the text wraps to next line */
+            font-size: 0.8em;
+            color: #777;
+            margin-top: 5px;
+        }
+        .competitor--sec .brand-name {
+            font-weight: bold;
+            color: #2E3D62;
+        }
+        .competitor--sec .c-brand-name {
+            color: #0674EC; /* Links/brand names are blue */
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .competitor--sec .c-brand-name a:hover {
+            text-decoration: underline;
+        }
+
+        /* Sample Data Table */
+        .output_table thead th {
+            background-color: #6a9bd6; /* Different blue for sample data table */
+            color: white;
+        }
+        .output_table td {
+            white-space: nowrap; /* Prevent content from wrapping too much */
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 991px) {
+            .Lir-bg h1 {
+                font-size: 2.2em;
+            }
+            .Lir-bg p {
+                font-size: 1em;
+            }
+            .box__loc {
+                flex-direction: column; /* Stack boxes vertically */
+                align-items: center;
+            }
+            .iner--wrp {
+                max-width: 80%; /* Wider boxes when stacked */
+            }
+            .top-ten-state .row {
+                flex-direction: column;
+                align-items: center;
+            }
+            .box-state-wrp, .box-state-wrp-1, .box-state-wrp-2 {
+                max-width: 80%;
+            }
+            h2.sb-title-reports {
+                font-size: 1.8em;
+            }
+            h3.title--h3 {
+                font-size: 1.4em;
+            }
+        }
+        @media (max-width: 767px) {
+            body {
+                padding: 10px; /* More padding on small screens */
+            }
+            .Lir-bg h1 {
+                font-size: 1.8em;
+            }
+            .Lir-bg p {
+                font-size: 0.9em;
+            }
+            .iner--wrp, .box-state-wrp, .box-state-wrp-1, .box-state-wrp-2 {
+                min-width: unset;
+                width: 100%; /* Full width on smaller mobiles */
+            }
+            .list-states ul {
+                grid-template-columns: 1fr; /* Single column on very small screens */
+            }
+            .table-items th, .table-items td {
+                padding: 8px 10px;
+            }
+            .template-section-wrap {
+                padding: 20px; /* Reduce padding inside main content block on small screens */
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Main Header/Banner Section -->
+    <section class="Lir-bg">
+        <div class="main container-fluid">
+            <div class="header-txt-left">
+                <h1>Number of Tim Hortons Restaurant in the United States in 2025</h1>
+                <p>According to reports, there are 659 Tim Hortons Restaurant locations in 11 states and territories of the United States. The highest number of Tim Hortons Restaurant locations in the US are in New York and Columbus with 257 locations and 32 stores, respectively. New York makes up approximately 39% of all Tim Hortons Restaurant locations in the United States.</p>
+                <bdi class="date-info">Data updated on <span class="date-report">May 11, 2025</span></bdi>
+            </div>
+            <!-- Tim Hortons Logo as seen in PDF -->
+            <img class="brand-logo" src="https://www.locationscloud.com/wp-content/uploads/2023/06/Tim-Hortons-Locations-Data-USA.png" alt="Tim Hortons Logo">
+        </div>
+    </section>
+
+    <!-- Content Area (including breadcrumb) -->
+    <section class="template-section-wrap container">
+        <!-- Breadcrumb from PDF page 1 bottom, moved to top of content section -->
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb-reports-in">
+                <li class="breadcrumb-item"><a href="#">Home</a></li>
+                <li class="breadcrumb-item"><a href="#">All Reports</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Number of Tim Hortons Restaurant in the United States in 2025</li>
+            </ol>
+        </nav>
+
+        <!-- Removed "All Reports" Category List as requested -->
+
+        <div class="main-content-r">
+            <h2 class="sb-title-reports">How Many Tim Hortons Restaurant are Present in the USA?</h2>
+            <p>Tim Hortons is a Canadian multinational coffeehouse and restaurant chain and a subsidiary Wendy’s, restaurant brands, and International. The total number of Tim Hortons restaurant locations in the United States is 659, and its graphical representation is shown on the map.</p>
+            <div class="text-center">
+                <img src="https://www.locationscloud.com/wp-content/uploads/edd/2024/01/Tim_Hortons_USA_Map.png" alt="LocationsCloud Map" class="img-fluid">
+            </div>
+        </div>
+
+        <section class="box__loc">
+            <div class="iner--wrp">
+                <img src="https://www.locationscloud.com/wp-content/uploads/2024/08/store-locations.png" alt="Store Location">
+                <h5>659</h5>
+                <p>STORE LOCATIONS</p>
+            </div>
+            <div class="iner--wrp">
+                <img src="https://www.locationscloud.com/wp-content/uploads/2024/08/states-locations.png" alt="States Location">
+                <h5>11</h5>
+                <p>STATES & TERRITORIES</p>
+            </div>
+            <div class="iner--wrp">
+                <img src="https://www.locationscloud.com/wp-content/uploads/2024/08/cities-locations.png" alt="Cities Location">
+                <h5>329</h5>
+                <p>CITIES</p>
+            </div>
+        </section>
+
+        <section class="top-ten-state">
+            <h3 class="title--h3">Top 10 States & Territories With the Highest Number of Tim Hortons Restaurants</h3>
+            <p>Explore the top 10 U.S. states and territories with the highest number of Tim Hortons Restaurants locations. Highlighted below are the top 3 states and territories where Tim Hortons has the strongest presence along with a detailed breakdown of store counts and population data for each state.</p>
+            <div class="row mt-4 top--in">
+                <div class="box-state-wrp">
+                    <div class="number--box">257 (39%)</div>
+                    <div class="state-info-padding">
+                        <h6 class="state-ll">New York</h6>
+                        <p>In New York, there is one restaurant for every 75,696 people, accounting for approximately 39% of all Tim Hortons Restaurant locations.</p>
+                    </div>
+                </div>
+                <div class="box-state-wrp-1">
+                    <div class="number--box-1">206 (31%)</div>
+                    <div class="state-info-padding">
+                        <h6 class="state-ll">Michigan</h6>
+                        <p>In Michigan, there is one restaurants for every 48,481 people, accounting for approximately 31% of all Tim Hortons Restaurants locations.</p>
+                    </div>
+                </div>
+                <div class="box-state-wrp-2">
+                    <div class="number--box-2">133 (20%)</div>
+                    <div class="state-info-padding">
+                        <h6 class="state-ll">Ohio</h6>
+                        <p>In Ohio, there is one restaurants for every 87,887 people, accounting for approximately 20% of all Tim Hortons Restaurants locations.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="table-items">
+            <div class="scroll-report">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>State & Territory</th>
+                            <th>Number of Locations</th>
+                            <th>Population</th>
+                            <th>Population Per Locations</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>New York</td><td>257 <span class="d-percent">(39%)</span></td><td>19.45M</td><td>75.70K</td></tr>
+                        <tr><td>Michigan</td><td>206 <span class="d-percent">(31%)</span></td><td>9.99M</td><td>49.48K</td></tr>
+                        <tr><td>Ohio</td><td>133 <span class="d-percent">(20%)</span></td><td>11.69M</td><td>87.89K</td></tr>
+                        <tr><td>Pennsylvania</td><td>19 <span class="d-percent">(3%)</span></td><td>12.80M</td><td>673.79K</td></tr>
+                        <tr><td>New Jersey</td><td>10 <span class="d-percent">(2%)</span></td><td>8.88M</td><td>888.20K</td></tr>
+                        <tr><td>West Virginia</td><td>9 <span class="d-percent">(1%)</span></td><td>1.79M</td><td>199.11K</td></tr>
+                        <tr><td>Texas</td><td>8 <span class="d-percent">(1%)</span></td><td>29.00M</td><td>3.62M</td></tr>
+                        <tr><td>Maine</td><td>7<span class="d-percent">(1%)</span></td><td>1.34M</td><td>192.00K</td></tr>
+                        <tr><td>Georgia</td><td>5<span class="d-percent">(1%)</span></td><td>10.62M</td><td>2.12M</td></tr>
+                        <tr><td>Indiana</td><td>3<span class="d-percent">(0%)</span></td><td>6.73M</td><td>2.24M</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="icn--text">
+            <i class="fas fa-arrow-alt-circle-right"></i><span>Tim Hortons Restaurant operates in <strong> 11 States and Territories </strong> across the United States.</span>
+        </div>
+
+        <section class="state-section">
+            <h3 class="title--h3">Which States and Territories Don't Have Tim Hortons Restaurants?</h3>
+            <p>Find out the 45 States & Territories across the US that are don’t yet have Tim Hortons restaurants locations. The list of regions where the popular brand has yet to establish its presence are:</p>
+            <div class="list-states">
+                <ul>
+                    <li>Rhode Island</li>
+                    <li>California</li>
+                    <li>New Mexico</li>
+                    <li>Montana</li>
+                    <li>Delaware</li>
+                    <li>U.S. Virgin Islands</li>
+                    <li>Northern Mariana Islands</li>
+                    <li>North Dakota</li>
+                    <li>Connecticut</li>
+                    <li>Minnesota</li>
+                    <li>Idaho</li>
+                    <li>New Hampshire</li>
+                    <li>Puerto Rico</li>
+                    <li>Hawaii</li>
+                    <li>Missouri</li>
+                    <li>Alaska</li>
+                    <li>Massachusetts</li>
+                    <li>Virginia</li>
+                    <li>South Dakota</li>
+                    <li>Tennessee</li>
+                    <li>Nevada</li>
+                    <li>Arkansas</li>
+                    <li>Vermont</li>
+                    <li>Alabama</li>
+                    <li>Nebraska</li>
+                    <li>Utah</li>
+                    <li>Louisiana</li>
+                    <li>North Carolina</li>
+                    <li>Iowa</li>
+                    <li>Illinois</li>
+                    <li>Mississippi</li>
+                    <li>Florida</li>
+                    <li>Colorado</li>
+                    <li>Oklahoma</li>
+                    <li>District of Columbia</li>
+                    <li>Maryland</li>
+                    <li>Wyoming</li>
+                    <li>American Samoa</li>
+                    <li>Washington</li>
+                    <li>Oregon</li>
+                    <li>Guam</li>
+                    <li>South Carolina</li>
+                    <li>Wisconsin</li>
+                    <li>Arizona</li>
+                    <li>Kansas</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="table--sec">
+            <h3 class="title--h3">Top Cities With the Most Tim Hortons Outlets in the United States</h3>
+            <p>Discover the top 10 cities across the US with highest Tim Hortons outlet locations. The detailed breakdown provides a clear view of Tim Hortons location distribution among the states & territories and number of store locations in the USA.</p>
+            <div class="table-items">
+                <div class="scroll-report">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>City</th>
+                                <th>State & Territory</th>
+                                <th>Number of Store</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Columbus</td><td>Ohio</td><td>32</td></tr>
+                            <tr><td>Buffalo</td><td>New York</td><td>31</td></tr>
+                            <tr><td>Rochester</td><td>New York</td><td>12</td></tr>
+                            <tr><td>Tonawanda</td><td>New York</td><td>11</td></tr>
+                            <tr><td>Cheektowaga</td><td>New York</td><td>9</td></tr>
+                            <tr><td>Williamsville</td><td>New York</td><td>8</td></tr>
+                            <tr><td>Erie</td><td>Pennsylvania</td><td>8</td></tr>
+                            <tr><td>Niagara Falls</td><td>New York</td><td>8</td></tr>
+                            <tr><td>Warren</td><td>Michigan</td><td>7</td></tr>
+                            <tr><td>Hamburg</td><td>New York</td><td>7</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section class="competitor--sec">
+            <h2 class="sb-title-reports">List of Tim Hortons Restaurants Competitors Analysis</h2>
+            <p>Explore a comprehensive analysis of Tim Hortons restaurants top competitors along with number of stores, states and cities across USA.</p>
+            <div class="lc-table table-items">
+                <div class="scroll-report">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Brand</th>
+                                <th>Vs</th>
+                                <th style="text-align: left;">Competitors</th>
+                                <th>Number of Store</th>
+                                <th>Number of States</th>
+                                <th>Number of Cities</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="brand-name">Tim Hortons</span></td>
+                                <td>vs</td>
+                                <td class="sm-icon"><span class="c-brand-name">Starbucks</span></td>
+                                <td>16,507<br /><span class="sm-text">(+15,868 locations than Tim Hortons)</span></td>
+                                <td>52<br /><span class="sm-text">(+41 states than Tim Hortons)</span></td>
+                                <td>3,649<br /><span class="sm-text">(+3,334 cities than Tim Hortons)</span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="brand-name">Tim Hortons</span></td>
+                                <td>vs</td>
+                                <td class="sm-icon"><span class="c-brand-name">Dunkin’ Donuts</span></td>
+                                <td>9,641<br /><span class="sm-text">(+9,002 locations than Tim Hortons)</span></td>
+                                <td>45<br /><span class="sm-text">(+34 states than Tim Hortons)</span></td>
+                                <td>3,281<br /><span class="sm-text">(+2,966 cities than Tim Hortons)</span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="brand-name">Tim Hortons</span></td>
+                                <td>vs</td>
+                                <td class="sm-icon"><span class="c-brand-name">Panera Bread</span></td>
+                                <td>2,169<br /><span class="sm-text">(+1,530 locations than Tim Hortons)</span></td>
+                                <td>49<br /><span class="sm-text">(+38 states than Tim Hortons)</span></td>
+                                <td>1,380<br /><span class="sm-text">(+1,065 cities than Tim Hortons)</span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="brand-name">Tim Hortons</span></td>
+                                <td>vs</td>
+                                <td class="sm-icon"><span class="c-brand-name">Caribou Coffee</span></td>
+                                <td>496<br /><span class="sm-text">( -143 locations than Tim Hortons)</span></td>
+                                <td>20<br /><span class="sm-text">(+9 states than Tim Hortons)</span></td>
+                                <td>244<br /><span class="sm-text">( -71 cities than Tim Hortons)</span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="brand-name">Tim Hortons</span></td>
+                                <td>vs</td>
+                                <td class="sm-icon"><span class="c-brand-name">Shipley Do-Nuts</span><br /></td>
+                                <td>374<br /><span class="sm-text">( -265 locations than Tim Hortons)</span></td>
+                                <td>12<br /><span class="sm-text">(+1 states than Tim Hortons)<br /></span></td>
+                                <td>181<br /><span class="sm-text">( -134 cities than Tim Hortons)</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- "Get A List of Tim Hortons Locations of the USA" section without the CTA button -->
+        <section class="cta--sec">
+            <h3>Get A List of Tim Hortons Locations of the USA</h3>
+            <p>Get the complete Tim Hortons store locations datasets for the USA! Download in any format you need, including JSON, Esri Shapefile, GeoJSON, KML (Google Earth), or even a custom format. This enriched POI dataset includes geo-coded addresses, phone numbers, opening hours, and more.</p>
+        </section>
+
+        <!-- "Download the Complete Datasets of Tim Hortons Locations Across the USA" section with sample data table -->
+        <section class="dataset-sec">
+            <h3 class="title--h3">Download the Complete Datasets of Tim Hortons Locations Across the USA</h3>
+            <p>You can download the complete list of Tim Hortons locations used in this analysis from our data store. Here’s a sample of 10 records for you to review the fields and data that we provide.</p>
+            <div class="output_table scroll-report">
+                <table class="output_table">
+                    <thead>
+                        <tr>
+                            <th>Store ID</th>
+                            <th>Brand/Store Name</th>
+                            <th>Category</th>
+                            <th>Store URL</th>
+                            <th>Phone No.</th>
+                            <th>Address</th>
+                            <th>Latitude</th>
+                            <th>Longitude</th>
+                            <th>Direction URL</th>
+                            <th>Store Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td>Tim Hortons</td><td>Food Chain</td><td>https://locations.timhortons.com/en/</td><td>(856) 829-1700</td><td>2701 – Us-130 Building B</td><td>40.0086807</td><td>-74.9714044</td><td></td><td>Open</td></tr>
+                        <tr><td>2</td><td>Tim Hortons</td><td>Food Chain</td><td>https://locations.timhortons.com/en/</td><td>(888) 601-1616</td><td>133 Garden State Pkwy</td><td>40.591141</td><td>-74.322943</td><td></td><td>Open</td></tr>
+                        <tr><td>3</td><td>Tim Hortons</td><td>Food Chain</td><td>https://locations.timhortons.com/en/</td><td>(732) 494-3440</td><td>78 Garden State Pkwy</td><td>40.5817973</td><td>-74.3318259</td><td></td><td>Open</td></tr>
+                        <tr><td>4</td><td>Tim Hortons</td><td>Food Chain</td><td>https://locations.timhortons.com/en/</td><td>(888) 601-1616</td><td>193 Nj-17</td><td>41.0966999</td><td>-74.1571311</td><td></td><td>Open</td></tr>
+                        <tr><td>5</td><td>Tim Hortons</td><td>Food Chain</td><td>https://locations.timhortons.com/en/</td><td>(888) 601-1616</td><td>198 Nj-17</td><td>41.0962814</td><td>-74.1581842</td><td></td><td>Open</td></tr>
+                        <tr><td>6</td><td>Tim Hortons</td><td>Food Chain</td><td>https://locations.timhortons.com/en/</td><td>(888) 601-1616</td><td>639 – N State Rt 17</td><td>37.3199009</td><td>-91.9654182</td><td></td><td>Open</td></tr>
+                        <tr><td>7</td><td>Tim Hortons</td><td>Food Chain</td><td>https://locations.timhortons.com/en/</td><td>(908) 231-8000</td><td>223 W End Ave</td><td>40.5749289</td><td>-74.6278777</td><td></td><td>Open</td></tr>
+                        <tr><td>8</td><td>Tim Hortons</td><td>Food Chain</td><td>https://locations.timhortons.com/en/</td><td>(856) 566-2222</td><td>57 White Horse Pike</td><td>39.8309829</td><td>-75.0017202</td><td></td><td>Open</td></tr>
+                        <tr><td>9</td><td>Tim Hortons</td><td>Food Chain</td><td>https://locations.timhortons.com/en/</td><td>(201) 661-8383</td><td>254 Nj Rt 17n</td><td>40.365245</td><td>-74.0833488</td><td></td><td>Open</td></tr>
+                        <tr><td>10</td><td>Tim Hortons</td><td>Food Chain</td><td>https://locations.timhortons.com/en/</td><td>(716) 542-4092</td><td>12950 Main Rd</td><td>42.9980856</td><td>-78.5048828</td><td></td><td>Open</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </section>
+</body>
+</html>
