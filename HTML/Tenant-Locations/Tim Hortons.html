@@ -160,6 +160,7 @@
             min-width: 280px; /* Minimum width before wrapping */
             max-width: 32%; /* Max width for desktop 3-column layout */
             box-sizing: border-box;
+            border: 1px solid #e0e0e0; /* Add a subtle border to the cards */
         }
         .iner--wrp img {
             width: 70px; /* Smaller icon size */
@@ -188,26 +189,44 @@
             gap: 20px; /* Space between state boxes */
             justify-content: center;
         }
-        .box-state-wrp, .box-state-wrp-1, .box-state-wrp-2 {
+        .box-state-card {
+            background-color: #fff; /* Ensure card background is white */
             border-radius: 8px;
-            padding: 25px;
             text-align: center;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
             flex: 1;
-            min-width: 300px; /* Minimum width for state boxes */
+            min-width: 300px; /* Minimum width for state cards */
             max-width: 32%;
             box-sizing: border-box;
+            overflow: hidden; /* Ensure top bar color doesn't bleed */
+            border: 1px solid #e0e0e0; /* Default border, will be overridden */
         }
-        .number--box, .number--box-1, .number--box-2 {
+
+        /* Top Bar for State Cards */
+        .box-state-top-bar {
+            padding: 15px 25px; /* Reduced vertical padding for the top bar */
+            height: 100px; /* Fixed height to control spacing */
+            display: flex;
+            align-items: center; /* Vertically center content */
+            justify-content: center; /* Horizontally center content */
             font-size: 2.5em; /* Very large number */
             font-weight: 700;
-            margin-bottom: 15px;
+            margin-bottom: 0; /* No bottom margin on the top bar */
+            color: #fff; /* White text on colored bar */
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
         }
+        .state-info-padding {
+            padding: 25px; /* Padding for the content below the top bar */
+        }
+
         .state-ll {
             font-size: 1.8em;
             font-weight: 600;
+            /* Adjusted margin-top to bring closer to top bar */
+            margin-top: 15px; /* Reduced from 25px, or adjust to 0 if state-info-padding handles it */
             margin-bottom: 10px;
-            color: #2E3D62;
+            color: #2E3D62; /* Darker blue for state name */
         }
         .top-ten-state p {
             font-size: 0.95em;
@@ -216,23 +235,30 @@
         }
 
         /* Specific colors for top 3 state boxes based on PDF */
-        .box-state-wrp { /* New York */
-            background-color: #e6f7e6; /* Light green */
-            color: #008000;
+        .box-state-card.new-york {
+            border-color: #d4facf; /* Green border color from original image */
         }
-        .number--box { color: #008000; }
+        .box-state-card.new-york .box-state-top-bar {
+            background-color: #d4facf; /* Green background for top bar */
+            color: #008000; /* Darker green text for number */
+        }
 
-        .box-state-wrp-1 { /* Michigan */
-            background-color: #e6f0ff; /* Light blue */
-            color: #0056b3;
+        .box-state-card.michigan {
+            border-color: #c9ebfa; /* Blue border color from original image */
         }
-        .number--box-1 { color: #0056b3; }
+        .box-state-card.michigan .box-state-top-bar {
+            background-color: #c9ebfa; /* Blue background for top bar */
+            color: #0056b3; /* Darker blue text for number */
+        }
 
-        .box-state-wrp-2 { /* Ohio */
-            background-color: #fff3e6; /* Light orange */
-            color: #cc6600;
+        .box-state-card.ohio {
+            border-color: #fee9d2; /* Orange border color from original image */
         }
-        .number--box-2 { color: #cc6600; }
+        .box-state-card.ohio .box-state-top-bar {
+            background-color: #fee9d2; /* Orange background for top bar */
+            color: #cc6600; /* Darker orange text for number */
+        }
+
 
         /* General Table Styles */
         .table-items {
@@ -344,7 +370,7 @@
 
         /* Sample Data Table */
         .output_table thead th {
-            background-color: #275b80; /* Different blue for sample data table */
+            background-color: #275b80; /* Same as other table headers for consistency */
             color: white;
         }
         .output_table td {
@@ -370,7 +396,7 @@
                 flex-direction: column;
                 align-items: center;
             }
-            .box-state-wrp, .box-state-wrp-1, .box-state-wrp-2 {
+            .box-state-card { /* Use new class name */
                 max-width: 80%;
             }
             h2.sb-title-reports {
@@ -390,7 +416,7 @@
             .Lir-bg p {
                 font-size: 0.9em;
             }
-            .iner--wrp, .box-state-wrp, .box-state-wrp-1, .box-state-wrp-2 {
+            .iner--wrp, .box-state-card { /* Use new class name */
                 min-width: unset;
                 width: 100%; /* Full width on smaller mobiles */
             }
@@ -431,8 +457,6 @@
             </ol>
         </nav>
 
-        <!-- Removed "All Reports" Category List as requested -->
-
         <div class="main-content-r">
             <h2 class="sb-title-reports">How Many Tim Hortons Restaurant are Present in the USA?</h2>
             <p>Tim Hortons is a Canadian multinational coffeehouse and restaurant chain and a subsidiary Wendy’s, restaurant brands, and International. The total number of Tim Hortons restaurant locations in the United States is 659, and its graphical representation is shown on the map.</p>
@@ -443,17 +467,17 @@
 
         <section class="box__loc">
             <div class="iner--wrp">
-                <img src="https://www.locationscloud.com/wp-content/uploads/2024/08/store-locations.png" alt="Store Location">
+                <img src="https://cleanslatekickz.github.io/geojson/HTML/Tenant-Locations/Images/store-locations.png" alt="Store Location Icon">
                 <h5>659</h5>
                 <p>STORE LOCATIONS</p>
             </div>
             <div class="iner--wrp">
-                <img src="https://www.locationscloud.com/wp-content/uploads/2024/08/states-locations.png" alt="States Location">
+                <img src="https://cleanslatekickz.github.io/geojson/HTML/Tenant-Locations/Images/States-Territories.png" alt="States & Territories Icon">
                 <h5>11</h5>
                 <p>STATES & TERRITORIES</p>
             </div>
             <div class="iner--wrp">
-                <img src="https://www.locationscloud.com/wp-content/uploads/2024/08/cities-locations.png" alt="Cities Location">
+                <img src="https://cleanslatekickz.github.io/geojson/HTML/Tenant-Locations/Images/Cities.png" alt="Cities Icon">
                 <h5>329</h5>
                 <p>CITIES</p>
             </div>
@@ -463,22 +487,25 @@
             <h3 class="title--h3">Top 10 States & Territories With the Highest Number of Tim Hortons Restaurants</h3>
             <p>Explore the top 10 U.S. states and territories with the highest number of Tim Hortons Restaurants locations. Highlighted below are the top 3 states and territories where Tim Hortons has the strongest presence along with a detailed breakdown of store counts and population data for each state.</p>
             <div class="row mt-4 top--in">
-                <div class="box-state-wrp">
-                    <div class="number--box">257 (39%)</div>
+                <!-- New York Card -->
+                <div class="box-state-card new-york">
+                    <div class="box-state-top-bar">257 (39%)</div>
                     <div class="state-info-padding">
                         <h6 class="state-ll">New York</h6>
                         <p>In New York, there is one restaurant for every 75,696 people, accounting for approximately 39% of all Tim Hortons Restaurant locations.</p>
                     </div>
                 </div>
-                <div class="box-state-wrp-1">
-                    <div class="number--box-1">206 (31%)</div>
+                <!-- Michigan Card -->
+                <div class="box-state-card michigan">
+                    <div class="box-state-top-bar">206 (31%)</div>
                     <div class="state-info-padding">
                         <h6 class="state-ll">Michigan</h6>
                         <p>In Michigan, there is one restaurants for every 48,481 people, accounting for approximately 31% of all Tim Hortons Restaurants locations.</p>
                     </div>
                 </div>
-                <div class="box-state-wrp-2">
-                    <div class="number--box-2">133 (20%)</div>
+                <!-- Ohio Card -->
+                <div class="box-state-card ohio">
+                    <div class="box-state-top-bar">133 (20%)</div>
                     <div class="state-info-padding">
                         <h6 class="state-ll">Ohio</h6>
                         <p>In Ohio, there is one restaurants for every 87,887 people, accounting for approximately 20% of all Tim Hortons Restaurants locations.</p>
@@ -665,13 +692,6 @@
             </div>
         </section>
 
-        <!-- "Get A List of Tim Hortons Locations of the USA" section without the CTA button -->
-        <section class="cta--sec">
-            <h3>Get A List of Tim Hortons Locations of the USA</h3>
-            <p>Get the complete Tim Hortons store locations datasets for the USA! Download in any format you need, including JSON, Esri Shapefile, GeoJSON, KML (Google Earth), or even a custom format. This enriched POI dataset includes geo-coded addresses, phone numbers, opening hours, and more.</p>
-        </section>
-
-        <!-- "Download the Complete Datasets of Tim Hortons Locations Across the USA" section with sample data table -->
         <section class="dataset-sec">
             <h3 class="title--h3">Download the Complete Datasets of Tim Hortons Locations Across the USA</h3>
             <p>You can download the complete list of Tim Hortons locations used in this analysis from our data store. Here’s a sample of 10 records for you to review the fields and data that we provide.</p>
@@ -707,5 +727,5 @@
             </div>
         </section>
     </section>
-</body>
+    </body>
 </html>
