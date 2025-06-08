@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Strategic Guide: 1031 Exchanges from Oregon</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/alpinejs" defer></script>
+</head>
+    <body class="bg-gray-50 text-gray-800">
+
+        <div class="max-w-6xl mx-auto px-4 py-8">
+            <h1 class="text-4xl font-bold mb-6 text-blue-800">Strategic Guide: Why Oregon Property Owners Should Consider 1031 Exchanges into Tax-Free States</h1>
+
+            <!-- Tabs -->
+            <div x-data="{ tab: 'why' }">
+                <div class="flex space-x-4 border-b pb-2 mb-6">
+                    <button class="px-3 py-2 font-semibold text-sm"
+                            :class="tab === 'why' ? 'text-blue-700 border-b-2 border-blue-700' : 'text-gray-500'"
+                            @click="tab = 'why'">Why Exchange</button>
+                    <button class="px-3 py-2 font-semibold text-sm"
+                            :class="tab === 'objections' ? 'text-blue-700 border-b-2 border-blue-700' : 'text-gray-500'"
+                            @click="tab = 'objections'">Common Objections</button>
+                    <button class="px-3 py-2 font-semibold text-sm"
+                            :class="tab === 'talking' ? 'text-blue-700 border-b-2 border-blue-700' : 'text-gray-500'"
+                            @click="tab = 'talking'">Talking Points</button>
+                    <button class="px-3 py-2 font-semibold text-sm"
+                            :class="tab === 'advisor' ? 'text-blue-700 border-b-2 border-blue-700' : 'text-gray-500'"
+                            @click="tab = 'advisor'">Advisor Approach</button>
+                    <button class="px-3 py-2 font-semibold text-sm"
+                            :class="tab === 'bottom' ? 'text-blue-700 border-b-2 border-blue-700' : 'text-gray-500'"
+                            @click="tab = 'bottom'">The Bottom Line</button>
+                </div>
+
+                <!-- WHY EXCHANGE -->
+                <div x-show="tab === 'why'" x-cloak>
+                    <section class="mb-8">
+                        <h2 class="text-2xl font-semibold text-blue-700 mb-2">The Hidden Cost of "Just Holding" in Oregon</h2>
+                        <p class="mb-4">Your Starbucks owner client perfectly illustrates a common blind spot: contentment with the status quo often masks significant opportunity costs.</p>
+                        <p class="mb-4">For a typical <strong>$3M NNN property generating $180,000/year</strong>:</p>
+                        <ul class="list-disc pl-6 mb-4 text-sm">
+                            <li>Oregon state income tax (9.9%): ~$17,820/year</li>
+                            <li>10-year impact: $178,200</li>
+                            <li>20-year impact: $356,400+ (not including rent increases)</li>
+                        </ul>
+                    </section>
+
+                    <section class="mb-8">
+                        <h2 class="text-2xl font-semibold text-blue-700 mb-2">Why Exchange Out of Oregon</h2>
+                        <div x-data="{ open: false }" class="mb-4">
+                            <button @click="open = !open" class="text-left w-full px-4 py-2 bg-gray-100 rounded hover:bg-gray-200 font-semibold">
+                                1. Immediate Cash Flow Enhancement
+                            </button>
+                            <div x-show="open" class="px-4 py-2 text-sm">
+                                Moving to states like Texas or Florida increases net income ~10%. That’s ~$17,820/year more in your pocket on a $180k rent roll.
+                            </div>
+                        </div>
+
+                        <div x-data="{ open: false }" class="mb-4">
+                            <button @click="open = !open" class="text-left w-full px-4 py-2 bg-gray-100 rounded hover:bg-gray-200 font-semibold">
+                                2. The Clawback Paradox
+                            </button>
+                            <div x-show="open" class="px-4 py-2 text-sm">
+                                Oregon’s clawback only matters when selling. If you never sell, you collect rent income tax-free for decades in another state.
+                            </div>
+                        </div>
+
+                        <div x-data="{ open: false }">
+                            <button @click="open = !open" class="text-left w-full px-4 py-2 bg-gray-100 rounded hover:bg-gray-200 font-semibold">
+                                3. The “Exchange Forever” Strategy
+                            </button>
+                            <div x-show="open" class="px-4 py-2 text-sm">
+                                Use repeated 1031s + step-up in basis at death = no tax due. It's a powerful estate planning and wealth building strategy.
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- OBJECTIONS -->
+                <div x-show="tab === 'objections'" x-cloak>
+                    <h2 class="text-2xl font-semibold text-blue-700 mb-4">Overcoming Common Objections</h2>
+
+                    <div class="mb-6">
+                        <h3 class="font-bold text-lg mb-1">"There’s Nothing Better to Exchange Into"</h3>
+                        <ul class="list-disc pl-6 text-sm">
+                            <li>It’s about the same quality in a better tax climate.</li>
+                            <li>Same tenant, same rent, more income in Texas or Florida.</li>
+                            <li>Cap rates often higher in red states—better yield.</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h3 class="font-bold text-lg mb-1">"It’s Too Much Hassle"</h3>
+                        <ul class="list-disc pl-6 text-sm">
+                            <li>Professional help streamlines the process.</li>
+                            <li>60 days of effort = decades of increased income.</li>
+                            <li>What’s harder: one exchange or 20 years of taxes?</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- TALKING POINTS -->
+                <div x-show="tab === 'talking'" x-cloak>
+                    <h2 class="text-2xl font-semibold text-blue-700 mb-4">Key Talking Points</h2>
+
+                    <div class="mb-6">
+                        <h3 class="font-bold text-lg mb-1">Immediate Benefits</h3>
+                        <ul class="list-disc pl-6 text-sm">
+                            <li>"In Texas, you keep the full rent. In Oregon, they take 10%."</li>
+                            <li>"Same Starbucks, more cash flow—$1,485/month more."</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-6">
+                        <h3 class="font-bold text-lg mb-1">Long-Term Wealth Building</h3>
+                        <ul class="list-disc pl-6 text-sm">
+                            <li>"Redirect taxes into your wealth, not the state’s."</li>
+                            <li>"Give your heirs income-producing assets, not tax liabilities."</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h3 class="font-bold text-lg mb-1">Risk Mitigation</h3>
+                        <ul class="list-disc pl-6 text-sm">
+                            <li>"Future-proof your income from tax increases."</li>
+                            <li>"Red states often have better landlord protections."</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- ADVISOR APPROACH -->
+                <div x-show="tab === 'advisor'" x-cloak>
+                    <h2 class="text-2xl font-semibold text-blue-700 mb-4">The Professional Advisor's Approach</h2>
+                    <ul class="list-disc pl-6 text-sm">
+                        <li>Quantify what they’re losing each year.</li>
+                        <li>Simplify the 1031 process into bite-sized steps.</li>
+                        <li>Emphasize client control and long-term benefits.</li>
+                        <li>Frame it around family legacy and smarter holding strategies.</li>
+                    </ul>
+
+                    <h3 class="font-bold mt-6 mb-2">Client Action Steps</h3>
+                    <ol class="list-decimal pl-6 text-sm">
+                        <li>Calculate current state tax cost</li>
+                        <li>Estimate 10–20 year savings by moving</li>
+                        <li>Identify ideal NNN assets in low/no-tax states</li>
+                        <li>Contact a Qualified Intermediary</li>
+                        <li>Visit and evaluate target markets</li>
+                    </ol>
+                </div>
+
+                <!-- THE BOTTOM LINE -->
+                <div x-show="tab === 'bottom'" x-cloak>
+                    <h2 class="text-2xl font-semibold text-blue-700 mb-4">The Bottom Line</h2>
+                    <p class="mb-4">For long-term holders, exchanging into a no-income-tax state is a no-brainer. Even with Oregon’s Clawback provision, if they never sell, they win. And if they do sell, they’re no worse off—but enjoyed decades of tax-free income.</p>
+                    <p class="mb-4"><strong>The question isn't "Why exchange?" but "Why keep funding Oregon’s tax system when you could be building your own wealth?"</strong></p>
+                    <p class="text-blue-800 font-semibold">A 1031 exchange isn't a hassle—it's a strategic wealth-building tool with monthly dividends.</p>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
