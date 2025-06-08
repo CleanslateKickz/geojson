@@ -3,109 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GeoJSON Repository - CleanslateKickz</title>
+    <title>GeoJSON Repository & Real Estate Tools - CleanslateKickz</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.css">
+    <style>
+        .main-section { margin: 0 auto; max-width: 1150px; padding: 2rem 1rem; }
+        .dir-list { margin: 2.5rem 0 2rem 0; }
+        .dir-list h2 { margin-bottom: 1rem; color: #2c3e50; }
+        .dir-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap: 22px; }
+        .dir-card {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(44,62,80,0.11);
+            padding: 24px 18px 18px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-height: 160px;
+        }
+        .dir-card i { color: #3498db; margin-right: 7px; }
+        .dir-card h3 { font-size: 1.18rem; margin-bottom: 5px; }
+        .dir-card p { color: #555; font-size: 0.96rem; margin-bottom: 0; }
+        .dir-card a, .dir-card button {
+            display: inline-block; margin-top: 9px; color: #fff;
+            background: #3498db; border: none; border-radius: 5px;
+            padding: 7px 16px; text-decoration: none;
+            font-size: 0.96rem; cursor: pointer;
+            transition: background 0.15s;
+        }
+        .dir-card a:hover, .dir-card button:hover { background: #217dbb; }
+        .footer { text-align: center; margin-top: 3rem; font-size: 1rem; color: #888; }
+        .footer a { color: #3498db; }
+        @media (max-width: 650px) {
+            .main-section { padding: 1.2rem 0.5rem; }
+            .dir-card { padding: 14px 8px 12px 8px; }
+        }
+    </style>
 </head>
 <body>
     <header>
         <div class="container">
-            <h1><i class="fas fa-map-marked-alt"></i> GeoJSON Repository</h1>
-            <p>A collection of GeoJSON files for Leaflet map projects</p>
-            <div class="repo-stats">
-                <span id="repoStars"><i class="fas fa-star"></i> <span>-</span></span>
-                <span id="repoForks"><i class="fas fa-code-branch"></i> <span>-</span></span>
-                <span id="lastUpdate"><i class="fas fa-clock"></i> <span>Loading...</span></span>
-            </div>
+            <h1><i class="fas fa-map-marked-alt"></i> CleanslateKickz GeoJSON & Real Estate Tools</h1>
+            <p>Your hub for interactive maps, widgets, and real estate dashboards.</p>
         </div>
     </header>
 
-    <main class="container">
-        <div class="search-container">
-            <input type="text" id="searchInput" placeholder="Search files and widgets...">
-            <i class="fas fa-search search-icon"></i>
-            <div class="search-filters">
-                <select id="contentTypeFilter">
-                    <option value="all">All Content</option>
-                    <option value="geojson">GeoJSON Files</option>
-                    <option value="widgets">Widgets</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="widgets-section">
-            <h2><i class="fas fa-puzzle-piece"></i> Interactive Widgets</h2>
-            <div class="widgets-grid" id="widgetsGrid">
-                <div class="widget-card" data-widget="ArcGIS URL Formatter.html">
+    <main class="main-section">
+        <section class="dir-list">
+            <h2><i class="fas fa-puzzle-piece"></i> Widgets & Tools</h2>
+            <div class="dir-grid">
+                <div class="dir-card">
                     <h3><i class="fas fa-link"></i> ArcGIS URL Formatter</h3>
-                    <p>Format and validate ArcGIS URLs for your GeoJSON data</p>
-                    <button class="launch-widget">Launch Widget</button>
+                    <p>Format and validate ArcGIS FeatureServer/MapServer URLs for direct GeoJSON download.</p>
+                    <a href="Widgets/ArcGIS URL Formatter.html" target="_blank">Open Widget</a>
                 </div>
-                <div class="widget-card" data-widget="DynamicSizeTenant.html">
-                    <h3><i class="fas fa-expand"></i> Dynamic Size Tenant</h3>
-                    <p>Dynamic sizing tool for tenant mapping</p>
-                    <button class="launch-widget">Launch Widget</button>
+                <div class="dir-card">
+                    <h3><i class="fas fa-expand"></i> Dynamic Size Tenant Map</h3>
+                    <p>Interactive Leaflet/Cluster map with dynamic tenant logo scaling. <br><b>For Grist plugin users.</b></p>
+                    <a href="Widgets/DynamicSizeTenant.html" target="_blank">Open Widget</a>
                 </div>
-                <div class="widget-card" data-widget="TenantMap.html">
-                    <h3><i class="fas fa-map"></i> Tenant Map</h3>
-                    <p>Interactive tenant mapping interface</p>
-                    <button class="launch-widget">Launch Widget</button>
+                <div class="dir-card">
+                    <h3><i class="fas fa-map"></i> Tenant Map (Standard)</h3>
+                    <p>Minimalist clustered tenant map for Grist plugin integrations. Logo type scaling.</p>
+                    <a href="Widgets/TenantMap.html" target="_blank">Open Widget</a>
                 </div>
-                <div class="widget-card" data-widget="TenantMapCities.html">
-                    <h3><i class="fas fa-city"></i> Tenant Map Cities</h3>
-                    <p>City-specific tenant mapping tool</p>
-                    <button class="launch-widget">Launch Widget</button>
+                <div class="dir-card">
+                    <h3><i class="fas fa-table-cells-large"></i> Calculator</h3>
+                    <p>A simple on-page calculator for quick math.</p>
+                    <a href="Widgets/Calculator.html" target="_blank">Open Calculator</a>
+                </div>
+                <div class="dir-card">
+                    <h3><i class="fas fa-caret-down"></i> Drop-down Widget</h3>
+                    <p>Simple drop-down selection widget for Grist.</p>
+                    <a href="Widgets/drop-down-widget/index.html" target="_blank">Open Widget</a>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div class="categories">
-            <h2><i class="fas fa-folder"></i> Categories</h2>
-            <div class="category-grid" id="categoryGrid">
-                <!-- Categories will be dynamically added here -->
+        <section class="dir-list">
+            <h2><i class="fas fa-globe"></i> Interactive Maps & Dashboards</h2>
+            <div class="dir-grid">
+                <div class="dir-card">
+                    <h3><i class="fas fa-location-dot"></i> Property Lookup Map</h3>
+                    <p>Nationwide map: search addresses, get county info, instant tax/GIS links.<br>Easiest place to start for US property research.</p>
+                    <a href="HTML/national/index.html" target="_blank">Open National Map</a>
+                </div>
+                <div class="dir-card">
+                    <h3><i class="fas fa-image"></i> Images Gallery</h3>
+                    <p>Preview and copy-paste URLs for all images in the <b>/Images/</b> folder.</p>
+                    <a href="images.html" target="_blank">Open Gallery</a>
+                </div>
             </div>
-        </div>
+        </section>
 
-        <div class="recent-files">
+        <section class="dir-list">
+            <h2><i class="fas fa-folder-open"></i> 1031 Exchange Playbooks</h2>
+            <div class="dir-grid">
+                <div class="dir-card">
+                    <h3><i class="fas fa-book"></i> Oregon 1031 Strategic Guide (Claude)</h3>
+                    <p>Educational guide for exchanging Oregon properties into tax-free states.</p>
+                    <a href="HTML/1031-Exchange/Claude-OR-1031.html" target="_blank">Read Guide</a>
+                </div>
+                <div class="dir-card">
+                    <h3><i class="fas fa-book"></i> Oregon 1031 Strategic Guide (GPT v1)</h3>
+                    <p>Concise 1031 rationale and talking points.<br>Bootstrap accordion style.</p>
+                    <a href="HTML/1031-Exchange/GPT-1031-(1).html" target="_blank">Read Guide</a>
+                </div>
+                <div class="dir-card">
+                    <h3><i class="fas fa-book"></i> Oregon 1031 Strategic Guide (GPT v2)</h3>
+                    <p>Tab-based, Tailwind/AlpineJS version of the 1031 playbook.</p>
+                    <a href="HTML/1031-Exchange/GPT-1031-(2).html" target="_blank">Read Guide</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="dir-list">
+            <h2><i class="fas fa-database"></i> GeoJSON Files & Raw Data</h2>
+            <div class="dir-grid">
+                <div class="dir-card">
+                    <h3><i class="fas fa-folder-tree"></i> GeoJSON Directory</h3>
+                    <p>Repository structure for GeoJSON files. Browse in GitHub, or download raw files.</p>
+                    <a href="https://github.com/CleanslateKickz/geojson/tree/main/geojson" target="_blank">Browse on GitHub</a>
+                </div>
+                <div class="dir-card">
+                    <h3><i class="fas fa-clock"></i> Recent GeoJSONs</h3>
+                    <p>Browse and preview recent .geojson uploads in this repo.</p>
+                    <a href="#recentFiles" onclick="document.getElementById('recentFiles').scrollIntoView({behavior:'smooth'}); return false;">Show Recent Files</a>
+                </div>
+            </div>
+        </section>
+
+        <div id="recentFiles" class="files-list" style="margin-top:3rem;">
+            <!-- Will be dynamically loaded by main.js -->
             <h2><i class="fas fa-clock"></i> Recent Files</h2>
-            <div class="files-list" id="recentFiles">
-                <!-- Recent files will be dynamically added here -->
-                <div class="loading-placeholder">Loading repository contents...</div>
-            </div>
-        </div>
-
-        <!-- Widget Modal -->
-        <div class="widget-modal" id="widgetModal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 id="widgetTitle">Widget</h3>
-                    <span class="close-modal">&times;</span>
-                </div>
-                <div class="modal-body">
-                    <iframe id="widgetFrame" frameborder="0"></iframe>
-                </div>
-            </div>
-        </div>
-
-        <!-- Preview Modal -->
-        <div class="preview-modal" id="previewModal">
-            <div class="modal-content">
-                <span class="close-modal">&times;</span>
-                <h3>GeoJSON Preview</h3>
-                <div id="previewContent"></div>
-            </div>
+            <div class="loading-placeholder">Loading repository contents...</div>
         </div>
     </main>
 
-    <footer>
-        <div class="container">
-            <p>© 2025 CleanslateKickz | <a href="https://github.com/CleanslateKickz" target="_blank"><i class="fab fa-github"></i> GitHub</a></p>
-            <div class="api-status">
-                <span id="apiStatus"><i class="fas fa-circle"></i> API Status: Connected</span>
-            </div>
-        </div>
+    <footer class="footer">
+        <p>© 2025 <a href="https://github.com/CleanslateKickz" target="_blank">CleanslateKickz</a> &mdash; <a href="https://github.com/CleanslateKickz/geojson" target="_blank"><i class="fab fa-github"></i> Repo</a></p>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js"></script>
