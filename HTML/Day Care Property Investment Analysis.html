@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day Care Property Investment Analysis</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        :root {
+            --primary-blue: #007bff;
+            --light-blue: #e6f2ff;
+            --dark-grey: #34495e;
+            --medium-grey: #7f8c8d;
+            --light-grey: #f0f2f5;
+            --white: #ffffff;
+            --success-green: #28a745;
+            --danger-red: #dc3545;
+            --purple: #8e44ad;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 30px;
+            background-color: var(--light-grey);
+            color: var(--dark-grey);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--white);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: var(--dark-grey);
+            margin: 0;
+            padding: 0;
+        }
+        h1 { font-size: 2.2em; font-weight: 700; }
+        h2 { font-size: 1.3em; color: var(--medium-grey); font-weight: 400; margin-top: 5px; margin-bottom: 30px; }
+
+        .input-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 50px;
+            margin-bottom: 30px;
+            padding: 25px;
+            background-color: var(--light-blue);
+            border-radius: 12px;
+        }
+
+        .input-group-label { font-weight: 600; margin-bottom: 10px; font-size: 1.1em; text-align: center;}
+        .radio-options-container { display: flex; flex-direction: column; gap: 8px; }
+        .radio-option { display: flex; align-items: center; cursor: pointer; }
+        .radio-option input[type="radio"] { display: none; }
+        .radio-custom { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--primary-blue); position: relative; margin-right: 10px; transition: all 0.2s ease-in-out; flex-shrink: 0; }
+        .radio-custom::after { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--primary-blue); position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); transition: transform 0.2s ease-in-out; }
+        .radio-option input[type="radio"]:checked + .radio-custom { background-color: var(--white); }
+        .radio-option input[type="radio"]:checked + .radio-custom::after { transform: translate(-50%, -50%) scale(1); }
+        .radio-option span { font-size: 1em; font-weight: 500; }
+
+        .summary-card { background: #f8f9fa; border-radius: 12px; padding: 25px; margin-bottom: 40px; text-align: center; border: 1px solid #dee2e6; }
+        .summary-card h3 { font-size: 1.4em; color: var(--dark-grey); margin: 0 0 20px 0; font-weight: 600; }
+        .summary-metrics { display: flex; justify-content: space-around; flex-wrap: wrap; gap: 15px; }
+        .summary-metric-item { flex: 1; min-width: 160px; padding: 15px; background-color: var(--white); border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.04); }
+        .summary-metric-item .label { font-size: 0.9em; color: var(--medium-grey); margin-bottom: 5px; }
+        .summary-metric-item .value { font-size: 1.4em; font-weight: 700; color: var(--primary-blue); }
+        .value.positive { color: var(--success-green); }
+        .value.negative { color: var(--danger-red); }
+
+        .section-title { font-size: 1.6em; text-align: center; margin: 40px 0 25px 0; font-weight: 600; }
+        .charts-section { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 40px; }
+        .full-width-chart { grid-column: 1 / -1; }
+        .chart-container { background: var(--white); border-radius: 12px; padding: 25px; border: 1px solid #dee2e6; }
+        .chart-container h3 { font-size: 1.4em; text-align: center; margin: 0 0 20px 0; font-weight: 600; }
+        
+        /* THE FIX: Wrapper div to constrain the canvas */
+        .chart-wrapper {
+            position: relative;
+            height: 350px;
+            width: 100%;
+        }
+
+        .table-container { overflow-x: auto; border: 1px solid #dee2e6; border-radius: 12px; }
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th, .data-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #dee2e6; }
+        .data-table th { background-color: var(--dark-grey); color: var(--white); font-weight: 600; font-size: 0.8em; text-transform: uppercase; }
+        .data-table tbody tr:last-child td { border-bottom: none; }
+        .data-table tbody tr:nth-child(even) { background-color: #f8f9fa; }
+        .data-table .positive { color: var(--success-green); font-weight: 500; }
+        .data-table .negative { color: var(--danger-red); font-weight: 500; }
+
+        @media (max-width: 992px) { .charts-section { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) { .input-section { flex-direction: column; gap: 20px; } .summary-metrics { flex-direction: column; align-items: stretch; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Day Care Property Investment Analysis</h1>
+        <h2>Financing Options for 1031 Exchange Buyer & Operators</h2>
+
+        <div class="input-section">
+            <div class="input-group">
+                <div class="input-group-label">Select Purchase Price:</div>
+                <div class="radio-options-container">
+                    <label class="radio-option">
+                        <input type="radio" id="pp2373191" name="purchasePrice" value="PP_2373191" checked>
+                        <span class="radio-custom"></span>
+                        <span>$2,373,191 (Seller's Break-Even)</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" id="pp2500000" name="purchasePrice" value="PP_2500000">
+                        <span class="radio-custom"></span>
+                        <span>$2,500,000</span>
+                    </label>
+                </div>
+            </div>
+            <div class="input-group">
+                <div class="input-group-label">Select Monthly Rent:</div>
+                <div class="radio-options-container">
+                    <label class="radio-option"><input type="radio" name="monthlyRent" value="10000"><span class="radio-custom"></span><span>$10,000</span></label>
+                    <label class="radio-option"><input type="radio" name="monthlyRent" value="12000"><span class="radio-custom"></span><span>$12,000</span></label>
+                    <label class="radio-option"><input type="radio" name="monthlyRent" value="13500" checked><span class="radio-custom"></span><span>$13,500</span></label>
+                    <label class="radio-option"><input type="radio" name="monthlyRent" value="15000"><span class="radio-custom"></span><span>$15,000</span></label>
+                </div>
+            </div>
+        </div>
+
+        <div class="summary-card">
+            <h3 id="currentScenarioTitle"></h3>
+            <div class="summary-metrics">
+                <div class="summary-metric-item"><div class="label">Investor Purchase Price</div><div class="value" id="summaryPurchasePrice"></div></div>
+                <div class="summary-metric-item"><div class="label">Annual Cash Flow (CFBT)</div><div class="value" id="summaryAnnualCFBT"></div></div>
+                <div class="summary-metric-item"><div class="label">Cash-on-Cash Return</div><div class="value" id="summaryCashOnCash"></div></div>
+                <div class="summary-metric-item"><div class="label">Initial Down Payment</div><div class="value" id="summaryDownPayment"></div></div>
+            </div>
+        </div>
+
+        <div class="charts-section">
+            <div class="chart-container full-width-chart">
+                <h3>Cumulative Investor Position Over Time</h3>
+                <div class="chart-wrapper">
+                    <canvas id="cumulativePositionChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-container">
+                <h3>Annual Cash Flow (CFBT) Comparison</h3>
+                <div class="chart-wrapper">
+                    <canvas id="annualCFBTChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-container">
+                <h3>Cash-on-Cash Return Comparison</h3>
+                <div class="chart-wrapper">
+                    <canvas id="cashOnCashChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="section-title">Year-over-Year Amortization Details</h3>
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr><th>Year</th><th>Annual Rent</th><th>Debt Service</th><th>Annual CFBT</th><th>Interest Paid</th><th>Principal Paid</th><th>Loan Balance</th><th>Cumulative CFBT</th><th>Cumulative Principal</th></tr>
+                </thead>
+                <tbody id="amortizationTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const processedData = {"PP_2373191_Rent_10000":{"purchase_price":2373191,"monthly_rent":10000,"annual_rent":120000,"down_payment":711957.3,"loan_amount":1661233.7,"annual_debt_service":140895.05,"annual_cfbt":-20895.05,"cash_on_cash":-2.93,"amortization_schedule":[{"year":1,"starting_balance":1661233.7,"annual_debt_service":140895.05,"annual_interest_paid":115481.27,"annual_principal_paid":25413.78,"ending_balance":1635819.92},{"year":2,"starting_balance":1635819.92,"annual_debt_service":140895.05,"annual_interest_paid":113644.11,"annual_principal_paid":27250.94,"ending_balance":1608568.98},{"year":3,"starting_balance":1608568.98,"annual_debt_service":140895.05,"annual_interest_paid":111674.14,"annual_principal_paid":29220.91,"ending_balance":1579348.07},{"year":4,"starting_balance":1579348.07,"annual_debt_service":140895.05,"annual_interest_paid":109561.76,"annual_principal_paid":31333.29,"ending_balance":1548014.78},{"year":5,"starting_balance":1548014.78,"annual_debt_service":140895.05,"annual_interest_paid":107296.67,"annual_principal_paid":33598.38,"ending_balance":1514416.4},{"year":6,"starting_balance":1514416.4,"annual_debt_service":140895.05,"annual_interest_paid":104867.84,"annual_principal_paid":36027.21,"ending_balance":1478389.19},{"year":7,"starting_balance":1478389.19,"annual_debt_service":140895.05,"annual_interest_paid":102263.43,"annual_principal_paid":38631.62,"ending_balance":1439757.57},{"year":8,"starting_balance":1439757.57,"annual_debt_service":140895.05,"annual_interest_paid":99470.75,"annual_principal_paid":41424.3,"ending_balance":1398333.26},{"year":9,"starting_balance":1398333.26,"annual_debt_service":140895.05,"annual_interest_paid":96476.18,"annual_principal_paid":44418.87,"ending_balance":1353914.39},{"year":10,"starting_balance":1353914.39,"annual_debt_service":140895.05,"annual_interest_paid":93265.14,"annual_principal_paid":47629.91,"ending_balance":1306284.48}]},"PP_2373191_Rent_12000":{"purchase_price":2373191,"monthly_rent":12000,"annual_rent":144000,"down_payment":711957.3,"loan_amount":1661233.7,"annual_debt_service":140895.05,"annual_cfbt":3104.95,"cash_on_cash":0.44,"amortization_schedule":[{"year":1,"starting_balance":1661233.7,"annual_debt_service":140895.05,"annual_interest_paid":115481.27,"annual_principal_paid":25413.78,"ending_balance":1635819.92},{"year":2,"starting_balance":1635819.92,"annual_debt_service":140895.05,"annual_interest_paid":113644.11,"annual_principal_paid":27250.94,"ending_balance":1608568.98},{"year":3,"starting_balance":1608568.98,"annual_debt_service":140895.05,"annual_interest_paid":111674.14,"annual_principal_paid":29220.91,"ending_balance":1579348.07},{"year":4,"starting_balance":1579348.07,"annual_debt_service":140895.05,"annual_interest_paid":109561.76,"annual_principal_paid":31333.29,"ending_balance":1548014.78},{"year":5,"starting_balance":1548014.78,"annual_debt_service":140895.05,"annual_interest_paid":107296.67,"annual_principal_paid":33598.38,"ending_balance":1514416.4},{"year":6,"starting_balance":1514416.4,"annual_debt_service":140895.05,"annual_interest_paid":104867.84,"annual_principal_paid":36027.21,"ending_balance":1478389.19},{"year":7,"starting_balance":1478389.19,"annual_debt_service":140895.05,"annual_interest_paid":102263.43,"annual_principal_paid":38631.62,"ending_balance":1439757.57},{"year":8,"starting_balance":1439757.57,"annual_debt_service":140895.05,"annual_interest_paid":99470.75,"annual_principal_paid":41424.3,"ending_balance":1398333.26},{"year":9,"starting_balance":1398333.26,"annual_debt_service":140895.05,"annual_interest_paid":96476.18,"annual_principal_paid":44418.87,"ending_balance":1353914.39},{"year":10,"starting_balance":1353914.39,"annual_debt_service":140895.05,"annual_interest_paid":93265.14,"annual_principal_paid":47629.91,"ending_balance":1306284.48}]},"PP_2373191_Rent_13500":{"purchase_price":2373191,"monthly_rent":13500,"annual_rent":162000,"down_payment":711957.3,"loan_amount":1661233.7,"annual_debt_service":140895.05,"annual_cfbt":21104.95,"cash_on_cash":2.96,"amortization_schedule":[{"year":1,"starting_balance":1661233.7,"annual_debt_service":140895.05,"annual_interest_paid":115481.27,"annual_principal_paid":25413.78,"ending_balance":1635819.92},{"year":2,"starting_balance":1635819.92,"annual_debt_service":140895.05,"annual_interest_paid":113644.11,"annual_principal_paid":27250.94,"ending_balance":1608568.98},{"year":3,"starting_balance":1608568.98,"annual_debt_service":140895.05,"annual_interest_paid":111674.14,"annual_principal_paid":29220.91,"ending_balance":1579348.07},{"year":4,"starting_balance":1579348.07,"annual_debt_service":140895.05,"annual_interest_paid":109561.76,"annual_principal_paid":31333.29,"ending_balance":1548014.78},{"year":5,"starting_balance":1548014.78,"annual_debt_service":140895.05,"annual_interest_paid":107296.67,"annual_principal_paid":33598.38,"ending_balance":1514416.4},{"year":6,"starting_balance":1514416.4,"annual_debt_service":140895.05,"annual_interest_paid":104867.84,"annual_principal_paid":36027.21,"ending_balance":1478389.19},{"year":7,"starting_balance":1478389.19,"annual_debt_service":140895.05,"annual_interest_paid":102263.43,"annual_principal_paid":38631.62,"ending_balance":1439757.57},{"year":8,"starting_balance":1439757.57,"annual_debt_service":140895.05,"annual_interest_paid":99470.75,"annual_principal_paid":41424.3,"ending_balance":1398333.26},{"year":9,"starting_balance":1398333.26,"annual_debt_service":140895.05,"annual_interest_paid":96476.18,"annual_principal_paid":44418.87,"ending_balance":1353914.39},{"year":10,"starting_balance":1353914.39,"annual_debt_service":140895.05,"annual_interest_paid":93265.14,"annual_principal_paid":47629.91,"ending_balance":1306284.48}]},"PP_2373191_Rent_15000":{"purchase_price":2373191,"monthly_rent":15000,"annual_rent":180000,"down_payment":711957.3,"loan_amount":1661233.7,"annual_debt_service":140895.05,"annual_cfbt":39104.95,"cash_on_cash":5.49,"amortization_schedule":[{"year":1,"starting_balance":1661233.7,"annual_debt_service":140895.05,"annual_interest_paid":115481.27,"annual_principal_paid":25413.78,"ending_balance":1635819.92},{"year":2,"starting_balance":1635819.92,"annual_debt_service":140895.05,"annual_interest_paid":113644.11,"annual_principal_paid":27250.94,"ending_balance":1608568.98},{"year":3,"starting_balance":1608568.98,"annual_debt_service":140895.05,"annual_interest_paid":111674.14,"annual_principal_paid":29220.91,"ending_balance":1579348.07},{"year":4,"starting_balance":1579348.07,"annual_debt_service":140895.05,"annual_interest_paid":109561.76,"annual_principal_paid":31333.29,"ending_balance":1548014.78},{"year":5,"starting_balance":1548014.78,"annual_debt_service":140895.05,"annual_interest_paid":107296.67,"annual_principal_paid":33598.38,"ending_balance":1514416.4},{"year":6,"starting_balance":1514416.4,"annual_debt_service":140895.05,"annual_interest_paid":104867.84,"annual_principal_paid":36027.21,"ending_balance":1478389.19},{"year":7,"starting_balance":1478389.19,"annual_debt_service":140895.05,"annual_interest_paid":102263.43,"annual_principal_paid":38631.62,"ending_balance":1439757.57},{"year":8,"starting_balance":1439757.57,"annual_debt_service":140895.05,"annual_interest_paid":99470.75,"annual_principal_paid":41424.3,"ending_balance":1398333.26},{"year":9,"starting_balance":1398333.26,"annual_debt_service":140895.05,"annual_interest_paid":96476.18,"annual_principal_paid":44418.87,"ending_balance":1353914.39},{"year":10,"starting_balance":1353914.39,"annual_debt_service":140895.05,"annual_interest_paid":93265.14,"annual_principal_paid":47629.91,"ending_balance":1306284.48}]},"PP_2500000_Rent_10000":{"purchase_price":2500000,"monthly_rent":10000,"annual_rent":120000,"down_payment":750000.0,"loan_amount":1750000.0,"annual_debt_service":148423.63,"annual_cfbt":-28423.63,"cash_on_cash":-3.79,"amortization_schedule":[{"year":1,"starting_balance":1750000.0,"annual_debt_service":148423.63,"annual_interest_paid":121651.9,"annual_principal_paid":26771.73,"ending_balance":1723228.27},{"year":2,"starting_balance":1723228.27,"annual_debt_service":148423.63,"annual_interest_paid":119716.57,"annual_principal_paid":28707.07,"ending_balance":1694521.2},{"year":3,"starting_balance":1694521.2,"annual_debt_service":148423.63,"annual_interest_paid":117641.33,"annual_principal_paid":30782.3,"ending_balance":1663738.9},{"year":4,"starting_balance":1663738.9,"annual_debt_service":148423.63,"annual_interest_paid":115416.07,"annual_principal_paid":33007.56,"ending_balance":1630731.34},{"year":5,"starting_balance":1630731.34,"annual_debt_service":148423.63,"annual_interest_paid":113029.96,"annual_principal_paid":35393.68,"ending_balance":1595337.67},{"year":6,"starting_balance":1595337.67,"annual_debt_service":148423.63,"annual_interest_paid":110471.34,"annual_principal_paid":37952.29,"ending_balance":1557385.38},{"year":7,"starting_balance":1557385.38,"annual_debt_service":148423.63,"annual_interest_paid":107727.77,"annual_principal_paid":40695.86,"ending_balance":1516689.52},{"year":8,"starting_balance":1516689.52,"annual_debt_service":148423.63,"annual_interest_paid":104785.86,"annual_principal_paid":43637.77,"ending_balance":1473051.75},{"year":9,"starting_balance":1473051.75,"annual_debt_service":148423.63,"annual_interest_paid":101631.29,"annual_principal_paid":46792.35,"ending_balance":1426259.41},{"year":10,"starting_balance":1426259.41,"annual_debt_service":148423.63,"annual_interest_paid":98248.66,"annual_principal_paid":50174.97,"ending_balance":1376084.44}]},"PP_2500000_Rent_12000":{"purchase_price":2500000,"monthly_rent":12000,"annual_rent":144000,"down_payment":750000.0,"loan_amount":1750000.0,"annual_debt_service":148423.63,"annual_cfbt":-4423.63,"cash_on_cash":-0.59,"amortization_schedule":[{"year":1,"starting_balance":1750000.0,"annual_debt_service":148423.63,"annual_interest_paid":121651.9,"annual_principal_paid":26771.73,"ending_balance":1723228.27},{"year":2,"starting_balance":1723228.27,"annual_debt_service":148423.63,"annual_interest_paid":119716.57,"annual_principal_paid":28707.07,"ending_balance":1694521.2},{"year":3,"starting_balance":1694521.2,"annual_debt_service":148423.63,"annual_interest_paid":117641.33,"annual_principal_paid":30782.3,"ending_balance":1663738.9},{"year":4,"starting_balance":1663738.9,"annual_debt_service":148423.63,"annual_interest_paid":115416.07,"annual_principal_paid":33007.56,"ending_balance":1630731.34},{"year":5,"starting_balance":1630731.34,"annual_debt_service":148423.63,"annual_interest_paid":113029.96,"annual_principal_paid":35393.68,"ending_balance":1595337.67},{"year":6,"starting_balance":1595337.67,"annual_debt_service":148423.63,"annual_interest_paid":110471.34,"annual_principal_paid":37952.29,"ending_balance":1557385.38},{"year":7,"starting_balance":1557385.38,"annual_debt_service":148423.63,"annual_interest_paid":107727.77,"annual_principal_paid":40695.86,"ending_balance":1516689.52},{"year":8,"starting_balance":1516689.52,"annual_debt_service":148423.63,"annual_interest_paid":104785.86,"annual_principal_paid":43637.77,"ending_balance":1473051.75},{"year":9,"starting_balance":1473051.75,"annual_debt_service":148423.63,"annual_interest_paid":101631.29,"annual_principal_paid":46792.35,"ending_balance":1426259.41},{"year":10,"starting_balance":1426259.41,"annual_debt_service":148423.63,"annual_interest_paid":98248.66,"annual_principal_paid":50174.97,"ending_balance":1376084.44}]},"PP_2500000_Rent_13500":{"purchase_price":2500000,"monthly_rent":13500,"annual_rent":162000,"down_payment":750000.0,"loan_amount":1750000.0,"annual_debt_service":148423.63,"annual_cfbt":13576.37,"cash_on_cash":1.81,"amortization_schedule":[{"year":1,"starting_balance":1750000.0,"annual_debt_service":148423.63,"annual_interest_paid":121651.9,"annual_principal_paid":26771.73,"ending_balance":1723228.27},{"year":2,"starting_balance":1723228.27,"annual_debt_service":148423.63,"annual_interest_paid":119716.57,"annual_principal_paid":28707.07,"ending_balance":1694521.2},{"year":3,"starting_balance":1694521.2,"annual_debt_service":148423.63,"annual_interest_paid":117641.33,"annual_principal_paid":30782.3,"ending_balance":1663738.9},{"year":4,"starting_balance":1663738.9,"annual_debt_service":148423.63,"annual_interest_paid":115416.07,"annual_principal_paid":33007.56,"ending_balance":1630731.34},{"year":5,"starting_balance":1630731.34,"annual_debt_service":148423.63,"annual_interest_paid":113029.96,"annual_principal_paid":35393.68,"ending_balance":1595337.67},{"year":6,"starting_balance":1595337.67,"annual_debt_service":148423.63,"annual_interest_paid":110471.34,"annual_principal_paid":37952.29,"ending_balance":1557385.38},{"year":7,"starting_balance":1557385.38,"annual_debt_service":148423.63,"annual_interest_paid":107727.77,"annual_principal_paid":40695.86,"ending_balance":1516689.52},{"year":8,"starting_balance":1516689.52,"annual_debt_service":148423.63,"annual_interest_paid":104785.86,"annual_principal_paid":43637.77,"ending_balance":1473051.75},{"year":9,"starting_balance":1473051.75,"annual_debt_service":148423.63,"annual_interest_paid":101631.29,"annual_principal_paid":46792.35,"ending_balance":1426259.41},{"year":10,"starting_balance":1426259.41,"annual_debt_service":148423.63,"annual_interest_paid":98248.66,"annual_principal_paid":50174.97,"ending_balance":1376084.44}]},"PP_2500000_Rent_15000":{"purchase_price":2500000,"monthly_rent":15000,"annual_rent":180000,"down_payment":750000.0,"loan_amount":1750000.0,"annual_debt_service":148423.63,"annual_cfbt":31576.37,"cash_on_cash":4.21,"amortization_schedule":[{"year":1,"starting_balance":1750000.0,"annual_debt_service":148423.63,"annual_interest_paid":121651.9,"annual_principal_paid":26771.73,"ending_balance":1723228.27},{"year":2,"starting_balance":1723228.27,"annual_debt_service":148423.63,"annual_interest_paid":119716.57,"annual_principal_paid":28707.07,"ending_balance":1694521.2},{"year":3,"starting_balance":1694521.2,"annual_debt_service":148423.63,"annual_interest_paid":117641.33,"annual_principal_paid":30782.3,"ending_balance":1663738.9},{"year":4,"starting_balance":1663738.9,"annual_debt_service":148423.63,"annual_interest_paid":115416.07,"annual_principal_paid":33007.56,"ending_balance":1630731.34},{"year":5,"starting_balance":1630731.34,"annual_debt_service":148423.63,"annual_interest_paid":113029.96,"annual_principal_paid":35393.68,"ending_balance":1595337.67},{"year":6,"starting_balance":1595337.67,"annual_debt_service":148423.63,"annual_interest_paid":110471.34,"annual_principal_paid":37952.29,"ending_balance":1557385.38},{"year":7,"starting_balance":1557385.38,"annual_debt_service":148423.63,"annual_interest_paid":107727.77,"annual_principal_paid":40695.86,"ending_balance":1516689.52},{"year":8,"starting_balance":1516689.52,"annual_debt_service":148423.63,"annual_interest_paid":104785.86,"annual_principal_paid":43637.77,"ending_balance":1473051.75},{"year":9,"starting_balance":1473051.75,"annual_debt_service":148423.63,"annual_interest_paid":101631.29,"annual_principal_paid":46792.35,"ending_balance":1426259.41},{"year":10,"starting_balance":1426259.41,"annual_debt_service":148423.63,"annual_interest_paid":98248.66,"annual_principal_paid":50174.97,"ending_balance":1376084.44}]}};
+            
+            const radioInputs = document.querySelectorAll('input[type="radio"]');
+            const summaryTitle = document.getElementById('currentScenarioTitle');
+            const summaryPurchasePrice = document.getElementById('summaryPurchasePrice');
+            const summaryAnnualCFBT = document.getElementById('summaryAnnualCFBT');
+            const summaryCashOnCash = document.getElementById('summaryCashOnCash');
+            const summaryDownPayment = document.getElementById('summaryDownPayment');
+            const amortizationTableBody = document.getElementById('amortizationTableBody');
+            
+            let chartInstances = {};
+
+            const formatCurrency = (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val);
+            const formatPercentage = (val) => new Intl.NumberFormat('en-US', { style: 'percent', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val / 100);
+            
+            function updateUI() {
+                const selectedPP = document.querySelector('input[name="purchasePrice"]:checked').value;
+                const selectedRent = document.querySelector('input[name="monthlyRent"]:checked').value;
+                const currentKey = `${selectedPP}_Rent_${selectedRent}`;
+                const currentData = processedData[currentKey];
+
+                summaryTitle.textContent = `Current Scenario: ${formatCurrency(currentData.purchase_price)} PP / ${formatCurrency(currentData.monthly_rent)} Rent`;
+                summaryPurchasePrice.textContent = formatCurrency(currentData.purchase_price);
+                summaryAnnualCFBT.textContent = formatCurrency(currentData.annual_cfbt);
+                summaryAnnualCFBT.className = `value ${currentData.annual_cfbt >= 0 ? 'positive' : 'negative'}`;
+                summaryCashOnCash.textContent = formatPercentage(currentData.cash_on_cash);
+                summaryCashOnCash.className = `value ${currentData.cash_on_cash >= 0 ? 'positive' : 'negative'}`;
+                summaryDownPayment.textContent = formatCurrency(currentData.down_payment);
+
+                amortizationTableBody.innerHTML = '';
+                let cumulativeCF = 0, cumulativeP = 0;
+                currentData.amortization_schedule.forEach(year => {
+                    cumulativeCF += currentData.annual_cfbt;
+                    cumulativeP += year.annual_principal_paid;
+                    amortizationTableBody.innerHTML += `<tr><td>${year.year}</td><td>${formatCurrency(currentData.annual_rent)}</td><td>${formatCurrency(year.annual_debt_service)}</td><td class="${currentData.annual_cfbt >= 0 ? 'positive' : 'negative'}">${formatCurrency(currentData.annual_cfbt)}</td><td>${formatCurrency(year.annual_interest_paid)}</td><td>${formatCurrency(year.annual_principal_paid)}</td><td>${formatCurrency(year.ending_balance)}</td><td class="${cumulativeCF >= 0 ? 'positive' : 'negative'}">${formatCurrency(cumulativeCF)}</td><td class="positive">${formatCurrency(cumulativeP)}</td></tr>`;
+                });
+
+                createOrUpdateCharts(currentData);
+            }
+            
+            function createOrUpdateCharts(currentData) {
+                const rentLevels = { '10000': '$10K', '12000': '$12K', '13500': '$13.5K', '15000': '$15K' };
+                const chartLabels = Object.values(rentLevels);
+
+                const getChartOptions = (yLabel, formatter) => ({
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${formatter(ctx.raw)}` } } },
+                    scales: { y: { ticks: { callback: (val) => formatter(val) } } }
+                });
+
+                const cfbtData = { pp1: [], pp2: [] };
+                const cocData = { pp1: [], pp2: [] };
+                for (const rentKey in rentLevels) {
+                    cfbtData.pp1.push(processedData[`PP_2373191_Rent_${rentKey}`].annual_cfbt);
+                    cfbtData.pp2.push(processedData[`PP_2500000_Rent_${rentKey}`].annual_cfbt);
+                    cocData.pp1.push(processedData[`PP_2373191_Rent_${rentKey}`].cash_on_cash);
+                    cocData.pp2.push(processedData[`PP_2500000_Rent_${rentKey}`].cash_on_cash);
+                }
+
+                if (chartInstances.annualCFBT) chartInstances.annualCFBT.destroy();
+                chartInstances.annualCFBT = new Chart(document.getElementById('annualCFBTChart').getContext('2d'), {
+                    type: 'bar',
+                    data: { labels: chartLabels, datasets: [
+                        { label: '$2,373,191 PP', data: cfbtData.pp1, backgroundColor: '#28a745', borderRadius: 4 },
+                        { label: '$2,500,000 PP', data: cfbtData.pp2, backgroundColor: '#007bff', borderRadius: 4 }
+                    ]},
+                    options: getChartOptions('Annual Cash Flow', formatCurrency)
+                });
+                
+                if (chartInstances.cashOnCash) chartInstances.cashOnCash.destroy();
+                chartInstances.cashOnCash = new Chart(document.getElementById('cashOnCashChart').getContext('2d'), {
+                    type: 'bar',
+                    data: { labels: chartLabels, datasets: [
+                        { label: '$2,373,191 PP', data: cocData.pp1, backgroundColor: '#28a745', borderRadius: 4 },
+                        { label: '$2,500,000 PP', data: cocData.pp2, backgroundColor: '#007bff', borderRadius: 4 }
+                    ]},
+                    options: getChartOptions('Cash-on-Cash Return', formatPercentage)
+                });
+
+                const cumulativeLabels = ['Initial', ...currentData.amortization_schedule.map(d => `Year ${d.year}`)];
+                const cumulativeCFData = [0];
+                const cumulativePData = [0];
+                let runningCF = 0, runningP = 0;
+                currentData.amortization_schedule.forEach(year => {
+                    runningCF += currentData.annual_cfbt;
+                    runningP += year.annual_principal_paid;
+                    cumulativeCFData.push(runningCF);
+                    cumulativePData.push(runningP);
+                });
+
+                if (chartInstances.cumulative) chartInstances.cumulative.destroy();
+                chartInstances.cumulative = new Chart(document.getElementById('cumulativePositionChart').getContext('2d'), {
+                    type: 'line',
+                    data: { labels: cumulativeLabels, datasets: [
+                        { label: 'Cumulative Cash Flow', data: cumulativeCFData, borderColor: '#28a745', backgroundColor: 'rgba(40, 167, 69, 0.1)', fill: true, tension: 0.3 },
+                        { label: 'Cumulative Principal Paid', data: cumulativePData, borderColor: '#007bff', backgroundColor: 'rgba(0, 123, 255, 0.1)', fill: true, tension: 0.3 }
+                    ]},
+                    options: getChartOptions('Cumulative Amount', formatCurrency)
+                });
+            }
+            
+            radioInputs.forEach(radio => radio.addEventListener('change', updateUI));
+            updateUI();
+        });
+    </script>
+</body>
+</html>
