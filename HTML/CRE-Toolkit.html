@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -188,6 +187,11 @@
         #cashFlowInputsContainer .input-group label { flex-shrink: 0; width: 80px; margin-bottom: 0; }
         .remove-cf-btn { background: var(--danger-red); color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; font-weight: bold; }
 
+        /* Currency Formatting for inputs */
+        .input-currency {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
     </style>
 </head>
 <body>
@@ -209,15 +213,15 @@
                     <h4>Inputs</h4>
                     <div class="input-group">
                         <label for="sa-purchase-price">Original Purchase Price ($)</label>
-                        <input type="number" id="sa-purchase-price" placeholder="e.g., 1,500,000" value="1500000">
+                        <input type="text" inputmode="decimal" class="input-currency" id="sa-purchase-price" placeholder="e.g., 1,500,000" value="1,500,000">
                     </div>
                     <div class="input-group">
                         <label for="sa-purchase-date">Original Purchase Date</label>
-                        <input type="date" id="sa-purchase-date" value="2018-01-01">
+                        <input type="date" id="sa-purchase-date" value="2018-01-01" autocomplete="off">
                     </div>
                     <div class="input-group">
                         <label for="sa-annual-rent">Initial Annual Rent ($)</label>
-                        <input type="number" id="sa-annual-rent" placeholder="e.g., 90,000" value="90000">
+                        <input type="text" inputmode="decimal" class="input-currency" id="sa-annual-rent" placeholder="e.g., 90,000" value="90,000">
                     </div>
                     <div class="input-group">
                         <label for="sa-rent-increase">Annual Rent Increase (%)</label>
@@ -262,7 +266,7 @@
                     <h4>Lease Start & End Date</h4>
                     <div class="input-group">
                         <label for="qc-start-date">Start Date</label>
-                        <input type="date" id="qc-start-date" class="input-green">
+                        <input type="date" id="qc-start-date" class="input-green" autocomplete="off">
                     </div>
                     <div class="input-group">
                         <label for="qc-months"># of Months</label>
@@ -282,11 +286,11 @@
                     <h4>Solve for Cap Rate</h4>
                     <div class="input-group">
                         <label for="qc-noi-cap">NOI ($)</label>
-                        <input type="number" id="qc-noi-cap" class="input-green" placeholder="e.g., 250,000">
+                        <input type="text" inputmode="decimal" class="input-green input-currency" id="qc-noi-cap" placeholder="e.g., 250,000">
                     </div>
                     <div class="input-group">
                         <label for="qc-price-cap">Price ($)</label>
-                        <input type="number" id="qc-price-cap" class="input-green" placeholder="e.g., 4,166,667">
+                        <input type="text" inputmode="decimal" class="input-green input-currency" id="qc-price-cap" placeholder="e.g., 4,166,667">
                     </div>
                     <div class="input-group">
                         <label for="qc-cap-rate">Cap Rate (%)</label>
@@ -298,7 +302,7 @@
                     <h4>Solve for Total Price</h4>
                      <div class="input-group">
                         <label for="qc-noi-price">NOI ($)</label>
-                        <input type="number" id="qc-noi-price" class="input-green" placeholder="e.g., 250,000">
+                        <input type="text" inputmode="decimal" class="input-green input-currency" id="qc-noi-price" placeholder="e.g., 250,000">
                     </div>
                     <div class="input-group">
                         <label for="qc-cap-rate-price">Cap Rate (%)</label>
@@ -319,7 +323,7 @@
                     <h4>Cash Flow Inputs</h4>
                     <div class="input-group">
                         <label for="ia-investment">Initial Investment (Year 0)</label>
-                        <input type="number" id="ia-investment" placeholder="Must be a negative number" value="-100000">
+                        <input type="text" inputmode="decimal" class="input-currency" id="ia-investment" placeholder="Must be a negative number" value="-100,000">
                     </div>
                     <div id="cashFlowInputsContainer">
                          <!-- Dynamic cash flow inputs go here -->
@@ -351,11 +355,11 @@
                     <h4>IRR & Cash on Cash</h4>
                      <div class="input-group">
                         <label for="ia-total-cash">Total Cash Invested ($)</label>
-                        <input type="number" id="ia-total-cash" placeholder="e.g., 300,000" value="300000">
+                        <input type="text" inputmode="decimal" class="input-currency" id="ia-total-cash" placeholder="e.g., 300,000" value="300,000">
                     </div>
                     <div class="input-group">
                         <label for="ia-cfbt">Annual Pre-Tax Cash Flow (Year 1)</label>
-                        <input type="number" id="ia-cfbt" placeholder="e.g., 25,000" value="25000">
+                        <input type="text" inputmode="decimal" class="input-currency" id="ia-cfbt" placeholder="e.g., 25,000" value="25,000">
                     </div>
                     <div class="summary-metric-item" style="margin-top: 20px;"><div class="label">Internal Rate of Return (IRR)</div><div class="value" id="ia-irr-result">-</div></div>
                     <div class="summary-metric-item" style="margin-top: 10px;"><div class="label">Cash on Cash Return</div><div class="value" id="ia-coc-result">-</div></div>
@@ -372,39 +376,130 @@
         </div>
 
     </div>
-
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // --- GLOBAL HELPERS & CONSTANTS ---
-            const SUCCESS_GREEN = '#28a745';
-            const DANGER_RED = '#dc3545';
-            
-            const formatCurrency = (val, digits = 0) => {
-                if (isNaN(val) || val === null) return '-';
-                return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: digits, maximumFractionDigits: digits }).format(val);
+        // --- GLOBAL HELPERS & CONSTANTS ---
+        const SUCCESS_GREEN = '#28a745';
+        const DANGER_RED = '#dc3545';
+
+        // Format a number as currency, no symbol if raw is true
+        function formatCurrency(val, digits = 0, raw = false) {
+            if (isNaN(val) || val === null) return '-';
+            let n = Math.abs(val);
+            let parts = n.toFixed(digits).split(".");
+            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            let out = (val < 0 ? "-" : "") + parts[0];
+            if (digits > 0) out += "." + parts[1];
+            if (!raw) out = "$" + out;
+            return out;
+        }
+        function parseCurrency(str) {
+            if (typeof str === "number") return str;
+            if (!str) return 0;
+            return parseFloat(String(str).replace(/[^0-9.-]+/g,"")) || 0;
+        }
+        const formatPercent = (val, digits = 2) => {
+            if (isNaN(val) || val === null) return '-';
+             return new Intl.NumberFormat('en-US', { style: 'percent', minimumFractionDigits: digits, maximumFractionDigits: digits }).format(val);
+        }
+
+        // --- TABS NAVIGATION ---
+        document.querySelectorAll('.tab-btn').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(item => item.classList.remove('active'));
+                tab.classList.add('active');
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+
+        // --- CHART INSTANCES ---
+        let chartInstances = {};
+
+        // --- DATE PASTE SUPPORT ---
+        function parseClipboardDate(str) {
+            if (!str) return null;
+            // Try parsing various common date formats
+            let date;
+            // Try native Date constructor
+            date = new Date(str);
+            if (!isNaN(date.getTime())) return date;
+            // Try US format: MMMM D, YYYY
+            let m = str.match(/^([A-Za-z]+)\s+(\d{1,2}),\s*(\d{4})$/);
+            if (m) {
+                date = new Date(`${m[1]} ${m[2]}, ${m[3]}`);
+                if (!isNaN(date.getTime())) return date;
             }
-            const formatPercent = (val, digits = 2) => {
-                if (isNaN(val) || val === null) return '-';
-                 return new Intl.NumberFormat('en-US', { style: 'percent', minimumFractionDigits: digits, maximumFractionDigits: digits }).format(val);
+            // Try YYYY-MM-DD
+            m = str.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+            if (m) {
+                date = new Date(`${m[1]}-${m[2]}-${m[3]}`);
+                if (!isNaN(date.getTime())) return date;
             }
+            // Try MM/DD/YYYY
+            m = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+            if (m) {
+                date = new Date(`${m[3]}-${m[1].padStart(2,'0')}-${m[2].padStart(2,'0')}`);
+                if (!isNaN(date.getTime())) return date;
+            }
+            return null;
+        }
 
-            // --- TABS NAVIGATION ---
-            const tabs = document.querySelectorAll('.tab-btn');
-            const tabContents = document.querySelectorAll('.tab-content');
+        function dateToYMD(date) {
+            return date.toISOString().slice(0,10);
+        }
 
-            tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    tabs.forEach(item => item.classList.remove('active'));
-                    tab.classList.add('active');
-
-                    const target = document.querySelector(`#${tab.dataset.tab}`);
-                    tabContents.forEach(content => content.classList.remove('active'));
-                    target.classList.add('active');
+        // For all input[type="date"], support pasting common date strings
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('input[type="date"]').forEach(dateInput => {
+                dateInput.addEventListener('paste', function(e) {
+                    let text = (e.clipboardData || window.clipboardData).getData('text');
+                    let parsed = parseClipboardDate(text);
+                    if (parsed) {
+                        e.preventDefault();
+                        this.value = dateToYMD(parsed);
+                        this.dispatchEvent(new Event('input', {bubbles:true}));
+                    }
                 });
             });
+        });
 
-            // --- CHART INSTANCES ---
-            let chartInstances = {};
+        // --- CURRENCY FORMATTING FOR INPUTS ---
+        function attachCurrencyFormat(input) {
+            // On blur, format value as currency
+            input.addEventListener('blur', function() {
+                let n = parseCurrency(this.value);
+                this.value = n ? formatCurrency(n, 0, true) : "";
+            });
+            // On focus, remove formatting to allow editing
+            input.addEventListener('focus', function() {
+                let n = parseCurrency(this.value);
+                this.value = n ? n : "";
+            });
+            // On input, always store plain numeric string
+            input.addEventListener('input', function() {
+                // Remove formatting, keep only numbers, commas, minus, dot
+                let raw = this.value.replace(/[^0-9.,-]/g,"");
+                // Optionally remove commas live
+                raw = raw.replace(/,/g,"");
+                this.value = raw;
+            });
+            // On paste, allow pasting formatted or plain numbers
+            input.addEventListener('paste', function(e) {
+                setTimeout(() => {
+                    let n = parseCurrency(this.value);
+                    this.value = n ? formatCurrency(n, 0, true) : "";
+                }, 0);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Attach currency formatting to all .input-currency fields
+            document.querySelectorAll('.input-currency').forEach(input => {
+                attachCurrencyFormat(input);
+                // Format value on load
+                let n = parseCurrency(input.value);
+                input.value = n ? formatCurrency(n, 0, true) : "";
+            });
 
             // --- TAB 1: SELLER'S ANALYSIS ---
             const saPurchasePrice = document.getElementById('sa-purchase-price');
@@ -421,9 +516,9 @@
             const saTableBody = document.getElementById('sa-table-body');
 
             saCalculateBtn.addEventListener('click', () => {
-                const purchasePrice = parseFloat(saPurchasePrice.value);
+                const purchasePrice = parseCurrency(saPurchasePrice.value);
                 const purchaseDate = new Date(saPurchaseDate.value);
-                let annualRent = parseFloat(saAnnualRent.value);
+                let annualRent = parseCurrency(saAnnualRent.value);
                 const rentIncrease = parseFloat(saRentIncrease.value) / 100;
 
                 if (isNaN(purchasePrice) || isNaN(purchaseDate.getTime()) || isNaN(annualRent)) {
@@ -482,7 +577,7 @@
                         datasets: [{
                             label: 'Cumulative Cash Flow',
                             data: chartData,
-                            borderColor: SUCCESS_GREEN, // <-- FIXED: Using JS constant
+                            borderColor: SUCCESS_GREEN,
                             backgroundColor: 'rgba(40, 167, 69, 0.1)',
                             fill: true,
                             tension: 0.3
@@ -518,7 +613,7 @@
                     qcEndDate.value = '';
                     return;
                 }
-                const startDate = new Date(startDateVal + "T00:00:00"); // Avoid timezone issues
+                const startDate = new Date(startDateVal + "T00:00:00");
                 const months = parseInt(qcMonths.value) || 0;
                 const years = parseInt(qcYears.value) || 0;
 
@@ -536,10 +631,14 @@
             qcYears.addEventListener('input', () => { qcMonths.value = ''; calculateLeaseEnd(); });
             qcStartDate.addEventListener('input', calculateLeaseEnd);
 
+            // Currency formatting for quick calcs
+            [qcNoiCap, qcPriceCap, qcNoiPrice].forEach(input => {
+                attachCurrencyFormat(input);
+            });
 
             function calculateCapRate() {
-                const noi = parseFloat(qcNoiCap.value);
-                const price = parseFloat(qcPriceCap.value);
+                const noi = parseCurrency(qcNoiCap.value);
+                const price = parseCurrency(qcPriceCap.value);
                 if (noi > 0 && price > 0) {
                     const capRate = (noi / price);
                     qcCapRate.value = formatPercent(capRate, 2);
@@ -550,7 +649,7 @@
             [qcNoiCap, qcPriceCap].forEach(el => el.addEventListener('input', calculateCapRate));
 
             function calculatePrice() {
-                const noi = parseFloat(qcNoiPrice.value);
+                const noi = parseCurrency(qcNoiPrice.value);
                 const capRate = parseFloat(qcCapRatePrice.value) / 100;
                 if (noi > 0 && capRate > 0) {
                     const price = noi / capRate;
@@ -585,16 +684,19 @@
                 div.className = 'input-group';
                 div.innerHTML = `
                     <label for="cf-${cashFlowCounter}">Year ${cashFlowInputsContainer.children.length + 1} CF</label>
-                    <input type="number" class="cash-flow-input" id="cf-${cashFlowCounter}" placeholder="e.g., 20000" value="${value}">
+                    <input type="text" inputmode="decimal" class="cash-flow-input input-currency" id="cf-${cashFlowCounter}" placeholder="e.g., 20000" value="${formatCurrency(parseCurrency(value),0,true)}">
                     <button type="button" class="remove-cf-btn" title="Remove">X</button>
                 `;
+                let input = div.querySelector('input');
+                attachCurrencyFormat(input);
+
                 cashFlowInputsContainer.appendChild(div);
                 div.querySelector('.remove-cf-btn').addEventListener('click', () => {
                     div.remove();
                     updateCashFlowLabels();
                     recalculateInvestmentAnalysis();
                 });
-                div.querySelector('input').addEventListener('input', recalculateInvestmentAnalysis);
+                input.addEventListener('input', recalculateInvestmentAnalysis);
             }
 
             function updateCashFlowLabels() {
@@ -611,10 +713,9 @@
             // Add some default inputs
             [20000, 22000, 24000, 26000, 150000].forEach(cf => addCashFlowInput(cf));
 
-
             function getCashFlows() {
-                const initialInvestment = parseFloat(iaInvestment.value) || 0;
-                const subsequentFlows = Array.from(document.querySelectorAll('.cash-flow-input')).map(input => parseFloat(input.value) || 0);
+                const initialInvestment = parseCurrency(iaInvestment.value) || 0;
+                const subsequentFlows = Array.from(document.querySelectorAll('.cash-flow-input')).map(input => parseCurrency(input.value) || 0);
                 return [initialInvestment, ...subsequentFlows];
             }
 
@@ -643,7 +744,6 @@
                     npvAtUpper = calculateNPV(cashFlows, upperBound);
                 }
                 if(npvAtLower * npvAtUpper > 0) return null; // No bracket found
-
 
                 let midRate, npv;
                 for (let i = 0; i < maxIterations; i++) {
@@ -682,14 +782,13 @@
                 return Math.pow(fv_pos_flows / pv_neg_flows, 1 / n) - 1;
             }
 
-
             function recalculateInvestmentAnalysis() {
                 const cashFlows = getCashFlows();
                 const discountRate = parseFloat(iaDiscountRate.value) / 100;
                 const reinvestRate = parseFloat(iaReinvestRate.value) / 100;
                 const financeRate = parseFloat(iaFinanceRate.value) / 100;
-                const totalCash = parseFloat(iaTotalCash.value);
-                const firstYearCF = parseFloat(iaCfbt.value);
+                const totalCash = parseCurrency(iaTotalCash.value);
+                const firstYearCF = parseCurrency(iaCfbt.value);
 
                 // NPV
                 const npv = calculateNPV(cashFlows, discountRate);
@@ -733,10 +832,20 @@
                 iaTableBody.innerHTML = tableHtml;
             }
 
-            [iaInvestment, iaDiscountRate, iaReinvestRate, iaFinanceRate, iaTotalCash, iaCfbt].forEach(el => {
+            [
+                iaInvestment, iaDiscountRate, iaReinvestRate, iaFinanceRate, iaTotalCash, iaCfbt
+            ].forEach(el => {
                 el.addEventListener('input', recalculateInvestmentAnalysis);
             });
             
+            // Attach currency formatting to investment tab
+            [iaInvestment, iaTotalCash, iaCfbt].forEach(input => {
+                attachCurrencyFormat(input);
+                // Format value on load
+                let n = parseCurrency(input.value);
+                input.value = n ? formatCurrency(n, 0, true) : "";
+            });
+
             // Initial calculation for all tabs
             recalculateInvestmentAnalysis();
         });
