@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Property Comp Breakdown</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom font for a clean, modern look */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Styling for details that use a border-left for visual separation */
+        .detail-item {
+            @apply flex items-center mb-1;
+        }
+        .detail-label {
+            @apply text-sm text-gray-500 font-medium w-32 min-w-[120px] pr-2;
+        }
+        .detail-value {
+            @apply text-base font-semibold text-gray-800 flex-1;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4 sm:p-6 md:p-8">
+    <div class="max-w-6xl mx-auto bg-white p-6 sm:p-8 md:p-10 rounded-xl shadow-lg">
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-8 text-center">
+            Property Comp Breakdown
+        </h1>
+
+        <!-- Data parsing logic in JavaScript -->
+        <script>
+            const rawData = `
+| IMG | Tenant | Price | $/SF | Cap | Date | Address | Building Size | Year Built | Days On Market | Notes |
+| <https://ahprd1cdn.csgpimgs.com/i2/vOvQWAP3h8fV3IsKCCDSeJciLNHnGyh1mCNuCe5C5DQ/117/image.jpg> | Sherwin-Williams | $3,800,000 | $1,085.71 | 5.61% | Apr 11, 2025 | 17810 Canyon Rd E, Tacoma, WA 98446 | 3,500 SF | 2024 | 267 | The property was generating a net operating income of $213,180 and a cap rate of 5.61%. The tenant, Sherwin Williams, signed a 10 year deal in 2024 with multiple extension options. The buyer was part of a 1031 tax deferred exchange. |
+| <https://ahprd1cdn.csgpimgs.com/i2/JaWvR0LlC1CczRUFAkx8hiuoXI7tIZVc-YW5Wkp6oj0/117/image.jpg> | Sherwin-Williams | $2,026,500 | $533.29 | 5.20% | Feb 13, 2025 | 9920 NE 117th Ave, Vancouver, WA 98662 | 3,800 SF | 2021 | 139 | On February 13th, 2025 MAJ Development sold the 3,800-square-foot retail building to a private individual for $2,026,500 or about $533 per square foot. The property was fully occupied at time of sale, yielding a net operating income of $105,378 and a cap rate of 5.20%. |
+| <https://ahprd1cdn.csgpimgs.com/i2/Lp-2wuukBLmnnfekJLI0iWrJJvj5YIEi8tMbntpRxVU/117/image.jpg> | Sherwin-Williams | $2,880,000 | $823 | 5.25% | Dec 20, 2024 | 8930 SW Old Tualatin Sherwood Rd, Tualatin, OR 97062 | 3,500 SF | 2019 | | |
+| <https://ahprd1cdn.csgpimgs.com/i2/6L2dHy3AIlT4VJWXlqMurM0BCekG2FGTVsbXCwjsI9c/117/image.jpg> | Sherwin-Williams | $4,200,000 | $1,200.00 | 5.46% | Sep 16, 2024 | 2602 Milton Way, Milton, WA 98354 | 3,500 SF | 2024 | | Milton Way Associates LLC successfully sold a 3,500 SF general retail building to a private individual for $4,200,000, reflecting a price of $1,200 per square foot. The property was sold at its initial asking price of $4,200,000, and was 100% occupied at the time of sale. This transaction represented a build-to-suit opportunity, with the property remaining on the market for just 74 days with an in-place cap rate of 5.46% and an estimated NOI of $229,320 |
+| <https://ahprd1cdn.csgpimgs.com/i2/3lXmjLrWUjr5v-tWEBpUYlMb2Y0tzlPGhNjTo-x_HBI/117/image.jpg> | Sherwin-Williams | $1,050,000 | $218.11 | 6.31% | Sep 10, 2024 | 3936 W Clearwater Ave, Kennewick, WA 99336 | 4,814 SF | 1987 | | A private investor sold this 4,814 square foot retail property to a private investor for $1,050,000 or $218.11 per square foot. The property was fully occupied at time of sale. The seller was motivated to divest the property as they were moving out of market. The buyer was motivated to invest in the property as the tenant was below market rent with a short term lease so there was a possibility to renegotiate. This transaction had a triple net investment tenant, generating a NOI of $66,255 and a cap rate of 6.31% |
+| <https://ahprd1cdn.csgpimgs.com/i2/usOwjLuaygM4oelzYGiEommQj1Hc4ttAL4OGdpgD4Ok/116/image.jpg> | Sherwin-Williams | $3,350,000 | $837.50 | 5.25% | Jan 9, 2024 | 1500 SE East Devils Lake Rd, Lincoln City, OR 97367 | 4,000 SF | 2023 | 172 | Seth Singerman sold this 4,000 square foot retail building to Carla Fillippone for $3,350,000 or $837.50 per square foot. All information in the comparable has been verified by the seller and buyer broker. |
+| <https://ahprd1cdn.csgpimgs.com/i2/Fc7EBw-SS_LTvORCAdxpooFQT_iGQNXnLcl1lhORAio/117/image.jpg> | Sherwin-Williams | $1,525,000 | $381.25 | 6.29% | Sep 15, 2023 | 5211 100th St SW, Lakewood, WA 98499 | 4,000 SF | 2015 | | |
+| [](https://ahprd1cdn.csgpimgs.com/i2/_R9-kRZbEtGmFby5ZDzrRy65-64GhjH8ZBtoe1HNXHc/117/image.jpg)<https://ahprd1cdn.csgpimgs.com/i2/_R9-kRZbEtGmFby5ZDzrRy65-64GhjH8ZBtoe1HNXHc/117/image.jpg> | Starbucks | $2,933,000 | $1,356.61 | 5.25% | May 19, 2025 | 903 Douglas Munroe Blvd, Cle Elum, WA 98922 | 2,162 SF | 2024 | | A private individual sold this 2,162 square foot retail building to the 2004 Diane E Pierson Revocable Trust for $2,933,000, or $1,356.61 per square foot. The property was a triple net lease to Starbucks at the time of sale. The property was on the market for five (5) months, with an initial asking price of $2,933,000. The property delivered in 2024. Starbucks began a 10 year NNN lease on 4/1/2024. The lease features 10% rental increases every five (5) years and four 5-year renewal options. The in-place net operating income for 2025 was reported to be $153,983, yielding an actual cap rate of 5.25%. |
+| [](https://ahprd1cdn.csgpimgs.com/i2/P8uveba9Epu3piwAHl2TfUIrxczO4_1GyC8UKQPr8aU/117/image.jpg)<https://ahprd1cdn.csgpimgs.com/i2/P8uveba9Epu3piwAHl2TfUIrxczO4_1GyC8UKQPr8aU/117/image.jpg> | Starbucks | $2,260,000 | $462.36 | 6% | Jan 3, 2025 | 500 Valley Mall Dr, Wenatchee, WA 98802 | 4,888 SF | 2000 | | A private individual sold this 4,888 square foot retail building to a private individual for $2,260,000 or $462.36 per square foot. 1031 Exchange |
+| [](https://ahprd1cdn.csgpimgs.com/i2/vJRdqBgV3GvSohAJA_iQqwBEz4kLeYf_NpvGl8Pc2RA/117/image.png)<https://ahprd1cdn.csgpimgs.com/i2/vJRdqBgV3GvSohAJA_iQqwBEz4kLeYf_NpvGl8Pc2RA/117/image.png> | Starbucks | $3,187,500 | $1,242.69 | 4.86% | Dec 16, 2024 | 1895 Franklin Blvd, Eugene, OR 97403 | 2,565 SF | 2000, Renov 2016 | | A private individual sold this 2,565 square foot to another private individual for an undisclosed price. The property was fully leased to Starbucks on a triple net lease deal. The net operating income for 2024 was reported to be $155,182, yielding a 4.86% cap rate. The property was on the market for 103 days with the initial asking price of $3,450,000. The information in this comparable has been verified by listing broker. |
+| [](https://ahprd1cdn.csgpimgs.com/i2/iIUAUTDo8jZgNFRVM4n2GkXCARTSiB9Q8i2rDS_zA-I/116/image.jpg)<https://ahprd1cdn.csgpimgs.com/i2/iIUAUTDo8jZgNFRVM4n2GkXCARTSiB9Q8i2rDS_zA-I/116/image.jpg> | Starbucks | $1,620,000 | $803.17 | 4.94% | Oct 23, 2020 | 1270 N Bayshore Dr, Coos Bay, OR 97420 ･ Coos Bay Village | 2,017 SF | 2020 | | |
+| [](https://ahprd1cdn.csgpimgs.com/i2/iIUAUTDo8jZgNFRVM4n2GkXCARTSiB9Q8i2rDS_zA-I/116/image.jpg)<https://ahprd1cdn.csgpimgs.com/i2/iIUAUTDo8jZgNFRVM4n2GkXCARTSiB9Q8i2rDS_zA-I/116/image.jpg> | Starbucks | $1,500,000 | $743.68 | 5.34% | Nov 21, 2024 | 1270 N Bayshore Dr, Coos Bay, OR 97420 ･ Coos Bay Village | 2,017 SF | 2020 | | Gregory Drobot sold this 2,017 SF building to Stephanie Teazis for $1,500,000 or $743.68 per SF. The property was on the market for 4 months, with an initial asking price of $1,500,000. The in-place net operating income was reported to be $80,100, yielding an actual cap rate of 5.34%. |
+| [](https://ahprd1cdn.csgpimgs.com/i2/yZrdlm1eC73eaTGhZ_dkAekca7AgAMc8qESwBB2O_Xk/117/image.jpg)<https://ahprd1cdn.csgpimgs.com/i2/yZrdlm1eC73eaTGhZ_dkAekca7AgAMc8qESwBB2O_Xk/117/image.jpg> | Starbucks | $1,700,000 | $971.43 | 5.25% | Nov 12, 2024 | 4700 Avery Ln SE, Lacey, WA 98503 | 1,750 SF | 2008 | | |
+| [](https://ahprd1cdn.csgpimgs.com/m2/nAfkjsUOwtOBB9SmSvDdFcrDOMPpd7oAQi7I7VYR-z204dXS0raCbcpy62FjqGyST4CZA8wzvc0UiB13P5ehNWQAz6pfkpsQAF_heKTL-NY/H180W270/image.jpg)<https://ahprd1cdn.csgpimgs.com/m2/nAfkjsUOwtOBB9SmSvDdFcrDOMPpd7oAQi7I7VYR-z204dXS0raCbcpy62FjqGyST4CZA8wzvc0UiB13P5ehNWQAz6pfkpsQAF_heKTL-NY/H180W270/image.jpg> | Starbucks | $2,065,000 | $214.57 | 4.80% | Sep 18, 2019 | 2408 NW 9th St, Corvallis, OR 97330 | 9,624 SF | 1978, Renov 2019 | | Per correspondence with seller and public record, the 3,330 square foot retail building located at 2408 NW 9th St. Corvallis, OR 97330 sold in an investment sale for $2,065,000 on 9/18/19. Sale conditions include investment triple net. The property had a 4.8% cap rate at the time of sale and Starbucks is in the 1st year of a 10 year lease in the building. |
+| [](https://ahprd1cdn.csgpimgs.com/m2/nAfkjsUOwtOBB9SmSvDdFcrDOMPpd7oAQi7I7VYR-z204dXS0raCbcpy62FjqGyST4CZA8wzvc0UiB13P5ehNWQAz6pfkpsQAF_heKTL-NY/H180W270/image.jpg)<https://ahprd1cdn.csgpimgs.com/m2/nAfkjsUOwtOBB9SmSvDdFcrDOMPpd7oAQi7I7VYR-z204dXS0raCbcpy62FjqGyST4CZA8wzvc0UiB13P5ehNWQAz6pfkpsQAF_heKTL-NY/H180W270/image.jpg> | Starbucks | $2,080,000 | $216.13 | 4.77% | Oct 31, 2024 | 2408 NW 9th St, Corvallis, OR 97330 | 9,624 SF | 1978, Renov 2019 | | |
+| [](https://ahprd1cdn.csgpimgs.com/i2/vPiPyDlp_nuqgin2yd6UbI4ww9QEXGzTPl1k0exK5qY/117/image.jpg)<https://ahprd1cdn.csgpimgs.com/i2/vPiPyDlp_nuqgin2yd6UbI4ww9QEXGzTPl1k0exK5qY/117/image.jpg> | Starbucks | $1,700,000 | $850.00 | 5.89% | Jul 8, 2024 | 2372 W Main St, Medford, OR 97501 ･ Jackson Creek Center | 2,000 SF | 2020, Renovated 2021 | | 1031 exchange was a sale condition that effectd the price of the sale. The in-place net operating income was reported to be $100,000 yielding an actual cap rate of 5.89%. |
+| [](https://ahprd1cdn.csgpimgs.com/i2/7KcL7_yUNwMtah_6xHL49lG-8Bu9CTSXNub52PIzMY4/117/image.jpg)<https://ahprd1cdn.csgpimgs.com/i2/7KcL7_yUNwMtah_6xHL49lG-8Bu9CTSXNub52PIzMY4/117/image.jpg> | Starbucks | $3,000,000 | $1,248.96 | 5.39% | Jun 27, 2024 | 9862 16th Ave SW, Seattle, WA 98106 | 2,402 SF | 2017 | | Multiple offers were secured for this new construction Starbucks with an eight year lease in place, allowing the property to go under contract for $60,000 above the asking price. |
+| [](https://ahprd1cdn.csgpimgs.com/i2/E4URprk3U8aQztG7v6zXryROZV0nUOtqehVLrIlKWSM/117/image.jpg)<https://ahprd1cdn.csgpimgs.com/i2/E4URprk3U8aQztG7v6zXryROZV0nUOtqehVLrIlKWSM/117/image.jpg> | Starbucks | $2,015,000 | $305.30 | 5.31% | Jun 14, 2024 | 1250 Basin St SW, Ephrata, WA 98823 | 6,600 SF | 2022 | | A private entity sold this 6,600 SF retail building to another private entity for $2,015,000. The property was on the market for 159 days, with an initial asking price of $2,040,000. According to Marcus & Millichap press release, this property has eight and one-half years left on the lease term. The buyer exchanged from a management-intensive asset and increased their cash flow by 30%. |
+| [](https://ahprd1cdn.csgpimgs.com/i2/XPIvWCy35_cBpKUFG2xUA8swb4UckBFV-AyfSbxSx2I/117/image.jpg)<https://ahprd1cdn.csgpimgs.com/i2/XPIvWCy35_cBpKUFG2xUA8swb4UckBFV-AyfSbxSx2I/117/image.jpg> | Starbucks | $2,590,000 | $1,210.28 | 5.41% | Apr 10, 2024 | 31330 S Highway 213, Molalla, OR 97038 | 2,140 SF | 2023 | | A private investeor sold this 2,140 SF retail building to a private investor for $2,590,000, or $1210.28 per SF. The property is 100% occupied wtht a triple net lease to Starbucks. The property was on market for five month, with an initial asking price of $2,620,000. The newly delivered Starbucks opened in November 2023 and has a ten year lease with 10% escalations every five years. The net operating income for 2024 was report to be $140,170, yielding an actual cap rate of 5.41%. |
+| [](https://ahprd1cdn.csgpimgs.com/i2/VbwpUQwSUhv-pHKnq2SiatQaFCccwMJjWxEmLh6pacE/117/image.png)<https://ahprd1cdn.csgpimgs.com/i2/VbwpUQwSUhv-pHKnq2SiatQaFCccwMJjWxEmLh6pacE/117/image.png> | Starbucks | $3,100,000 | $457.02 | 5.99% | Dec 13, 2023 | 1925 N Wenatchee Ave, Wenatchee, WA 98801 | 6,783 SF | 2005 | | A private investor sold a 6,783 square foot retail building to private investors for $3,100,000 or $457 per square foot. The property was 100% occupied at the time of sale. The property was on the market from 10/4/2023 to 12/13/2023, with an initial asking price of $3,150,000. The reported 2023 NOI for the property was $185,7785, yielding a 5.99% cap rate. |
+| [](https://ahprd1cdn.csgpimgs.com/i2/MSzZxqILYoaXNa1FnAjwOZ5yt4DDvY94fLJX_x0F_Qg/117/image.jpg)<https://ahprd1cdn.csgpimgs.com/i2/MSzZxqILYoaXNa1FnAjwOZ5yt4DDvY94fLJX_x0F_Qg/117/image.jpg> | Starbucks | $3,730,000 | $645.66 | 5.50% | Aug 11, 2023 | 3401 SE 192nd Ave, Vancouver, WA 98683 ･ Riverstone Marketplace | 5,777 SF | 2007 | | Killian Pacific sold this 5,777 SF general retail building to Bruce Kayser for $3,730,000, or $645.66 per SF. The property is zoned CC, and was fully leased at the time of sale. The class B building was constructed in 2007 and is situated on 0.91 acres of land. The property was on the market for around 2 months, with an initial asking price of $3,730,000. The in place net operating income for 2022 was reported to be $205,267, yielding an actual cap rate of 5.5%. |
+            `;
+
+            // Function to parse the raw data string into a structured array of objects
+            function parseData(dataString) {
+                const lines = dataString.trim().split('\n');
+                const headersLine = lines[0].trim();
+                const dataRows = lines.slice(2);
+
+                const headers = headersLine.split('|').map(h => h.trim()).filter(h => h !== '');
+
+                const parsedProperties = [];
+
+                dataRows.forEach(rowString => {
+                    let imgUrl = '';
+                    let remainingRowString = rowString;
+
+                    // Find the index of the second pipe to correctly isolate the IMG column content
+                    const firstPipeIndex = remainingRowString.indexOf('|');
+                    const secondPipeIndex = remainingRowString.indexOf('|', firstPipeIndex + 1);
+
+                    if (firstPipeIndex !== -1 && secondPipeIndex !== -1) {
+                        const imgColumnContent = remainingRowString.substring(firstPipeIndex + 1, secondPipeIndex).trim(); // Get content between first and second pipe
+                        remainingRowString = remainingRowString.substring(secondPipeIndex); // The rest of the string, starting from the second pipe
+
+                        const urlMatch = imgColumnContent.match(/https?:\/\/[^\s<>\])]+/);
+                        if (urlMatch) {
+                            imgUrl = urlMatch[0];
+                        }
+                    }
+
+                    // Now split the remaining string by '|' and process values
+                    let values = remainingRowString.split('|').map(v => v.trim());
+
+                    // Remove empty strings from start/end due to splitting on leading/trailing pipes
+                    if (values.length > 0 && values[0] === '') {
+                        values = values.slice(1);
+                    }
+                    if (values.length > 0 && values[values.length - 1] === '') {
+                        values = values.slice(0, -1);
+                    }
+
+                    // Add the extracted image URL as the first value (corresponding to the 'IMG' header)
+                    values.unshift(imgUrl);
+
+                    // Ensure the number of values matches the number of headers
+                    while (values.length < headers.length) {
+                        values.push('');
+                    }
+                    values = values.slice(0, headers.length); // Truncate if too many values
+
+                    const property = {};
+                    headers.forEach((header, index) => {
+                        property[header] = values[index];
+                    });
+                    parsedProperties.push(property);
+                });
+                return parsedProperties;
+            }
+
+            const properties = parseData(rawData);
+
+            // Group properties by tenant
+            const groupedProperties = properties.reduce((acc, property) => {
+                const tenant = property.Tenant;
+                if (!acc[tenant]) {
+                    acc[tenant] = [];
+                }
+                acc[tenant].push(property);
+                return acc;
+            }, {});
+
+            // Function to render property details
+            function renderProperty(property) {
+                // Helper to safely get value and handle empty strings
+                const getDetail = (label, key) => property[key] && property[key].trim() !== '' ? `
+                    <div class="detail-item">
+                        <span class="detail-label">${label}:</span>
+                        <span class="detail-value">${property[key]}</span>
+                    </div>
+                ` : '';
+
+                return `
+                    <div class="bg-white rounded-xl shadow-md p-4 sm:p-6 mb-6 flex flex-col md:flex-row items-start md:items-center transform hover:scale-105 transition-transform duration-300 ease-in-out">
+                        ${property.IMG ? `
+                            <div class="md:w-1/3 w-full mb-4 md:mb-0 md:mr-6 flex-shrink-0">
+                                <img src="${property.IMG}" alt="${property.Tenant} Property" class="w-full h-48 object-cover rounded-lg shadow-sm" onerror="this.onerror=null;this.src='https://placehold.co/600x400/E0E7FF/4338CA?text=Image+Not+Found';">
+                            </div>
+                        ` : `
+                            <div class="md:w-1/3 w-full mb-4 md:mb-0 md:mr-6 flex-shrink-0">
+                                <div class="w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500 text-center">No Image Available</div>
+                            </div>
+                        `}
+                        <div class="md:w-2/3 w-full">
+                            <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-1">
+                                ${property.Price || 'N/A'} | ${property.Cap || 'N/A'}
+                            </h3>
+                            <p class="text-lg text-gray-600 mb-3">${property.Address || 'N/A'}</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4 text-gray-700">
+                                ${getDetail('$/SF', '$/SF')}
+                                ${getDetail('Sale Date', 'Date')}
+                                ${getDetail('Building Size', 'Building Size')}
+                                ${getDetail('Year Built', 'Year Built')}
+                                ${getDetail('Days On Market', 'Days On Market')}
+                            </div>
+                            ${property.Notes && property.Notes.trim() !== '' ? `
+                                <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-md shadow-sm">
+                                    <p class="text-sm font-medium text-blue-800">Notes:</p>
+                                    <p class="text-sm text-blue-700 mt-1">${property.Notes}</p>
+                                </div>
+                            ` : `
+                                <div class="bg-gray-50 border-l-4 border-gray-300 p-4 rounded-md shadow-sm">
+                                    <p class="text-sm font-medium text-gray-600">No specific notes available for this property.</p>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Render the grouped properties
+            document.addEventListener('DOMContentLoaded', () => {
+                const appContainer = document.getElementById('app-container');
+                let htmlContent = '';
+
+                for (const tenant in groupedProperties) {
+                    htmlContent += `
+                        <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mt-10 mb-6 border-b-2 border-gray-300 pb-2">
+                            ${tenant} Properties
+            </h2>
+                        <div class="grid grid-cols-1 gap-6">
+                    `;
+                    groupedProperties[tenant].forEach(property => {
+                        htmlContent += renderProperty(property);
+                    });
+                    htmlContent += `</div>`;
+                }
+
+                appContainer.innerHTML = htmlContent;
+            });
+        </script>
+
+        <div id="app-container">
+            <!-- Properties will be rendered here by JavaScript -->
+        </div>
+    </div>
+    </body>
+</html>
