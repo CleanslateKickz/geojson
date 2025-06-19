@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Current Listings - Great Opportunities</title>
+        <style>
+            /* Universal Box-Sizing */
+            *, *::before, *::after {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            /* Body Styles */
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                line-height: 1.6; /* Adjusted for better readability */
+                color: #333;
+                background-color: #f0f2f5; 
+                scroll-behavior: smooth; 
+                font-size: 16px; 
+            }
+
+            /* Header Section */
+            .header {
+                background: linear-gradient(135deg, #1a2b3c 0%, #4a86b8 100%); 
+                color: white;
+                padding: 15px 20px; /* Reduced padding for mobile */
+                text-align: center;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.15); /* Softer shadow */
+                /* position: sticky; REMOVED for mobile by default */
+                /* top: 0; REMOVED for mobile by default */
+                /* z-index: 1000; REMOVED for mobile by default */
+            }
+
+            .header h1 {
+                font-size: 1.5rem; /* Reduced for mobile */
+                margin-bottom: 5px; /* Reduced margin */
+                letter-spacing: 0.5px;
+            }
+
+            .header p {
+                font-size: 0.9rem; /* Reduced for mobile */
+                opacity: 0.9;
+            }
+
+            /* Main Container */
+            .container {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 20px 15px; /* Adjusted padding */
+            }
+
+            /* Summary Section */
+            .summary {
+                background: linear-gradient(45deg, #e6f2ff, #f3f9ff); 
+                padding: 20px; 
+                border-radius: 10px; /* Slightly less rounded */
+                margin-bottom: 25px; /* Adjusted margin */
+                box-shadow: 0 3px 15px rgba(0,0,0,0.08); 
+                text-align: center;
+                color: #2c3e50;
+                border: 1px solid #cce0f0; 
+            }
+
+            .summary p {
+                font-size: 1.1rem; 
+                margin-bottom: 6px; 
+                font-weight: 500;
+            }
+             .summary p:last-child {
+                margin-bottom: 0;
+            }
+
+            .summary strong {
+                font-weight: 600; /* Slightly less bold */
+                color: #007bff; 
+            }
+
+            .summary span {
+                font-weight: 600; /* Slightly less bold */
+                color: #28a745; 
+            }
+
+            /* Filters */
+            .filters {
+                background: #fff;
+                padding: 15px; 
+                border-radius: 10px; 
+                margin-bottom: 25px; 
+                box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
+                border: 1px solid #dde2e7; 
+            }
+
+            .filters h3 {
+                text-align: center;
+                margin-bottom: 12px; 
+                color: #2c3e50;
+                font-size: 1.2rem; 
+            }
+
+            .filter-actions {
+                display: flex;
+                justify-content: space-around; /* Distribute space for horizontal buttons */
+                gap: 8px; 
+                flex-wrap: nowrap; /* Prevent wrapping on mobile for filter buttons */
+            }
+
+            .filter-actions button {
+                padding: 9px 12px; 
+                font-size: 0.85rem; 
+                border: none;
+                border-radius: 6px; /* Softer radius */
+                cursor: pointer;
+                transition: background-color 0.3s ease, box-shadow 0.3s ease;
+                font-weight: 500;
+                flex-basis: calc(33.333% - 6px); /* Aim for 3 buttons per row, adjusting for gap */
+                max-width: 150px; /* Max width for buttons */
+                text-align: center;
+                white-space: nowrap; /* Prevent text wrapping inside button */
+            }
+
+
+            .filter-button {
+                background-color: #3498db; 
+                color: white;
+            }
+            .filter-button:hover {
+                background-color: #2980b9; 
+                box-shadow: 0 1px 6px rgba(0,0,0,0.1);
+            }
+
+            #reset-filters {
+                background-color: #6c757d; 
+                color: white;
+            }
+
+            #reset-filters:hover {
+                background-color: #5a6268; 
+                box-shadow: 0 1px 6px rgba(0,0,0,0.1);
+            }
+            
+            /* Modal Styles */
+            .modal {
+                display: none; 
+                position: fixed; 
+                z-index: 1001; 
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                overflow: auto; 
+                background-color: rgba(0,0,0,0.65); /* Slightly darker overlay */
+                padding-top: 50px; /* Adjusted padding */
+            }
+
+            .modal-content {
+                background-color: #fefefe;
+                margin: 5% auto; 
+                padding: 20px; 
+                border: 1px solid #ccc; /* Lighter border */
+                width: 90%;
+                max-width: 380px; 
+                border-radius: 8px; 
+                box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+                animation: fadeInModal 0.25s ease-out;
+            }
+
+            @keyframes fadeInModal {
+                from { opacity: 0; transform: translateY(-15px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+
+            .modal-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                border-bottom: 1px solid #e0e0e0; /* Lighter separator */
+                padding-bottom: 10px; 
+                margin-bottom: 12px; 
+            }
+
+            .modal-header h4 {
+                margin: 0;
+                font-size: 1.1rem; 
+                color: #333;
+            }
+
+            .close-button {
+                color: #999; /* Lighter close button */
+                font-size: 24px; 
+                font-weight: bold;
+                cursor: pointer;
+                transition: color 0.2s;
+            }
+
+            .close-button:hover,
+            .close-button:focus {
+                color: #222; /* Darker on hover */
+                text-decoration: none;
+            }
+
+            .modal-body label {
+                display: block;
+                margin-bottom: 5px; 
+                font-weight: 500; /* Lighter label weight */
+                color: #444; /* Darker gray for label */
+                font-size: 0.85rem; 
+            }
+
+            .modal-body input[type="number"] {
+                width: 100%;
+                padding: 9px; 
+                margin-bottom: 12px; 
+                border: 1px solid #ddd; /* Lighter border */
+                border-radius: 5px; 
+                font-size: 0.9rem; 
+                transition: border-color 0.2s ease;
+            }
+             .modal-body input[type="number"]:focus {
+                border-color: #3498db;
+                outline: none;
+            }
+
+            .modal-footer {
+                display: flex;
+                justify-content: flex-end; 
+                gap: 8px; /* Reduced gap */
+                padding-top: 10px; 
+                border-top: 1px solid #e0e0e0; /* Lighter separator */
+                margin-top: 6px; 
+            }
+
+            .modal-footer button {
+                padding: 7px 15px; 
+                font-size: 0.85rem; 
+                border: none;
+                border-radius: 5px; 
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+                font-weight: 500;
+            }
+
+            .apply-filter-btn {
+                background-color: #28a745; 
+                color: white;
+            }
+            .apply-filter-btn:hover {
+                background-color: #218838;
+            }
+
+            .cancel-filter-btn {
+                background-color: #dc3545; 
+                color: white;
+            }
+             .cancel-filter-btn:hover {
+                background-color: #c82333;
+            }
+
+
+            /* Property Grid */
+            .property-grid {
+                display: grid;
+                gap: 20px; 
+                grid-template-columns: 1fr; 
+            }
+
+            /* Property Card */
+            .property-card {
+                background: white;
+                border-radius: 12px; 
+                overflow: hidden;
+                box-shadow: 0 3px 12px rgba(0,0,0,0.07); 
+                transition: transform 0.25s ease, box-shadow 0.25s ease;
+                display: flex; 
+                flex-direction: column;
+                border: 1px solid #e8e8e8; /* Lighter border */
+            }
+
+            .property-card:hover {
+                transform: translateY(-4px); 
+                box-shadow: 0 6px 20px rgba(0,0,0,0.1); 
+            }
+
+            /* Image Carousel Styles */
+            .property-image-carousel {
+                position: relative;
+                width: 100%;
+                height: 220px; /* Optimized for mobile */
+                overflow: hidden;
+                background-color: #f0f2f5; /* Match body background */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .property-image-carousel img.carousel-image { 
+                width: 100%;
+                height: 100%;
+                object-fit: cover; 
+                display: block;
+                transition: opacity 0.4s ease-in-out; 
+            }
+
+            .property-image-carousel .no-image,
+            .property-image-carousel .image-error {
+                position: absolute; 
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: #e9ecef; /* Simpler background */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #6c757d;
+                font-size: 1rem; 
+                text-align: center;
+                padding: 10px;
+            }
+            .property-image-carousel .image-error {
+                background: #ffebeb; /* Simpler error background */
+                color: #dc3545;
+                font-weight: 500;
+            }
+
+            .carousel-button {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                background: rgba(0,0,0,0.35); 
+                color: white;
+                border: none;
+                padding: 8px 6px; 
+                cursor: pointer;
+                font-size: 1.5rem; 
+                line-height: 1;
+                z-index: 10;
+                border-radius: 4px; 
+                transition: background 0.2s ease, opacity 0.2s ease;
+                opacity: 0.6; /* Always slightly visible on mobile for discoverability */
+            }
+            .property-image-carousel:hover .carousel-button {
+                opacity: 0.8; 
+            }
+            .carousel-button:hover {
+                background: rgba(0,0,0,0.55);
+                opacity: 1;
+            }
+
+
+            .carousel-button.prev {
+                left: 6px; 
+            }
+
+            .carousel-button.next {
+                right: 6px; 
+            }
+
+            .property-image-carousel[data-image-count="0"] .carousel-button,
+            .property-image-carousel[data-image-count="1"] .carousel-button {
+                display: none !important; 
+            }
+
+
+            .carousel-indicators {
+                position: absolute;
+                bottom: 6px; 
+                left: 50%;
+                transform: translateX(-50%);
+                display: flex;
+                gap: 5px; 
+                z-index: 10;
+            }
+
+            .indicator-dot {
+                width: 8px; 
+                height: 8px; 
+                background-color: rgba(255,255,255,0.5); 
+                border-radius: 50%;
+                cursor: pointer;
+                transition: background-color 0.2s ease, transform 0.2s ease;
+                border: 1px solid rgba(0,0,0,0.1); 
+            }
+
+            .indicator-dot.active {
+                background-color: #3498db; 
+                transform: scale(1.1); 
+                border-color: #2980b9; /* Darker border for active dot */
+            }
+
+            /* Property Content */
+            .property-content {
+                padding: 15px; 
+                display: flex;
+                flex-direction: column;
+                flex-grow: 1; 
+            }
+
+            .property-name {
+                font-size: 1.15rem; 
+                font-weight: 600; 
+                color: #2c3e50;
+                margin-bottom: 6px; 
+                line-height: 1.25; /* Tighter line height */
+            }
+
+            .property-address {
+                font-size: 0.9rem; 
+                font-weight: 400; 
+                color: #555; 
+                margin-bottom: 15px; 
+                line-height: 1.3; /* Tighter line height */
+            }
+
+            /* Compact Property Details for Mobile */
+            .property-details {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr); /* Ensures two columns */
+                gap: 8px; /* Reduced gap */
+                margin-bottom: 15px; 
+            }
+
+            .detail-item {
+                background: #f9f9f9; /* Very light gray */
+                padding: 8px; 
+                border-radius: 6px; 
+                text-align: center;
+                border: 1px solid #efefef; /* Very light border */
+                box-shadow: none; 
+            }
+
+            .detail-label {
+                font-size: 0.7rem; /* Further reduced for very compact view */
+                color: #777; /* Lighter gray for less emphasis */
+                text-transform: uppercase;
+                letter-spacing: 0.4px; 
+                margin-bottom: 3px; 
+                font-weight: 500; 
+            }
+
+            .detail-value {
+                font-size: 0.95rem; /* Reduced for compactness */
+                font-weight: 600;
+                color: #333; /* Slightly darker for value */
+                word-break: break-word; /* Changed from break-all for better readability */
+            }
+
+            .price {
+                color: #27ae60 !important; 
+                font-size: 1rem !important; 
+            }
+
+            .cap-rate {
+                color: #e74c3c !important; 
+            }
+            
+            /* Investment Details / Sale Notes */
+            .investment-details {
+                background: #fdfdfd; /* Almost white */
+                padding: 12px; 
+                border-radius: 6px; 
+                border-left: 3px solid #3498db; /* Thinner accent border */
+                margin-top: auto; 
+                box-shadow: 0 1px 3px rgba(0,0,0,0.03); 
+            }
+
+            .investment-details h4 {
+                color: #333; /* Darker heading */
+                margin-bottom: 6px; 
+                font-size: 0.9rem; 
+                text-transform: uppercase;
+                letter-spacing: 0.4px; 
+                border-bottom: 1px solid #f0f0f0; /* Lighter separator */
+                padding-bottom: 6px; 
+            }
+
+            .investment-details ul {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }
+
+            .investment-details li {
+                position: relative;
+                padding-left: 18px; 
+                margin-bottom: 5px; 
+                font-size: 0.8rem; 
+                color: #555; /* Slightly darker text */
+                line-height: 1.4; 
+            }
+
+            .investment-details li::before {
+                content: '•';
+                color: #3498db;
+                font-weight: bold;
+                position: absolute;
+                left: 0;
+                top: -1px; 
+                font-size: 1.1em; 
+            }
+          
+            /* Footer */
+            .footer {
+                text-align: center;
+                padding: 25px 15px; 
+                color: #777; /* Lighter footer text */
+                font-size: 0.85rem; 
+                border-top: 1px solid #e8e8e8; /* Lighter border */
+                margin-top: 25px; 
+                background-color: #fafafa; /* Very light footer background */
+            }
+
+            /* Responsive Adjustments */
+            @media (max-width: 380px) { /* Targeting very small screens for filter button stacking */
+                .filter-actions {
+                    flex-direction: column; /* Stack buttons if screen is too narrow */
+                    align-items: stretch;
+                }
+                .filter-actions button {
+                    flex-basis: auto; /* Reset basis */
+                    width: 100%; /* Full width when stacked */
+                }
+                .property-details {
+                    grid-template-columns: 1fr; /* Stack details on very small screens if needed */
+                }
+            }
+
+
+            @media (min-width: 769px) {
+                /* Header becomes sticky on larger screens */
+                .header {
+                    position: sticky;
+                    top: 0;
+                    z-index: 1000;
+                    padding: 25px 20px; /* Restore padding */
+                }
+                .header h1 {
+                    font-size: 2.2rem; /* Restore font size */
+                }
+                .header p {
+                    font-size: 1.2rem; /* Restore font size */
+                }
+                .container {
+                    padding: 30px;
+                }
+                .summary {
+                    padding: 25px;
+                    margin-bottom: 40px;
+                }
+                .summary p {
+                    font-size: 1.2rem;
+                }
+                 .filters {
+                    padding: 20px;
+                    margin-bottom: 30px;
+                }
+                .filters h3 {
+                    font-size: 1.3rem;
+                }
+                .filter-actions {
+                    flex-wrap: nowrap; /* Ensure they stay horizontal on larger screens */
+                }
+                .filter-actions button {
+                    padding: 10px 15px;
+                    font-size: 0.9rem;
+                    flex-grow: 0; /* Don't force grow if not needed */
+                }
+
+                /* On larger screens, property details can have more columns if desired */
+                .property-details {
+                    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* More flexible columns */
+                    gap: 15px; /* Slightly larger gap */
+                }
+                .detail-label {
+                    font-size: 0.8rem;
+                }
+                .detail-value {
+                    font-size: 1.05rem;
+                }
+                .price {
+                    font-size: 1.15rem !important;
+                }
+
+                .property-grid {
+                    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); 
+                    gap: 30px;
+                }
+                .property-image-carousel {
+                    height: 250px;
+                }
+                 .carousel-button {
+                    opacity: 0; /* Hide on desktop until hover */
+                }
+                .property-content {
+                    padding: 20px;
+                }
+                .property-name {
+                    font-size: 1.3rem;
+                }
+                .property-address {
+                    font-size: 1rem;
+                }
+                 .investment-details {
+                    padding: 15px;
+                }
+                .investment-details li {
+                    font-size: 0.85rem;
+                }
+
+
+            }
+             @media (min-width: 1024px) {
+                .property-grid {
+                    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+                }
+                 .filter-actions button {
+                    padding: 12px 24px;
+                    font-size: 1rem;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>Current Listings | Great Opportunities</h1>
+        </div>
+
+        <div class="container">
+            <div class="summary">
+                <p><strong id="totalPropertiesSummary">Loading...</strong></p>
+                <p>Cap Rates ranging from <span id="capRateRangeSummary">Loading...</span></p>
+            </div>
+
+            <div class="filters">
+                <h3>Filter Properties</h3>
+                <div class="filter-actions">
+                    <button id="open-price-filter-modal" class="filter-button">Filter by Price</button>
+                    <button id="open-cap-rate-filter-modal" class="filter-button">Filter by Cap Rate</button>
+                    <button id="reset-filters">Reset Filters</button>
+                </div>
+            </div>
+
+            <!-- Price Filter Modal -->
+            <div id="price-filter-modal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4>Price Range Filter</h4>
+                        <span class="close-button" data-modal-id="price-filter-modal">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <label for="min-price">Minimum Price:</label>
+                        <input type="number" id="min-price" placeholder="e.g., 500000">
+                        <label for="max-price">Maximum Price:</label>
+                        <input type="number" id="max-price" placeholder="e.g., 3000000">
+                    </div>
+                    <div class="modal-footer">
+                        <button id="apply-price-filter" class="apply-filter-btn">Apply</button>
+                        <button class="cancel-filter-btn" data-modal-id="price-filter-modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cap Rate Filter Modal -->
+            <div id="cap-rate-filter-modal" class="modal">
+                <div class="modal-content">
+                     <div class="modal-header">
+                        <h4>Cap Rate Range Filter</h4>
+                        <span class="close-button" data-modal-id="cap-rate-filter-modal">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <label for="min-cap-rate">Minimum Cap Rate (%):</label>
+                        <input type="number" id="min-cap-rate" step="0.01" placeholder="e.g., 5.0">
+                        <label for="max-cap-rate">Maximum Cap Rate (%):</label>
+                        <input type="number" id="max-cap-rate" step="0.01" placeholder="e.g., 8.5">
+                    </div>
+                    <div class="modal-footer">
+                        <button id="apply-cap-rate-filter" class="apply-filter-btn">Apply</button>
+                        <button class="cancel-filter-btn" data-modal-id="cap-rate-filter-modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="property-grid" id="propertyGrid">
+                <p>Loading properties...</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>&copy; <span id="currentYear"></span> Property Listings Inc. All rights reserved.</p>
+            <p>Generated on <span id="currentDate"></span></p>
+        </div>
+
+        <script>
+            // COMPLETE property data
+            const properties = [
+                {
+                    "IMG URL": "https://ahprd1cdn.csgpimgs.com/i2/I7lgqJldkyORglOet6T7cnHzatsgfXjxaePfkMgT_Z4/117/image.jpg https://ahprd1cdn.csgpimgs.com/i2/Zsjgyo6symMDbsYyNktxeLuOinRtwAAgFGRorv9bcn0/116/image.png https://ahprd1cdn.csgpimgs.com/i2/ZyVgeXKeoE7m-9FSdRI40HDbNPBfN325YwSZEQ3a07s/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/S-IRrIPsFwDAotQCIg-BTjVYXH8FFS3y09UNP7znsgw/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/i48QDU58wDEARYGx4jPANeyeViAHyl9WziBiciV18CY/116/image.jpg",
+                    "Property Name": null,
+                    "Address": "3331 NE Sandy Blvd, Portland, OR 97232",
+                    "Price": 2489000,
+                    "Price/SF": 253.98,
+                    "Cap Rate": 0.07,
+                    "RBA": 9800,
+                    "Land": 4900,
+                    "Sale Notes": "Fully Leased Mixed Use Retail/Neighborhood Office Complex located in the Laurelhurst Neighborhood. \nFully Remodeled from studs up in 2015 including new plumbing, electrical, roof, systems, and more."
+                },
+                {
+                    "IMG URL": "https://ahprd1cdn.csgpimgs.com/i2/TZCQCR9ksnKnr4dpOdczKocxOdk6XmVx4cbCmd2WrgM/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/ndFoiYW12PMCaqujvNxBVd64FVS5mzC3TWOfKyf-2KA/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/xIlRHwRqiN3f4TH1qJCIii-dNX9ULSx0d9nXofRo4Qo/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/-bRfGve1HcCXVpHyu_VyFNunkOZLEy7RIhXYXaQ-rBw/116/image.jpg",
+                    "Property Name": "Plaza 102",
+                    "Address": "940-948 NE 102nd Ave, Portland, OR 97220",
+                    "Price": 1895000,
+                    "Price/SF": 211.54,
+                    "Cap Rate": null,
+                    "RBA": 8958,
+                    "Land": 25265,
+                    "Sale Notes": null
+                },
+                {
+                    "IMG URL": "https://ahprd1cdn.csgpimgs.com/i2/aAo2gjqb7wgO-hXOnNn48DxW_pEphQ7ET5L86EBZJP4/117/image.jpg https://ahprd1cdn.csgpimgs.com/i2/xCPBinlFJfBc-mZAg-N1JYmiLJoLOpOB3BmptDHKfxU/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/XccgT9e30Wl1Y3I1lg1zuAPoqGz6YF93kvVvgdMPcAY/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/Gf-D1aOOBZZQ0SZJEr8hrlfITt7iT0t6rM1Lb34A5vs/116/image.jpg",
+                    "Property Name": "Woodstock Square",
+                    "Address": "4103-4111 SE Woodstock Blvd, Portland, OR 97202",
+                    "Price": 2500000,
+                    "Price/SF": 353.31,
+                    "Cap Rate": null,
+                    "RBA": 7076,
+                    "Land": 14810,
+                    "Sale Notes": "1 Vacant unit at 2,879 SF"
+                },
+                {
+                    "IMG URL": "https://ahprd1cdn.csgpimgs.com/i2/HA0TypHOuMwJbw0dHZ5HfyTpxv5ylzyFgJdxKGorNco/117/image.jpg https://ahprd1cdn.csgpimgs.com/i2/0SZeYJvKjUT5QehnJ2schkafJnUH8-i-gYQ0GBKbYbQ/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/YEYmXUvZzw8-bNKJulhf3Xt2IdVSS1ypI2wpkPIf92g/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/Cp1TJ_plcIRkb7oUe-qurT1ulv75cgoKi5gXIKX8iOA/116/image.jpg",
+                    "Property Name": "Mill Plain Plaza",
+                    "Address": "12014 SE Mill Plain Blvd, Vancouver, WA 98684",
+                    "Price": 2100000,
+                    "Price/SF": 297.45,
+                    "Cap Rate": null,
+                    "RBA": 7060,
+                    "Land": 10019,
+                    "Sale Notes": null
+                },
+                {
+                    "IMG URL": "https://ahprd1cdn.csgpimgs.com/i2/Fj9bDFE0BJeGPelKrql6l8qm49EwRJ3UAj4JFJkevxs/117/image.jpg https://ahprd1cdn.csgpimgs.com/i2/pVO6G_jsC4pSvAq7fLXkP-nOB3kymu3RWlrwb3JUctA/116/image.jpg",
+                    "Property Name": "Mountain Park Professional Bldg",
+                    "Address": "3689 SW Carman Dr, Lake Oswego, OR 97035",
+                    "Price": 2500000,
+                    "Price/SF": 413.43,
+                    "Cap Rate": null,
+                    "RBA": 6047,
+                    "Land": 69696,
+                    "Sale Notes": null
+                },
+                {
+                    "IMG URL": "https://ahprd1cdn.csgpimgs.com/i2/lgy_0fUFk9C-73xCuG5SNjaHEJbbKfkqk3XSSxdSa1E/117/image.jpg https://ahprd1cdn.csgpimgs.com/i2/XQDLlHExxPnNsA259cZwd0nh8f1Id_v60YugdfAzyOE/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/ZeK_UuQmpUS65EOtttkIteuXFLUi_ZvIR5Olns-0LBo/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/5384tulqI0P_5rZFD7cvGqdWPFwnV21GnwLs65uav8Y/116/image.jpg ",
+                    "Property Name": "R&C Professional Plaza",
+                    "Address": "4055 SW 185th Ave, Beaverton, OR 97007",
+                    "Price": 1600000,
+                    "Price/SF": 277.78,
+                    "Cap Rate": null,
+                    "RBA": 5760,
+                    "Land": 17860,
+                    "Sale Notes": null
+                },
+                {
+                    "IMG URL": "https://ahprd1cdn.csgpimgs.com/i2/PdsSm_0oDjr-N_ByZD0ira4GvJeoviWtz160mk4Xj24/117/image.jpg https://ahprd1cdn.csgpimgs.com/i2/ZVLQowOE3xoMe8JizJXZ5xESNg8iZe4Y-UOaQnV3eOY/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/0tSJmDRxC3XfB7IHwLovTyka8L5IK7NI7T016rJjMrI/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/ObqeRCEYcQTkva7FW_Q67A3aLAlx9bIVjYta0W50MG4/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/PjFBdXbuNsWEtm4ubxdHQ6ZmZnlQCfO2mWAPHIqAHzc/116/image.jpg ",
+                    "Property Name": "The Walker Building",
+                    "Address": "1005 N Main Ave, Gresham, OR 97030",
+                    "Price": 1100000,
+                    "Price/SF": 192.04,
+                    "Cap Rate": null,
+                    "RBA": 5728,
+                    "Land": 14810,
+                    "Sale Notes": "Renovated in 2023"
+                },
+                {
+                    "IMG URL": "https://ahprd1cdn.csgpimgs.com/i2/u2LtliNmlcCLn1MJEqSEsJon17O0K1jy3yaiqp1G8V0/117/image.jpg https://ahprd1cdn.csgpimgs.com/i2/GlPHJfA-Fk1z0Xb5LjQutQnxqqIKaUHXzqolkg3p1Qk/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/JJIj9kX85ZbJuTGiBA2MqL8_G5Mwm-rNwb9zQNWPzDI/116/image.jpg ",
+                    "Property Name": null,
+                    "Address": "7320-7330 NE Fremont St, Portland, OR 97213",
+                    "Price": 1325000,
+                    "Price/SF": 272.63,
+                    "Cap Rate": null,
+                    "RBA": 4860,
+                    "Land": 10019,
+                    "Sale Notes": "40.1% Percent Leased"
+                },
+                {
+                    "IMG URL": "https://ahprd1cdn.csgpimgs.com/i2/jsvx-SjYHuJLPxvXYEQGvZMyH_sh5QZQodu6JUJwb5c/117/image.jpg https://ahprd1cdn.csgpimgs.com/i2/c9FbAkp0W4IBKixNhzCF909uOfwHLQIU_0RbXXARdoI/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/sg5lUI6YAdeblbR11Q3VB25rO0MU-8lHxsXoIahe32U/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/xmSRjvkBMR6-p2zhxLJPQkyPB4fosgMzRDmgyefWPmY/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/1Ur9UsQIcSHyL0n7eDMUjP1fC8Jm5yJH0ULSjAkm174/116/image.jpg",
+                    "Property Name": "Dall Building",
+                    "Address": "4400 SW 110th Ave, Beaverton, OR 97005",
+                    "Price": 2499999,
+                    "Price/SF": 526.54,
+                    "Cap Rate": null,
+                    "RBA": 4748,
+                    "Land": 9148,
+                    "Sale Notes": "Well-Maintained 2-Story Medical/Dental Office Building\nNEW Exterior Paint was done in May 2025 and the Parking Lot was Resealed in May 2025"
+                },
+                {
+                    "IMG URL": "https://ahprd1cdn.csgpimgs.com/i2/OVePtyxM0t26_th55ThkZw0TsvNGWztUVgXGWhXXzRs/117/image.jpg https://ahprd1cdn.csgpimgs.com/i2/v4-dhgNZS4jH2SadoPZq2Y05uY5n6GnUtIRxKZ9nF5I/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/BOmlRzduENQusX2It7UGw9kz7aXyiBmlS_RiIz42KWQ/116/image.jpg ",
+                    "Property Name": null,
+                    "Address": "6529-6533 NE Sandy Blvd, Portland, OR 97213",
+                    "Price": 989000,
+                    "Price/SF": 219.97,
+                    "Cap Rate": 0.0666,
+                    "RBA": 4496,
+                    "Land": 4809,
+                    "Sale Notes": "2 Story Retail Flex Small Office Building\nMain Floor has multiple office/flex/medical users.\n2nd Floor has small therapy and related tenants."
+                },
+                {
+                    "IMG URL": "https://ahprd1cdn.csgpimgs.com/i2/lbLLR2ekNXAc9DlQmLA8hABYQeblURENXPO87naQ4EE/117/image.jpg https://ahprd1cdn.csgpimgs.com/i2/V4s6xABHrKyinmFEEpbsx1mqtxn9crJ6GGEi22UoDHk/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/9kHm1a9H-hufkR6io91NiV10vSj4I71U4OLvthnOg_U/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/e8Yy7dsUEW7_HC1grQ0ZY-Loku8qnOorhbLNNoQLYRc/116/image.jpg",
+                    "Property Name": null,
+                    "Address": "10802-10806 SE Washington St, Portland, OR 97216",
+                    "Price": 1290000,
+                    "Price/SF": 313.34,
+                    "Cap Rate": 0.0625,
+                    "RBA": 4117,
+                    "Land": 12196,
+                    "Sale Notes": "Owner just replaced the roof with a new 20-year manufacturer warrantied TPO roof that cost in excess of $42,000.\nThe property is leased to two service-oriented national tenants: US Renal Care and Edward Jones."
+                },
+                {
+                    "IMG URL": "https://ahprd1cdn.csgpimgs.com/i2/05GX1Id5ILlRDbTBPMa5HdVSC_-tOfDur7jljzoqLqQ/117/image.jpg https://ahprd1cdn.csgpimgs.com/i2/uQPKpdFAyCidmWgHI6q6fyFYiAnIQwZLmvc1foc5wcI/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/Vk_1sMnomVUqXzWBUKvpDzB68h2vilINbIUaXJ0DgcE/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/vZrbbirE7ht8eMSbUdfH7oxEvN7PjqQFioqjQU22_vU/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/xVevrKmNK2evTof2fQl6BUOUMojrDz3Sm2i1NBUtg1w/116/image.jpg",
+                    "Property Name": null,
+                    "Address": "19230 SE McLoughlin Blvd, Gladstone, OR 97027",
+                    "Price": 2100000,
+                    "Price/SF": 525,
+                    "Cap Rate": null,
+                    "RBA": 4000,
+                    "Land": 15246,
+                    "Sale Notes": "TWO-UNIT Commercial Building in the heart of Gladstone!\r\n3,200 SF Dental space AND 800 SF Retail space!"
+                },
+                {
+                    "IMG URL": "https://ahprd1cdn.csgpimgs.com/i2/LNSQT0nP6xRSW74XiMtLhMrmszQJVEu0ER63m6sNAC8/117/image.jpg https://ahprd1cdn.csgpimgs.com/i2/ekUpYZYMYMwOioR1fq01k1sCZrA7WJSyXGKnahfCDRI/116/image.png https://ahprd1cdn.csgpimgs.com/i2/2yzfwfveMMM70_9rLJWGZ9Hgl-J3t0sV-AyYU3rgiQI/116/image.png https://ahprd1cdn.csgpimgs.com/i2/j3R1W28L8kFVyiOZJXHqGJe8woZ7DCUX7isfk1hXVpU/116/image.jpg",
+                    "Property Name": null,
+                    "Address": "12515 SE Division St, Portland, OR 97236",
+                    "Price": 1200787,
+                    "Price/SF": 309.8,
+                    "Cap Rate": 0.075,
+                    "RBA": 3876,
+                    "Land": 15050,
+                    "Sale Notes": "STABLE INVESTMENT: There are over 2 years remaining on the NNN lease with annual increases and two, 3-year options to extend the lease.\nHIGH-CALIBER OPERATOR: The property is leased to Lakefield Veterinary Group which operates 80+ locations in 12 states."
+                },
+                {
+                    "IMG URL": "https://ahprd1cdn.csgpimgs.com/i2/EshJsvfcrlSJVZUu5hGO-VyZ0O1PalD_ufNNWnY-v_I/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/fv4p-YXw5ENk1s-9DRQQy_fUgFwxlC9IeG_wsGOoBJY/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/29b0rPsfas-FCBV3lY8GZrz287_ZjfFqkouGQrD69Xo/117/image.jpg",
+                    "Property Name": null,
+                    "Address": "416 NE 87th Ave, Vancouver, WA 98664",
+                    "Price": 1350000,
+                    "Price/SF": 351.56,
+                    "Cap Rate": 0.0522,
+                    "RBA": 3840,
+                    "Land": 15682,
+                    "Sale Notes": "Location: Across the street from PeaceHealth and centrally located in Vancouver with easy access to entire metro area."
+                },
+                {
+                    "IMG URL": "https://ahprd1cdn.csgpimgs.com/i2/1LhhLRpSiTdoT6S9HeZi1dKvizA0JunWvAInj8mzYSw/117/image.jpg https://ahprd1cdn.csgpimgs.com/i2/hII0MzHTEOxeZZNOX_PCA7oS-XarTnvxp-kFFv8K4KY/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/OqraOewvdpK-Dg9mYzyi5Rx4_GraP4yTbwptZPiL03A/116/image.jpg",
+                    "Property Name": null,
+                    "Address": "750 NE Burnside Rd, Gresham, OR 97030",
+                    "Price": 700000,
+                    "Price/SF": 249.64,
+                    "Cap Rate": null,
+                    "RBA": 2804,
+                    "Land": 9635,
+                    "Sale Notes": null
+                },
+                {
+                    "IMG URL": "https://ahprd1cdn.csgpimgs.com/i2/ADtnI411vPVD_6ty_Ky5nIrQ3UK1aIHMgtpCfTRKbxM/117/image.jpg https://ahprd1cdn.csgpimgs.com/i2/UAHSUDyvH8B1iNOqZQZJQ0gLlyNV8rv6SmWa6JogJzA/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/iAvS8sAHwWt8ldqflFEULLaoX7SlXYnDF26ISznG0L0/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/-cVS85QxxgvJPG_DgxvRTjMl08sxlLhbQDqNcOsOz9Y/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/Xs98u_CBwgkJnDA58V0aksshJ3DlE90yzRlO9jjqtHk/116/image.jpg",
+                    "Property Name": null,
+                    "Address": "334 SE 146th Ave, Portland, OR 97233",
+                    "Price": 799000,
+                    "Price/SF": 377.24,
+                    "Cap Rate": 0.065,
+                    "RBA": 2118,
+                    "Land": 21344,
+                    "Sale Notes": "An exceptional Corporate Absolute Net investment opportunity featuring Cadence Education Learning System with a corporate lease guarantee"
+                },
+                {
+                    "IMG URL": "https://ahprd1cdn.csgpimgs.com/i2/ilpQC8Q_XjGJK1QCiorj3EVunXehm3WpEDXPokJokp8/117/image.jpg https://ahprd1cdn.csgpimgs.com/i2/ejtagxkoJba6CspCFgkAjun-H6XZlhaKvKSUmqztOIo/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/0pX7Z542x1ElIVC_pzCju7VEbmzN8JJGnSvf8CgqLGM/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/IR4n3c_ghfqaY8bQSi-ZWJzZzJPa504sO8ZKDP6mZnI/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/LS7h_lLd0ZW73Snmh-fSqLUhQZptBoAiTsqC0Uu9YXE/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/elrO7degVk9XB93Gi0J3J1bbznZ1sFdwnCT1kyegbdw/116/image.jpg",
+                    "Property Name": null,
+                    "Address": "88 NW Murray Blvd, Portland, OR 97229",
+                    "Price": 995000,
+                    "Price/SF": 489.18,
+                    "Cap Rate": null,
+                    "RBA": 2034,
+                    "Land": 5663,
+                    "Sale Notes": "2,034 SF Retail/Office Building: 1,017 SF of retail space on first floor and 1,017 SF of office space on second floor\r\nGreat visibility with high traffic count located right off Murray Blvd exit of Hwy 26"
+                },
+                {
+                    "IMG URL": "https://ahprd1cdn.csgpimgs.com/i2/3FkkLr-8II-5ArdVB7Kx938SlrkWg_cLn2Fu2CglxyI/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/Ixpyqb-u_b_IRtBCBM-HuO_yQxkQ-x1RjMD7E5qwt4s/117/image.jpg https://ahprd1cdn.csgpimgs.com/i2/VbnwahcSuNOQvtyvuvy4sGIqYsXa9ysRKjPCbWIpsuQ/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/S-WDMKl40qAjHo5pjm4lxtfNip4umGK5emfkSKeYSS4/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/COuIEdYIsWvERq89pVaqU0SHHdPgXpbwuNj1kGKHLC4/116/image.jpg",
+                    "Property Name": null,
+                    "Address": "Panorama Building\n4504 SW Corbett Ave, Portland, OR 97239",
+                    "Price": 2450000,
+                    "Price/SF": 163.33,
+                    "Cap Rate": 0.06,
+                    "RBA": 15000,
+                    "Land": 8276,
+                    "Sale Notes": "The Panorama Building is 100% occupied with Professional Tenants. Just minutes from downtown Portland, the building has easy access to Barbur Blvd., Interstate 5, and HWY 99.\nLeases are All Inclusive and annual 5% rent increases are included in the Lease Agreements."
+                },
+                {
+                    "IMG URL": "https://ahprd1cdn.csgpimgs.com/i2/R6ShCIO6jZHMwE5aQbH1zJm7cxmX_FsJo0s4auJVWyI/117/image.jpg https://ahprd1cdn.csgpimgs.com/i2/X1Fidz1xUYDllYQczghF4lR0EeY6ULDY33JDTAjTGKY/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/QjDvAvjxJ2a8QY2F54zQAV7S0wUR6l-GjWfLSBlNNoU/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/EBJ9IGBwWXt8lqctZyq-ttoiN4HIRSjNgsZSdNRgZG4/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/6IYLZMp9icI2Som8BAUDTtTCz8QmOX11D51zuHcAQic/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/uKCfjasMo-jualAj5YWXgZQAlQJ72CUquDEBNEUAHEs/116/image.jpg",
+                    "Property Name": null,
+                    "Address": "3-Property Sale, 13015-13035 SW Pacific Hwy, Tigard, OR 97223",
+                    "Price": 2500000,
+                    "Price/SF": 241.5,
+                    "Cap Rate": null,
+                    "RBA": 10352,
+                    "Land": 39180,
+                    "Sale Notes": "3 Occupied Buildings - Warehouse/Shop, Retail & Office Space"
+                },
+                {
+                    "IMG URL": "https://ahprd1cdn.csgpimgs.com/i2/-lo0stv8r9lt5aWmJSCQJip-k3B5vlbF-OFCPjtj5yE/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/zvmm6JzFiMWS3IgVdo49pBEyXBR1IKHiPpZxJj0tw9w/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/cBs2UJX1nWabRjm4E2Xgv0Ps0ees0s03xgVhgiHYRbY/117/image.jpg https://ahprd1cdn.csgpimgs.com/i2/fjB1lFFoz5j1lnsTl67DeGAi4b_rfaU4JPvPtVzy_lI/116/image.jpg",
+                    "Property Name": null,
+                    "Address": "2145-2159 Columbia Blvd, Saint Helens, OR 97051",
+                    "Price": 1200000,
+                    "Price/SF": 120,
+                    "Cap Rate": null,
+                    "RBA": 10000,
+                    "Land": 21819,
+                    "Sale Notes": "Four Private Retail Spaces"
+                },
+                {
+                    "IMG URL": "https://ahprd1cdn.csgpimgs.com/i2/p_zGcemDzyq4N_jWw2JsIOmpl5y4wkpPEGePJjjMP-4/117/image.jpg https://ahprd1cdn.csgpimgs.com/i2/LkX59bQrUiq0dKWigaRWL5Mf80QIUM0HlQ-6Ik-jrkA/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/zbmE6OHcjneVlyjJEhM5yTdQ-2I3mhcoEShsUa_Pe8s/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/Wlda8AJ7AFbq6A-l77sBsAzXDg-snZRJpGgjcLeH3Uo/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/Ee4HwDL4zag741sOu8Zz5q4c5bZYtxsAO_Xqv0ZvjZc/116/image.jpg",
+                    "Property Name": null,
+                    "Address": "4815-4831 SE Division St, Portland, OR 97206",
+                    "Price": 1500000,
+                    "Price/SF": 150,
+                    "Cap Rate": null,
+                    "RBA": 10000,
+                    "Land": 10000,
+                    "Sale Notes": "Priced for Building Redevelopment or New Building\nMix of Month-to-Month and Shorter-Term Tenants"
+                },
+                {
+                    "IMG URL": "https://ahprd1cdn.csgpimgs.com/i2/hzYO9pJdxY-JKtqTTD7rk0Q7habx_-lVbiXCyhXvd_Q/117/image.jpg https://ahprd1cdn.csgpimgs.com/i2/PjYRXwnWsP8NwqYqeILNK-cBL_0jf-KXvwZ_5eMQvW0/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/DizMqv0KI-sSPkiNCp-BCPtoYqKOdVs5dGKD01bn05w/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/-ef3p9J1Il6aJ2ucrko1Nb0mMvyzNZ0ejXNM0EGGDtk/116/image.jpg",
+                    "Property Name": null,
+                    "Address": "5441-5445 SE Powell Blvd, Portland, OR 97206",
+                    "Price": 1200000,
+                    "Price/SF": 129.91,
+                    "Cap Rate": null,
+                    "RBA": 9237,
+                    "Land": 10019,
+                    "Sale Notes": null
+                },
+                {
+                    "IMG URL": "https://ahprd1cdn.csgpimgs.com/i2/rbNGtmxFnqwgC2Ph3hd861Jp_iYc-sZuFpG3j0CtRtQ/117/image.jpg https://ahprd1cdn.csgpimgs.com/i2/3ZQMGPiqZZC-W8S4aLcnPXogWISVlGRoCawMVGCIOYM/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/AqQkzI6AtptB9XZZYAR1Vksoeefw7MrvYDhm0zUGc_4/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/eO4IaYM7AES5MGaPKyITMWhnniOjPvou7pUAFH2E5xA/116/image.jpg",
+                    "Property Name": "Klineline Center",
+                    "Address": "11813 NE Hwy 99, Vancouver, WA 98686",
+                    "Price": 3890000,
+                    "Price/SF": 486.25, 
+                    "Cap Rate": 0.065,
+                    "RBA": 8000,
+                    "Land": 76666,
+                    "Sale Notes": "100% Leased Business Center With Newly Signed Leases\nOver $100,000 In Recent Property Improvements\nAttractive Seller Financing Available (10% Cash-oncash Return)"
+                },
+                {
+                    "IMG URL": "https://woodfordcre.com/media/properties/18721/Main.jpg https://woodfordcre.com/media/properties/18721/7th-7.jpg https://woodfordcre.com/media/properties/18721/7th-8.jpg ",
+                    "Property Name": "Pioneer Plaza",
+                    "Address": "1953 7th Ave, Longview, WA 98632",
+                    "Price": 3599999,
+                    "Price/SF": 258.06,
+                    "Cap Rate": 0.074,
+                    "RBA": 13950,
+                    "Land": 51130,
+                    "Sale Notes": "If you're seeking exceptional cash flow, look no further. Pioneer Plaza presents a unique opportunity to acquire one of Longview’s premier state-occupied office complexes. This well-maintained building spans 13,950 SF across two floors, with convenient elevator access. Situated on 4 separate tax parcels, the property encompasses 51,130 SF of land. The complex underwent significant renovations in 2004 and 2019, along with multiple interior upgrades over the years. It boasts reliable long-term tenants and offers a strong, consistent income stream with an attractive 7.4% Cap Rate/Return. This is an outstanding opportunity to add a high-performing asset to your portfolio. Contact us today for further details."
+                },
+                {
+                    "IMG URL": "https://ahprd1cdn.csgpimgs.com/i2/77ZOdvM26bJfNCu4IcR2A5ysvSY-a6UFwQ48L7WLHTY/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/ewml0HsgAjhs5Gi0KBwNrHStnJrtzKrRdIzz76t-Ylc/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/KgQd9e8wxiR3gC9dkh3biAxgxtnrIh7LGVo9tkEDPJE/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/G6p9VnCbveN8ETgsNp4EBwq2WlreiHPLC6RS-RVRzV4/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/A8vuOfmDNykT4ajj110qxrGWKBeofP8WCNOwZvlGRGs/116/image.jpg",
+                    "Property Name": "Cascadia Center",
+                    "Address": "421-485 NE Burnside Rd, Gresham, OR 97030",
+                    "Price": 3250000,
+                    "Price/SF": 209.68,
+                    "Cap Rate": 0.0716,
+                    "RBA": 15500,
+                    "Land": 77608,
+                    "Sale Notes": "Fully Leased Long Term Tenants\nUpdated Systems & Interiors \n/ Newer HVAC Rooftop Units\nNew Roof & Exterior Paint in 2015 "
+                },
+                {
+                    "IMG URL": "https://ahprd1cdn.csgpimgs.com/i2/XWIQB5ftb38Y0SlwRkNSrAFhFmNhcVMPuA_sEv-jV_s/117/image.jpg https://ahprd1cdn.csgpimgs.com/i2/kQViyGRixxAzxTllxmd3ZXuEH8bmapzTYSZt1zV5vUc/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/FkSISo5SpVxARt7DlD5Lzv43u4HfSrJacP8oLTsUPaI/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/t2WaGzIKG-K_iMx7eMgWRhsT3T6bKqFBHiGw6l0WOnk/116/image.jpg",
+                    "Property Name": "Starbucks & Evolve Physical Therapy",
+                    "Address": "18215 NW West Union Rd, Portland, OR 97229",
+                    "Price": 3210000,
+                    "Price/SF": 743.4,
+                    "Cap Rate": 0.055,
+                    "RBA": 4318,
+                    "Land": 38757,
+                    "Sale Notes": "100% Leased ･ Investment Triple Net\nStarbucks (investment-grade credit of BBB) and Evolve Physical Therapy\nEvolve recently extended their lease term two years early.\nExtremely high barriers-to-entry in the submarket due to Urban Growth Boundary."
+                },
+                {
+                    "IMG URL": "https://ahprd1cdn.csgpimgs.com/i2/R4M_QeeUURm2S_AXVYn-GyInZNMuEao6KhHgiBqUQ8s/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/SYQ4pRjRnYvYHh6ZzA_RQnR_CNmWyx-60p57302yZB0/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/rvEpE9JXl3JszfyJgHgKE036V9D1K2rvFLrVW7-gjhA/116/image.png",
+                    "Property Name": "Tillamook Shops",
+                    "Address": "2230 Main Ave N, Tillamook, OR 97141",
+                    "Price": 3100000,
+                    "Price/SF": 490.74,
+                    "Cap Rate": 0.06,
+                    "RBA": 6317,
+                    "Land": 39722,
+                    "Sale Notes": "Only Starbucks drive-thru within an hour to the south and north.\nDenny’s has been at this location for over 16 years and offers potential upside through percentage rent of 7%.\n\n"
+                },
+                {
+                    "IMG URL": "https://ahprd1cdn.csgpimgs.com/i2/cui5wJSccX9td2lzb9gvZ-MYZmxbSi7ogzfUk25iYPs/117/image.jpg https://ahprd1cdn.csgpimgs.com/i2/xpDL2tJYGSKlfQL29ulmSSA2M7Tgg5g3PPcHrd6RVPQ/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/bWfPrlgx5PsTuxy1dgN9basp6oAN8T-35YObxUOzJLQ/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/ltdtn_TJYGvWDic3s_NuGFLve7xQJIHnuUMD0uUX-e4/116/image.jpg",
+                    "Property Name": "The Campa Building",
+                    "Address": "1960 SE Hawthorne Blvd, Portland, OR 97214",
+                    "Price": 2950000,
+                    "Price/SF": 203.93,
+                    "Cap Rate": 0.0751,
+                    "RBA": 14466,
+                    "Land": 9583,
+                    "Sale Notes": "Extensive renovations to enhance value while preserving character\n13.4% cash-on-cash return in year 6\n3.9% average annual rent increases\nHighly rentable apartments above diverse commercial tenant mix"
+                },
+                {
+                    "IMG URL": "https://ahprd1cdn.csgpimgs.com/i2/SGSvCZlKCbDpZIKU4_BqB03EhhL-N3tHGjWzHHjyv_Q/117/image.jpg https://ahprd1cdn.csgpimgs.com/i2/EcKJpuCrHljDDuWmZmoEViLzugPYPsdBlT4vTvD2uqU/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/NnJMUehFH-SNNlIj2ft99cJRLHzFi_8xwYtpEbm3JGs/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/nnNfYJnjtoZHt8OvvjotstMj_B8nxUiqf4wOkb_uH68/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/JBBHt8B0ns4M-dRjWQtEXfBhB0JIlLy8qCuGGw56rtE/116/image.jpg ",
+                    "Property Name": "Heritage Plaza",
+                    "Address": "15650 NE Fourth Plain Blvd, Vancouver, WA 98682",
+                    "Price": 2899000,
+                    "Price/SF": 478.38,
+                    "Cap Rate": 0.0647,
+                    "RBA": 6060,
+                    "Land": 25700,
+                    "Sale Notes": "Brand New Construction W/ Transferable Roof\nShadow Anchored By Top Performing Safeway Located In The Rapidly Growing Vancouver/Portland MSA\n100% Occupied Retail Center With Diverse Tenant Mix"
+                },
+                {
+                    "IMG URL": "https://ahprd1cdn.csgpimgs.com/i2/4rpM4-VtJ9sYMrQdp_3SBJxfqBzZZZCsuCP5LvMJBm8/117/image.jpg https://ahprd1cdn.csgpimgs.com/i2/kYW-LgQM1DA8BJ-NfYadHRFgGzNvsE88z0OeUAJCFCA/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/XU7IHrV9Y4IGCOzjnyvjvinEULWEIsvZoPLGfn-8gNE/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/VjCUNiPEM4m2j6lEKqVvwzmg-SAdsPjx_RpcuV9p4No/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/NQ9vk_l1bPZ9_WVOcX0m9WOL6j21Vxw-9Rc5rUYT4CU/116/image.jpg",
+                    "Property Name": "Hunters Ridge",
+                    "Address": "20510 SW Roy Rogers Rd, Sherwood, OR 97140",
+                    "Price": 2795000,
+                    "Price/SF": 33.31, 
+                    "Cap Rate": 0.0701,
+                    "RBA": 83919,
+                    "Land": 43560,
+                    "Sale Notes": "Mixed-use condominium"
+                },
+                {
+                    "IMG URL": "https://ahprd1cdn.csgpimgs.com/i2/3d04Aq9Pdks5pVHOecvPVQpvwoPzuUeaV6CfUk170-M/117/image.jpg https://ahprd1cdn.csgpimgs.com/i2/7WhY5YmH4vqels7ywmq5N5u8ESgZb_Z-iJUcrfR8-jc/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/MwHIE8UH9IASNscEsVrhmlCWQD_ZJWHep4jiJ6PwiFI/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/Jw-h_ggXzenlN5RT4LaOvq-UbizO3baOs2jnPAni81g/116/image.jpg ",
+                    "Property Name": null,
+                    "Address": "1621-1637 SE Hawthorne Blvd, Portland, OR 97214",
+                    "Price": 2600000,
+                    "Price/SF": 266.12,
+                    "Cap Rate": 0.0758,
+                    "RBA": 9770,
+                    "Land": 9583,
+                    "Sale Notes": "100% Leased ･ Redevelopment Project\nSeller Financing Available 30% Down | 5% Interest | 30 Year Am | 5 Year Term\nWell Maintained Building with Short Term Leases and Below Market Rents"
+                },
+                {
+                    "IMG URL": "https://ahprd1cdn.csgpimgs.com/i2/NpJK-fU8P8led4VTctQaTM7amDwCG1kkoRnZ27zY1Rw/117/image.jpg https://ahprd1cdn.csgpimgs.com/i2/h-vRP-l55cdOQJvCHcPHKfWh8kY6t6H10FoVf0lUo0s/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/E99WdLvo_zYM2PNRcmH-LrOc9Tql8SRkgUJJS2kufY4/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/RYcgz_nGBaAVkaNO7zWXcIjEuL7MZBW6OntxRKnOV3A/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/cedmE37c_kZgd6E2DK92nLl7sPwBFi1z05iid1YqNM8/116/image.jpg",
+                    "Property Name": "Wendy's & Chipotle - Leasehold",
+                    "Address": "9687-9695 NE Cascades Pky, Portland, OR 97220",
+                    "Price": 2537000,
+                    "Price/SF": 495.9,
+                    "Cap Rate": 0.07,
+                    "RBA": 5116,
+                    "Land": 40075,
+                    "Sale Notes": "2-Tenant Retail Pad | Target & IKEA Outparcel. \nThe Chipotle lease expires March 2029, with 2 (5-Year) options. \nWendy's lease expires October 2033, with 1 (5-Year) option.\n\nOpportunity to acquire the sub-leasehold interest in the underlying land, subject to a ground lease with Target that runs through 2042"
+                },
+                {
+                    "IMG URL": "https://woodfordcre.com/media/properties/19025/Vandercook-4.jpg https://woodfordcre.com/media/properties/19025/Vandercook-7.jpg https://woodfordcre.com/media/properties/19025/Vandercook-10.jpg https://woodfordcre.com/media/properties/19025/Vandercook-11.jpg https://woodfordcre.com/media/properties/19025/Vandercook-3.jpg https://woodfordcre.com/media/properties/19025/Vandercook-5.jpg",
+                    "Property Name": null,
+                    "Address": "711-717 Vandercook Way, Longview, WA 98632",
+                    "Price": 2450000,
+                    "Price/SF": 211.9,
+                    "Cap Rate": 0.065,
+                    "RBA": 11562,
+                    "Land": 21344,
+                    "Sale Notes": "Ideal income office/retail building now available for sale! This two-story building features approx. 11,562 SF spread over 7 total spaces, has a large parking lot, rear parking easement, and has one of the best corner locations for excellent signage and visibility. A majority of the spaces have been tastefully updated over the past 5 years. This property is offered at a 6.5% CAP Rate with great potential upside. This building has had historically low vacancy and potential for rent increases upon lease renewals. This would make an excellent addition to your portfolio, so call today to get more information on this property."
+                },
+                {
+                    "IMG URL": "https://ahprd1cdn.csgpimgs.com/i2/NksY5oql94-sjc4Q_Bq2u3bv9TnlWJc6pxl0TAfsK44/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/QIon9gdZ8TmtM4g0aY0CSly9ctSdqoSMId7_X6dH-OI/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/qJTt2M2EgLZ59mM6qmQEbYMGNsnj1d5x77pH6A1QxhY/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/vqXbBOPfY3t_8AzqF2JJpQ3lFiJ3BGpGZknu-a6P2VQ/116/image.jpg ",
+                    "Property Name": null,
+                    "Address": "2805-2815 SE Holgate Blvd, Portland, OR 97202",
+                    "Price": 1598000,
+                    "Price/SF": 470,
+                    "Cap Rate": 0.06,
+                    "RBA": 3400,
+                    "Land": 8712,
+                    "Sale Notes": "100% Occupied 3-Tenant Center\nFull NNN Leases\n3% Annual Rental Increases\n1.3% Vacancy Rate Within Sub-market"
+                },
+                {
+                    "IMG URL": "https://ahprd1cdn.csgpimgs.com/i2/yksvRsJF_S4DMOjDx63idXbp7j8b9ENgVge1uy3TRC0/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/vBMvuMSrAG5q_Ranyj1tB62alwLZiDgvS7vCzRG4_a0/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/uKgG8atXv__OQPIuB-ug3UcGJ7UKK-7xRXITQ0fMf34/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/xkr8pbJNglLP_flLm8s_RwXvWtz2dS4IqwazC0R2q1Y/116/image.jpg",
+                    "Property Name": "Sherwin-Williams Retail Center",
+                    "Address": "3527 US-101, Gearhart, OR 97138",
+                    "Price": 1580000,
+                    "Price/SF": 159.77, 
+                    "Cap Rate": 0.075,
+                    "RBA": 9889,
+                    "Land": 37897,
+                    "Sale Notes": "Sherwin-Williams occupies 61% of the GLA and has a 21-year tenure at the Property with a recently executed 5-year extension\nOpportunity for upside provided by low average base rents\nExposed to over 16,000 vehicles per day with frontage on Hwy 101, the coast's main connecting highway"
+                },
+                {
+                    "IMG URL": "https://woodfordcre.com/media/properties/19039/DJI_0188.JPG https://woodfordcre.com/media/properties/19039/DJI_0193.JPG https://woodfordcre.com/media/properties/19039/DJI_0184.JPG",
+                    "Property Name": "14th Ave Plaza",
+                    "Address": "1008 14th Ave Plaza, Longview, WA 98632",
+                    "Price": 1500000,
+                    "Price/SF": 150,
+                    "Cap Rate": 0.069,
+                    "RBA": 10000,
+                    "Land": null,
+                    "Sale Notes": "Long established retail building now available for sale! This building is one third of 14th Avenue Plaza features approx. 10,000 SF spread over 7 total spaces, has a large parking lot, and shared parking easement great locations for excellent signage and visibility. This property is offered at a 6.9% CAP Rate with great potential upside. This building has had historically low vacancy and potential for rent increases upon lease renewals. This would make an excellent addition to your portfolio, so call today to get more information on this property. Potential to buy the whole plaza."
+                },
+                {
+                    "IMG URL": "https://ahprd1cdn.csgpimgs.com/i2/mt80Kq5CBe1oDEtJZ4r3lQisTCLZ2Gv-6jHTkEz2n6c/117/image.jpg https://ahprd1cdn.csgpimgs.com/i2/l3-nTgblKzXN82VESOf8OVd_VkZcboZ0xvi8Mvs1hlw/116/image.jpg https://ahprd1cdn.csgpimgs.com/i2/Rqe7G14eS5Qqv6kxxsLuOUY40YULoQ6VQ-itGWv0r_E/116/image.jpg",
+                    "Property Name": null,
+                    "Address": "20 NW 2nd St, Gresham, OR 97030",
+                    "Price": 1399999,
+                    "Price/SF": 152.17,
+                    "Cap Rate": 0.083,
+                    "RBA": 9200,
+                    "Land": 10000,
+                    "Sale Notes": "Roof replaced in 2007\nWell maintained commercial building\nShort term leases in-place\nProperty taxes: $18,539.85\n5 retail tenants on short term leases\n* This one is in Multnomah County *"
+                }
+            ];
+
+            // Store current image index for each property
+            const currentImageIndexes = {}; 
+
+            // --- UTILITY FUNCTIONS ---
+            function formatCurrency(value) {
+                if (value === null || value === undefined || isNaN(parseFloat(value))) return 'N/A';
+                return '$' + parseFloat(value).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+            }
+
+            function formatPricePerSF(value) {
+                if (value === null || value === undefined || isNaN(parseFloat(value))) return 'N/A';
+                return '$' + parseFloat(value).toFixed(2);
+            }
+
+            function formatNumber(value) {
+                if (value === null || value === undefined || isNaN(parseInt(value))) return 'N/A';
+                return parseInt(value).toLocaleString('en-US');
+            }
+            
+            function formatCapRateDisplay(rate) {
+                if (rate === null || rate === undefined || rate === '' || rate === 'null' || isNaN(parseFloat(rate))) {
+                    return 'N/A';
+                }
+                return (parseFloat(rate) * 100).toFixed(2) + '%';
+            }
+
+            // --- SUMMARY STATISTICS ---
+            function updateSummaryStatistics() {
+                const totalProps = properties.length;
+                const validCapRates = properties.map(p => parseFloat(p['Cap Rate'])).filter(cr => cr !== null && !isNaN(cr) && cr > 0);
+                
+                let capRateMin = 'N/A', capRateMax = 'N/A';
+                if (validCapRates.length > 0) {
+                    capRateMin = Math.min(...validCapRates);
+                    capRateMax = Math.max(...validCapRates);
+                }
+
+                document.getElementById('totalPropertiesSummary').textContent = `${totalProps} Premium Properties`;
+                if (capRateMin !== 'N/A' && capRateMax !== 'N/A') {
+                     document.getElementById('capRateRangeSummary').textContent = `${(capRateMin * 100).toFixed(1)}% to ${(capRateMax * 100).toFixed(1)}%`;
+                } else {
+                    document.getElementById('capRateRangeSummary').textContent = 'N/A';
+                }
+            }
+            
+            // --- IMAGE CAROUSEL LOGIC ---
+            function showImage(propertyIndex, imageIndex) {
+                const propertyCard = document.querySelector(`.property-card[data-property-idx="${propertyIndex}"]`);
+                if (!propertyCard) return;
+
+                const carousel = propertyCard.querySelector('.property-image-carousel');
+                const imgElement = carousel.querySelector('.carousel-image');
+                const noImageDiv = carousel.querySelector('.no-image');
+                const errorDiv = carousel.querySelector('.image-error');
+                const indicatorsContainer = carousel.querySelector('.carousel-indicators');
+
+                const imageUrlsString = carousel.dataset.imageUrls || '';
+                const imageUrls = imageUrlsString.split(' ').filter(url => url.trim() !== '');
+
+                if (imageUrls.length === 0) {
+                    imgElement.style.display = 'none';
+                    noImageDiv.style.display = 'flex';
+                    errorDiv.style.display = 'none';
+                    if (indicatorsContainer) indicatorsContainer.innerHTML = '';
+                    return;
+                }
+
+                imageIndex = (imageIndex + imageUrls.length) % imageUrls.length; 
+                currentImageIndexes[propertyIndex] = imageIndex;
+
+                imgElement.src = imageUrls[imageIndex];
+                imgElement.alt = `${properties[propertyIndex]['Property Name'] || properties[propertyIndex].Address} - Image ${imageIndex + 1}`;
+                imgElement.style.display = 'block';
+                noImageDiv.style.display = 'none';
+                errorDiv.style.display = 'none';
+
+                imgElement.onload = () => { 
+                    errorDiv.style.display = 'none';
+                    imgElement.style.display = 'block';
+                };
+                imgElement.onerror = () => { 
+                    imgElement.style.display = 'none';
+                    noImageDiv.style.display = 'none';
+                    errorDiv.style.display = 'flex';
+                };
+
+                if (indicatorsContainer) {
+                    indicatorsContainer.innerHTML = '';
+                    imageUrls.forEach((_, idx) => {
+                        const dot = document.createElement('div');
+                        dot.classList.add('indicator-dot');
+                        if (idx === imageIndex) dot.classList.add('active');
+                        dot.dataset.imageIndex = idx; 
+                        indicatorsContainer.appendChild(dot);
+                    });
+                }
+            }
+            
+            function navigateImage(propertyIndex, direction) {
+                const carousel = document.querySelector(`.property-card[data-property-idx="${propertyIndex}"] .property-image-carousel`);
+                const imageUrlsString = carousel.dataset.imageUrls || '';
+                const imageUrls = imageUrlsString.split(' ').filter(url => url.trim() !== '');
+                if (imageUrls.length <= 1) return; 
+
+                let currentIdx = currentImageIndexes[propertyIndex] || 0;
+                currentIdx += direction;
+                showImage(propertyIndex, currentIdx);
+            }
+
+
+            // --- PROPERTY CARD CREATION ---
+            function createPropertyCard(property, index) {
+                const imageUrls = property['IMG URL'] ? property['IMG URL'].split(' ').filter(url => url.trim() !== '') : [];
+                const initialImageUrl = imageUrls.length > 0 ? imageUrls[0] : 'https://placehold.co/600x400/e9ecef/6c757d?text=No+Image'; 
+                const imageCount = imageUrls.length;
+
+                let saleNotesListHtml = '';
+                if (property['Sale Notes']) {
+                    const notesArray = property['Sale Notes'].split('\n').filter(note => note.trim() !== '');
+                    if (notesArray.length > 0) {
+                        saleNotesListHtml = '<ul>' + notesArray.map(note => `<li>${note.trim()}</li>`).join('') + '</ul>';
+                    }
+                }
+
+                return `
+                <div class="property-card" data-property-idx="${index}">
+                    <div class="property-image-carousel" data-image-count="${imageCount}" data-image-urls="${imageUrls.join(' ')}">
+                        <img src="${initialImageUrl}" alt="${property['Property Name'] || property.Address || 'Property image'}" class="carousel-image">
+                        <div class="no-image" style="${imageCount === 0 ? 'display:flex;' : 'display:none;'}">📷 No Image Available</div>
+                        <div class="image-error" style="display:none;">⚠️ Image Load Error</div>
+                        ${imageCount > 1 ? `
+                            <button class="carousel-button prev" aria-label="Previous Image">❮</button>
+                            <button class="carousel-button next" aria-label="Next Image">❯</button>
+                            <div class="carousel-indicators"></div>
+                        ` : ''}
+                    </div>
+                    <div class="property-content">
+                        ${property['Property Name'] ? `<div class="property-name">${property['Property Name']}</div>` : ''}
+                        <div class="property-address">${property.Address || 'Address Not Available'}</div>
+                        <div class="property-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Sale Price</div>
+                                <div class="detail-value price">${formatCurrency(property.Price)}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Cap Rate</div>
+                                <div class="detail-value cap-rate">${formatCapRateDisplay(property['Cap Rate'])}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Price per SF</div>
+                                <div class="detail-value">${formatPricePerSF(property['Price/SF'])}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">RBA (SF)</div>
+                                <div class="detail-value">${formatNumber(property.RBA)}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Land Area (SF)</div>
+                                <div class="detail-value">${formatNumber(property.Land)}</div>
+                            </div>
+                        </div>
+                        ${saleNotesListHtml ? `
+                            <div class="investment-details">
+                                <h4>Investment Highlights</h4>
+                                ${saleNotesListHtml}
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>`;
+            }
+
+            // --- FILTERING LOGIC ---
+            // Store current filter values globally so modals can pre-fill them if needed
+            let currentFilters = {
+                priceMin: null,
+                priceMax: null,
+                capRateMin: null,
+                capRateMax: null
+            };
+            
+            function applyFilters() {
+                const priceMin = currentFilters.priceMin === null ? 0 : parseFloat(currentFilters.priceMin);
+                const priceMax = currentFilters.priceMax === null ? Infinity : parseFloat(currentFilters.priceMax);
+                const capRateMin = currentFilters.capRateMin === null ? 0 : parseFloat(currentFilters.capRateMin) / 100;
+                const capRateMax = currentFilters.capRateMax === null ? Infinity : parseFloat(currentFilters.capRateMax) / 100;
+                
+                const propertyGrid = document.getElementById('propertyGrid');
+                let visibleCount = 0;
+
+                properties.forEach((property, index) => {
+                    const card = propertyGrid.querySelector(`.property-card[data-property-idx="${index}"]`);
+                    if (!card) return;
+
+                    const price = parseFloat(property.Price) || 0;
+                    const capRate = parseFloat(property['Cap Rate']); 
+
+                    const matchesPrice = price >= priceMin && price <= priceMax;
+                    const matchesCapRate = (isNaN(capRate) && (capRateMin === 0 && capRateMax === Infinity)) || 
+                                           (!isNaN(capRate) && capRate >= capRateMin && capRate <= capRateMax);
+                    
+                    if (matchesPrice && matchesCapRate) {
+                        card.style.display = 'flex'; 
+                        visibleCount++;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+
+                 if (visibleCount === 0 && properties.length > 0) { // Only show if there were properties to begin with
+                    propertyGrid.innerHTML = '<p style="text-align:center; padding: 20px; font-size: 1.1rem;">No properties match your current filter criteria.</p>';
+                } else if (visibleCount > 0 && propertyGrid.querySelector('p')?.textContent.startsWith('No properties')) {
+                    // If the "no properties" message is there, but now we have matches, re-render.
+                    renderAndFilterProperties();
+                }
+            }
+
+            function resetFilters() {
+                currentFilters = { priceMin: null, priceMax: null, capRateMin: null, capRateMax: null };
+                // Clear modal inputs
+                document.getElementById('min-price').value = '';
+                document.getElementById('max-price').value = '';
+                document.getElementById('min-cap-rate').value = '';
+                document.getElementById('max-cap-rate').value = '';
+                renderAndFilterProperties(); 
+            }
+            
+            // --- INITIAL RENDERING AND EVENT LISTENERS ---
+            function renderAndFilterProperties() {
+                const grid = document.getElementById('propertyGrid');
+                if (!grid) {
+                    console.error("Property grid not found!");
+                    return;
+                }
+                if (properties.length === 0) {
+                    grid.innerHTML = '<p style="text-align:center; padding: 20px; font-size: 1.1rem;">No properties available at the moment.</p>';
+                    return;
+                }
+                grid.innerHTML = properties.map((property, index) => createPropertyCard(property, index)).join('');
+                
+                properties.forEach((_, index) => {
+                    currentImageIndexes[index] = 0; 
+                    showImage(index, 0); 
+                });
+                applyFilters(); 
+            }
+
+            // --- MODAL HANDLING ---
+            function openModal(modalId) {
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    // Pre-fill inputs if values exist
+                    if (modalId === 'price-filter-modal') {
+                        document.getElementById('min-price').value = currentFilters.priceMin !== null ? currentFilters.priceMin : '';
+                        document.getElementById('max-price').value = currentFilters.priceMax !== null ? currentFilters.priceMax : '';
+                    } else if (modalId === 'cap-rate-filter-modal') {
+                        document.getElementById('min-cap-rate').value = currentFilters.capRateMin !== null ? currentFilters.capRateMin : '';
+                        document.getElementById('max-cap-rate').value = currentFilters.capRateMax !== null ? currentFilters.capRateMax : '';
+                    }
+                    modal.style.display = 'block';
+                }
+            }
+
+            function closeModal(modalId) {
+                const modal = document.getElementById(modalId);
+                if (modal) modal.style.display = 'none';
+            }
+
+
+            document.addEventListener('DOMContentLoaded', function() {
+                // Set dynamic dates
+                const today = new Date();
+                document.getElementById('currentDate').textContent = today.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                document.getElementById('currentYear').textContent = today.getFullYear();
+
+                updateSummaryStatistics();
+                renderAndFilterProperties(); 
+
+                // Modal Triggers
+                document.getElementById('open-price-filter-modal').addEventListener('click', () => openModal('price-filter-modal'));
+                document.getElementById('open-cap-rate-filter-modal').addEventListener('click', () => openModal('cap-rate-filter-modal'));
+
+                // Modal Close Buttons (X and Cancel)
+                document.querySelectorAll('.close-button, .cancel-filter-btn').forEach(button => {
+                    button.addEventListener('click', function() {
+                        closeModal(this.dataset.modalId);
+                    });
+                });
+
+                // Apply Filter Buttons in Modals
+                document.getElementById('apply-price-filter').addEventListener('click', function() {
+                    currentFilters.priceMin = document.getElementById('min-price').value ? parseFloat(document.getElementById('min-price').value) : null;
+                    currentFilters.priceMax = document.getElementById('max-price').value ? parseFloat(document.getElementById('max-price').value) : null;
+                    applyFilters();
+                    closeModal('price-filter-modal');
+                });
+
+                document.getElementById('apply-cap-rate-filter').addEventListener('click', function() {
+                    currentFilters.capRateMin = document.getElementById('min-cap-rate').value ? parseFloat(document.getElementById('min-cap-rate').value) : null;
+                    currentFilters.capRateMax = document.getElementById('max-cap-rate').value ? parseFloat(document.getElementById('max-cap-rate').value) : null;
+                    applyFilters();
+                    closeModal('cap-rate-filter-modal');
+                });
+                
+                document.getElementById('reset-filters').addEventListener('click', resetFilters);
+
+                // Event delegation for carousel controls
+                document.getElementById('propertyGrid').addEventListener('click', function(event) {
+                    const target = event.target;
+                    const propertyCard = target.closest('.property-card');
+                    if (!propertyCard) return;
+                    
+                    const propertyIndex = parseInt(propertyCard.dataset.propertyIdx);
+
+                    if (target.classList.contains('carousel-button')) {
+                        const direction = target.classList.contains('next') ? 1 : -1;
+                        navigateImage(propertyIndex, direction);
+                    } else if (target.classList.contains('indicator-dot')) {
+                        const imageIndex = parseInt(target.dataset.imageIndex);
+                        showImage(propertyIndex, imageIndex);
+                    }
+                });
+
+                // Close modal if user clicks outside of it
+                window.addEventListener('click', function(event) {
+                    if (event.target.classList.contains('modal')) {
+                        closeModal(event.target.id);
+                    }
+                });
+            });
+        </script>
+    </body>
+</html>
