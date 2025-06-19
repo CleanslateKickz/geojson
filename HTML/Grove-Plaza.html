@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grove Plaza Property Comparison</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js CDN for interactive charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* General Body and Container Styles for Compactness */
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); /* Softer, muted background */
+            color: #1e293b; /* Dark text for readability */
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        .tab-button {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            background-color: #e2e8f0;
+            color: #475569;
+            border-top-left-radius: 0.5rem;
+            border-top-right-radius: 0.5rem;
+            font-weight: 500;
+            transition: all 0.2s ease-in-out;
+            border-bottom: 2px solid transparent;
+        }
+        .tab-button.active {
+            background-color: #ffffff;
+            color: #1e293b;
+            border-bottom: 2px solid #3b82f6;
+        }
+        .tab-content {
+            display: none;
+            padding: 1.5rem;
+            background-color: #ffffff;
+            border-bottom-left-radius: 0.5rem;
+            border-bottom-right-radius: 0.5rem;
+            border-top-right-radius: 0.5rem; /* Only top-right if tabs are on left */
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.07);
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .container {
+            max-width: 850px; /* Adjusted max-width to accommodate both versions */
+            margin: 1.5rem auto;
+            padding: 0; /* Remove container padding as tabs will handle it */
+            background-color: transparent; /* No background, tabs will have it */
+            border-radius: 16px;
+            box-shadow: none; /* No shadow, tabs will have it */
+        }
+
+        /* --- STYLES FROM FILE 1 (editor_content - 2025-06-18T174410.010.html) --- */
+        .version1-container .hero-section {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            color: white;
+            padding: 2.5rem 1.5rem; /* Compact padding */
+            border-radius: 16px; /* Match container rounding */
+            margin-bottom: 2rem; /* Compact margin */
+            box-shadow: 0 15px 40px -8px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        .version1-container .hero-section::before { /* Pattern background */
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="%23ffffff" stroke-width="0.5" opacity="0.08"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            pointer-events: none;
+        }
+        .version1-container .hero-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+        .version1-container .hero-title {
+            font-size: 2.8rem; /* Compact font size */
+            font-weight: 700;
+            margin-bottom: 0.4rem; /* Compact margin */
+            letter-spacing: -0.02em;
+        }
+        .version1-container .hero-subtitle {
+            font-size: 1.1rem; /* Compact font size */
+            opacity: 0.9;
+            font-weight: 300;
+        }
+        .version1-container .property-address {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px); /* Slightly less blur */
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 0.8rem 1.2rem; /* Compact padding */
+            border-radius: 10px; /* Slightly less rounded */
+            margin-top: 1.2rem; /* Compact margin */
+            font-size: 1rem; /* Compact font size */
+        }
+        .version1-container .section-title {
+            font-size: 1.8rem; /* Compact font size */
+            font-weight: 600;
+            color: #0f172a;
+            margin: 2.5rem 0 1.2rem 0; /* Compact margins */
+            text-align: center;
+            position: relative;
+        }
+        .version1-container .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -0.4rem; /* Adjusted position */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70px; /* Slightly narrower line */
+            height: 3px;
+            background: linear-gradient(90deg, #3b82f6, #1d4ed8); /* Blue gradient line */
+            border-radius: 2px;
+        }
+        .version1-container .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* More compact min-width */
+            gap: 1rem; /* Reduced gap */
+            margin-bottom: 1.5rem; /* Reduced margin */
+        }
+        .version1-container .metric-card { /* Base style for all info cards */
+            background: white;
+            padding: 1.2rem; /* Reduced padding */
+            border-radius: 12px; /* Slightly less rounded */
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05); /* Lighter shadow */
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-align: center; /* Center content */
+        }
+        .version1-container .metric-card::before { /* Top border accent */
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px; /* Thinner border */
+            background: linear-gradient(90deg, #3b82f6, #1d4ed8); /* Blue accent */
+        }
+        .version1-container .metric-card:hover {
+            transform: translateY(-4px); /* Reduced lift */
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08); /* Reduced shadow */
+        }
+        .version1-container .metric-label {
+            font-size: 0.8rem; /* Reduced font size */
+            font-weight: 500;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 0.4rem; /* Reduced margin */
+        }
+        .version1-container .metric-value {
+            font-size: 1.8rem; /* Reduced font size */
+            font-weight: 700;
+            color: #0f172a; /* Darker text */
+            line-height: 1;
+        }
+        .version1-container .highlight-card { /* Current performance summary */
+            background: #e0f2fe; /* Muted light blue */
+            border: 1px solid #90cdf4;
+            border-left: 6px solid #3b82f6; /* Stronger blue accent */
+        }
+        .version1-container .warning-card { /* Day Spa Vacancy summary */
+            background: #fefce8; /* Muted light yellow */
+            border: 1px solid #fcd34d;
+            border-left: 6px solid #f59e0b; /* Stronger orange accent */
+        }
+        .version1-container .success-card { /* Fully Leased Potential summary */
+            background: #dcfce7; /* Muted light green */
+            border: 1px solid #86efac;
+            border-left: 6px solid #22c55e; /* Stronger green accent */
+        }
+        /* Color adjustments for text inside these cards */
+        .version1-container .highlight-card .noi-value, .version1-container .highlight-card .cap-rate { color: #1c64f2; }
+        .version1-container .warning-card .noi-value, .version1-container .warning-card .cap-rate { color: #f59e0b; }
+        .version1-container .success-card .noi-value, .version1-container .success-card .cap-rate { color: #22c55e; }
+        .version1-container .property-image {
+            width: 100%;
+            height: 350px; /* Reduced height */
+            object-fit: cover;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08); /* Softer shadow */
+            margin-bottom: 2rem; /* Reduced margin */
+        }
+        .version1-container .rent-roll-table {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden; /* Ensures rounded corners */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Softer shadow */
+            border: 1px solid #e2e8f0;
+        }
+        .version1-container .rent-roll-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .version1-container .rent-roll-table th {
+            background: #f8fafc;
+            padding: 0.8rem 0.6rem; /* Reduced padding */
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 0.75rem; /* Reduced font size */
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .version1-container .rent-roll-table td {
+            padding: 0.8rem 0.6rem; /* Reduced padding */
+            border-bottom: 1px solid #f1f5f9;
+            color: #1e293b;
+            font-size: 0.85rem; /* Reduced font size */
+        }
+        .version1-container .rent-roll-table tr:last-child td {
+            border-bottom: none;
+        }
+        .version1-container .rent-roll-table tr:nth-child(even) {
+            background: #fbfdff; /* Very light subtle stripe */
+        }
+        .version1-container .tenant-details { /* For lease options/notes under tenant name */
+            background: #f0f4f8; /* Soft background */
+            padding: 0.3rem 0.5rem; /* Compact padding */
+            margin-top: 0.2rem; /* Compact margin */
+            border-radius: 6px;
+            font-size: 0.7rem; /* Reduced font size */
+            color: #64748b;
+            border-left: 3px solid #64748b; /* Muted gray accent */
+        }
+        .version1-container .tenant-details summary {
+            list-style: none; /* Remove default summary marker */
+            cursor: pointer;
+            font-weight: 500;
+            color: #3b82f6; /* Blue for 'Lease Options & Terms' */
+            font-size: 0.8rem;
+        }
+        .version1-container .tenant-details summary::-webkit-details-marker {
+            display: none; /* For Chrome, Safari */
+        }
+        .version1-container .tenant-details summary:before {
+            content: "+ "; /* Custom marker */
+            display: inline-block;
+            transition: transform 0.2s ease-in-out;
+        }
+        .version1-container .tenant-details details[open] summary:before {
+            content: "- ";
+            transform: rotate(0deg);
+        }
+        .version1-container .tenant-details p {
+            margin-top: 0.2rem;
+            margin-left: 0.8rem; /* Indent the detailed text */
+            font-size: 0.75rem;
+            color: #475569;
+        }
+        .version1-container .scenario-comparison {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.2rem; /* Reduced gap */
+            margin: 1.5rem 0;
+        }
+        .version1-container .scenario-card {
+            background: white;
+            padding: 1.2rem; /* Reduced padding */
+            border-radius: 12px;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+            text-align: center;
+        }
+        .version1-container .scenario-title {
+            font-size: 1rem; /* Reduced font size */
+            font-weight: 600;
+            margin-bottom: 0.6rem; /* Reduced margin */
+            color: #0f172a;
+        }
+        .version1-container .noi-value {
+            font-size: 1.8rem; /* Reduced font size */
+            font-weight: 700;
+            margin: 0.6rem 0; /* Reduced margin */
+        }
+        .version1-container .cap-rate {
+            font-size: 1.1rem; /* Reduced font size */
+            font-weight: 600;
+            padding: 0.3rem 0.6rem; /* Reduced padding */
+            border-radius: 6px;
+            display: inline-block;
+        }
+        .version1-container .chart-container {
+            background: white;
+            padding: 1.2rem; /* Reduced padding */
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+            margin: 1.5rem 0;
+            height: 350px; /* Increased chart height */
+        }
+        .version1-container .chart-title {
+            font-size: 1.2rem; /* Reduced font size */
+            font-weight: 600;
+            color: #0f172a;
+            text-align: center;
+            margin-bottom: 0.8rem; /* Reduced margin */
+        }
+        .version1-container .highlights-list {
+            background: white;
+            padding: 1.2rem; /* Reduced padding */
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+            margin: 1.5rem 0;
+        }
+        .version1-container .highlight-item {
+            padding: 1rem; /* Reduced padding */
+            margin-bottom: 0.6rem; /* Reduced margin */
+            background: #f8fafc;
+            border-radius: 10px;
+            border-left: 4px solid #3b82f6;
+        }
+        .version1-container .highlight-item:last-child {
+            margin-bottom: 0;
+        }
+        .version1-container .highlight-item h3 {
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 0.3rem; /* Reduced margin */
+            font-size: 0.95rem; /* Reduced font size */
+        }
+        .version1-container .highlight-item p {
+            color: #475569;
+            margin: 0;
+            line-height: 1.4; /* Slightly tighter line height */
+            font-size: 0.85rem; /* Reduced font size */
+        }
+        .version1-container .image-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Further reduced min-width for images */
+            gap: 0.6rem; /* Reduced gap */
+            margin-top: 1rem; /* Reduced margin */
+            margin-bottom: 1.5rem; /* Reduced margin */
+            justify-items: center;
+        }
+        .version1-container .gallery-image {
+            width: 100%;
+            height: 100px; /* Further reduced image height */
+            object-fit: cover;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            transition: transform 0.3s ease;
+        }
+        .version1-container .footer {
+            text-align: center;
+            padding: 1rem; /* Reduced padding */
+            color: #64748b;
+            border-top: 1px solid #e2e8f0;
+            margin-top: 2.5rem; /* Reduced margin */
+            font-size: 0.8rem; /* Reduced font size */
+        }
+        .version1-container .chartjs-tooltip {
+            background-color: rgba(15, 23, 42, 0.9) !important;
+            color: #ffffff !important;
+            border-radius: 6px !important;
+            padding: 0.75rem 1rem !important;
+            font-size: 0.9rem !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 480px) {
+            .version1-container .hero-title {
+                font-size: 2rem;
+            }
+            .version1-container .hero-subtitle {
+                font-size: 0.8rem;
+            }
+            .version1-container .property-address {
+                padding: 0.5rem 0.7rem;
+                font-size: 0.8rem;
+            }
+            .version1-container .section-title {
+                font-size: 1.4rem;
+                margin: 1.5rem 0 0.8rem 0;
+            }
+            .version1-container .metric-value {
+                font-size: 1.3rem;
+            }
+            .version1-container .cap-rate {
+                font-size: 0.9rem;
+            }
+            .version1-container .property-image {
+                height: 200px;
+            }
+            .version1-container .image-gallery {
+                grid-template-columns: 1fr;
+            }
+            .version1-container .gallery-image {
+                height: 120px;
+            }
+            .version1-container .rent-roll-table th, .version1-container .rent-roll-table td {
+                padding: 0.4rem 0.5rem;
+                font-size: 0.7rem;
+            }
+            .version1-container .tenant-details {
+                padding: 0.2rem 0.4rem;
+                font-size: 0.65rem;
+            }
+            .version1-container .chart-container {
+                height: 250px; /* Even smaller for very small screens, but larger than previous 200px */
+            }
+            .version1-container .chart-title {
+                font-size: 1rem;
+            }
+            .version1-container .highlights-list .highlight-item h3 {
+                font-size: 0.85rem;
+            }
+            .version1-container .highlights-list .highlight-item p {
+                font-size: 0.75rem;
+            }
+        }
+
+
+        /* --- STYLES FROM FILE 2 (editor_content - 2025-06-18T174404.951.html) --- */
+        .version2-container h1 {
+            color: #1f2937;
+            font-weight: 700;
+            margin-bottom: 0.6rem; /* Adjusted margin */
+            font-size: 2.5rem; /* Reduced main title font size */
+        }
+        .version2-container h2 {
+            color: #374151;
+            font-weight: 600;
+            margin-top: 2rem; /* Reduced top margin */
+            margin-bottom: 0.8rem; /* Reduced margin */
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 0.4rem; /* Reduced padding */
+            font-size: 1.75rem; /* Reduced subheading font size */
+            text-align: center;
+        }
+        .version2-container .header-section {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: #ffffff;
+            padding: 1.5rem 1.5rem; /* Reduced padding */
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 1.5rem; /* Reduced margin */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); /* Slightly reduced shadow */
+        }
+        .version2-container .header-section h1 {
+            color: #ffffff;
+            font-size: 2.5rem; /* Reduced font size */
+            margin-bottom: 0.4rem; /* Reduced margin */
+            letter-spacing: -0.05em;
+        }
+        .version2-container .header-section p {
+            font-size: 1rem; /* Reduced font size */
+            opacity: 0.95;
+            line-height: 1.4;
+        }
+        .version2-container .section-subheading {
+            font-size: 1.5rem; /* Reduced font size */
+            font-weight: 600;
+            color: #374151;
+            text-align: center;
+            margin-bottom: 1.5rem; /* Reduced margin */
+        }
+        .version2-container .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* Adjusted min-width for better compactness */
+            gap: 1rem; /* Reduced gap */
+            margin-bottom: 1rem; /* Reduced margin */
+        }
+        .version2-container .data-item {
+            background-color: #fefefe;
+            padding: 1rem; /* Reduced padding */
+            border-radius: 12px;
+            border: 1px solid #e0e7ee;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.03); /* Lighter shadow */
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        .version2-container .data-item:hover {
+            transform: translateY(-5px); /* Reduced lift on hover */
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08); /* Reduced shadow */
+        }
+        .version2-container .data-item strong {
+            color: #4b5563;
+            display: block;
+            margin-bottom: 0.4rem; /* Reduced margin */
+            font-size: 0.9rem; /* Reduced font size */
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .version2-container .data-item span {
+            font-size: 1.5rem; /* Reduced font size */
+            font-weight: 700;
+            color: #1c64f2;
+        }
+        .version2-container table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 1rem; /* Reduced margin */
+            margin-bottom: 1.5rem; /* Reduced margin */
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04); /* Lighter shadow */
+        }
+        .version2-container th, .version2-container td {
+            padding: 0.7rem 0.8rem; /* Reduced padding */
+            text-align: left;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 0.9rem; /* Smaller table text */
+        }
+        .version2-container th {
+            background-color: #f9fafb;
+            font-weight: 600;
+            color: #4b5563;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+        .version2-container tr:last-child td {
+            border-bottom: none;
+        }
+        .version2-container .notes-list {
+            list-style-type: none;
+            padding-left: 0;
+            margin-top: 0.8rem; /* Reduced margin */
+        }
+        .version2-container .notes-list li {
+            background-color: #fdfdfd;
+            padding: 0.7rem 1rem; /* Reduced padding */
+            border-left: 5px solid #9ca3af; /* Slightly thinner accent bar */
+            border-radius: 8px;
+            margin-bottom: 0.6rem; /* Reduced margin */
+            font-size: 0.95rem; /* Slightly smaller text */
+            color: #374151;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02); /* Very subtle shadow */
+        }
+        .version2-container .summary-box {
+            padding: 1.5rem; /* Reduced padding */
+            border-radius: 16px;
+            margin-top: 1.5rem; /* Reduced margin */
+            margin-bottom: 1.5rem; /* Reduced margin */
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+        .version2-container .summary-box p {
+            font-size: 1.05rem; /* Reduced font size */
+            font-weight: 600;
+            margin-bottom: 0.6rem; /* Reduced margin */
+        }
+        .version2-container .summary-box .cap-rate {
+            font-size: 1.75rem; /* Reduced font size */
+            font-weight: 700;
+            display: block;
+            margin-top: 0.4rem;
+            letter-spacing: -0.02em;
+        }
+        .version2-container .summary-box.highlight {
+            background-color: #e6f7ee;
+            border: 1px solid #a8dadc;
+            color: #2c5282;
+        }
+        .version2-container .summary-box.highlight p {
+            color: #2c5282;
+        }
+        .version2-container .summary-box.highlight .cap-rate {
+            color: #10b981;
+        }
+        .version2-container .summary-box.warning {
+            background-color: #fef3e7;
+            border: 1px solid #fecb93;
+            color: #374151; /* User requested color */
+        }
+        .version2-container .summary-box.warning p {
+            color: #374151; /* User requested color */
+        }
+        .version2-container .summary-box.warning .cap-rate {
+            color: #374151; /* User requested color */
+        }
+        .version2-container .main-image {
+            width: 100%;
+            border-radius: 12px;
+            margin-bottom: 1.5rem; /* Reduced margin */
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.07);
+        }
+        .version2-container .image-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* Adjusted min-width for images */
+            gap: 0.8rem; /* Reduced gap */
+            margin-top: 1.2rem; /* Reduced margin */
+            margin-bottom: 2rem; /* Reduced margin */
+            justify-items: center;
+        }
+        .version2-container .image-gallery img {
+            width: 100%;
+            height: 120px; /* Reduced image height */
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            object-fit: cover;
+            transition: transform 0.2s ease-in-out;
+        }
+        .version2-container details {
+            margin-top: 0.4rem; /* Reduced margin */
+            background-color: #f6f8fa;
+            border-radius: 8px;
+            padding: 0.5rem 0.8rem; /* Reduced padding */
+            border: 1px solid #e0e7ee;
+        }
+        .version2-container summary {
+            font-weight: 500;
+            cursor: pointer;
+            color: #4b5563;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem; /* Reduced font size */
+        }
+        .version2-container summary:before {
+            content: "+ ";
+            font-size: 1em; /* Reduced indicator size */
+            margin-right: 0.3rem; /* Reduced margin */
+            color: #6b7280;
+            transition: transform 0.2s ease-in-out;
+        }
+        .version2-container details[open] summary:before {
+            content: "- ";
+        }
+        .version2-container .chart-container {
+            position: relative;
+            height: 300px; /* Reduced chart height */
+            width: 100%;
+            margin-top: 1.5rem; /* Reduced margin */
+            margin-bottom: 1.5rem; /* Reduced margin */
+            padding: 1rem; /* Reduced padding */
+            background-color: #fefefe;
+            border-radius: 12px;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05); /* Lighter shadow */
+        }
+        .version2-container footer {
+            margin-top: 3rem; /* Adjusted footer margin */
+            padding-top: 1.5rem; /* Adjusted padding */
+        }
+    </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="flex border-b border-gray-200 mb-4">
+                <button id="tab1-button" class="tab-button active">Version 1</button>
+                <button id="tab2-button" class="tab-button">Version 2</button>
+            </div>
+
+            <div id="tab1-content" class="tab-content active version1-container">
+                <!-- Content from editor_content - 2025-06-18T174410.010.html -->
+                <div class="hero-section">
+                    <div class="hero-content">
+                        <h1 class="hero-title">Grove Plaza</h1>
+                        <p class="hero-subtitle">Comprehensive Investment Opportunity Analysis</p>
+                        <p class="property-address">
+                            <strong>NAPA Auto Parts Building</strong><br>
+                            104 S Pacific Hwy, Cottage Grove, OR 97424
+                        </p>
+                    </div>
+                </div>
+
+                <img src="https://ahprd1cdn.csgpimgs.com/i2/qWKiglpBgkedHNjmt343XIgkv56zgoGXGoku56-_3YY/116/image.jpg"
+                     alt="Grove Plaza - NAPA Auto Parts Building" class="property-image"
+                     onerror="this.onerror=null; this.src='https://placehold.co/750x350/CCDDEE/4A5568?text=Image+Not+Available';">
+
+                <h2 class="section-title">Property Overview</h2>
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-label">Purchase Price</div>
+                        <div class="metric-value">$945,000</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Price per SF</div>
+                        <div class="metric-value">$67.50</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Rentable Building Area</div>
+                        <div class="metric-value">13,362 SF</div>
+                    </div>
+                </div>
+
+                <h2 class="section-title">Current Financial Performance</h2>
+                <p class="text-center text-base text-gray-700 mb-3">
+                    Detailed financial overview with current tenancy, including Bochetto Day Spa.
+                </p>
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-label">Annual Rent Income</div>
+                        <div class="metric-value">$66,864</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">CAMs</div>
+                        <div class="metric-value">$7,089</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Property Taxes</div>
+                        <div class="metric-value">$10,215.22</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Insurance</div>
+                        <div class="metric-value">$3,102.00</div>
+                    </div>
+                </div>
+
+                <div class="metric-card highlight-card" style="max-width: 500px; margin: 1.5rem auto;">
+                    <div class="text-center">
+                        <div class="metric-label">Current Net Operating Income</div>
+                        <div class="noi-value">$60,635</div>
+                        <div class="cap-rate" style="background: #3b82f6; color: white;">7.08% Cap Rate</div>
+                    </div>
+                </div>
+
+                <h2 class="section-title">Rent Roll Details</h2>
+                <div class="overflow-x-auto rent-roll-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tenant</th>
+                                <th>RBA (SF)</th>
+                                <th>Lease Expiration</th>
+                                <th>Monthly Rent</th>
+                                <th>Annual Rent</th>
+                                <th>Insurance</th>
+                                <th>Water</th>
+                                <th>Tax</th>
+                                <th>Monthly Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <strong>NAPA Auto Parts</strong>
+                                    <details class="tenant-details">
+                                        <summary>Lease Options & Terms</summary>
+                                        <p>Two (2) five-year renewal options, NNN lease.</p>
+                                        <p><em>Lump sum property tax payment: $5,558.69</em></p>
+                                    </details>
+                                </td>
+                                <td>6,924</td>
+                                <td>08/2029</td>
+                                <td>$4,272</td>
+                                <td>$51,264</td>
+                                <td>$140.00</td>
+                                <td>$240.00</td>
+                                <td>$5,558.69</td>
+                                <td>$4,652.00</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <strong>Bochetto Day Spa</strong>
+                                    <details class="tenant-details">
+                                        <summary>Lease Options & Terms</summary>
+                                        <p>12-month renewal option, NNN lease.</p>
+                                        <p><em>Property tax: $85.28/month ($1,023.36/year)</em></p>
+                                    </details>
+                                </td>
+                                <td>2,800</td>
+                                <td>08/2025</td>
+                                <td>$1,300</td>
+                                <td>$15,600</td>
+                                <td>$51.50</td>
+                                <td>$75.00</td>
+                                <td>$1,023.36</td>
+                                <td>$1,511.78</td>
+                            </tr>
+                            <tr style="background: #fef3e7;">
+                                <td><strong>Vacant Space</strong></td>
+                                <td>4,200</td>
+                                <td>—</td>
+                                <td>—</td>
+                                <td>—</td>
+                                <td>—</td>
+                                <td>—</td>
+                                <td>—</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="section-title">Investment Scenarios</h2>
+                <p class="text-center text-gray-700 mb-4 text-base">
+                    Detailed financial projections illustrating performance under different tenancy scenarios, highlighting the value-add opportunity.
+                </p>
+                <div class="scenario-comparison">
+                    <div class="scenario-card highlight-card">
+                        <h3 class="scenario-title">Current Performance</h3>
+                        <div class="metric-label">Net Operating Income</div>
+                        <div class="noi-value">$60,635</div>
+                        <div class="cap-rate" style="background: #3b82f6; color: white;">7.08%</div>
+                        <p style="margin-top: 0.8rem; color: #64748b; font-size: 0.8rem;">
+                            Stable income with NAPA + Day Spa
+                        </p>
+                    </div>
+                    <div class="scenario-card warning-card">
+                        <h3 class="scenario-title">Day Spa Vacancy</h3>
+                        <div class="metric-label">Net Operating Income</div>
+                        <div class="noi-value">$43,885</div>
+                        <div class="cap-rate" style="background: #f59e0b; color: white;">4.64%</div>
+                        <p style="margin-top: 0.8rem; color: #64748b; font-size: 0.8rem;">
+                            NAPA only + 7,000 SF vacant
+                        </p>
+                    </div>
+                    <div class="scenario-card success-card">
+                        <h3 class="scenario-title">Fully Leased Potential</h3>
+                        <div class="metric-label">Projected NOI</div>
+                        <div class="noi-value">$78,747</div>
+                        <div class="cap-rate" style="background: #22c55e; color: white;">8.33%</div>
+                        <p style="margin-top: 0.8rem; color: #64748b; font-size: 0.8rem;">
+                            Maximum income potential
+                        </p>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <h3 class="chart-title">Cap Rate Performance Analysis</h3>
+                    <div style="height: 300px;"> <!-- Increased height for chart rendering -->
+                        <canvas id="performanceChart1"></canvas>
+                    </div>
+                </div>
+
+                <h2 class="section-title">Key Investment Highlights</h2>
+                <div class="highlights-list">
+                    <div class="highlight-item">
+                        <h3>🎯 Strong Anchor Tenant</h3>
+                        <p>NAPA Auto Parts provides stable, long-term income with lease extending to 2029 and two five-year renewal options. National credit tenant with proven track record.</p>
+                    </div>
+                    <div class="highlight-item">
+                        <h3>📈 Immediate Value-Add Opportunity</h3>
+                        <p>7,000 SF of leasable space (52% of total RBA) presents significant upside potential. Day Spa lease expires August 2025, providing flexibility for repositioning.</p>
+                    </div>
+                    <div class="highlight-item">
+                        <h3>💰 Exceptional Return Potential</h3>
+                        <p>Projected 8.33% cap rate upon full lease-up represents a 117% increase from the vacancy scenario, demonstrating compelling value creation opportunity.</p>
+                    </div >
+                    <div class="highlight-item">
+                        <h3>🚗 Prime Location & Access</h3>
+                        <p>Strategic position on Pacific Highway with excellent connectivity to Highway 99 and I-5. High visibility and accessibility for retail and service tenants.</p>
+                    </div>
+                    <div class="highlight-item">
+                        <h3>🔧 Recently Renovated</h3>
+                        <p>Extensive 2024 improvements including new TPO roof with rigid insulation, two HVAC units, and exterior paint. Minimal immediate capital requirements.</p>
+                    </div>
+                    <div class="highlight-item">
+                        <h3>💼 Flexible Investment Strategy</h3>
+                        <p>Suitable for both passive income investors and active value-add strategies. Strong foundation with NAPA tenancy provides downside protection.</p>
+                    </div>
+                </div>
+
+                <h2 class="section-title">Property Gallery</h2>
+                <div class="image-gallery">
+                    <img src="https://ahprd1cdn.csgpimgs.com/i2/SPrHWCS9AjqfV--OWXykdU_xBdTxrRrHZVKw1qqqqqqqq/116/image.jpg"
+                         alt="Property Exterior" class="gallery-image"
+                         onerror="this.onerror=null; this.src='https://placehold.co/300x120/CCDDEE/4A5568?text=Image+Not+Available';">
+                    <img src="https://ahprd1cdn.csgpimgs.com/i2/pmbDdM9uogA0EcoBJC3ODEmhzOgIU09s-sGAulXCJjU/116/image.jpg"
+                         alt="Property Exterior View" class="gallery-image"
+                         onerror="this.onerror=null; this.src='https://placehold.co/300x120/CCDDEE/4A5568?text=Image+Not+Available';">
+                    <img src="https://ahprd1cdn.csgpimgs.com/i2/TBYyJGyA6apH9LewdlppL5sNWb9_-Do3H9baAyULULE/116/image.jpg"
+                         alt="Interior Space" class="gallery-image"
+                         onerror="this.onerror=null; this.src='https://placehold.co/300x120/CCDDEE/4A5568?text=Image+Not+Available';">
+                    <img src="https://ahprd1cdn.csgpimgs.com/i2/h1PvyPzMoqdnrw_XUOhfpynJOnipQ8DrTqBMxR_bsI0/116/image.jpg"
+                         alt="Vacant Interior" class="gallery-image"
+                         onerror="this.onerror=null; this.src='https://placehold.co/300x120/CCDDEE/4A5568?text=Image+Not+Available';">
+                    <img src="https://ahprd1cdn.csgpimgs.com/i2/YqoYsslOS81BBWrPNbIreuUebJqjDMvweZx8eovik1k/116/image.jpg"
+                         alt="Day Spa Interior" class="gallery-image"
+                         onerror="this.onerror=null; this.src='https://placehold.co/300x120/CCDDEE/4A5568?text=Image+Not+Available';">
+                </div>
+
+                <div class="footer">
+                    <p>&copy; 2025 Grove Plaza Investment Analysis. Information deemed reliable but not guaranteed.</p>
+                </div>
+            </div>
+
+            <div id="tab2-content" class="tab-content version2-container">
+                <!-- Content from editor_content - 2025-06-18T174404.951.html -->
+                <div class="header-section">
+                    <h1>Grove Plaza Property</h1>
+                    <p>Comprehensive Investment Opportunity Analysis</p>
+                    <p class="mt-3 text-lg font-semibold">NAPA Auto Parts Building</p>
+                    <p class="text-base">104 S Pacific Hwy, Cottage Grove, OR 97424</p>
+                </div>
+
+                <img src="https://ahprd1cdn.csgpimgs.com/i2/qWKiglpBgkedHNjmt343XIgkv56zgoGXGoku56-_3YY/116/image.jpg"
+                     alt="Grove Plaza - NAPA Auto Parts Building" class="main-image"
+                     onerror="this.onerror=null; this.src='https://placehold.co/1000x500/CCDDEE/4A5568?text=Image+Not+Available';">
+
+                <h2>Property Overview</h2>
+                <div class="data-grid">
+                    <div class="data-item">
+                        <strong>Purchase Price</strong>
+                        <span>$945,000</span>
+                    </div>
+                    <div class="data-item">
+                        <strong>Price/SF</strong>
+                        <span>$67.50</span>
+                    </div>
+                    <div class="data-item">
+                        <strong>Rentable Building Area (RBA)</strong>
+                        <span>13,362 SF</span>
+                    </div>
+                </div>
+
+                <h2>Current Financial Breakdown</h2>
+                <p class="text-center text-base text-gray-700 mb-3">
+                    Detailed financial overview with current tenancy, including Bochetto Day Spa.
+                </p>
+                <div class="data-grid">
+                    <div class="data-item">
+                        <strong>Total Rent Income</strong>
+                        <span>$66,864</span>
+                    </div>
+                    <div class="data-item">
+                        <strong>CAMs</strong>
+                        <span>$7,089</span>
+                    </div>
+                    <div class="data-item">
+                        <strong>Property Taxes</strong>
+                        <span>$10,215.22</span>
+                    </div>
+                    <div class="data-item">
+                        <strong>Total Insurance</strong>
+                        <span>$3,102.00</span>
+                    </div>
+                </div>
+                <div class="summary-box highlight">
+                    <p>Calculated Net Operating Income (NOI): <span class="font-bold">$60,635</span></p>
+                    <p>Yielding a Capitalization Rate (Cap Rate) of: <span class="cap-rate">7.08%</span></p>
+                </div>
+
+                <h2>Rent Roll Details</h2>
+                <div class="overflow-x-auto rounded-lg shadow">
+                    <table class="min-w-full bg-white">
+                        <thead>
+                            <tr>
+                                <th>Tenant</th>
+                                <th>RBA</th>
+                                <th>Expiration</th>
+                                <th>Rent</th>
+                                <th>Annual</th>
+                                <th>Total CAMs</th>
+                                <th>Total Monthly Income</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>NAPA Auto Parts</td>
+                                <td>6,924 SF</td>
+                                <td>08/2029</td>
+                                <td>$4,272</td>
+                                <td>$51,264</td>
+                                <td>$5,938.69</td>
+                                <td>$4,652.00</td>
+                                <td>They made a lump payment for property tax of $5,558.69
+                                    <details>
+                                        <summary>Lease Options & Terms</summary>
+                                        <p class="text-sm text-gray-700 pl-4 py-1">Two (2) five-year renewal options, NNN lease.</p>
+                                    </details>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Bochetto Day Spa</td>
+                                <td>2,800 SF</td>
+                                <td>08/2025</td>
+                                <td>$1,300</td>
+                                <td>$15,600</td>
+                                <td>$1,149.86</td>
+                                <td>$1,511.78</td>
+                                <td>Prop tax $85.28/Mo. ($1,023.36/yr)
+                                    <details>
+                                        <summary>Lease Options & Terms</summary>
+                                        <p class="text-sm text-gray-700 pl-4 py-1">12-month renewal option, NNN lease.</p>
+                                    </details>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Vacant</td>
+                                <td>4,200 SF</td>
+                                <td>--</td>
+                                <td>--</td>
+                                <td>--</td>
+                                <td>--</td>
+                                <td>--</td>
+                                <td>--</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2>Financial Breakdown: Day Spa Lease Not Renewed</h2>
+                <p class="text-center text-base text-gray-700 mb-3">
+                    Illustrates the immediate financial impact if Bochetto Day Spa does not renew their lease, highlighting the current income from NAPA Auto Parts and two vacant spaces (7,000 SF combined).
+                </p>
+
+                <div class="data-grid">
+                    <div class="data-item">
+                        <strong>Remaining Annual Rent Income</strong>
+                        <span id="remainingRent">$51,264</span>
+                    </div>
+                    <div class="data-item">
+                        <strong>Estimated Total Expenses</strong>
+                        <span id="estimatedExpenses">$19,256</span>
+                    </div>
+                </div>
+                <div class="summary-box warning">
+                    <p>Estimated Net Operating Income (NOI) with Vacancy: <span class="font-bold" id="vacantNOI">$43,885</span></p>
+                    <p>Estimated Capitalization Rate (Cap Rate) with Vacancy: <span class="cap-rate" id="vacantCapRate">4.64%</span></p>
+                    <p class="text-sm mt-4 text-gray-700">
+                        <em>Note: This scenario highlights the immediate impact of the Day Spa vacating. The estimated expenses reflect user-provided figures for CAMs and other owner-borne costs under this scenario. The significant value-add opportunity lies in re-leasing the vacant 7,000 SF.</em>
+                    </p>
+                </div>
+
+                <h2>Projected Fully Leased Financials (Value-Add Opportunity)</h2>
+                <p class="text-center text-base text-gray-700 mb-3">
+                    This projection illustrates the significant upside potential if the two vacant spaces (totaling 7,000 SF) are successfully leased, achieving full occupancy.
+                </p>
+                <div class="data-grid">
+                    <div class="data-item">
+                        <strong>Projected Total Rent Income</strong>
+                        <span>$92,064</span>
+                    </div>
+                    <div class="data-item">
+                        <strong>Projected Total Expenses</strong>
+                        <span>$13,317.22</span>
+                    </div>
+                </div>
+                <div class="summary-box highlight">
+                    <p>Projected Net Operating Income (NOI): <span class="font-bold">$78,747</span></p>
+                    <p>Projected Capitalization Rate (Cap Rate): <span class="cap-rate">8.33%</span></p>
+                </div>
+
+                <h2>Key Investment Highlights & Value-Add Opportunity</h2>
+                <ul class="notes-list">
+                    <li>
+                        <strong>Solid Anchor Tenant with Significant Upside:</strong> Acquire a property anchored by NAPA Auto Parts, a reputable national tenant, currently yielding a strong 7.08% cap rate. This provides stable in-place cash flow with immediate potential for substantial growth through lease-up.
+                    </li>
+                    <li>
+                        <strong>Immediate Value-Add Potential:</strong> With the Bochetto Day Spa lease expiring in August 2025, an incoming investor gains direct control over 2,800 SF, in addition to the existing 4,200 SF vacancy, totaling 7,000 SF of prime leasable space. This substantial vacancy (52% of RBA) offers a clear path to significantly increasing returns.
+                    </li>
+                    <li>
+                        <strong>Projected High Yield:</strong> Upon successful lease-up of the vacant 7,000 SF, the projected Net Operating Income (NOI) rises to $78,747, yielding an impressive 8.33% capitalization rate. This demonstrates a compelling value-add play, aligning with strategies for long-term portfolio growth.
+                    </li>
+                    <li>
+                        <strong>Strategic Regional Connectivity:</strong> Located along Pacific Hwy with convenient access to Hwy 99 and I-5, this property benefits from strong local community engagement and regional accessibility. While Cottage Grove may be considered a secondary market, its excellent highway access and proximity to major throughfares enhance its appeal for national and regional tenants.
+                    </li>
+                    <li>
+                        <strong>Recent Capital Improvements:</strong> Extensive renovations in 2024, including a new TPO roof with 12mm rigid insulation, two new HVAC units, and new exterior paint, significantly reduce immediate capital expenditure for a new owner, providing a modernized and turn-key opportunity for the existing NAPA tenancy.
+                    </li>
+                    <li>
+                        <strong>Flexible Investment Strategy:</strong> This asset caters to both investors seeking long-term, stable NNN income from NAPA and those looking for a hands-on value-add play by aggressively repositioning the vacant spaces, reflecting a blend of in-place returns and future growth potential in line with diversified portfolios.
+                    </li>
+                </ul>
+
+                <h2>Property Images</h2>
+                <div class="image-gallery">
+                    <img src="https://ahprd1cdn.csgpimgs.com/i2/SPrHWCS9AjqfV--OWXykdU_xBdTxrRrHZVKw1qqqqqqqq/116/image.jpg"
+                         alt="Property Exterior" class="gallery-image"
+                         onerror="this.onerror=null; this.src='https://placehold.co/300x200/CCDDEE/4A5568?text=Image+Not+Available';">
+                    <img src="https://ahprd1cdn.csgpimgs.com/i2/pmbDdM9uogA0EcoBJC3ODEmhzOgIU09s-sGAulXCJjU/116/image.jpg"
+                         alt="Property Exterior View" class="gallery-image"
+                         onerror="this.onerror=null; this.src='https://placehold.co/300x200/CCDDEE/4A5568?text=Image+Not+Available';">
+                    <img src="https://ahprd1cdn.csgpimgs.com/i2/TBYyJGyA6apH9LewdlppL5sNWb9_-Do3H9baAyULULE/116/image.jpg"
+                         alt="Interior Space" class="gallery-image"
+                         onerror="this.onerror=null; this.src='https://placehold.co/300x200/CCDDEE/4A5568?text=Image+Not+Available';">
+                    <img src="https://ahprd1cdn.csgpimgs.com/i2/h1PvyPzMoqdnrw_XUOhfpynJOnipQ8DrTqBMxR_bsI0/116/image.jpg"
+                         alt="Vacant Space Interior 2" class="gallery-image"
+                         onerror="this.onerror=null; this.src='https://placehold.co/300x200/CCDDEE/4A5568?text=Image+Not+Available';">
+                    <img src="https://ahprd1cdn.csgpimgs.com/i2/YqoYsslOS81BBWrPNbIreuUebJqjDMvweZx8eovik1k/116/image.jpg"
+                         alt="Bochetto Day Spa Interior" class="gallery-image"
+                         onerror="this.onerror=null; this.src='https://placehold.co/300x200/CCDDEE/4A5568?text=Image+Not+Available';">
+                </div>
+
+                <div class="footer">
+                    <p>&copy; 2025 Property Analysis. All rights reserved. Information deemed reliable but not guaranteed.</p>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const tab1Button = document.getElementById('tab1-button');
+                const tab2Button = document.getElementById('tab2-button');
+                const tab1Content = document.getElementById('tab1-content');
+                const tab2Content = document.getElementById('tab2-content');
+
+                function showTab(tabNumber) {
+                    if (tabNumber === 1) {
+                        tab1Button.classList.add('active');
+                        tab2Button.classList.remove('active');
+                        tab1Content.classList.add('active');
+                        tab2Content.classList.remove('active');
+                    } else {
+                        tab1Button.classList.remove('active');
+                        tab2Button.classList.add('active');
+                        tab1Content.classList.remove('active');
+                        tab2Content.classList.add('active');
+                    }
+                }
+
+                tab1Button.addEventListener('click', () => showTab(1));
+                tab2Button.addEventListener('click', () => showTab(2));
+
+                // Initialize the charts only when their respective tabs are active
+                // and re-render if the tab becomes active again.
+                const charts = {}; // To store chart instances
+
+                function initializeChart(canvasId, data, options) {
+                    const ctx = document.getElementById(canvasId);
+                    if (ctx) {
+                        // Destroy existing chart if it exists
+                        if (charts[canvasId]) {
+                            charts[canvasId].destroy();
+                        }
+                        charts[canvasId] = new Chart(ctx.getContext('2d'), {
+                            type: 'bar',
+                            data: data,
+                            options: options
+                        });
+                    }
+                }
+
+                // Data and options for Chart 1 (from original file 1)
+                const chart1Data = {
+                    labels: ['Current\n(With Day Spa)', 'Day Spa Vacancy\n(NAPA Only)', 'Fully Leased\n(Maximum Potential)'],
+                    datasets: [{
+                        label: 'Cap Rate (%)',
+                        data: [7.08, 4.64, 8.33],
+                        backgroundColor: [
+                            'rgba(14, 165, 233, 0.8)',
+                            'rgba(245, 158, 11, 0.8)',
+                            'rgba(34, 197, 94, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgb(14, 165, 233)',
+                            'rgb(245, 158, 11)',
+                            'rgb(34, 197, 94)'
+                        ],
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        borderSkipped: false,
+                    }]
+                };
+                const chart1Options = {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Capitalization Rate Performance & Projection',
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            },
+                            color: '#374151',
+                            padding: {
+                                top: 10,
+                                bottom: 15
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                            titleColor: 'white',
+                            bodyColor: 'white',
+                            borderColor: 'rgba(148, 163, 184, 0.2)',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    return `Cap Rate: ${context.parsed.x.toFixed(2)}%`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 10,
+                            title: {
+                                display: true,
+                                text: 'Cap Rate (%)',
+                                color: '#475569',
+                                font: {
+                                    size: 12
+                                },
+                                padding: { top: 0, bottom: 20 } // Added padding to bottom to push it down
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                },
+                                color: '#64748b',
+                                font: {
+                                    size: 10
+                                },
+                                padding: 5 // Reduced padding for x-axis ticks
+                            },
+                            grid: {
+                                color: 'rgba(148, 163, 184, 0.1)'
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                color: '#64748b',
+                                font: {
+                                    size: 12,
+                                    family: 'Inter'
+                                },
+                                padding: 10,
+                                mirror: false,
+                                align: 'center',
+                                maxRotation: 0,
+                                autoSkip: false // Prevent skipping labels if space is tight
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    elements: {
+                        bar: {
+                            borderRadius: 6
+                        }
+                    },
+                    layout: {
+                        padding: {
+                            left: 20, // Increased left padding for Y-axis labels
+                            right: 20,
+                            top: 10,
+                            bottom: 20 // Increased bottom padding for X-axis title
+                        }
+                    }
+                };
+
+                // Data and options for Chart 2 (from original file 2)
+                const purchasePrice = 945000;
+                const vacantScenarioNOI = 43885;
+                const vacantScenarioCapRate = (vacantScenarioNOI / purchasePrice) * 100;
+
+                const napaOnlyRentAnnual = 51264;
+                const vacantScenarioCAMs = 5938.69;
+                const vacantScenarioExpenses = 13317.22;
+                const totalVacantScenarioExpenses = vacantScenarioCAMs + vacantScenarioExpenses;
+
+                const fullyLeasedProjectedIncome = 92064;
+                const fullyLeasedProjectedExpenses = 13317.22;
+                const fullyLeasedProjectedNOI = 78747;
+                const fullyLeasedProjectedCapRate = (fullyLeasedProjectedNOI / purchasePrice) * 100;
+
+                const currentCapRate = 7.08;
+                const vacantDaySpaCapRate = 4.64;
+                const projectedCapRateFullyLeased = fullyLeasedProjectedCapRate;
+
+                const chart2Data = {
+                    labels: ['Current Cap Rate', 'Cap Rate (Day Spa Vacancy)', 'Projected Fully Leased'],
+                    datasets: [{
+                        label: 'Capitalization Rate (%)',
+                        data: [currentCapRate, vacantDaySpaCapRate, projectedCapRateFullyLeased],
+                        backgroundColor: [
+                            '#60a5fa',
+                            '#fca5a5',
+                            '#34d399'
+                        ],
+                        borderColor: [
+                            '#3b82f6',
+                            '#ef4444',
+                            '#059669'
+                        ],
+                        borderWidth: 1,
+                        borderRadius: 6,
+                    }]
+                };
+                const chart2Options = {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Capitalization Rate Performance & Projection',
+                            font: {
+                                size: 20,
+                                weight: 'bold'
+                            },
+                            color: '#374151',
+                            padding: {
+                                top: 10,
+                                bottom: 20
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += context.raw.toFixed(2) + '%';
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Cap Rate (%)',
+                                color: '#4b5563',
+                                font: {
+                                    size: 14
+                                }
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                },
+                                color: '#4b5563'
+                            },
+                            grid: {
+                                color: '#e5e7eb'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: false,
+                            },
+                            ticks: {
+                                color: '#4b5563',
+                                font: {
+                                    size: 14
+                                }
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                };
+
+                // Helper function to update the financial values in Version 2 tab
+                function updateFinancialsVersion2() {
+                    const vacantNOIElement = document.getElementById('vacantNOI');
+                    const vacantCapRateElement = document.getElementById('vacantCapRate');
+                    const remainingRentElement = document.getElementById('remainingRent');
+                    const estimatedExpensesElement = document.getElementById('estimatedExpenses');
+
+                    if (vacantNOIElement) {
+                        vacantNOIElement.textContent = `$${vacantScenarioNOI.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+                    }
+                    if (vacantCapRateElement) {
+                        vacantCapRateElement.textContent = `${vacantScenarioCapRate.toFixed(2)}%`;
+                    }
+                    if (remainingRentElement) {
+                        remainingRentElement.textContent = `$${napaOnlyRentAnnual.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+                    }
+                    if (estimatedExpensesElement) {
+                        estimatedExpensesElement.textContent = `$${totalVacantScenarioExpenses.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+                    }
+                }
+
+
+                // Initial load: show tab 1 and initialize its chart
+                showTab(1);
+                initializeChart('performanceChart1', chart1Data, chart1Options);
+
+                // Re-initialize charts when tabs are clicked
+                tab1Button.addEventListener('click', () => {
+                    showTab(1);
+                    initializeChart('performanceChart1', chart1Data, chart1Options);
+                });
+
+                tab2Button.addEventListener('click', () => {
+                    showTab(2);
+                    updateFinancialsVersion2(); // Update financials for Version 2 when its tab is active
+                    initializeChart('capRateChart', chart2Data, chart2Options);
+                });
+            });
+        </script>
+    </body>
+</html>
