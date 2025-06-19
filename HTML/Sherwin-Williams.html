@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sherwin-Williams Property Overview | For Sale</title>
+  <meta name="description" content="Commercial property for sale: Sherwin-Williams paint store at 19405 SW Tualatin Valley Hwy, Beaverton, OR. Investment grade tenant, NNN lease.">
+  <style>
+    /* CSS Variables */
+    :root {
+      --primary-color: #007BFF; /* A vibrant blue */
+      --primary-hover-color: #0056b3;
+      --sw-blue: #004a99; /* Sherwin-Williams Dark Blue */
+      --sw-red: #d9232a;  /* Sherwin-Williams Red */
+      --text-color: #333;
+      --light-text-color: #555;
+      --bg-color: #fff;
+      --light-bg-color: #f7f9fc; /* Slightly softer light background */
+      --border-color: #e0e0e0;
+      --font-family-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-family-headings: "Georgia", serif; /* Example for a more distinct heading font */
+      --border-radius: 6px;
+      --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --box-shadow-hover: 0 6px 16px rgba(0, 0, 0, 0.12);
+      --container-padding: 20px;
+    }
+
+    /* Base & Reset Styles */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html {
+      scroll-behavior: smooth; /* For smooth scrolling from nav links */
+    }
+    body {
+      font-family: var(--font-family-sans);
+      line-height: 1.7;
+      background-color: var(--light-bg-color);
+      color: var(--text-color);
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
+    .container {
+      max-width: 1100px;
+      margin: auto;
+      padding: 0 var(--container-padding); /* Horizontal padding */
+      width: 100%;
+    }
+
+    /* Typography */
+    h1, h2, h3 {
+      font-family: var(--font-family-headings);
+      color: var(--sw-blue);
+      margin-bottom: 0.75em;
+      line-height: 1.3;
+    }
+    h1 {
+      font-size: 2.5rem; /* ~40px */
+      margin-bottom: 0.5em;
+    }
+    h2 {
+      font-size: 2rem; /* ~32px */
+      border-bottom: 2px solid var(--sw-red);
+      padding-bottom: 0.3em;
+      margin-bottom: 1em;
+    }
+    h3 {
+      font-size: 1.5rem; /* ~24px */
+      color: var(--text-color);
+    }
+    p, ul, ol {
+      margin-bottom: 1em;
+      color: var(--light-text-color);
+    }
+    ul, ol {
+      padding-left: 20px;
+    }
+    li {
+      margin-bottom: 0.5em;
+    }
+    a {
+      color: var(--primary-color);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    a:hover, a:focus {
+      color: var(--primary-hover-color);
+      text-decoration: underline;
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block; /* Removes bottom space under image */
+    }
+
+    /* Header */
+    .site-header {
+      background-color: var(--bg-color);
+      padding: 20px 0;
+      text-align: center;
+      border-bottom: 1px solid var(--border-color);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .site-header img {
+      max-width: 400px; /* Control header image size */
+      margin: 0 auto 20px auto;
+      border-radius: var(--border-radius);
+    }
+
+    /* Navigation */
+    .site-nav {
+      background-color: var(--sw-blue);
+      padding: 10px 0;
+      position: sticky; /* Sticky nav */
+      top: 0;
+      z-index: 999;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .site-nav .container {
+      display: flex;
+      justify-content: space-between; /* Pushes menu toggle to one side */
+      align-items: center;
+    }
+    .nav-menu {
+      list-style: none;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 0;
+      padding: 0;
+    }
+    .nav-menu li {
+      margin: 0 15px; /* Horizontal margin only */
+    }
+    .nav-menu a {
+      color: var(--bg-color);
+      font-weight: bold;
+      padding: 10px 5px;
+      display: block;
+      text-decoration: none;
+    }
+    .nav-menu a:hover,
+    .nav-menu a:focus,
+    .nav-menu a.active-link { /* For JS-based active link styling */
+      color: var(--primary-color);
+      text-decoration: none;
+      border-bottom: 2px solid var(--primary-color);
+    }
+    .menu-toggle {
+      display: none; /* Hidden by default */
+      background: transparent;
+      color: white;
+      border: 1px solid white;
+      padding: 8px 12px;
+      font-size: 24px;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+    }
+
+    /* Main Content & Sections */
+    main {
+      padding: 0; /* Sections will handle their own padding */
+    }
+    section {
+      padding: 40px 0; /* Vertical padding for sections */
+    }
+    section:nth-child(odd) { /* Alternating background for sections */
+      background-color: var(--bg-color);
+    }
+    section:nth-child(even) {
+      background-color: var(--light-bg-color);
+    }
+    #home .container, #location .container, #financials .container {
+        max-width: 800px; /* Narrower container for text-heavy sections */
+    }
+
+
+    /* Property Details Section */
+    .property-details-grid {
+      display: grid;
+      grid-template-columns: 1fr; /* Default to single column */
+      gap: 30px;
+    }
+    @media (min-width: 768px) {
+      .property-details-grid {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Responsive columns */
+      }
+    }
+    .property-details-grid > div {
+      padding: 25px;
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+    }
+
+    /* Table */
+    .table-container {
+      overflow-x: auto; /* Makes table scrollable on small screens */
+      background-color: var(--bg-color);
+      padding: 15px;
+      border-radius: var(--border-radius);
+      border: 1px solid var(--border-color);
+      margin-top: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    table caption {
+      font-size: 1.2em;
+      font-weight: bold;
+      padding: 10px;
+      caption-side: top;
+      text-align: left;
+      color: var(--text-color);
+    }
+    th, td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+    th {
+      background-color: var(--light-bg-color);
+      font-weight: bold;
+      color: var(--sw-blue);
+    }
+    tr:last-child th,
+    tr:last-child td {
+        border-bottom: none;
+    }
+    tr:hover {
+        background-color: #f0f8ff; /* Light blue on hover for rows */
+    }
+
+    /* Buttons */
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-top: 25px;
+    }
+    .button, .pdf-button {
+      padding: 12px 25px;
+      text-decoration: none;
+      border-radius: var(--border-radius);
+      font-weight: 500;
+      transition: all 0.3s ease;
+      border: 1px solid transparent;
+      text-align: center;
+      display: inline-block;
+      cursor: pointer;
+    }
+    .pdf-button {
+      background-color: var(--light-bg-color);
+      color: var(--text-color);
+      border-color: var(--border-color);
+    }
+    .pdf-button:hover, .pdf-button:focus {
+      background-color: #e9ecef;
+      border-color: #ced4da;
+      box-shadow: var(--box-shadow-hover);
+      text-decoration: none;
+    }
+    .button.primary { /* Example of a primary button */
+      background-color: var(--sw-red);
+      color: white;
+    }
+    .button.primary:hover, .button.primary:focus {
+      background-color: #c8191f; /* Darker red */
+      box-shadow: var(--box-shadow-hover);
+      text-decoration: none;
+    }
+
+    /* Gallery */
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .gallery-item {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      cursor: pointer;
+    }
+    .gallery-item img {
+      width: 100%;
+      height: 250px; /* Fixed height for gallery images */
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+    .gallery-item img:hover {
+      transform: scale(1.05);
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.9);
+    }
+    .modal-content {
+      margin: auto; /* Vertically and horizontally center */
+      display: block;
+      width: 90%;
+      max-width: 800px;
+      max-height: 90vh; /* Max height to prevent overflow */
+      border-radius: var(--border-radius);
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    .modal-close {
+      color: #ccc;
+      position: absolute;
+      top: 15px;
+      right: 35px;
+      font-size: 40px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+    .modal-close:hover,
+    .modal-close:focus {
+      color: white;
+      text-decoration: none;
+    }
+
+    /* Footer */
+    .site-footer {
+      background-color: #333; /* Darker footer */
+      padding: 30px 0;
+      text-align: center;
+      color: #ccc;
+      font-size: 0.9em;
+    }
+    .site-footer p {
+        margin-bottom: 0;
+        color: #ccc;
+    }
+
+    /* Responsive Design - Mobile Menu */
+    @media (max-width: 768px) {
+      h1 { font-size: 2rem; }
+      h2 { font-size: 1.75rem; }
+      h3 { font-size: 1.3rem; }
+
+      .menu-toggle {
+        display: block; /* Show hamburger */
+      }
+      .nav-menu {
+        display: none; /* Hide menu by default */
+        flex-direction: column;
+        width: 100%;
+        background-color: var(--sw-blue); /* Same as nav bar */
+        position: absolute;
+        top: 100%; /* Position below the nav bar */
+        left: 0;
+        padding: 10px 0;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      }
+      .nav-menu.active {
+        display: flex; /* Show menu when active */
+      }
+      .nav-menu li {
+        margin: 0;
+        width: 100%;
+        text-align: center;
+      }
+      .nav-menu a {
+        padding: 15px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+      }
+      .nav-menu li:last-child a {
+        border-bottom: none;
+      }
+      .nav-menu a:hover, .nav-menu a:focus {
+        background-color: var(--primary-hover-color);
+        color: white;
+      }
+      .site-header img {
+        max-width: 80%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container">
+      <h1>Sherwin-Williams Property Overview</h1>
+      <img src="https://images.crexi.com/assets/1680318/cddf6f67dfa346e18e97bef44f5aaca3_1306x734.jpg"  alt="Sherwin Williams Store Front">
+    </div>
+  </header>
+
+  <nav class="site-nav">
+    <div class="container">
+      <a href="#home" style="color:white; font-weight:bold; text-decoration:none; font-size: 1.2em;">Property Sale</a>
+      <button id="menu-toggle" class="menu-toggle" aria-controls="nav-menu" aria-expanded="false" aria-label="Toggle navigation">
+        ☰ <!-- Hamburger Icon -->
+      </button>
+      <ul id="nav-menu" class="nav-menu">
+        <li><a href="#home">Home</a></li>
+        <li><a href="#property-details-section">Property Details</a></li>
+        <li><a href="#gallery-section">Gallery</a></li>
+        <li><a href="#location-section">Location</a></li>
+        <li><a href="#financials-section">Financials</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <!-- Home Section -->
+    <section id="home">
+      <div class="container">
+        <h2>From Lupe's Escape to Sherwin-Williams: A Transformation Story</h2>
+        <p>This offering presents an excellent opportunity to acquire a well-located commercial property that has undergone a significant transformation. Originally home to Lupe's Escape, a popular local eatery, the property has now been repurposed as a Sherwin-Williams paint store, leased to one of the world's leading paint and coatings companies.</p>
+        <p>A prime investment with a strong tenant in a growing area, this property promises stable returns and long-term value.</p>
+      </div>
+    </section>
+
+    <!-- Property Details Section -->
+    <section id="property-details-section">
+      <div class="container">
+        <h2>Property Highlights & Details</h2>
+        <div class="property-details-grid">
+          <div>
+            <h3>Site Information</h3>
+            <p><strong>Address:</strong> 19405 SW Tualatin Valley Hwy, Beaverton, OR 97003</p>
+            <p><strong>Tenant:</strong> Sherwin-Williams (BBB Rating from S&P)</p>
+            <p><strong>Building Size:</strong> 3,500 SF</p>
+            <p><strong>Parcel Size:</strong> ±0.47 Acres (±20,473 SF)</p>
+            <p><strong>Parking Spaces:</strong> 14 (Ratio: 4/1000 SF)</p>
+          </div>
+          <div>
+            <h3>Investment Highlights</h3>
+            <ul>
+              <li>Investment Grade Tenant with BBB Rating from S&P</li>
+              <li>NNN Lease with Minimal Landlord Responsibilities</li>
+              <li>Approximately 7 Years on the Lease Remaining</li>
+              <li>Three (3), Five (5) Year Options to Extend</li>
+              <li>±33,690 Average Daily Traffic Volume (ADT)</li>
+              <li>Located in an Area of Dense Residential Housing and New Suburban Subdivisions</li>
+            </ul>
+          </div>
+        </div>
+        <div class="property-details-grid" style="margin-top: 30px;">
+             <div>
+                <h3>Rent Increase Schedule</h3>
+                <ul>
+                  <li>Current Term: $136,500 per year</li>
+                  <li>Next Rent Increase (6/1/2027): 12.51%</li>
+                  <li>Option #1 (6/1/2032): 15.06%</li>
+                  <li>Option #2 (6/1/2037): 12.50%</li>
+                  <li>Option #3 (6/1/2042): 14.06%</li>
+                </ul>
+             </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Financial Summary Section -->
+    <section id="financials-table-section">
+        <div class="container">
+            <h2>Financial Summary</h2>
+            <div class="table-container">
+              <table>
+                <caption>Lease Term Financial Overview</caption>
+                <thead>
+                  <tr>
+                    <th>Term</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Rent/Year</th>
+                    <th>Rent/Month</th>
+                    <th>Rent/SF</th>
+                    <th>Rent Increase</th>
+                    <th>Yield</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Current Term</td>
+                    <td>5/31/2022</td>
+                    <td>5/31/2027</td>
+                    <td>$136,500.00</td>
+                    <td>$11,375.00</td>
+                    <td>$39.00</td>
+                    <td>-</td>
+                    <td>5.14%</td>
+                  </tr>
+                  <tr>
+                    <td>Rent Increase 6/1/2027</td>
+                    <td>6/1/2027</td>
+                    <td>5/31/2032</td>
+                    <td>$153,579.96</td>
+                    <td>$12,798.33</td>
+                    <td>$43.88</td>
+                    <td>12.51%</td>
+                    <td>5.78%</td>
+                  </tr>
+                  <tr>
+                    <td>Option #1 6/1/2032</td>
+                    <td>6/1/2032</td>
+                    <td>5/31/2037</td>
+                    <td>$176,715.00</td>
+                    <td>$14,726.25</td>
+                    <td>$50.49</td>
+                    <td>15.06%</td>
+                    <td>6.65%</td>
+                  </tr>
+                  <tr>
+                    <td>Option #2 6/1/2037</td>
+                    <td>6/1/2037</td>
+                    <td>5/31/2042</td>
+                    <td>$198,800.04</td>
+                    <td>$16,566.67</td>
+                    <td>$56.80</td>
+                    <td>12.50%</td>
+                    <td>7.48%</td>
+                  </tr>
+                  <tr>
+                    <td>Option #3 6/1/2042</td>
+                    <td>6/1/2042</td>
+                    <td>5/31/2047</td>
+                    <td>$223,650.00</td>
+                    <td>$18,637.50</td>
+                    <td>$63.90</td>
+                    <td>14.06%</td>
+                    <td>8.41%</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section id="gallery-section">
+      <div class="container">
+        <h2>Property Gallery</h2>
+        <div class="gallery">
+          <div class="gallery-item">
+            <img id="gallery-image-1" src="https://images.crexi.com/assets/1680318/c201bc6905ff44b59801912062a61548_1306x734.jpg"  alt="Sherwin Williams Store Front - Main View" onclick="openModal('gallery-image-1')">
+          </div>
+          <div class="gallery-item">
+            <img id="gallery-image-2" src="https://shoppingcenter-report.neocities.org/On-Markets/Sherwin-Williams/Screenshot%202025-06-17%20115726.png"  alt="Historical Aerial View of Property Location" onclick="openModal('gallery-image-2')">
+          </div>
+          <div class="gallery-item">
+            <img id="gallery-image-3" src="https://shoppingcenter-report.neocities.org/On-Markets/Sherwin-Williams/Screenshot%202025-06-17%20115944.png"  alt="Current Aerial View of Property and Surrounding Area" onclick="openModal('gallery-image-3')">
+          </div>
+          <!-- Add more gallery items as needed -->
+          <!-- <div class="gallery-item">
+            <img id="gallery-image-4" src="placeholder-image4.jpg"  alt="Property Feature 4" onclick="openModal('gallery-image-4')">
+          </div> -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Location Section -->
+    <section id="location-section">
+      <div class="container">
+        <h2>Location Overview</h2>
+        <p>The property is strategically situated along Tualatin Valley Hwy (Hwy 8), a major thoroughfare in Beaverton, Oregon, benefiting from excellent visibility and strong area demographics. With over 326,105 residents within a five-mile radius, the area is densely populated and continues to experience significant growth.</p>
+        <p>Nearby developments such as Reed's Crossing, Butternut Creek, and South Cooper Mountain further enhance the property's appeal by bringing in new residents and increasing commercial activity in the vicinity. The location offers easy access and is surrounded by a mix of retail, residential, and service-based businesses, making it a hub for local consumers.</p>
+        <!-- Consider embedding a Google Map here -->
+        <!-- Example: <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2797.669584485542!2d-122.87903868444155!3d45.47895097910118!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x54950df683696f5b%3A0xf6397e5a07c0b8b8!2s19405%20SW%20Tualatin%20Valley%20Hwy%2C%20Beaverton%2C%20OR%2097003!5e0!3m2!1sen!2sus!4v1626359141029!5m2!1sen!2sus" width="100%" height="450" style="border:0; border-radius: var(--border-radius); margin-top:20px;" allowfullscreen="" loading="lazy"></iframe> -->
+      </div>
+    </section>
+
+    <!-- Financials & Downloads Section -->
+    <section id="financials-section">
+      <div class="container">
+        <h2>Additional Resources & Downloads</h2>
+        <p>For more detailed information, due diligence materials, and financial reports, please review the following documents or contact us for a full offering memorandum.</p>
+        <div class="button-group">
+          <a href="https://shoppingcenter-report.neocities.org/On-Markets/Sherwin-Williams/Washington%20County%20Public%20Access%20_%20Property%20Detail.pdf"  class="pdf-button" target="_blank" rel="noopener noreferrer">Property Taxes Document</a>
+          <a href="https://shoppingcenter-report.neocities.org/On-Markets/Sherwin-Williams/SW%20-%20Store%20Trends%20Report.pdf"  class="pdf-button" target="_blank" rel="noopener noreferrer">Store Trends Report</a>
+          <a href="https://shoppingcenter-report.neocities.org/On-Markets/Sherwin-Williams/RetailStat%20Financial%20-%20Financial%20Snapshot.pdf"  class="pdf-button" target="_blank" rel="noopener noreferrer">Financial Snapshot</a>
+          <a href="https://shoppingcenter-report.neocities.org/On-Markets/Sherwin-Williams/Sherwin_Williams%20-%20TV%20Hwy.pdf"  class="pdf-button" target="_blank" rel="noopener noreferrer">Full Package</a>
+          <!-- Example Primary CTA -->
+          <!-- <a href="mailto:your.email@example.com?subject=Inquiry%20about%20Sherwin-Williams%20Property" class="button primary">Contact Agent</a> -->
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal for Gallery Images -->
+  <div id="myModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-image-alt">
+    <span class="modal-close" onclick="closeModal()" aria-label="Close image viewer">×</span>
+    <img class="modal-content" id="imgModal" alt="">
+    <!-- For accessibility, you might add a hidden caption or use aria-describedby if image alt is not sufficient -->
+    <!-- <p id="modal-image-alt" class="visually-hidden">Enlarged image view</p> -->
+  </div>
+
+  <script>
+    // Set current year in footer
+    document.getElementById("currentYear").textContent = new Date().getFullYear();
+
+    // Mobile Menu Toggle
+    const menuToggle = document.getElementById("menu-toggle");
+    const navMenu = document.getElementById("nav-menu");
+
+    menuToggle.addEventListener("click", function () {
+      const isExpanded = navMenu.classList.toggle("active");
+      menuToggle.setAttribute("aria-expanded", isExpanded);
+    });
+
+    // Smooth Scroll for Nav Links & Close Mobile Menu
+    document.querySelectorAll('.nav-menu a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href');
+        const targetElement = document.querySelector(targetId);
+
+        if (targetElement) {
+          targetElement.scrollIntoView({
+            behavior: 'smooth'
+          });
+
+          // Close mobile menu if open
+          if (navMenu.classList.contains("active")) {
+            navMenu.classList.remove("active");
+            menuToggle.setAttribute('aria-expanded', 'false');
+          }
+        }
+      });
+    });
+
+    // Modal functionality
+    const modal = document.getElementById("myModal");
+    const modalImg = document.getElementById("imgModal");
+
+    function openModal(imageId) {
+      const img = document.getElementById(imageId);
+      modal.style.display = "block";
+      modalImg.src = img.src;
+      modalImg.alt = img.alt; // Set alt text for modal image
+      document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    }
+
+    function closeModal() {
+      modal.style.display = "none";
+      document.body.style.overflow = 'auto'; // Restore background scrolling
+    }
+
+    // Close modal when clicking outside the image
+    window.addEventListener("click", function (event) {
+      if (event.target === modal) {
+        closeModal();
+      }
+    });
+
+    // Close modal with Escape key
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && modal.style.display === "block") {
+        closeModal();
+      }
+    });
+  </script>
+</body>
+</html>
