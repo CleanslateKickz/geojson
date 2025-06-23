@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Property Listings Widget</title>
+
+    <!-- 1. Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- 2. Grist Plugin API for communication with the document -->
+    <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+    
+    <!-- 3. Lucide Icons via CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- 4. Custom Styles and Animations -->
+    <style>
+        /* Using a common font */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f9ff; /* Equivalent to from-sky-100 */
+            background-image: linear-gradient(to bottom, #f0f9ff, #ffffff);
+        }
+        
+        /* Fade-in animation for cards */
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-fadeIn {
+          animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        /* Modal animations */
+        @keyframes modal-bg-fade-in {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes modal-content-zoom-in {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.95); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .modal-open .modal-backdrop {
+            animation: modal-bg-fade-in 0.2s ease-out forwards;
+        }
+
+        .modal-open .modal-content {
+            animation: modal-content-zoom-in 0.2s ease-out forwards;
+        }
+
+        /* Ensure lucide icons are sized correctly */
+        .lucide {
+            width: 1em;
+            height: 1em;
+            display: inline-block;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-b from-sky-100 to-white min-h-screen">
+
+    <!-- App Container -->
+    <div class="container mx-auto px-4 py-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-slate-800">Commercial Property Listings</h1>
+            <p class="text-slate-600 mt-2">Browse our exclusive investment opportunities</p>
+        </header>
+
+        <!-- Filter Bar -->
+        <div id="filter-bar" class="mb-8 p-4 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm flex flex-col sm:flex-row items-center gap-4 sticky top-4 z-10">
+            <div class="flex-grow w-full">
+                <label for="type-filter" class="sr-only">Property Type</label>
+                <select id="type-filter" class="w-full p-2 border border-gray-300 rounded-md bg-white">
+                    <option value="all">All Property Types</option>
+                </select>
+            </div>
+            <div class="flex-grow w-full">
+                <label for="days-filter" class="sr-only">Days on Market</label>
+                <select id="days-filter" class="w-full p-2 border border-gray-300 rounded-md bg-white">
+                    <option value="all">All Time</option>
+                    <option value="7">Last 7 Days</option>
+                    <option value="30">Last 30 Days</option>
+                    <option value="90">Last 90 Days</option>
+                </select>
+            </div>
+            <button id="reset-filters-button" class="px-4 py-2 bg-slate-600 text-white rounded-md hover:bg-slate-700 transition-colors w-full sm:w-auto">
+                Reset
+            </button>
+        </div>
+
+
+        <!-- Loading / Error / Content Area -->
+        <div id="status-message" class="text-center text-slate-500">Loading widget...</div>
+        <div id="property-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Property cards will be injected here by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Modal Container (initially hidden) -->
+    <div id="modal-container" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <!-- Backdrop -->
+        <div id="modal-backdrop" class="fixed inset-0 bg-black/80"></div>
+
+        <!-- Modal Content -->
+        <div class="modal-content fixed left-1/2 top-1/2 w-full max-w-3xl -translate-x-1/2 -translate-y-1/2">
+            <div class="relative max-h-[90vh] overflow-y-auto bg-white rounded-lg shadow-xl">
+                <!-- Close Button -->
+                <button id="modal-close-button" class="absolute right-4 top-4 text-gray-400 hover:text-gray-600 z-10">
+                    <svg class="lucide lucide-x h-6 w-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+
+                <!-- Dynamic Content Area -->
+                <div id="modal-body">
+                    <!-- Modal content will be injected here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- HTML TEMPLATES -->
+    <template id="property-card-template">
+        <!-- CHANGE: Updated card structure for a cleaner, more detailed look -->
+        <div class="group bg-white rounded-lg border border-gray-200 hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col overflow-hidden">
+            <div class="relative overflow-hidden h-48">
+                <img data-template-field="photo_url" alt="" class="w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-300">
+                <div data-template-field="Property_Type" class="absolute top-3 right-3 bg-white/90 text-slate-700 text-xs px-2 py-1 rounded-full font-semibold shadow-sm backdrop-blur-sm"></div>
+            </div>
+            <div class="p-4 flex-grow flex flex-col">
+                <h3 data-template-field="Property_Name" class="text-lg font-bold text-gray-800 truncate" title=""></h3>
+                <p data-template-field="Address" class="text-sm text-gray-500 flex items-center gap-2 mt-1 truncate">
+                    <i data-lucide="map-pin" class="lucide h-4 w-4 flex-shrink-0"></i>
+                    <span class="truncate"></span>
+                </p>
+                <div class="mt-4 pt-4 border-t border-gray-100 space-y-2 flex-grow">
+                    <div class="flex justify-between text-sm">
+                        <p class="text-gray-500 flex items-center gap-2"><i data-lucide="dollar-sign" class="lucide h-4 w-4 text-green-500"></i> Price</p>
+                        <p data-template-field="Price" class="font-semibold text-gray-700"></p>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <p class="text-gray-500 flex items-center gap-2"><i data-lucide="trending-up" class="lucide h-4 w-4 text-blue-500"></i> Cap Rate</p>
+                        <p data-template-field="Cap_Rate" class="font-semibold text-gray-700"></p>
+                    </div>
+                     <div class="flex justify-between text-sm">
+                        <p class="text-gray-500 flex items-center gap-2"><i data-lucide="ruler" class="lucide h-4 w-4 text-orange-500"></i> Size</p>
+                        <p data-template-field="RBA" class="font-semibold text-gray-700"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+    
+    <template id="modal-body-template">
+        <div class="relative">
+            <img data-template-field="photo_url" class="w-full h-80 object-contain bg-slate-100 rounded-t-lg">
+        </div>
+        <div class="p-6">
+            <h2 data-template-field="Property_Name" class="text-2xl font-bold text-gray-800"></h2>
+            <p data-template-field="Address" class="text-md text-gray-500 flex items-center gap-2 pt-1">
+                 <i data-lucide="map-pin" class="lucide h-4 w-4"></i>
+                 <span></span>
+            </p>
+        </div>
+        <div class="px-6 pb-6 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            <div class="p-3 bg-slate-50 rounded-lg">
+                <h4 class="text-sm text-gray-500">Price</h4>
+                <p data-template-field="Price" class="font-bold text-lg text-green-600"></p>
+            </div>
+            <div class="p-3 bg-slate-50 rounded-lg">
+                <h4 class="text-sm text-gray-500">Building Size</h4>
+                <p data-template-field="RBA" class="font-bold text-lg"></p>
+            </div>
+            <div class="p-3 bg-slate-50 rounded-lg">
+                <h4 class="text-sm text-gray-500">Cap Rate</h4>
+                <p data-template-field="Cap_Rate" class="font-bold text-lg"></p>
+            </div>
+            <div class="p-3 bg-slate-50 rounded-lg">
+                <h4 class="text-sm text-gray-500">Type</h4>
+                <p data-template-field="Property_Type" class="font-bold text-lg"></p>
+            </div>
+        </div>
+        <div class="px-6 pb-6">
+            <h4 class="font-bold mb-2">Description</h4>
+            <p data-template-field="Notes" class="text-sm text-gray-600"></p>
+        </div>
+        <div class="px-6 pb-6">
+            <h4 class="font-bold mb-3">External Resources</h4>
+            <div data-template-field="links" class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            </div>
+        </div>
+    </template>
+
+    <!-- MAIN JAVASCRIPT LOGIC -->
+    <script type="module">
+        // --- GLOBAL STATE AND DOM ELEMENTS ---
+        let allRecords = []; // To store the original dataset from Grist
+        const propertyGrid = document.getElementById('property-grid');
+        const cardTemplate = document.getElementById('property-card-template');
+        const statusMessage = document.getElementById('status-message');
+        const modalContainer = document.getElementById('modal-container');
+        const modalBody = document.getElementById('modal-body');
+        const modalBodyTemplate = document.getElementById('modal-body-template');
+        const typeFilterSelect = document.getElementById('type-filter');
+        const daysFilterSelect = document.getElementById('days-filter');
+        const resetButton = document.getElementById('reset-filters-button');
+
+        // --- FORMATTERS ---
+        const formatters = {
+            Price: (val) => val ? `$${Number(val).toLocaleString('en-US')}` : 'N/A',
+            RBA: (val) => val ? `${Number(val).toLocaleString()} sq ft` : 'N/A',
+            Cap_Rate: (val) => val ? `${(Number(val) * 100).toFixed(2)}%` : 'N/A',
+            default: (val) => val || 'N/A',
+        };
+
+        // --- HELPERS ---
+        function copyToClipboard(text, button) {
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i data-lucide="check" class="lucide h-4 w-4 mr-2"></i> Copied!';
+                lucide.createIcons();
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    lucide.createIcons();
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+                const originalText = button.innerHTML;
+                button.textContent = 'Copy Failed';
+                 setTimeout(() => {
+                    button.innerHTML = originalText;
+                    lucide.createIcons();
+                }, 2000);
+            });
+        }
+
+
+        // --- RENDERING LOGIC ---
+        function renderProperties(recordsToRender) {
+            propertyGrid.innerHTML = ''; 
+
+            if (!recordsToRender || recordsToRender.length === 0) {
+                statusMessage.textContent = allRecords.length > 0 ? 'No properties match the current filters.' : 'No properties found in the table. Please add some data.';
+                statusMessage.style.display = 'block';
+                return;
+            }
+            statusMessage.style.display = 'none';
+
+            recordsToRender.forEach((record, index) => {
+                if (!record || typeof record !== 'object') return;
+                const card = cardTemplate.content.cloneNode(true);
+                const cardElement = card.firstElementChild;
+                cardElement.style.animationDelay = `${index * 50}ms`;
+                cardElement.classList.add('animate-fadeIn');
+
+                card.querySelectorAll('[data-template-field]').forEach(el => {
+                    const field = el.dataset.templateField;
+                    const value = record[field];
+                    const formatter = formatters[field] || formatters.default;
+                    
+                    if(field === 'Property_Name'){
+                        el.textContent = formatter(value);
+                        el.title = value; // Add full name to title attribute for hover
+                    } else if (field === 'photo_url') {
+                        el.src = value || `https://placehold.co/600x400/e2e8f0/64748b?text=${encodeURIComponent(record.Property_Name || 'No Image')}`;
+                        el.alt = record.Property_Name;
+                    } else if (el.tagName === 'P' && el.querySelector('span')) {
+                        el.querySelector('span').textContent = formatter(value);
+                    } else {
+                        el.textContent = formatter(value);
+                    }
+                });
+                cardElement.addEventListener('click', () => showModal(record));
+                propertyGrid.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        function showModal(record) {
+            if (!record) return;
+            const modalContent = modalBodyTemplate.content.cloneNode(true);
+            modalContent.querySelectorAll('[data-template-field]').forEach(el => {
+                const field = el.dataset.templateField;
+                const value = record[field];
+                const formatter = formatters[field] || formatters.default;
+                if (field === 'links') {
+                    const linksContainer = el;
+                    linksContainer.innerHTML = '';
+                    const linkButton = (url, icon, text) => `
+                        <a href="${url}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 py-2 border border-slate-200 bg-white hover:bg-slate-100 w-full">
+                            <i data-lucide="${icon}" class="lucide h-4 w-4 mr-2"></i> ${text}
+                        </a>`;
+                    
+                    const copyButton = (filePath, icon, text) => `
+                        <button data-copy-path="${filePath}" class="om-copy-button inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 py-2 border border-slate-200 bg-white hover:bg-slate-100 w-full">
+                            <i data-lucide="${icon}" class="lucide h-4 w-4 mr-2"></i> ${text}
+                        </button>`;
+
+                    if (record.CoStar) linksContainer.innerHTML += linkButton(record.CoStar, 'external-link', 'View on CoStar');
+                    if (record.Crexi) linksContainer.innerHTML += linkButton(record.Crexi, 'external-link', 'View on Crexi');
+                    if (record.OM) linksContainer.innerHTML += copyButton(record.OM, 'copy', 'Copy OM Link');
+
+                    if (linksContainer.innerHTML === '') {
+                        linksContainer.innerHTML = '<p class="text-sm text-gray-500 col-span-full">No external resources provided.</p>';
+                    }
+                } else if (field === 'photo_url') {
+                    el.src = value || `https://placehold.co/800x600/e2e8f0/64748b?text=${encodeURIComponent(record.Property_Name || 'No Image')}`;
+                } else if (el.tagName === 'P' && el.querySelector('span')) {
+                    el.querySelector('span').textContent = formatter(value);
+                } else {
+                    el.textContent = formatter(value);
+                }
+            });
+            
+            modalBody.innerHTML = '';
+            modalBody.appendChild(modalContent);
+
+            modalBody.querySelectorAll('.om-copy-button').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const path = e.currentTarget.dataset.copyPath;
+                    copyToClipboard(path, e.currentTarget);
+                });
+            });
+            
+            modalContainer.classList.remove('hidden');
+            modalContainer.classList.add('modal-open');
+            lucide.createIcons();
+        }
+
+        function hideModal() {
+            modalContainer.classList.add('hidden');
+            modalContainer.classList.remove('modal-open');
+            modalBody.innerHTML = '';
+        }
+
+        // --- FILTERING LOGIC ---
+        function populateTypeFilter(records) {
+            const types = new Set(records.map(r => r.Property_Type).filter(Boolean).sort());
+            while (typeFilterSelect.options.length > 1) {
+                typeFilterSelect.remove(1);
+            }
+            types.forEach(type => {
+                const option = document.createElement('option');
+                option.value = type;
+                option.textContent = type;
+                typeFilterSelect.appendChild(option);
+            });
+        }
+
+        function applyFiltersAndRender() {
+            const typeFilterValue = typeFilterSelect.value;
+            const daysFilterValue = daysFilterSelect.value;
+            let filteredRecords = [...allRecords];
+
+            if (typeFilterValue !== 'all') {
+                filteredRecords = filteredRecords.filter(r => r.Property_Type === typeFilterValue);
+            }
+
+            if (daysFilterValue !== 'all') {
+                const today = new Date();
+                const days = parseInt(daysFilterValue, 10);
+                filteredRecords = filteredRecords.filter(r => {
+                    if (!r.Date_Listed) return false;
+                    const listedDate = new Date(r.Date_Listed * 1000);
+                    const diffTime = Math.abs(today - listedDate);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    return diffDays <= days;
+                });
+            }
+            renderProperties(filteredRecords);
+        }
+
+        // --- EVENT LISTENERS AND INITIALIZATION ---
+        typeFilterSelect.addEventListener('change', applyFiltersAndRender);
+        daysFilterSelect.addEventListener('change', applyFiltersAndRender);
+        
+        resetButton.addEventListener('click', () => {
+            typeFilterSelect.value = 'all';
+            daysFilterSelect.value = 'all';
+            applyFiltersAndRender();
+        });
+
+        document.getElementById('modal-close-button').addEventListener('click', hideModal);
+        document.getElementById('modal-backdrop').addEventListener('click', hideModal);
+
+        grist.ready({ requiredAccess: 'read table' });
+
+        grist.onRecords((records) => {
+            allRecords = records;
+            populateTypeFilter(records);
+            applyFiltersAndRender();
+        });
+    </script>
+</body>
+</html>
