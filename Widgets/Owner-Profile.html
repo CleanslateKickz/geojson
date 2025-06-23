@@ -6,364 +6,94 @@
     <title>Dynamic Owner Information Widget</title>
     <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        /* --- (CSS unchanged, omitted for brevity; see your original for full styles) --- */
+        /* ... All your existing CSS goes here ... */
+        * {margin:0;padding:0;box-sizing:border-box;}
+        body {font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,sans-serif;background:linear-gradient(135deg,#f0f9ff 0%,#fff 100%);min-height:100vh;padding:8px;overflow-x:hidden;}
+        .widget-container {width:100%;background:#fff;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.1);overflow:hidden;min-height:calc(100vh - 16px);}
+        .widget-header {background:linear-gradient(135deg,#2c3e50 0%,#3498db 100%);color:#fff;padding:16px;position:relative;overflow:hidden;display:flex;align-items:center;gap:16px;}
+        .widget-header::before {content:'';position:absolute;top:-50%;right:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(255,255,255,0.1) 0%,transparent 50%);animation:shimmer 4s ease-in-out infinite;}
+        @keyframes shimmer {0%,100%{transform:rotate(0deg);}50%{transform:rotate(180deg);}}
+        .profile-image-container {position:relative;z-index:2;flex-shrink:0;}
+        .profile-image {width:80px;height:80px;border-radius:50%;border:4px solid rgba(255,255,255,0.3);object-fit:cover;transition:all 0.3s ease;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;color:#fff;font-size:32px;font-weight:bold;}
+        .profile-image:hover {transform:scale(1.05);border-color:rgba(255,255,255,0.6);}
+        .header-info {flex:1;position:relative;z-index:2;}
+        .owner-title {font-size:24px;font-weight:700;margin-bottom:6px;}
+        .owner-subtitle {font-size:14px;opacity:.9;}
+        .widget-content {padding:16px;max-height:calc(100vh - 140px);overflow-y:auto;}
+        .no-data {text-align:center;padding:40px 20px;color:#7f8c8d;}
+        .no-data-icon {font-size:48px;margin-bottom:16px;}
+        .info-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:16px;}
+        .info-card {background:#f8f9fa;border-radius:8px;padding:12px;border-left:3px solid #3498db;transition:all 0.3s ease;position:relative;overflow:hidden;}
+        .info-card:hover {transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.1);border-left-color:#e74c3c;}
+        .card-title {font-size:11px;font-weight:600;color:#7f8c8d;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
+        .card-value {font-size:14px;font-weight:600;color:#2c3e50;line-height:1.3;}
+        .status-badges {display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
+        /* Tag badge base */
+.badge {
+    display: inline-block;
+    padding: 0.25em 0.9em;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .5px;
+    margin-right: 6px;
+    margin-bottom: 4px;
+    background: #eee;
+    color: #333;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    border: none;
+    vertical-align: middle;
+    transition: background 0.2s, color 0.2s;
+    user-select: none;
+}
+/* Tag color classes, based on your images (add/adjust as needed) */
+.badge-red     { background: #fce4e4; color: #d32f2f; }
+.badge-orange  { background: #fff3e0; color: #f57c00; }
+.badge-yellow  { background: #fffde7; color: #fbc02d; }
+.badge-green   { background: #e8f5e9; color: #388e3c; }
+.badge-blue    { background: #e3f2fd; color: #1976d2; }
+.badge-purple  { background: #f3e5f5; color: #8e24aa; }
+.badge-cyan    { background: #e0f7fa; color: #0097a7; }
+.badge-grey    { background: #ececec; color: #616161; }
+.badge-dark    { background: #263238; color: #fff; }
+.badge-black   { background: #111; color: #fff; }
+.badge-pink    { background: #ffebee; color: #c2185b; }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #f0f9ff 0%, #ffffff 100%);
-            min-height: 100vh;
-            padding: 8px;
-            overflow-x: hidden;
-        }
-
-        .widget-container {
-            width: 100%;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-            overflow: hidden;
-            min-height: calc(100vh - 16px);
-        }
-
-        .widget-header {
-            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
-            color: white;
-            padding: 16px;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .widget-header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 50%);
-            animation: shimmer 4s ease-in-out infinite;
-        }
-
-        @keyframes shimmer {
-            0%, 100% { transform: rotate(0deg); }
-            50% { transform: rotate(180deg); }
-        }
-
-        .profile-image-container {
-            position: relative;
-            z-index: 2;
-            flex-shrink: 0;
-        }
-
-        .profile-image {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            border: 4px solid rgba(255,255,255,0.3);
-            object-fit: cover;
-            transition: all 0.3s ease;
-            background: rgba(255,255,255,0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 32px;
-            font-weight: bold;
-        }
-
-        .profile-image:hover {
-            transform: scale(1.05);
-            border-color: rgba(255,255,255,0.6);
-        }
-
-        .header-info {
-            flex: 1;
-            position: relative;
-            z-index: 2;
-        }
-
-        .owner-title {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 6px;
-        }
-
-        .owner-subtitle {
-            font-size: 14px;
-            opacity: 0.9;
-        }
-
-        .widget-content {
-            padding: 16px;
-            max-height: calc(100vh - 140px);
-            overflow-y: auto;
-        }
-
-        .no-data {
-            text-align: center;
-            padding: 40px 20px;
-            color: #7f8c8d;
-        }
-
-        .no-data-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-        }
-
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .info-card {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 12px;
-            border-left: 3px solid #3498db;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .info-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-            border-left-color: #e74c3c;
-        }
-
-        .card-title {
-            font-size: 11px;
-            font-weight: 600;
-            color: #7f8c8d;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 4px;
-        }
-
-        .card-value {
-            font-size: 14px;
-            font-weight: 600;
-            color: #2c3e50;
-            line-height: 1.3;
-        }
-
-        .status-badges {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-bottom: 16px;
-        }
-
-        .badge {
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 10px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-            transition: all 0.3s ease;
-        }
-
-        .badge:hover {
-            transform: scale(1.05);
-        }
-
-        .badge-contact { background: linear-gradient(135deg, #27ae60, #2ecc71); color: white; }
-        .badge-lead { background: linear-gradient(135deg, #f39c12, #e67e22); color: white; }
-        .badge-friendly { background: linear-gradient(135deg, #9b59b6, #8e44ad); color: white; }
-        .badge-mom-pop { background: linear-gradient(135deg, #34495e, #2c3e50); color: white; }
-        .badge-developer { background: linear-gradient(135deg, #16a085, #1abc9c); color: white; }
-        .badge-buy-side { background: linear-gradient(135deg, #2980b9, #3498db); color: white; }
-
-        .contact-section {
-            background: linear-gradient(135deg, #ecf0f1, #bdc3c7);
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 16px;
-        }
-
-        .section-title {
-            font-size: 16px;
-            font-weight: 700;
-            color: #2c3e50;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .contact-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 8px;
-        }
-
-        .contact-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px;
-            background: white;
-            border-radius: 6px;
-            transition: all 0.3s ease;
-            font-size: 13px;
-        }
-
-        .contact-item:hover {
-            background: #f1f2f6;
-            transform: translateX(2px);
-        }
-
-        .contact-icon {
-            width: 20px;
-            height: 20px;
-            background: linear-gradient(135deg, #3498db, #2980b9);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 10px;
-            font-weight: bold;
-            flex-shrink: 0;
-        }
-
-        .contact-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .contact-label {
-            font-size: 10px;
-            color: #7f8c8d;
-            font-weight: 600;
-        }
-
-        .contact-value {
-            font-size: 12px;
-            color: #2c3e50;
-            font-weight: 500;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .activity-section {
-            background: linear-gradient(135deg, #ffffff, #f8f9fa);
-            border-radius: 8px;
-            padding: 16px;
-            border: 1px solid #e9ecef;
-            margin-bottom: 16px;
-        }
-
-        .timeline-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 8px;
-            padding: 8px 0;
-            border-bottom: 1px solid #e9ecef;
-            font-size: 12px;
-        }
-
-        .timeline-item:last-child {
-            border-bottom: none;
-        }
-
-        .timeline-dot {
-            width: 8px;
-            height: 8px;
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-            border-radius: 50%;
-            margin-top: 2px;
-            flex-shrink: 0;
-        }
-
-        .timeline-content {
-            flex: 1;
-        }
-
-        .timeline-date {
-            font-size: 10px;
-            color: #7f8c8d;
-            font-weight: 600;
-        }
-
-        .timeline-text {
-            font-size: 12px;
-            color: #2c3e50;
-            margin-top: 2px;
-        }
-
-        .property-section {
-            background: linear-gradient(135deg, #1e3c72, #2a5298);
-            color: white;
-            padding: 16px;
-            border-radius: 8px;
-        }
-
-        .property-section .section-title {
-            color: #fff !important;
-        }
-
-        .property-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-            gap: 8px;
-        }
-
-        .property-stat {
-            text-align: center;
-            padding: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 6px;
-            backdrop-filter: blur(10px);
-            color: #fff;
-        }
-
-        .property-number {
-            font-size: 16px;
-            font-weight: 700;
-            margin-bottom: 2px;
-            color: #fff;
-        }
-
-        .property-label {
-            font-size: 9px;
-            opacity: 0.8;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-            color: #fff;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #7f8c8d;
-        }
-
-        .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #3498db;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 16px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+/* Example: emoji tags or special cases */
+.badge-emoji   { background: #fbe9e7; color: #d84315; }
+        .badge:hover {transform:scale(1.05);}
+        .badge-contact {background:linear-gradient(135deg,#27ae60,#2ecc71);color:#fff;}
+        .badge-lead {background:linear-gradient(135deg,#f39c12,#e67e22);color:#fff;}
+        .badge-friendly {background:linear-gradient(135deg,#9b59b6,#8e44ad);color:#fff;}
+        .badge-mom-pop {background:linear-gradient(135deg,#34495e,#2c3e50);color:#fff;}
+        .badge-developer {background:linear-gradient(135deg,#16a085,#1abc9c);color:#fff;}
+        .badge-buy-side {background:linear-gradient(135deg,#2980b9,#3498db);color:#fff;}
+        .contact-section {background:linear-gradient(135deg,#ecf0f1,#bdc3c7);border-radius:8px;padding:16px;margin-bottom:16px;}
+        .section-title {font-size:16px;font-weight:700;color:#2c3e50;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+        .contact-grid {display:grid;grid-template-columns:1fr;gap:8px;}
+        .contact-item {display:flex;align-items:center;gap:10px;padding:8px;background:#fff;border-radius:6px;transition:all 0.3s ease;font-size:13px;}
+        .contact-item:hover {background:#f1f2f6;transform:translateX(2px);}
+        .contact-icon {width:20px;height:20px;background:linear-gradient(135deg,#3498db,#2980b9);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:bold;flex-shrink:0;}
+        .contact-info {flex:1;min-width:0;}
+        .contact-label {font-size:10px;color:#7f8c8d;font-weight:600;}
+        .contact-value {font-size:12px;color:#2c3e50;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .activity-section {background:linear-gradient(135deg,#fff,#f8f9fa);border-radius:8px;padding:16px;border:1px solid #e9ecef;margin-bottom:16px;}
+        .timeline-item {display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid #e9ecef;font-size:12px;}
+        .timeline-item:last-child {border-bottom:none;}
+        .timeline-dot {width:8px;height:8px;background:linear-gradient(135deg,#e74c3c,#c0392b);border-radius:50%;margin-top:2px;flex-shrink:0;}
+        .timeline-content {flex:1;}
+        .timeline-date {font-size:10px;color:#7f8c8d;font-weight:600;}
+        .timeline-text {font-size:12px;color:#2c3e50;margin-top:2px;}
+        .property-section {background:linear-gradient(135deg,#1e3c72,#2a5298);color:#fff;padding:16px;border-radius:8px;}
+        .property-section .section-title {color:#fff!important;}
+        .property-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:8px;}
+        .property-stat {text-align:center;padding:8px;background:rgba(255,255,255,0.1);border-radius:6px;backdrop-filter:blur(10px);color:#fff;}
+        .property-number {font-size:16px;font-weight:700;margin-bottom:2px;color:#fff;}
+        .property-label {font-size:9px;opacity:.8;text-transform:uppercase;letter-spacing:.3px;color:#fff;}
+        .loading {text-align:center;padding:40px;color:#7f8c8d;}
+        .spinner {border:3px solid #f3f3f3;border-top:3px solid #3498db;border-radius:50%;width:30px;height:30px;animation:spin 1s linear infinite;margin:0 auto 16px;}
+        @keyframes spin {0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
     </style>
 </head>
 <body>
@@ -377,34 +107,27 @@
                 <div class="owner-subtitle" id="ownerSubtitle">Choose a row to view details</div>
             </div>
         </div>
-
         <div class="widget-content">
             <div id="loadingState" class="loading" style="display: none;">
                 <div class="spinner"></div>
                 <div>Loading owner information...</div>
             </div>
-
             <div id="noDataState" class="no-data">
                 <div class="no-data-icon">📋</div>
                 <div><strong>No Owner Selected</strong></div>
                 <div id="noDataSubtitle">Click on a row in your Owners table to view detailed information here.</div>
             </div>
-
             <div id="ownerContent" style="display: none;">
                 <div class="status-badges" id="statusBadges"></div>
-
                 <div class="info-grid" id="infoGrid"></div>
-
-                <div class="contact-section">
+                <div class="contact-section" id="contactSection">
                     <div class="section-title">📞 Contact Information</div>
                     <div class="contact-grid" id="contactGrid"></div>
                 </div>
-
                 <div class="activity-section">
                     <div class="section-title">📈 Recent Activity</div>
                     <div id="activityTimeline"></div>
                 </div>
-
                 <div class="property-section">
                     <div class="section-title">🏢 Property Portfolio</div>
                     <div class="property-grid" id="propertyGrid"></div>
@@ -412,12 +135,11 @@
             </div>
         </div>
     </div>
-
     <script>
         let currentRecord = null;
 
         function formatDate(dateStr) {
-            if (!dateStr) return 'Not set';
+            if (!dateStr) return '';
             try {
                 const date = new Date(dateStr);
                 return date.toLocaleDateString('en-US', { 
@@ -439,141 +161,218 @@
                 .substring(0, 2);
         }
 
-        function createBadge(text, type = 'default') {
-            if (!text) return '';
-            const badgeTypes = {
-                'Contact': 'badge-contact',
-                'Lead': 'badge-lead',
-                'Friendly': 'badge-friendly',
-                'Very Friendly': 'badge-friendly',
-                'Mom & Pop': 'badge-mom-pop',
-                'Developer': 'badge-developer',
-                'Buy Side': 'badge-buy-side',
-                'Sell Side': 'badge-buy-side'
-            };
-            
-            const cssClass = badgeTypes[text] || 'badge-contact';
-            return `<div class="badge ${cssClass}">${text}</div>`;
-        }
+        // Tag value-to-style mapping based on your Grist options (adapt as needed)
+const BADGE_STYLE_MAP = {
+    // Red/pink: DNC, Not Interested, Angry, Rude, Developer, Operator, Company
+    "NOT INTERESTED/DNC": "red",
+    "DNC": "red",
+    "ANGRY": "red",
+    "RUDE": "red",
+    "DEVELOPER": "red",
+    "OPERATOR | OWNER U": "red",
+    "COMPANY": "red",
+    "✋ RUDE ✋": "red",
+    "❗ DNC ❗": "red",
+    "👿 ANGRY 👿": "red",
+
+    // Orange: IPA, Eric, Polite
+    "IPA": "purple",
+    "ERIC": "orange",
+    "POLITE - DIDN'T WANT TO TALK": "orange",
+
+    // Blue: Call Relationship, 2-4 Properties, Tier 2 Investor, Talkative, Liberal
+    "CALL RELATIONSHIP": "blue",
+    "2-4 PROPERTIES": "blue",
+    "TIER 2 INVESTOR": "blue",
+    "TALKATIVE": "cyan",
+    "LIBERAL": "cyan",
+    "FRIENDLY": "cyan",
+
+    // Green: Mom & Pop, Never, Contact, Call Again, VM
+    "MOM & POP": "green",
+    "NEVER": "green",
+    "CONTACT": "green",
+    "CALL AGAIN": "green",
+    "VM": "green",
+
+    // Grey/Dark: Broker/Eh, Broker
+    "BROKER/EH": "grey",
+    "BROKER": "dark",
+    "👨‍💼 BROKER 👨‍💼": "dark",
+
+    // Political: Republican, Liberal
+    "REPUBLICAN": "blue",
+    "🐘 REPUBLICAN 🐘": "blue",
+    "❄️ LIBERAL ❄️": "cyan",
+
+    // Special cases (catch emoji, etc.)
+    "VERY FRIENDLY": "cyan",
+    "OPERATOR": "red",
+    "COMPANY": "red"
+};
+
+// Helper: case-insensitive tag style mapping
+function getBadgeStyle(tag) {
+    if (!tag) return "grey";
+    const normalized = tag.trim().toUpperCase();
+    // Try to match exactly
+    if (BADGE_STYLE_MAP[normalized]) return "badge-" + BADGE_STYLE_MAP[normalized];
+    // Try substring matches for common tags
+    if (/DNC|NOT INTERESTED|ANGRY|RUDE/.test(normalized)) return "badge-red";
+    if (/FRIENDLY|TALKATIVE|LIBERAL/.test(normalized)) return "badge-cyan";
+    if (/CALL AGAIN|CONTACT|VM|NEVER|MOM & POP/.test(normalized)) return "badge-green";
+    if (/BROKER/.test(normalized)) return "badge-dark";
+    if (/OPERATOR|COMPANY/.test(normalized)) return "badge-red";
+    if (/IPA/.test(normalized)) return "badge-purple";
+    if (/ERIC/.test(normalized)) return "badge-orange";
+    if (/RELATIONSHIP|TIER|PROPERTIES/.test(normalized)) return "badge-blue";
+    // Fallback
+    return "badge-grey";
+}
+
+// Updated badge rendering
+function createBadge(text) {
+    if (!text) return '';
+    const badgeClass = getBadgeStyle(text);
+    return `<div class="badge ${badgeClass}">${text}</div>`;
+}
 
         function updateProfileImage(record) {
             const profileImage = document.getElementById('profileImage');
             const imageUrl = record.Profile_Image;
-            
             if (imageUrl && imageUrl.trim()) {
-                profileImage.innerHTML = `<img src="${imageUrl}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='${getInitials(record.Name || record.Owner_Full_Name)}';">`;
+                profileImage.innerHTML = `<img src="${imageUrl}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentNode.textContent='${getInitials(record.Name || record.Owner_Full_Name)}';">`;
             } else {
                 profileImage.textContent = getInitials(record.Name || record.Owner_Full_Name);
             }
         }
 
-        // Helper to get first account from Accounts string (splitting by "; ")
-        function getFirstAccount(accounts) {
-            if (!accounts || typeof accounts !== 'string') return accounts || 'N/A';
-            return accounts.split(';')[0].trim();
+        // Helper: get first item before delimiter ";"
+        function getFirstDelimitedItem(str) {
+            if (!str || typeof str !== 'string') return '';
+            return str.split(';')[0].trim();
+        }
+        // Helper: is a value "empty"?
+        function isEmpty(val) {
+            return val === null || val === undefined || (typeof val === "string" && val.trim() === "") || val === "N/A";
         }
 
         function updateOwnerDisplay(record) {
             currentRecord = record;
-            
             if (!record) {
                 document.getElementById('noDataState').style.display = 'block';
                 document.getElementById('ownerContent').style.display = 'none';
                 document.getElementById('ownerName').textContent = 'Select an Owner';
                 document.getElementById('ownerSubtitle').textContent = 'Choose a row to view details';
                 document.getElementById('profileImage').textContent = '👤';
-                // Reset subtitle for no data state
                 document.getElementById('noDataSubtitle').textContent = 'Click on a row in your Owners table to view detailed information here.';
                 return;
             }
-
             document.getElementById('noDataState').style.display = 'none';
             document.getElementById('ownerContent').style.display = 'block';
 
-            // Update header
+            // Only display the first account before semicolon
+            let accountsText = !isEmpty(record.Accounts) ? getFirstDelimitedItem(record.Accounts) : '';
             document.getElementById('ownerName').textContent = record.Name || record.Owner_Full_Name || 'Unknown Owner';
-
-            // MODIFICATION: Only display the first account in the Accounts column
-            // Fallback to 'Property Owner' if no Accounts
-            let accountsText = record.Accounts ? getFirstAccount(record.Accounts) : 'Property Owner';
-
-            document.getElementById('ownerSubtitle').textContent = `${accountsText} • ${record.Title || ''}`;
-            
-            // Update profile image
+            document.getElementById('ownerSubtitle').textContent = [
+                accountsText,
+                record.Title
+            ].filter(x => !isEmpty(x)).join(" • ");
             updateProfileImage(record);
 
-            // Create status badges
+            // Status badges
             const badgesContainer = document.getElementById('statusBadges');
             let badges = '';
-            
             if (record.Segment && Array.isArray(record.Segment)) {
-                record.Segment.forEach(segment => {
-                    badges += createBadge(segment);
-                });
-            } else if (record.Segment) {
+                record.Segment.forEach(segment => { if(!isEmpty(segment)) badges += createBadge(segment); });
+            } else if (!isEmpty(record.Segment)) {
                 badges += createBadge(record.Segment);
             }
-            
             if (record.Classify && Array.isArray(record.Classify)) {
-                record.Classify.forEach(classify => {
-                    badges += createBadge(classify);
-                });
-            } else if (record.Classify) {
+                record.Classify.forEach(classify => { if(!isEmpty(classify)) badges += createBadge(classify); });
+            } else if (!isEmpty(record.Classify)) {
                 badges += createBadge(record.Classify);
             }
-            
             if (record.Owner_Personality && Array.isArray(record.Owner_Personality)) {
-                record.Owner_Personality.forEach(personality => {
-                    badges += createBadge(personality);
-                });
-            } else if (record.Owner_Personality) {
+                record.Owner_Personality.forEach(personality => { if(!isEmpty(personality)) badges += createBadge(personality); });
+            } else if (!isEmpty(record.Owner_Personality)) {
                 badges += createBadge(record.Owner_Personality);
             }
-            
             if (record.Opportunity && Array.isArray(record.Opportunity)) {
-                record.Opportunity.forEach(opp => {
-                    badges += createBadge(opp);
-                });
-            } else if (record.Opportunity) {
+                record.Opportunity.forEach(opp => { if(!isEmpty(opp)) badges += createBadge(opp); });
+            } else if (!isEmpty(record.Opportunity)) {
                 badges += createBadge(record.Opportunity);
             }
-            
             badgesContainer.innerHTML = badges;
 
-            // Create info cards
+            // Info cards (only add if values exist)
             const infoGrid = document.getElementById('infoGrid');
-            infoGrid.innerHTML = `
-                <div class="info-card">
-                    <div class="card-title">Property Rating</div>
-                    <div class="card-value">⭐ ${record.Prop_Rate || 'N/A'}/5</div>
-                </div>
-                <div class="info-card">
-                    <div class="card-title">Age & Demographics</div>
-                    <div class="card-value">${record.Age || 'N/A'} years old • ${record.Gender || 'N/A'}</div>
-                </div>
-                <div class="info-card">
-                    <div class="card-title">Call Relationship</div>
-                    <div class="card-value">${Array.isArray(record.Call_Relationship) ? record.Call_Relationship.join(', ') : (record.Call_Relationship || 'N/A')}</div>
-                </div>
-                <div class="info-card">
-                    <div class="card-title">Last Contact</div>
-                    <div class="card-value">${formatDate(record.Date)} • ${record.Last_Call_Segment || 'N/A'}</div>
-                </div>
-                <div class="info-card">
-                    <div class="card-title">Market Tranche</div>
-                    <div class="card-value">${Array.isArray(record.Tranche) ? record.Tranche.join(', ') : (record.Tranche || 'N/A')}</div>
-                </div>
-                <div class="info-card">
-                    <div class="card-title">VM Preference</div>
-                    <div class="card-value">${record.Constant_Call_VM_s ? '📠 Accepts VMs' : '✖️ No VMs'}</div>
-                </div>
-            `;
+            infoGrid.innerHTML = "";
+            // Property Rating
+            if (!isEmpty(record.Prop_Rate)) {
+                infoGrid.innerHTML += `
+                    <div class="info-card">
+                        <div class="card-title">Property Rating</div>
+                        <div class="card-value">⭐ ${record.Prop_Rate}/5</div>
+                    </div>`;
+            }
+            // Age & Demographics
+            if (!isEmpty(record.Age) || !isEmpty(record.Gender)) {
+                let demo = [];
+                if (!isEmpty(record.Age)) demo.push(`${record.Age} years old`);
+                if (!isEmpty(record.Gender)) demo.push(record.Gender);
+                infoGrid.innerHTML += `
+                    <div class="info-card">
+                        <div class="card-title">Age & Demographics</div>
+                        <div class="card-value">${demo.join(' • ')}</div>
+                    </div>`;
+            }
+            // Call Relationship
+            let callRel = Array.isArray(record.Call_Relationship) ?
+                record.Call_Relationship.filter(x => !isEmpty(x)).join(', ') :
+                (isEmpty(record.Call_Relationship) ? '' : record.Call_Relationship);
+            if (!isEmpty(callRel)) {
+                infoGrid.innerHTML += `
+                    <div class="info-card">
+                        <div class="card-title">Call Relationship</div>
+                        <div class="card-value">${callRel}</div>
+                    </div>`;
+            }
+            // Last Contact
+            let lastContactArr = [];
+            if (!isEmpty(record.Date)) lastContactArr.push(formatDate(record.Date));
+            if (!isEmpty(record.Last_Call_Segment)) lastContactArr.push(record.Last_Call_Segment);
+            if (lastContactArr.length > 0) {
+                infoGrid.innerHTML += `
+                    <div class="info-card">
+                        <div class="card-title">Last Contact</div>
+                        <div class="card-value">${lastContactArr.join(' • ')}</div>
+                    </div>`;
+            }
+            // Market Tranche
+            let trancheVal = Array.isArray(record.Tranche) ?
+                record.Tranche.filter(x => !isEmpty(x)).join(', ') :
+                (isEmpty(record.Tranche) ? '' : record.Tranche);
+            if (!isEmpty(trancheVal)) {
+                infoGrid.innerHTML += `
+                    <div class="info-card">
+                        <div class="card-title">Market Tranche</div>
+                        <div class="card-value">${trancheVal}</div>
+                    </div>`;
+            }
+            // VM Preference (always show if any value)
+            if (!isEmpty(record.Constant_Call_VM_s)) {
+                infoGrid.innerHTML += `
+                    <div class="info-card">
+                        <div class="card-title">VM Preference</div>
+                        <div class="card-value">${record.Constant_Call_VM_s ? '📠 Accepts VMs' : '✖️ No VMs'}</div>
+                    </div>`;
+            }
 
-            // Create contact grid
+            // Contact grid (only add if values exist)
             const contactGrid = document.getElementById('contactGrid');
             let contactItems = '';
-            
-            if (record.Email) {
+            if (!isEmpty(record.Email)) {
                 contactItems += `
                     <div class="contact-item">
                         <div class="contact-icon">📧</div>
@@ -584,8 +383,7 @@
                     </div>
                 `;
             }
-            
-            if (record.Phone) {
+            if (!isEmpty(record.Phone)) {
                 contactItems += `
                     <div class="contact-item">
                         <div class="contact-icon">📱</div>
@@ -596,20 +394,20 @@
                     </div>
                 `;
             }
-            
-            if (record.Owner_Address) {
+            // Owner address: show only the first before semicolon
+            let firstOwnerAddress = getFirstDelimitedItem(record.Owner_Address);
+            if (!isEmpty(firstOwnerAddress)) {
                 contactItems += `
                     <div class="contact-item">
                         <div class="contact-icon">🏠</div>
                         <div class="contact-info">
                             <div class="contact-label">Address</div>
-                            <div class="contact-value">${record.Owner_Address}</div>
+                            <div class="contact-value">${firstOwnerAddress}</div>
                         </div>
                     </div>
                 `;
             }
-            
-            if (record.LinkedIn) {
+            if (!isEmpty(record.LinkedIn)) {
                 contactItems += `
                     <div class="contact-item">
                         <div class="contact-icon">🔗</div>
@@ -620,38 +418,38 @@
                     </div>
                 `;
             }
-            
-            if (record.Other_Owners) {
+            // Other owners: show only the first before semicolon
+            let firstOtherOwner = getFirstDelimitedItem(record.Other_Owners);
+            if (!isEmpty(firstOtherOwner)) {
                 contactItems += `
                     <div class="contact-item">
                         <div class="contact-icon">👥</div>
                         <div class="contact-info">
                             <div class="contact-label">Co-Owner</div>
-                            <div class="contact-value">${record.Other_Owners}</div>
+                            <div class="contact-value">${firstOtherOwner}</div>
                         </div>
                     </div>
                 `;
             }
-            
             contactGrid.innerHTML = contactItems;
+            // Hide contact section if nothing to show
+            document.getElementById('contactSection').style.display = contactItems ? "block" : "none";
 
-            // Create activity timeline
+            // Activity timeline (same logic, but keep at least "no activity recorded" if nothing)
             const timeline = document.getElementById('activityTimeline');
             let timelineItems = '';
-            
-            if (record.Date) {
+            if (!isEmpty(record.Date) && !isEmpty(record.Last_Call_Segment)) {
                 timelineItems += `
                     <div class="timeline-item">
                         <div class="timeline-dot"></div>
                         <div class="timeline-content">
                             <div class="timeline-date">${formatDate(record.Date)}</div>
-                            <div class="timeline-text">Last contact - ${record.Last_Call_Segment || 'General discussion'}</div>
+                            <div class="timeline-text">Last contact - ${record.Last_Call_Segment}</div>
                         </div>
                     </div>
                 `;
             }
-            
-            if (record.Past_Contact_) {
+            if (!isEmpty(record.Past_Contact_)) {
                 timelineItems += `
                     <div class="timeline-item">
                         <div class="timeline-dot"></div>
@@ -662,8 +460,7 @@
                     </div>
                 `;
             }
-            
-            if (record.Contact_1) {
+            if (!isEmpty(record.Contact_1)) {
                 timelineItems += `
                     <div class="timeline-item">
                         <div class="timeline-dot"></div>
@@ -674,29 +471,47 @@
                     </div>
                 `;
             }
-            
-            timeline.innerHTML = timelineItems || '<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-content"><div class="timeline-text">No activity recorded</div></div></div>';
+            timeline.innerHTML = timelineItems || `<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-content"><div class="timeline-text">No activity recorded</div></div></div>`;
 
-            // Create property stats
+            // Property stats (hide "N/A" or empty cards)
             const propertyGrid = document.getElementById('propertyGrid');
-            propertyGrid.innerHTML = `
-                <div class="property-stat">
-                    <div class="property-number">${record.Prop_Rate || 'N/A'}</div>
-                    <div class="property-label">Prop Rate</div>
-                </div>
-                <div class="property-stat">
-                    <div class="property-number">${Array.isArray(record.Classify) ? record.Classify[0] : (record.Classify || 'N/A')}</div>
-                    <div class="property-label">Type</div>
-                </div>
-                <div class="property-stat">
-                    <div class="property-number">${Array.isArray(record.Activity) ? record.Activity.length : (record.Activity ? '1' : '0')}</div>
-                    <div class="property-label">Activities</div>
-                </div>
-                <div class="property-stat">
-                    <div class="property-number">${Array.isArray(record.Opportunity) ? record.Opportunity[0] : (record.Opportunity || 'N/A')}</div>
-                    <div class="property-label">Status</div>
-                </div>
-            `;
+            let propertyStats = '';
+            if (!isEmpty(record.Prop_Rate)) {
+                propertyStats += `
+                    <div class="property-stat">
+                        <div class="property-number">${record.Prop_Rate}</div>
+                        <div class="property-label">Prop Rate</div>
+                    </div>
+                `;
+            }
+            let firstClassify = Array.isArray(record.Classify) ? record.Classify.find(x => !isEmpty(x)) : (!isEmpty(record.Classify) ? record.Classify : '');
+            if (!isEmpty(firstClassify)) {
+                propertyStats += `
+                    <div class="property-stat">
+                        <div class="property-number">${firstClassify}</div>
+                        <div class="property-label">Type</div>
+                    </div>
+                `;
+            }
+            let activityCount = Array.isArray(record.Activity) ? record.Activity.length : (!isEmpty(record.Activity) ? 1 : 0);
+            if (activityCount) {
+                propertyStats += `
+                    <div class="property-stat">
+                        <div class="property-number">${activityCount}</div>
+                        <div class="property-label">Activities</div>
+                    </div>
+                `;
+            }
+            let firstOpportunity = Array.isArray(record.Opportunity) ? record.Opportunity.find(x => !isEmpty(x)) : (!isEmpty(record.Opportunity) ? record.Opportunity : '');
+            if (!isEmpty(firstOpportunity)) {
+                propertyStats += `
+                    <div class="property-stat">
+                        <div class="property-number">${firstOpportunity}</div>
+                        <div class="property-label">Status</div>
+                    </div>
+                `;
+            }
+            propertyGrid.innerHTML = propertyStats;
         }
 
         // Initialize Grist plugin
@@ -711,7 +526,6 @@
             ]
         });
 
-        // Listen for record selection
         grist.onRecord(function(record) {
             if (record) {
                 updateOwnerDisplay(record);
@@ -720,13 +534,12 @@
             }
         });
 
-        // Add click handlers for interactive elements
+        // Contact item click handlers
         document.addEventListener('click', function(e) {
             if (e.target.closest('.contact-item')) {
                 const contactItem = e.target.closest('.contact-item');
                 const value = contactItem.querySelector('.contact-value').textContent;
                 const label = contactItem.querySelector('.contact-label').textContent;
-                
                 if (label === 'Email' && value.includes('@')) {
                     window.open(`mailto:${value}`, '_blank');
                 } else if (label === 'LinkedIn' && currentRecord && currentRecord.LinkedIn) {
