@@ -19,42 +19,106 @@
         }
         .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
         .img-overlay-chip {
-            display: inline-block;
-            padding: 0.32em 1.03em;
+            background: rgba(24,24,27,0.55);
+            color: #fff;
+            font-size: 0.78rem;
+            font-weight: 500;
             border-radius: 999px;
-            font-size: 0.95em;
-            font-weight: 600;
-            background: rgba(255,255,255,0.82);
-            box-shadow: 0 1px 8px rgba(0,0,0,0.09);
-            backdrop-filter: blur(4px);
-            color: #223047;
+            padding: 2px 9px;
+            min-width: 28px;
+            min-height: 1.3rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.09);
             letter-spacing: 0.01em;
-            border: 1px solid rgba(255,255,255,0.19);
+            border: none;
+        }
+        /* Sleek minimalist filter bar */
+        .filter-floatbar {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: rgba(255,255,255,0.55);
+            backdrop-filter: blur(5px);
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+            padding: 1rem;
+            position: sticky;
+            top: 1rem;
+            z-index: 30;
+            margin-bottom: 2rem;
+            max-width: 820px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .filter-group {
+            flex: 1;
+        }
+        .filter-select {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.95rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e2e8f0;
+            background: #fff;
+            color: #1f2937;
+            transition: all 0.2s;
+        }
+        .filter-select:focus {
+            outline: none;
+            border-color: #93c5fd;
+            box-shadow: 0 0 0 1px #93c5fd;
+        }
+        .filter-reset-btn {
+            padding: 0.5rem 1.25rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            border-radius: 0.5rem;
+            background: #334155;
+            color: #fff;
+            border: none;
+            transition: background 0.2s;
+        }
+        .filter-reset-btn:hover {
+            background: #1f2937;
+        }
+        @media (max-width: 640px) {
+            .filter-floatbar {
+                flex-direction: column;
+                gap: 0.75rem;
+                padding: 0.75rem;
+            }
+            .filter-select {
+                width: 100%;
+            }
+            .filter-reset-btn {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body class="bg-gradient-to-b from-sky-100 to-white min-h-screen">
     <div class="container mx-auto px-4 py-8">
-        <div id="filter-bar" class="mb-8 p-4 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm flex flex-col sm:flex-row items-center gap-4 sticky top-4 z-10">
-            <div class="flex-grow w-full">
-                <label for="type-filter" class="sr-only">Property Type</label>
-                <select id="type-filter" class="w-full p-2 border border-gray-300 rounded-md bg-white">
-                    <option value="all">All Property Types</option>
+        <!-- Sleek, minimalist, floating, sticky filter bar -->
+        <form id="filter-bar" class="filter-floatbar">
+            <div class="filter-group">
+                <select id="type-filter" class="filter-select">
+                    <option value="all">All Types</option>
                 </select>
             </div>
-            <div class="flex-grow w-full">
-                <label for="days-filter" class="sr-only">Days on Market</label>
-                <select id="days-filter" class="w-full p-2 border border-gray-300 rounded-md bg-white">
-                    <option value="all">All Time</option>
-                    <option value="7">Last 7 Days</option>
-                    <option value="30">Last 30 Days</option>
-                    <option value="90">Last 90 Days</option>
+            <div class="filter-group">
+                <select id="sort-filter" class="filter-select">
+                    <option value="date_desc">Newest (Date Listed)</option>
+                    <option value="date_asc">Oldest (Date Listed)</option>
+                    <option value="price_desc">Highest Price</option>
+                    <option value="price_asc">Lowest Price</option>
                 </select>
             </div>
-            <button id="reset-filters-button" class="px-4 py-2 bg-slate-600 text-white rounded-md hover:bg-slate-700 transition-colors w-full sm:w-auto">
+            <button id="reset-filters-button" type="button" class="filter-reset-btn">
                 Reset
             </button>
-        </div>
+        </form>
         <div id="status-message" class="text-center text-slate-500">Loading widget...</div>
         <div id="property-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
     </div>
@@ -71,14 +135,17 @@
     </div>
 
     <template id="property-card-template">
-        <div class="group bg-white rounded-lg border border-gray-200 hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col overflow-hidden">
+        <div class="group hover:shadow-lg transition-all duration-300 cursor-pointer flex flex-col bg-white rounded-lg border border-gray-200 overflow-hidden">
             <div class="relative overflow-hidden h-48">
                 <img data-template-field="photo_url" alt="" class="w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-300">
-                <div class="absolute top-3 left-3 z-10"><span class="img-overlay-chip days-chip"></span></div>
-                <div class="absolute top-3 right-3 z-10"><span class="img-overlay-chip type-chip"></span></div>
+                <div class="absolute top-2 left-2 z-10 days-chip-container"></div>
+                <div class="absolute top-2 right-2 z-10 type-chip-container"></div>
+                <div class="absolute bottom-0 left-0 right-0 h-14 bg-gradient-to-t from-black/70 to-transparent pointer-events-none"></div>
+                <div class="absolute bottom-2 left-4 text-white z-10">
+                    <p data-template-field="Property_Name" class="font-bold text-lg drop-shadow-md"></p>
+                </div>
             </div>
             <div class="p-4 flex-grow flex flex-col">
-                <h3 data-template-field="Property_Name" class="text-lg font-bold text-gray-800 truncate" title=""></h3>
                 <p data-template-field="Address" class="text-sm text-gray-500 flex items-center gap-2 mt-1 truncate">
                     <i data-lucide="map-pin" class="lucide h-4 w-4 flex-shrink-0"></i>
                     <span class="truncate"></span>
@@ -98,14 +165,13 @@
     </template>
     <template id="modal-body-template">
         <div class="relative w-full">
-            <!-- Modern, cropped, cover image -->
-            <img data-template-field="photo_url" class="w-full h-[320px] md:h-[400px] lg:h-[440px] object-cover object-center rounded-t-lg" style="min-height:180px;"/>
+            <img data-template-field="photo_url" class="w-full h-[320px] md:h-[400px] lg:h-[440px] object-cover object-center rounded-t-lg" style="background:#e7eaf1;" />
         </div>
         <div class="p-6 pb-2">
             <h2 data-template-field="Property_Name" class="text-2xl font-bold text-gray-800"></h2>
             <p data-template-field="Address" class="text-md text-gray-500 flex items-center gap-2 pt-1">
-                 <i data-lucide="map-pin" class="lucide h-4 w-4"></i>
-                 <span></span>
+                <i data-lucide="map-pin" class="lucide h-4 w-4"></i>
+                <span></span>
             </p>
         </div>
         <div class="px-6 pb-6 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
@@ -145,7 +211,7 @@
         const modalBody = document.getElementById('modal-body');
         const modalBodyTemplate = document.getElementById('modal-body-template');
         const typeFilterSelect = document.getElementById('type-filter');
-        const daysFilterSelect = document.getElementById('days-filter');
+        const sortFilterSelect = document.getElementById('sort-filter');
         const resetButton = document.getElementById('reset-filters-button');
 
         const formatters = {
@@ -155,15 +221,12 @@
             default: (val) => val || 'N/A',
         };
 
-        // -- Days on Market Helper --
         function getDaysOnMarket(dateVal) {
             if (!dateVal) return null;
             let listedDate;
             if (typeof dateVal === "number") {
-                // UNIX timestamp in seconds or ms (handle both)
                 listedDate = dateVal > 1e12 ? new Date(dateVal) : new Date(dateVal * 1000);
             } else if (typeof dateVal === "string") {
-                // Try ISO or US format string
                 let parsed = Date.parse(dateVal);
                 if (!isNaN(parsed)) listedDate = new Date(parsed);
                 else return null;
@@ -215,12 +278,24 @@
                 cardElement.style.animationDelay = `${index * 50}ms`;
                 cardElement.classList.add('animate-fadeIn');
 
-                // Overlay chips
-                const daysChip = cardElement.querySelector('.days-chip');
-                const typeChip = cardElement.querySelector('.type-chip');
+                // Days on Market overlay (only if value exists)
+                const daysChipContainer = cardElement.querySelector('.days-chip-container');
                 const dom = getDaysOnMarket(record.Date_Listed);
-                daysChip.textContent = dom !== null && !isNaN(dom) ? `${dom}d` : '—';
-                typeChip.textContent = record.Property_Type || '—';
+                if (record.Date_Listed && dom !== null && !isNaN(dom)) {
+                    const chip = document.createElement('span');
+                    chip.className = 'img-overlay-chip';
+                    chip.textContent = `${dom}d`;
+                    daysChipContainer.appendChild(chip);
+                }
+
+                // Property Type overlay (only if value exists)
+                const typeChipContainer = cardElement.querySelector('.type-chip-container');
+                if (record.Property_Type) {
+                    const chip = document.createElement('span');
+                    chip.className = 'img-overlay-chip';
+                    chip.textContent = record.Property_Type;
+                    typeChipContainer.appendChild(chip);
+                }
 
                 card.querySelectorAll('[data-template-field]').forEach(el => {
                     const field = el.dataset.templateField;
@@ -309,30 +384,44 @@
             });
         }
 
+        function sortRecords(records) {
+            const sortVal = sortFilterSelect.value;
+            let sorted = [...records];
+            if (sortVal === 'date_desc') {
+                sorted.sort((a, b) => {
+                    const ad = a.Date_Listed ? new Date(a.Date_Listed) : new Date(0);
+                    const bd = b.Date_Listed ? new Date(b.Date_Listed) : new Date(0);
+                    return bd - ad;
+                });
+            } else if (sortVal === 'date_asc') {
+                sorted.sort((a, b) => {
+                    const ad = a.Date_Listed ? new Date(a.Date_Listed) : new Date(0);
+                    const bd = b.Date_Listed ? new Date(b.Date_Listed) : new Date(0);
+                    return ad - bd;
+                });
+            } else if (sortVal === 'price_desc') {
+                sorted.sort((a, b) => (parseFloat(b.Price) || 0) - (parseFloat(a.Price) || 0));
+            } else if (sortVal === 'price_asc') {
+                sorted.sort((a, b) => (parseFloat(a.Price) || 0) - (parseFloat(b.Price) || 0));
+            }
+            return sorted;
+        }
+
         function applyFiltersAndRender() {
             const typeFilterValue = typeFilterSelect.value;
-            const daysFilterValue = daysFilterSelect.value;
             let filteredRecords = [...allRecords];
             if (typeFilterValue !== 'all') {
                 filteredRecords = filteredRecords.filter(r => r.Property_Type === typeFilterValue);
             }
-            if (daysFilterValue !== 'all') {
-                const today = new Date();
-                const days = parseInt(daysFilterValue, 10);
-                filteredRecords = filteredRecords.filter(r => {
-                    // Use getDaysOnMarket for robust parsing
-                    const dom = getDaysOnMarket(r.Date_Listed);
-                    return dom !== null && !isNaN(dom) && dom <= days;
-                });
-            }
+            filteredRecords = sortRecords(filteredRecords);
             renderProperties(filteredRecords);
         }
 
         typeFilterSelect.addEventListener('change', applyFiltersAndRender);
-        daysFilterSelect.addEventListener('change', applyFiltersAndRender);
+        sortFilterSelect.addEventListener('change', applyFiltersAndRender);
         resetButton.addEventListener('click', () => {
             typeFilterSelect.value = 'all';
-            daysFilterSelect.value = 'all';
+            sortFilterSelect.value = 'date_desc';
             applyFiltersAndRender();
         });
         document.getElementById('modal-close-button').addEventListener('click', hideModal);
