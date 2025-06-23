@@ -308,14 +308,6 @@ function createBadge(text) {
             // Info cards (only add if values exist)
             const infoGrid = document.getElementById('infoGrid');
             infoGrid.innerHTML = "";
-            // Property Rating
-            if (!isEmpty(record.Prop_Rate)) {
-                infoGrid.innerHTML += `
-                    <div class="info-card">
-                        <div class="card-title">Property Rating</div>
-                        <div class="card-value">⭐ ${record.Prop_Rate}/5</div>
-                    </div>`;
-            }
             // Age & Demographics
             if (!isEmpty(record.Age) || !isEmpty(record.Gender)) {
                 let demo = [];
