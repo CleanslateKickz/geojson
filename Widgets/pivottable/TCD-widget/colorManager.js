@@ -1,10 +1,10 @@
 /**
- * Gestionnaire de couleurs automatiques pour les variables
- * @fileoverview Assigne automatiquement des couleurs aux variables d'un pivot table
+ * Automatic color manager for variables
+ * @fileoverview Automatically assigns colors to pivot table variables
  * @version 1.1.0
  */
 
-// Palette de couleurs pour les variables
+// Color palette for variables
 const colorPalette = [
     'tag-blue', 'tag-purple', 'tag-pink', 'tag-green', 
     'tag-yellow', 'tag-teal', 'tag-indigo', 'tag-red', 
@@ -15,9 +15,9 @@ let variableColorMap = {};
 let colorIndex = 0;
 
 /**
- * Assigne une couleur à une variable
- * @param {string} variableName - Nom de la variable
- * @returns {string} Classe CSS de couleur assignée
+ * Assigns a color to a variable
+ * @param {string} variableName - Name of the variable
+ * @returns {string} Assigned CSS color class
  */
 function getVariableColor(variableName) {
     if (!variableColorMap[variableName]) {
@@ -28,25 +28,25 @@ function getVariableColor(variableName) {
 }
 
 /**
- * Applique les couleurs aux éléments de variables dans le DOM
- * Utilise jQuery pour sélectionner et modifier les éléments .pvtAttr
+ * Applies colors to variable elements in the DOM
+ * Uses jQuery to select and modify .pvtAttr elements
  */
 function applyVariableColors() {
-    // Vérifier si jQuery est disponible
+    // Check if jQuery is available
     if (typeof $ === 'undefined') {
-        console.warn('ColorManager: jQuery non disponible pour applyVariableColors');
+        console.warn('ColorManager: jQuery not available for applyVariableColors');
         return;
     }
     
-    // Attendre que les éléments soient rendus
+    // Wait until the elements are rendered
     setTimeout(() => {
         $('.pvtAttr').each(function() {
             const variableName = $(this).text().trim();
             if (variableName) {
                 const colorClass = getVariableColor(variableName);
-                // Supprimer toutes les anciennes classes de couleur du pvtAttr
+                // Remove all old color classes from pvtAttr
                 $(this).removeClass(colorPalette.join(' '));
-                // Ajouter la nouvelle classe de couleur au pvtAttr
+                // Add the new color class to pvtAttr
                 $(this).addClass(colorClass);
             }
         });
@@ -54,8 +54,8 @@ function applyVariableColors() {
 }
 
 /**
- * Réinitialise le mapping des couleurs et l'index
- * Utile pour recommencer l'attribution des couleurs
+ * Resets the color mapping and index
+ * Useful to restart color assignment
  */
 function resetColors() {
     variableColorMap = {};
@@ -63,41 +63,41 @@ function resetColors() {
 }
 
 /**
- * Retourne une copie de la palette de couleurs
- * @returns {Array<string>} Copie de la palette de couleurs
+ * Returns a copy of the color palette
+ * @returns {Array<string>} Copy of the color palette
  */
 function getColorPalette() {
     return [...colorPalette];
 }
 
 /**
- * Retourne une copie du mapping actuel variable -> couleur
- * @returns {Object} Copie du mapping des couleurs
+ * Returns a copy of the current variable -> color mapping
+ * @returns {Object} Copy of the color mapping
  */
 function getVariableColorMap() {
     return { ...variableColorMap };
 }
 
 /**
- * Retourne le nombre de variables actuellement mappées
- * @returns {number} Nombre de variables avec couleurs assignées
+ * Returns the number of currently mapped variables
+ * @returns {number} Number of variables with assigned colors
  */
 function getVariableCount() {
     return Object.keys(variableColorMap).length;
 }
 
 /**
- * Vérifie si une variable a déjà une couleur assignée
- * @param {string} variableName - Nom de la variable à vérifier
- * @returns {boolean} True si la variable a une couleur assignée
+ * Checks if a variable already has an assigned color
+ * @param {string} variableName - Name of the variable to check
+ * @returns {boolean} True if the variable has an assigned color
  */
 function hasVariableColor(variableName) {
     return variableName in variableColorMap;
 }
 
-// Exports pour différents environnements (Node.js, Browser, AMD)
+// Exports for different environments (Node.js, Browser, AMD)
 if (typeof module !== 'undefined' && module.exports) {
-    // Environment Node.js/CommonJS
+    // Node.js/CommonJS Environment
     module.exports = {
         getVariableColor,
         applyVariableColors,
@@ -108,7 +108,7 @@ if (typeof module !== 'undefined' && module.exports) {
         hasVariableColor
     };
 } else if (typeof window !== 'undefined') {
-    // Environment Browser - Exposition globale
+    // Browser Environment - Global exposure
     window.ColorManager = {
         getVariableColor,
         applyVariableColors,
