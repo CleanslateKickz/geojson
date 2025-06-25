@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Owner Information & Properties Widget</title>
+    <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+    <style>
+        /* --- Styles from Owner-Profile.html (mostly unchanged) --- */
+        * {margin:0;padding:0;box-sizing:border-box;}
+        body {font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,sans-serif;background:linear-gradient(135deg,#f0f9ff 0%,#fff 100%);min-height:100vh;padding:8px;overflow-x:hidden;}
+        .widget-container {width:100%;background:#fff;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.1);overflow:hidden;min-height:calc(100vh - 16px);}
+        .widget-header {background:linear-gradient(135deg,#2c3e50 0%,#3498db 100%);color:#fff;padding:16px;position:relative;overflow:hidden;display:flex;align-items:center;gap:16px;}
+        .widget-header::before {content:'';position:absolute;top:-50%;right:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(255,255,255,0.1) 0%,transparent 50%);animation:shimmer 4s ease-in-out infinite;}
+        @keyframes shimmer {0%,100%{transform:rotate(0deg);}50%{transform:rotate(180deg);}}
+        .profile-image-container {position:relative;z-index:2;flex-shrink:0;}
+        .profile-image {width:80px;height:80px;border-radius:50%;border:4px solid rgba(255,255,255,0.3);object-fit:cover;transition:all 0.3s ease;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;color:#fff;font-size:32px;font-weight:bold;}
+        .profile-image:hover {transform:scale(1.05);border-color:rgba(255,255,255,0.6);}
+        .header-info {flex:1;position:relative;z-index:2; min-width: 0;} /* Added min-width for flex shrink */
+        .owner-title {font-size:24px;font-weight:700;margin-bottom:6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+        .owner-subtitle {font-size:14px;opacity:.9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+        .widget-content {padding:16px;max-height:calc(100vh - (80px + 32px + 16px)); /* Adjusted for header height + padding */ overflow-y:auto;}
+        .no-data {text-align:center;padding:40px 20px;color:#7f8c8d;}
+        .no-data-icon {font-size:48px;margin-bottom:16px;}
+        .info-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:16px;}
+        .info-card {background:#f8f9fa;border-radius:8px;padding:12px;border-left:3px solid #3498db;transition:all 0.3s ease;position:relative;overflow:hidden;}
+        .info-card:hover {transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.1);border-left-color:#e74c3c;}
+        .card-title {font-size:11px;font-weight:600;color:#7f8c8d;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
+        .card-value {font-size:14px;font-weight:600;color:#2c3e50;line-height:1.3;}
+        .status-badges {display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
+        .badge {display: inline-block;padding:0.25em 0.9em;border-radius:999px;font-size:13px;font-weight:600;letter-spacing:.5px;margin-right:6px;margin-bottom:4px;background:#eee;color:#333;box-shadow:0 1px 2px rgba(0,0,0,0.02);border:none;vertical-align:middle;transition:background 0.2s,color 0.2s;user-select:none;}
+        .badge-red {background:#fce4e4;color:#d32f2f;} .badge-orange {background:#fff3e0;color:#f57c00;} .badge-yellow {background:#fffde7;color:#fbc02d;} .badge-green {background:#e8f5e9;color:#388e3c;} .badge-blue {background:#e3f2fd;color:#1976d2;} .badge-purple {background:#f3e5f5;color:#8e24aa;} .badge-cyan {background:#e0f7fa;color:#0097a7;} .badge-grey {background:#ececec;color:#616161;} .badge-dark {background:#263238;color:#fff;} .badge-black {background:#111;color:#fff;} .badge-pink {background:#ffebee;color:#c2185b;}
+        .badge:hover {transform:scale(1.05);}
+        .contact-section {background:linear-gradient(135deg,#ecf0f1,#bdc3c7);border-radius:8px;padding:16px;margin-bottom:16px;}
+        .section-title {font-size:16px;font-weight:700;color:#2c3e50;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+        .contact-grid {display:grid;grid-template-columns:1fr;gap:8px;}
+        .contact-item {display:flex;align-items:center;gap:10px;padding:8px;background:#fff;border-radius:6px;transition:all 0.3s ease;font-size:13px;}
+        .contact-item:hover {background:#f1f2f6;transform:translateX(2px);}
+        .contact-icon {width:20px;height:20px;background:linear-gradient(135deg,#3498db,#2980b9);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:bold;flex-shrink:0;}
+        .contact-info {flex:1;min-width:0;}
+        .contact-label {font-size:10px;color:#7f8c8d;font-weight:600;}
+        .contact-value {font-size:12px;color:#2c3e50;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .activity-section {background:linear-gradient(135deg,#fff,#f8f9fa);border-radius:8px;padding:16px;border:1px solid #e9ecef;margin-bottom:16px;}
+        .timeline-item {display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid #e9ecef;font-size:12px;}
+        .timeline-item:last-child {border-bottom:none;}
+        .timeline-dot {width:8px;height:8px;background:linear-gradient(135deg,#e74c3c,#c0392b);border-radius:50%;margin-top:2px;flex-shrink:0;}
+        .timeline-content {flex:1;}
+        .timeline-date {font-size:10px;color:#7f8c8d;font-weight:600;}
+        .timeline-text {font-size:12px;color:#2c3e50;margin-top:2px;}
+        .property-section {background:linear-gradient(135deg,#1e3c72,#2a5298);color:#fff;padding:16px;border-radius:8px;}
+        .property-section .section-title {color:#fff!important;}
+        .property-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:8px;}
+        .property-stat {text-align:center;padding:8px;background:rgba(255,255,255,0.1);border-radius:6px;backdrop-filter:blur(10px);color:#fff;}
+        .property-number {font-size:16px;font-weight:700;margin-bottom:2px;color:#fff;}
+        .property-label {font-size:9px;opacity:.8;text-transform:uppercase;letter-spacing:.3px;color:#fff;}
+        .loading {text-align:center;padding:40px;color:#7f8c8d;}
+        .spinner {border:3px solid #f3f3f3;border-top:3px solid #3498db;border-radius:50%;width:30px;height:30px;animation:spin 1s linear infinite;margin:0 auto 16px;}
+        .spinner-small {border:2px solid #f3f3f3;border-top:2px solid #3498db;border-radius:50%;width:16px;height:16px;animation:spin 1s linear infinite;display:inline-block; margin-right: 8px; vertical-align: middle;}
+        @keyframes spin {0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+
+        /* --- Styles for Owned Properties Section --- */
+        .owned-properties-section {
+            background: linear-gradient(135deg, #e9f0f7, #ddebf7);
+            color: #2c3e50;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            border: 1px solid #d4e0ee;
+            display: none; /* Initially hidden */
+        }
+        .owned-properties-section .section-title { color: #2c3e50 !important; }
+        .properties-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
+        .properties-table th, .properties-table td { text-align: left; padding: 10px 8px; border-bottom: 1px solid #d4e0ee; vertical-align: middle; }
+        .properties-table th { font-weight: 600; color: #34495e; background-color: rgba(255,255,255,0.3); }
+        .properties-table tr:hover td { background-color: rgba(255,255,255,0.5); }
+        .properties-table .property-image { width: 100px; height: 66px; object-fit: cover; border-radius: 4px; border: 1px solid #ccc; }
+        .properties-table .no-image-text { color: #7f8c8d; font-size: 12px; font-style: italic; }
+        .loading-properties-text { color: #555; padding: 20px; text-align: center; }
+        .no-properties-message { padding: 20px; color: #555; background-color: rgba(255,255,255,0.2); border-radius: 6px; }
+
+        /* --- Styles for Header Toggle Button --- */
+        .header-action-btn {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.25);
+            color: #fff;
+            padding: 0; /* Adjust padding for a circle */
+            width: 40px; /* Circle size */
+            height: 40px; /* Circle size */
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px; /* Emoji size */
+            line-height: 40px; /* Center emoji in circle */
+            text-align: center;
+            transition: all 0.2s ease;
+            margin-left: auto; /* Push to the right */
+            flex-shrink: 0;
+            display: none; /* Initially hidden */
+        }
+        .header-action-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
+        .header-action-btn.active { /* Style when properties are visible */
+            background: #fff;
+            color: #3498db;
+            box-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <div class="widget-header">
+            <div class="profile-image-container">
+                <div class="profile-image" id="profileImage">👤</div>
+            </div>
+            <div class="header-info">
+                <div class="owner-title" id="ownerName">Select an Owner</div>
+                <div class="owner-subtitle" id="ownerSubtitle">Choose a row to view details</div>
+            </div>
+            <button id="togglePropertiesBtn" class="header-action-btn" title="Toggle Owned Properties">🏘️</button>
+        </div>
+        <div class="widget-content">
+            <div id="loadingState" class="loading" style="display: none;">
+                <div class="spinner"></div>
+                <div>Loading owner information...</div>
+            </div>
+            <div id="noDataState" class="no-data">
+                <div class="no-data-icon">📋</div>
+                <div><strong>No Owner Selected</strong></div>
+                <div id="noDataSubtitle">Click on a row in your Owners table to view detailed information here.</div>
+            </div>
+            <div id="ownerContent" style="display: none;">
+                <div class="status-badges" id="statusBadges"></div>
+                <div class="info-grid" id="infoGrid"></div>
+                <div class="contact-section" id="contactSection">
+                    <div class="section-title">📞 Contact Information</div>
+                    <div class="contact-grid" id="contactGrid"></div>
+                </div>
+                <div class="activity-section">
+                    <div class="section-title">📈 Recent Activity</div>
+                    <div id="activityTimeline"></div>
+                </div>
+
+                <!-- Owned Properties Section (Now Toggled) -->
+                <div class="owned-properties-section" id="ownedPropertiesSection">
+                    <div class="section-title">🏘️ Owned Properties</div>
+                    <div id="ownedPropertiesContainer">
+                        <table class="properties-table">
+                            <thead>
+                                <tr>
+                                    <th>Property Address</th>
+                                    <th>Type</th>
+                                    <th>Image</th>
+                                </tr>
+                            </thead>
+                            <tbody id="propertiesTableBody">
+                                <!-- Property rows will be injected here -->
+                            </tbody>
+                        </table>
+                        <div id="noPropertiesFoundMessage" class="no-properties-message" style="display:none; text-align:center; margin-top:10px;"></div>
+                    </div>
+                </div>
+
+                <div class="property-section" id="ownerPortfolioSummarySection">
+                    <div class="section-title">📊 Owner Portfolio Summary</div>
+                    <div class="property-grid" id="propertyGrid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        let currentRecord = null;
+        let propertiesDataFetchedForCurrentUser = false; // Flag to track if properties are fetched
+        let isPropertiesSectionVisible = false; // Track visibility state
+
+        // DOM Elements
+        const profileImageEl = document.getElementById('profileImage');
+        const ownerNameEl = document.getElementById('ownerName');
+        const ownerSubtitleEl = document.getElementById('ownerSubtitle');
+        const loadingStateEl = document.getElementById('loadingState');
+        const noDataStateEl = document.getElementById('noDataState');
+        const noDataSubtitleEl = document.getElementById('noDataSubtitle');
+        const ownerContentEl = document.getElementById('ownerContent');
+        const statusBadgesContainer = document.getElementById('statusBadges');
+        const infoGridEl = document.getElementById('infoGrid');
+        const contactGridEl = document.getElementById('contactGrid');
+        const contactSectionEl = document.getElementById('contactSection');
+        const activityTimelineEl = document.getElementById('activityTimeline');
+        const propertyGridEl = document.getElementById('propertyGrid');
+        const ownedPropertiesSectionEl = document.getElementById('ownedPropertiesSection');
+        const propertiesTableBodyEl = document.getElementById('propertiesTableBody');
+        const noPropertiesMessageEl = document.getElementById('noPropertiesFoundMessage');
+        const togglePropertiesBtn = document.getElementById('togglePropertiesBtn');
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            try {
+                const date = typeof dateStr === 'number' ? new Date(dateStr * 1000) : new Date(dateStr);
+                return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+            } catch (e) { return dateStr; }
+        }
+
+        function getInitials(name) {
+            if (!name) return '?';
+            return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+        }
+
+        const BADGE_STYLE_MAP = {
+            "NOT INTERESTED/DNC": "red", "DNC": "red", "ANGRY": "red", "RUDE": "red", "DEVELOPER": "red",
+            "OPERATOR | OWNER U": "red", "COMPANY": "red", "✋ RUDE ✋": "red", "❗ DNC ❗": "red", "👿 ANGRY 👿": "red",
+            "IPA": "purple", "ERIC": "orange", "POLITE - DIDN'T WANT TO TALK": "orange",
+            "CALL RELATIONSHIP": "blue", "2-4 PROPERTIES": "blue", "TIER 2 INVESTOR": "blue",
+            "TALKATIVE": "cyan", "LIBERAL": "cyan", "FRIENDLY": "cyan", "VERY FRIENDLY": "cyan",
+            "MOM & POP": "green", "NEVER": "green", "CONTACT": "green", "CALL AGAIN": "green", "VM": "green",
+            "BROKER/EH": "grey", "BROKER": "dark", "👨‍💼 BROKER 👨‍💼": "dark",
+            "REPUBLICAN": "blue", "🐘 REPUBLICAN 🐘": "blue", "❄️ LIBERAL ❄️": "cyan",
+             "OPERATOR": "red"
+        };
+
+        function getBadgeStyle(tag) {
+            if (!tag) return "grey";
+            const normalized = tag.trim().toUpperCase();
+            if (BADGE_STYLE_MAP[normalized]) return "badge-" + BADGE_STYLE_MAP[normalized];
+            if (/DNC|NOT INTERESTED|ANGRY|RUDE/.test(normalized)) return "badge-red";
+            if (/FRIENDLY|TALKATIVE|LIBERAL/.test(normalized)) return "badge-cyan";
+            if (/CALL AGAIN|CONTACT|VM|NEVER|MOM & POP/.test(normalized)) return "badge-green";
+            if (/BROKER/.test(normalized)) return "badge-dark";
+            if (/OPERATOR|COMPANY/.test(normalized)) return "badge-red";
+            if (/IPA/.test(normalized)) return "badge-purple";
+            if (/ERIC/.test(normalized)) return "badge-orange";
+            if (/RELATIONSHIP|TIER|PROPERTIES/.test(normalized)) return "badge-blue";
+            return "badge-grey";
+        }
+
+        function createBadge(text) {
+            if (!text) return '';
+            const badgeClass = getBadgeStyle(text);
+            return `<div class="badge ${badgeClass}">${text}</div>`;
+        }
+
+        function updateProfileImage(record) {
+            const imageUrl = record.Profile_Image;
+            const initials = getInitials(record.Name || record.Owner_Full_Name);
+            if (imageUrl && typeof imageUrl === 'string' && imageUrl.trim()) {
+                profileImageEl.innerHTML = `<img src="${imageUrl}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.textContent='${initials}';">`;
+            } else {
+                profileImageEl.textContent = initials;
+            }
+        }
+
+        function getFirstDelimitedItem(str) {
+            if (!str || typeof str !== 'string') return '';
+            return str.split(';')[0].trim();
+        }
+        
+        function isEmpty(val) {
+            return val === null || val === undefined || (typeof val === "string" && val.trim() === "") || val === "N/A" || (Array.isArray(val) && val.length === 0);
+        }
+
+        function columnarToRowFormat(columnarData) {
+            if (!columnarData || !columnarData.id || !Array.isArray(columnarData.id)) return [];
+            const numRows = columnarData.id.length;
+            const columnNames = Object.keys(columnarData);
+            const rowData = [];
+            for (let i = 0; i < numRows; i++) {
+              const fields = {};
+              for (const colName of columnNames) {
+                if (colName !== 'id' && colName !== 'manualSort') fields[colName] = columnarData[colName][i];
+              }
+              rowData.push({ id: columnarData.id[i], fields: fields });
+            }
+            return rowData;
+        }
+
+        async function fetchAndDisplayProperties(ownerId, ownerNameForDisplay) {
+            propertiesTableBodyEl.innerHTML = `<tr><td colspan="3" class="loading-properties-text"><div class="spinner-small"></div>Loading properties for ${ownerNameForDisplay}...</td></tr>`;
+            noPropertiesMessageEl.style.display = 'none';
+
+            try {
+                const columnarPropertiesData = await grist.docApi.fetchTable('Properties_');
+                const allProperties = columnarToRowFormat(columnarPropertiesData);
+                
+                const ownerProperties = allProperties.filter(prop =>
+                    prop.fields.Name && Array.isArray(prop.fields.Name) && prop.fields.Name.includes(ownerId)
+                );
+
+                propertiesDataFetchedForCurrentUser = true; // Mark as fetched
+
+                if (ownerProperties.length === 0) {
+                    propertiesTableBodyEl.innerHTML = '';
+                    noPropertiesMessageEl.innerHTML = `No properties found for ${ownerNameForDisplay}.`;
+                    noPropertiesMessageEl.style.display = 'block';
+                } else {
+                    const tableRowsHtml = ownerProperties.map(prop => {
+                        const fields = prop.fields || {};
+                        const address = fields.Address_Concatenate || fields.Property_Address || "N/A";
+                        let secondaryTypesText = '';
+                        if (Array.isArray(fields.Secondary_Type) && fields.Secondary_Type[0] === 'L') {
+                            secondaryTypesText = fields.Secondary_Type.slice(1).join(', ');
+                        } else if (typeof fields.Secondary_Type === 'string') {
+                            secondaryTypesText = fields.Secondary_Type;
+                        }
+                        const typeInfo = [fields.Property_Type, secondaryTypesText].filter(Boolean).join(' / ');
+                        const imageUrl = fields.Pop_up_IMG || fields.ImageURLs || "";
+
+                        return `
+                            <tr>
+                                <td>${address}</td>
+                                <td>${typeInfo || 'N/A'}</td>
+                                <td>
+                                    ${imageUrl ? `<img src="${imageUrl}" alt="Property Image" class="property-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';"><span class="no-image-text" style="display:none;">No Image</span>` : '<span class="no-image-text">No Image</span>'}
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                    propertiesTableBodyEl.innerHTML = tableRowsHtml;
+                    noPropertiesMessageEl.style.display = 'none';
+                }
+
+            } catch (error) {
+                console.error('Error fetching or processing properties:', error);
+                propertiesTableBodyEl.innerHTML = '';
+                noPropertiesMessageEl.innerHTML = `<span style="color: red;">Error loading properties. Check console.</span>`;
+                noPropertiesMessageEl.style.display = 'block';
+            }
+        }
+
+        function handleToggleProperties() {
+            if (!currentRecord) return; // Should not happen if button is only visible with a record
+
+            isPropertiesSectionVisible = !isPropertiesSectionVisible;
+            if (isPropertiesSectionVisible) {
+                ownedPropertiesSectionEl.style.display = 'block';
+                togglePropertiesBtn.classList.add('active');
+                // Fetch data only if not already fetched for this user
+                if (!propertiesDataFetchedForCurrentUser) {
+                    fetchAndDisplayProperties(currentRecord.id, currentRecord.Name || currentRecord.Owner_Full_Name || 'Selected Owner');
+                }
+                // Scroll after a slight delay to ensure content is rendered
+                setTimeout(() => {
+                    ownedPropertiesSectionEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 100);
+            } else {
+                ownedPropertiesSectionEl.style.display = 'none';
+                togglePropertiesBtn.classList.remove('active');
+            }
+        }
+        togglePropertiesBtn.addEventListener('click', handleToggleProperties);
+
+
+        function updateOwnerDisplay(record) {
+            currentRecord = record;
+
+            if (!record) {
+                noDataStateEl.style.display = 'block';
+                ownerContentEl.style.display = 'none';
+                ownerNameEl.textContent = 'Select an Owner';
+                ownerSubtitleEl.textContent = 'Choose a row to view details';
+                profileImageEl.textContent = '👤';
+                noDataSubtitleEl.textContent = 'Click on a row in your Owners table to view detailed information here.';
+                
+                ownedPropertiesSectionEl.style.display = 'none'; // Hide properties section
+                togglePropertiesBtn.style.display = 'none'; // Hide toggle button
+                togglePropertiesBtn.classList.remove('active');
+                isPropertiesSectionVisible = false;
+                propertiesDataFetchedForCurrentUser = false;
+                propertiesTableBodyEl.innerHTML = '';
+                noPropertiesMessageEl.style.display = 'none';
+                return;
+            }
+            noDataStateEl.style.display = 'none';
+            ownerContentEl.style.display = 'block';
+            togglePropertiesBtn.style.display = 'inline-block'; // Show toggle button
+
+            // Reset properties section for new owner
+            ownedPropertiesSectionEl.style.display = 'none';
+            togglePropertiesBtn.classList.remove('active');
+            isPropertiesSectionVisible = false;
+            propertiesDataFetchedForCurrentUser = false; 
+            // propertiesTableBodyEl.innerHTML = ''; // Content will be loaded on demand
+            // noPropertiesMessageEl.style.display = 'none';
+
+
+            let accountsText = !isEmpty(record.Accounts) ? getFirstDelimitedItem(record.Accounts) : '';
+            const ownerDisplayName = record.Name || record.Owner_Full_Name || 'Unknown Owner';
+            ownerNameEl.textContent = ownerDisplayName;
+            ownerSubtitleEl.textContent = [accountsText, record.Title].filter(x => !isEmpty(x)).join(" • ");
+            updateProfileImage(record);
+
+            let badgesHtml = '';
+            const badgeFields = ['Segment', 'Classify', 'Owner_Personality', 'Opportunity'];
+            badgeFields.forEach(fieldKey => {
+                const fieldValue = record[fieldKey];
+                if (!isEmpty(fieldValue)) {
+                    if (Array.isArray(fieldValue) && fieldValue[0] === 'L') {
+                         fieldValue.slice(1).forEach(item => { if(!isEmpty(item)) badgesHtml += createBadge(item); });
+                    } else if (Array.isArray(fieldValue)) {
+                         fieldValue.forEach(item => { if(!isEmpty(item)) badgesHtml += createBadge(item); });
+                    } else { badgesHtml += createBadge(fieldValue); }
+                }
+            });
+            statusBadgesContainer.innerHTML = badgesHtml;
+
+            let infoCardsHtml = '';
+            if (!isEmpty(record.Age) || !isEmpty(record.Gender)) {
+                let demo = [];
+                if (!isEmpty(record.Age)) demo.push(`${record.Age} years old`);
+                if (!isEmpty(record.Gender)) demo.push(record.Gender);
+                if(demo.length > 0) infoCardsHtml += `<div class="info-card"><div class="card-title">Age & Demographics</div><div class="card-value">${demo.join(' • ')}</div></div>`;
+            }
+            let callRel = '';
+            if (Array.isArray(record.Call_Relationship) && record.Call_Relationship[0] === 'L') callRel = record.Call_Relationship.slice(1).filter(x => !isEmpty(x)).join(', ');
+            else if (!isEmpty(record.Call_Relationship)) callRel = record.Call_Relationship;
+            if (!isEmpty(callRel)) infoCardsHtml += `<div class="info-card"><div class="card-title">Call Relationship</div><div class="card-value">${callRel}</div></div>`;
+            let lastContactArr = [];
+            if (!isEmpty(record.Date)) lastContactArr.push(formatDate(record.Date));
+            if (!isEmpty(record.Last_Call_Segment)) lastContactArr.push(record.Last_Call_Segment);
+            if (lastContactArr.length > 0) infoCardsHtml += `<div class="info-card"><div class="card-title">Last Contact</div><div class="card-value">${lastContactArr.join(' • ')}</div></div>`;
+            let trancheVal = '';
+            if (Array.isArray(record.Tranche) && record.Tranche[0] === 'L') trancheVal = record.Tranche.slice(1).filter(x => !isEmpty(x)).join(', ');
+            else if (!isEmpty(record.Tranche)) trancheVal = record.Tranche;
+            if (!isEmpty(trancheVal)) infoCardsHtml += `<div class="info-card"><div class="card-title">Market Tranche</div><div class="card-value">${trancheVal}</div></div>`;
+            if (record.Constant_Call_VM_s !== undefined && record.Constant_Call_VM_s !== null) infoCardsHtml += `<div class="info-card"><div class="card-title">VM Preference</div><div class="card-value">${record.Constant_Call_VM_s ? '📠 Accepts VMs' : '✖️ No VMs'}</div></div>`;
+            infoGridEl.innerHTML = infoCardsHtml;
+
+            let contactItemsHtml = '';
+            if (!isEmpty(record.Email)) contactItemsHtml += `<div class="contact-item"><div class="contact-icon">📧</div><div class="contact-info"><div class="contact-label">Email</div><div class="contact-value">${record.Email}</div></div></div>`;
+            if (!isEmpty(record.Phone)) contactItemsHtml += `<div class="contact-item"><div class="contact-icon">📱</div><div class="contact-info"><div class="contact-label">Phone</div><div class="contact-value">${record.Phone}</div></div></div>`;
+            let firstOwnerAddress = getFirstDelimitedItem(record.Owner_Address);
+            if (!isEmpty(firstOwnerAddress)) contactItemsHtml += `<div class="contact-item"><div class="contact-icon">🏠</div><div class="contact-info"><div class="contact-label">Address</div><div class="contact-value">${firstOwnerAddress}</div></div></div>`;
+            if (!isEmpty(record.LinkedIn)) contactItemsHtml += `<div class="contact-item"><div class="contact-icon">🔗</div><div class="contact-info"><div class="contact-label">LinkedIn</div><div class="contact-value">View Profile</div></div></div>`;
+            let firstOtherOwner = getFirstDelimitedItem(record.Other_Owners);
+            if (!isEmpty(firstOtherOwner)) contactItemsHtml += `<div class="contact-item"><div class="contact-icon">👥</div><div class="contact-info"><div class="contact-label">Co-Owner</div><div class="contact-value">${firstOtherOwner}</div></div></div>`;
+            contactGridEl.innerHTML = contactItemsHtml;
+            contactSectionEl.style.display = contactItemsHtml ? "block" : "none";
+
+            let timelineItemsHtml = '';
+            if (!isEmpty(record.Date) && !isEmpty(record.Last_Call_Segment)) timelineItemsHtml += `<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-content"><div class="timeline-date">${formatDate(record.Date)}</div><div class="timeline-text">Last contact - ${record.Last_Call_Segment}</div></div></div>`;
+            if (!isEmpty(record.Past_Contact_)) timelineItemsHtml += `<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-content"><div class="timeline-date">Previous</div><div class="timeline-text">Past contact established</div></div></div>`;
+            if (!isEmpty(record.Contact_1)) timelineItemsHtml += `<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-content"><div class="timeline-date">Contact 1</div><div class="timeline-text">${record.Contact_1}</div></div></div>`;
+            activityTimelineEl.innerHTML = timelineItemsHtml || `<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-content"><div class="timeline-text">No activity recorded</div></div></div>`;
+
+            let propertyStatsHtml = '';
+            if (!isEmpty(record.Prop_Rate)) propertyStatsHtml += `<div class="property-stat"><div class="property-number">${record.Prop_Rate}</div><div class="property-label">Prop Rate</div></div>`;
+            let firstClassify = '';
+            if (Array.isArray(record.Classify) && record.Classify[0] === 'L') firstClassify = record.Classify.slice(1).find(x => !isEmpty(x)) || '';
+            else if (!isEmpty(record.Classify)) firstClassify = record.Classify;
+            if (!isEmpty(firstClassify)) propertyStatsHtml += `<div class="property-stat"><div class="property-number">${firstClassify}</div><div class="property-label">Type</div></div>`;
+            let activityCount = 0;
+            if (Array.isArray(record.Activity) && record.Activity[0] === 'L') activityCount = record.Activity.slice(1).filter(x => !isEmpty(x)).length;
+            else if (Array.isArray(record.Activity)) activityCount = record.Activity.filter(x => !isEmpty(x)).length;
+            else if (!isEmpty(record.Activity)) activityCount = 1;
+            if (activityCount > 0) propertyStatsHtml += `<div class="property-stat"><div class="property-number">${activityCount}</div><div class="property-label">Activities</div></div>`;
+            let firstOpportunity = '';
+            if (Array.isArray(record.Opportunity) && record.Opportunity[0] === 'L') firstOpportunity = record.Opportunity.slice(1).find(x => !isEmpty(x)) || '';
+            else if (!isEmpty(record.Opportunity)) firstOpportunity = record.Opportunity;
+            if (!isEmpty(firstOpportunity)) propertyStatsHtml += `<div class="property-stat"><div class="property-number">${firstOpportunity}</div><div class="property-label">Status</div></div>`;
+            propertyGridEl.innerHTML = propertyStatsHtml;
+        }
+
+        grist.ready({
+            columns: [
+                'Name', 'Owner_Full_Name', 'Prop_Rate', 'Call_Relationship', 'Constant_Call_VM_s',
+                'Tranche', 'Segment', 'Classify', 'Owner_Personality', 'Activity', 'My_Market_',
+                'Opportunity', 'Objection', 'Profile_Image', 'Last_Call_Segment', 'Past_Contact_',
+                'LinkedIn', 'Age', 'Accounts', 'Other_Owners', 'Email', 'Gender', 'Owner_Address',
+                'Title', 'Pref', 'Date', 'Plans_to_Buy', 'Plans_to_Sell', 'Contact_1', 'Contact_2',
+                'Contact_3', 'Contact_4', 'Phone', 'Phone_2', 'Phone_3', 'Phone_4', 'Extra_Notes'
+            ],
+            requiredAccess: 'full'
+        });
+
+        grist.onRecord(function(record) {
+            // loadingStateEl.style.display = 'block'; // Optional: show loading spinner briefly
+            // ownerContentEl.style.display = 'none';
+            // setTimeout(() => { // Simulate loading if needed or remove for direct update
+                updateOwnerDisplay(record);
+            //     loadingStateEl.style.display = 'none';
+            //     if (record) ownerContentEl.style.display = 'block';
+            // }, record ? 50 : 0); // Shorter delay if a record is present
+        });
+
+        document.addEventListener('click', function(e) {
+            const contactItem = e.target.closest('.contact-item');
+            if (contactItem && currentRecord) {
+                const value = contactItem.querySelector('.contact-value').textContent;
+                const label = contactItem.querySelector('.contact-label').textContent;
+                if (label === 'Email' && value.includes('@')) window.open(`mailto:${value}`, '_blank');
+                else if (label === 'LinkedIn' && currentRecord.LinkedIn) window.open(currentRecord.LinkedIn, '_blank');
+                else if (label === 'Phone') {
+                    const cleanedPhone = value.replace(/[^0-9+]/g, '');
+                    if (cleanedPhone) window.open(`tel:${cleanedPhone}`, '_blank');
+                }
+            }
+        });
+    </script>
+</body>
+</html>
