@@ -9,37 +9,151 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.css">
     <link rel="icon" type="image/x-icon" href="Images/Directory.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        .main-section { margin: 0 auto; max-width: 1150px; padding: 2rem 1rem; }
-        .dir-list { margin: 2.5rem 0 2rem 0; }
-        .dir-list h2 { margin-bottom: 1rem; color: #2c3e50; }
-        .dir-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap: 22px; }
-        .dir-card {
-            background: #fff;
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f5f7fa;
+            margin: 0;
+            color: #2d3748;
+        }
+        header {
+            background: linear-gradient(135deg, #2b6cb0 0%, #3182ce 100%);
+            color: white;
+            padding: 3rem 1rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        header p {
+            margin: 0.5rem 0 0;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        .main-section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        .search-bar {
+            margin-bottom: 2rem;
+            position: relative;
+        }
+        .search-bar input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid #e2e8f0;
             border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(44,62,80,0.11);
-            padding: 24px 18px 18px 18px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        .search-bar input:focus {
+            outline: none;
+            border-color: #3182ce;
+            box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+        }
+        .dir-list {
+            margin: 2.5rem 0;
+        }
+        .dir-list h2 {
+            color: #2d3748;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
             display: flex;
-            flex-direction: column;
-            gap: 10px;
-            min-height: 160px;
+            align-items: center;
+            gap: 0.5rem;
         }
-        .dir-card i { color: #3498db; margin-right: 7px; }
-        .dir-card h3 { font-size: 1.18rem; margin-bottom: 5px; }
-        .dir-card p { color: #555; font-size: 0.96rem; margin-bottom: 0; }
-        .dir-card a, .dir-card button {
-            display: inline-block; margin-top: 9px; color: #fff;
-            background: #3498db; border: none; border-radius: 5px;
-            padding: 7px 16px; text-decoration: none;
-            font-size: 0.96rem; cursor: pointer;
-            transition: background 0.15s;
+        .dir-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
         }
-        .dir-card a:hover, .dir-card button:hover { background: #217dbb; }
-        .footer { text-align: center; margin-top: 3rem; font-size: 1rem; color: #888; }
-        .footer a { color: #3498db; }
-        @media (max-width: 650px) {
-            .main-section { padding: 1.2rem 0.5rem; }
-            .dir-card { padding: 14px 8px 12px 8px; }
+        .dir-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .dir-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+        .dir-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: #3182ce;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .dir-card:hover::before {
+            opacity: 1;
+        }
+        .dir-card i {
+            color: #3182ce;
+            margin-right: 0.5rem;
+        }
+        .dir-card h3 {
+            font-size: 1.25rem;
+            margin: 0 0 0.5rem;
+            font-weight: 600;
+        }
+        .dir-card p {
+            color: #4a5568;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin: 0;
+        }
+        .dir-card a {
+            display: inline-block;
+            margin-top: 1rem;
+            background: #3182ce;
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: background 0.2s;
+        }
+        .dir-card a:hover {
+            background: #2b6cb0;
+        }
+        .footer {
+            text-align: center;
+            margin: 3rem 0 2rem;
+            color: #718096;
+            font-size: 0.95rem;
+        }
+        .footer a {
+            color: #3182ce;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2rem;
+            }
+            .main-section {
+                padding: 1.5rem 0.8rem;
+            }
+            .dir-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+            .dir-card {
+                padding: 1.2rem;
+            }
         }
     </style>
 </head>
@@ -52,6 +166,9 @@
     </header>
 
     <main class="main-section">
+        <div class="search-bar">
+            <input type="text" placeholder="Search projects and tools..." id="projectSearch">
+        </div>
 
         <!-- Tools & Utilities -->
         <section class="dir-list">
@@ -69,13 +186,13 @@
                 </div>
                 <div class="dir-card">
                     <h3><i class="fas fa-image"></i> Sherwin-Williams</h3>
-                    <p>Sherwin-Williams</p>
+                    <p>Sherwin-Williams Property Analysis</p>
                     <a href="HTML/Sherwin-Williams.html" target="_blank">Open</a>
                 </div>
             </div>
         </section>
 
-        <!-- RetailStat Newsletters (moved up) -->
+        <!-- RetailStat Newsletters -->
         <section class="dir-list">
             <h2><i class="fas fa-newspaper"></i> RetailStat Newsletters</h2>
             <div class="dir-grid">
@@ -89,15 +206,15 @@
                     <p>Jump straight to the newest upload.</p>
                     <a href="retailstat/June-17-2025.html" target="_blank">Open Latest Newsletter</a>
                 </div>
-                 <div class="dir-card">
+                <div class="dir-card">
                     <h3><i class="fas fa-file-alt"></i> Retail Outlook</h3>
                     <p>Retail Outlook: 2H25 Update</p>
-                    <a href="file:///C:/Users/Admin/Documents/2025/RetailStat/Retail%20Outlook%20-%202H25%20Update.pdf" target="_blank">Open</a>
+                    <a href="retailstat/Retail%20Outlook%20-%202H25%20Update.pdf" target="_blank">Open</a>
                 </div>
                 <div class="dir-card">
                     <h3><i class="fas fa-file-alt"></i> M&A Activity</h3>
                     <p>Merger & Acquisition Activity Update</p>
-                    <a href="file:///C:/Users/Admin/Documents/2025/RetailStat/M&A%20Activity%20Update%20-%20June%2017.pdf" target="_blank">Open</a>
+                    <a href="retailstat/M&A%20Activity%20Update%20-%20June%2017.pdf" target="_blank">Open</a>
                 </div>
             </div>
         </section>
@@ -108,7 +225,7 @@
             <div class="dir-grid">
                 <div class="dir-card">
                     <h3><i class="fas fa-location-dot"></i> Property Lookup Map</h3>
-                    <p>Nationwide map: search addresses, get county info, instant tax/GIS links.<br>Easiest place to start for US property research.</p>
+                    <p>Nationwide map: search addresses, get county info, instant tax/GIS links.</p>
                     <a href="HTML/national/index.html" target="_blank">Open National Map</a>
                 </div>
                 <div class="dir-card">
@@ -135,7 +252,7 @@
                 </div>
                 <div class="dir-card">
                     <h3><i class="fas fa-book"></i> Oregon 1031 Strategic Guide (GPT v1)</h3>
-                    <p>Concise 1031 rationale and talking points.<br>Bootstrap accordion style.</p>
+                    <p>Concise 1031 rationale and talking points.</p>
                     <a href="HTML/1031-Exchange/GPT-1031-(1).html" target="_blank">Read Guide</a>
                 </div>
                 <div class="dir-card">
@@ -163,7 +280,7 @@
             </div>
         </section>
 
-        <!-- Recently Added HTML Projects (NEW) -->
+        <!-- Additional HTML Projects -->
         <section class="dir-list">
             <h2><i class="fas fa-folder"></i> Additional HTML Projects</h2>
             <div class="dir-grid">
@@ -177,10 +294,35 @@
                     <p>Test markdown file in <b>national/</b> map project folder.</p>
                     <a href="HTML/national/test.md" target="_blank">Open Test File</a>
                 </div>
+                <div class="dir-card">
+                    <h3><i class="fas fa-building"></i> Grove Plaza</h3>
+                    <p>Analysis and visualization for Grove Plaza properties.</p>
+                    <a href="HTML/Grove-Plaza.html" target="_blank">Open Project</a>
+                </div>
+                <div class="dir-card">
+                    <h3><i class="fas fa-mobile-alt"></i> On-Markets Mobile</h3>
+                    <p>Mobile-optimized view for on-market listings.</p>
+                    <a href="HTML/On-Markets-Mobile.html" target="_blank">Open Project</a>
+                </div>
+                <div class="dir-card">
+                    <h3><i class="fas fa-balance-scale"></i> Oregon vs. Washington</h3>
+                    <p>Comparative analysis of Oregon and Washington real estate markets.</p>
+                    <a href="HTML/Oregon%20vs.%20Washington.html" target="_blank">Open Project</a>
+                </div>
+                <div class="dir-card">
+                    <h3><i class="fas fa-shield-alt"></i> AI Resilience Formula</h3>
+                    <p>AI-driven insights for resilient real estate investments.</p>
+                    <a href="HTML/The%20AI%20Resilience%20Formula.html" target="_blank">Open Project</a>
+                </div>
+                <div class="dir-card">
+                    <h3><i class="fas fa-window-maximize"></i> Owner Properties Window</h3>
+                    <p>Interactive window for viewing owner property details.</p>
+                    <a href="HTML/OwnerProperties-Window.html" target="_blank">Open Project</a>
+                </div>
             </div>
         </section>
 
-        <!-- Widgets & Tools (moved to bottom) -->
+        <!-- Widgets & Tools -->
         <section class="dir-list">
             <h2><i class="fas fa-puzzle-piece"></i> Widgets & Tools</h2>
             <div class="dir-grid">
@@ -191,12 +333,12 @@
                 </div>
                 <div class="dir-card">
                     <h3><i class="fas fa-expand"></i> Dynamic Size Tenant Map</h3>
-                    <p>Interactive Leaflet/Cluster map with dynamic tenant logo scaling. <br><b>For Grist plugin users.</b></p>
+                    <p>Interactive Leaflet/Cluster map with dynamic tenant logo scaling.</p>
                     <a href="Widgets/DynamicSizeTenant.html" target="_blank">Open Widget</a>
                 </div>
                 <div class="dir-card">
                     <h3><i class="fas fa-map"></i> Tenant Map (Standard)</h3>
-                    <p>Minimalist clustered tenant map for Grist plugin integrations. Logo type scaling.</p>
+                    <p>Minimalist clustered tenant map for Grist plugin integrations.</p>
                     <a href="Widgets/TenantMap.html" target="_blank">Open Widget</a>
                 </div>
                 <div class="dir-card">
@@ -214,17 +356,27 @@
 
         <!-- Recent Files Section -->
         <div id="recentFiles" class="files-list" style="margin-top:3rem;">
-            <!-- Will be dynamically loaded by main.js -->
             <h2><i class="fas fa-clock"></i> Recent Files</h2>
             <div class="loading-placeholder">Loading repository contents...</div>
         </div>
     </main>
 
     <footer class="footer">
-        <p>© 2025 <a href="https://github.com/CleanslateKickz" target="_blank">CleanslateKickz</a> &mdash; <a href="https://github.com/CleanslateKickz/geojson" target="_blank"><i class="fab fa-github"></i> Repo</a></p>
+        <p>© 2025 <a href="https://github.com/CleanslateKickz" target="_blank">CleanslateKickz</a> — <a href="https://github.com/CleanslateKickz/geojson" target="_blank"><i class="fab fa-github"></i> Repo</a></p>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js"></script>
     <script src="js/main.js"></script>
+    <script>
+        document.getElementById('projectSearch').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const cards = document.querySelectorAll('.dir-card');
+            cards.forEach(card => {
+                const title = card.querySelector('h3').textContent.toLowerCase();
+                const description = card.querySelector('p').textContent.toLowerCase();
+                card.style.display = (title.includes(searchTerm) || description.includes(searchTerm)) ? '' : 'none';
+            });
+        });
+    </script>
 </body>
 </html>
