@@ -7,12 +7,12 @@ grist.ready({
   requiredAccess: 'read table'
 });
 
-let currentViewMode = 'pivot'; // Mode d'affichage actuel : 'pivot' (normal) ou 'fullscreen' (plein écran)
-let lastPivotData = null;  // Stocke les données brutes du tableau reçues de Grist
-let currentPivotConfig = {};  // Configuration du tableau (rows, cols, vals, aggregatorName, rendererName)
-let pivotTableInitialized = false; // suit l'état d'initialisation du widget 
+let currentViewMode = 'pivot'; // Current display mode: 'pivot' (normal) or 'fullscreen'
+let lastPivotData = null;      // Stores the raw table data received from Grist
+let currentPivotConfig = {};   // Pivot table config (rows, cols, vals, aggregatorName, rendererName)
+let pivotTableInitialized = false; // Tracks pivot widget initialization state
 
-// Fonction pour mettre à jour le tableau même lorsqu'il est en plein écran
+// Updates the table when in fullscreen mode
 function updateFullscreenTable() {
   const $pivotTableInUI = $('#table').find('table.pvtTable'); 
   const $fullscreenContainer = $('#fullscreen-table-container');
@@ -22,12 +22,11 @@ function updateFullscreenTable() {
     const $clonedTable = $pivotTableInUI.clone(true, true);
     $fullscreenContainer.append($clonedTable);
   } else {
-    // Si nous sommes en mode plein écran mais que la table n'est pas encore prête,
-    // afficher un message de chargement au lieu d'un message d'erreur
+    // If we're in fullscreen and the table isn't ready, show a loading message instead of error
     if (currentViewMode === 'fullscreen' && !pivotTableInitialized) {
-      $fullscreenContainer.html('<p style="text-align:center; padding-top:50px;">Chargement du tableau en cours...</p>');
+      $fullscreenContainer.html('<p style="text-align:center; padding-top:50px;">Loading table...</p>');
     } else {
-      $fullscreenContainer.html('<p style="text-align:center; padding-top:50px; font-style:italic;">Aucun tableau à afficher en plein écran.</p>');
+      $fullscreenContainer.html('<p style="text-align:center; padding-top:50px; font-style:italic;">No table to display in fullscreen.</p>');
     }
   }
 }
@@ -36,7 +35,7 @@ function applyViewMode() {
   const $pivotUIContainer = $('#table');
   const $fullscreenContainer = $('#fullscreen-table-container');
   const $body = $('body');
-  // Le sélecteur de vue original et le bouton de sortie sont gérés par CSS via la classe .fullscreen-active
+  // The original view selector and exit button are handled via CSS using the .fullscreen-active class
 
   if (currentViewMode === 'fullscreen') {
     updateFullscreenTable(); 
@@ -68,23 +67,23 @@ function weightedAverage ([val, coef]) {
   });
 }
 
-// Traduction du nom des opérations mathématiques en français
+// Translation of math operation names to English
 $.extend(
   $.pivotUtilities.aggregators,
   $.pivotUtilities.locales.fr.aggregators,
-  { 'Moyenne pondérée': weightedAverage }
+  { 'Weighted Average': weightedAverage }
 );
 
-// Traduction du nom des types de visualisation en français
+// Translation of renderer types to English
 $.extend($.pivotUtilities.locales.fr.renderers,
          $.pivotUtilities.export_renderers);
 
-// Fonction qui attend que le tableau croisé dynamique soit complètement chargé, et applique le mode plein écran si nécessaire
+// Wait until the pivot table is fully loaded, apply fullscreen if needed
 function checkPivotTableAndApplyFullscreen() {
   const $pivotTable = $('#table').find('table.pvtTable');
   
   if ($pivotTable.length > 0) {
-    // Le tableau est prêt, mettons à jour le mode plein écran si nécessaire
+    // Table is ready, update fullscreen if needed
     if (currentViewMode === 'fullscreen') {
       updateFullscreenTable();
     }
@@ -92,30 +91,30 @@ function checkPivotTableAndApplyFullscreen() {
     return true;
   }
   
-  // Si le tableau n'est pas encore prêt, attendre un peu et réessayer 
+  // If the table isn't ready yet, wait and retry
   return false;
 }
 
-// Rendu allégé de la pivot table sans les autres possibilités de visualisation + traduction de Moyenne pondérée
+// Lightweight rendering of pivot table (no alternative visualizations) + translation of Weighted Average
 grist.onRecords(async rec => {
-  lastPivotData = rec;  // Sauvegarde globale des données reçues
-  pivotTableInitialized = false; // Réinitialiser l'état d'initialisation
+  lastPivotData = rec;  // Save received data globally
+  pivotTableInitialized = false; // Reset initialization state
 
-  // Récupération des options de configuration précédemment sauvegardées
+  // Retrieve previous config options saved in Grist
   let settings = await grist.getOption('settings') ?? {};
   let { rows, cols, vals, aggregatorName, rendererName } = settings;
 
-  // Stockage centralisé de la config pour facilité de mise à jour
+  // Centralized storage for config to make updates easier
   currentPivotConfig = { rows, cols, vals, aggregatorName, rendererName };
 
-  // l'ancien label était en anglais, on le mappe en français
-  const mapEnToFr = { 'Weighted Average': 'Moyenne pondérée' };
-  if (aggregatorName in mapEnToFr) {
-    aggregatorName = mapEnToFr[aggregatorName];
-    currentPivotConfig.aggregatorName = aggregatorName;  // Mise à jour dans config centrale
+  // The old label was in French, map it to English
+  const mapFrToEn = { 'Moyenne pondérée': 'Weighted Average' };
+  if (aggregatorName in mapFrToEn) {
+    aggregatorName = mapFrToEn[aggregatorName];
+    currentPivotConfig.aggregatorName = aggregatorName;  // Update in central config
   }
 
-  let firstRefresh = true; // Pour éviter d’écrire dans grist à la première initialisation
+  let firstRefresh = true; // Avoid writing to Grist on initial load
 
   $('#table').pivotUI(
     rec,
@@ -124,7 +123,7 @@ grist.onRecords(async rec => {
       cols: currentPivotConfig.cols,
       vals: currentPivotConfig.vals,
 
-      // Lors d’une modification par l’utilisateur
+      // On user edit
       onRefresh(config) {
         if (firstRefresh) { 
           firstRefresh = false; 
@@ -138,10 +137,10 @@ grist.onRecords(async rec => {
           rendererName: config.rendererName,
         };
 
-        // Sauvegarde des options modifiées dans Grist
+        // Save updated options in Grist
         grist.setOption('settings', currentPivotConfig);
 
-        // Si on est en mode fullscreen, mettre à jour le tableau cloné
+        // If in fullscreen, update the cloned table
         if (currentViewMode === 'fullscreen') {
           updateFullscreenTable();
         }
@@ -150,11 +149,11 @@ grist.onRecords(async rec => {
       aggregatorName: currentPivotConfig.aggregatorName,
       rendererName: currentPivotConfig.rendererName,
     },
-    false,  // overwrite = false, on ne remplace pas tout, on conserve ce qui existe
-    'fr'    // locale française pour les labels par défaut
+    false,  // overwrite = false, don't replace everything, retain what's there
+    'en'    // English locale for default labels
   );
 
-  // Créer de manière dynamique les Labels "colonnes" "lignes" "Valeurs"
+  // Dynamically create "Columns" "Rows" "Values" labels
   PivotLabels.init(); 
   
   try {
@@ -168,7 +167,7 @@ grist.onRecords(async rec => {
   }
   applyViewMode();
 
-  // Vérifier périodiquement si le tableau est chargé pour le mode plein écran
+  // Periodically check if the table is loaded for fullscreen mode
   if (currentViewMode === 'fullscreen') {
     const checkInterval = setInterval(() => {
       if (checkPivotTableAndApplyFullscreen()) {
@@ -176,12 +175,12 @@ grist.onRecords(async rec => {
       }
     }, 200);
     
-    // Arrêter de vérifier après 5 secondes dans tous les cas
+    // Stop checking after 5 seconds regardless
     setTimeout(() => clearInterval(checkInterval), 5000);
   }
 });
 $(document).ready(function() {
-  // Gestionnaire pour le sélecteur de vue original
+  // Handler for the main view selector
   $('#view-mode-select').on('change', function() {
     currentViewMode = $(this).val();
     grist.setOption('viewMode', currentViewMode).catch(err => {
@@ -190,10 +189,10 @@ $(document).ready(function() {
     applyViewMode();
   });
 
-  // Gestionnaire pour le bouton "Quitter plein écran"
+  // Handler for the "Exit fullscreen" button
   $('#fullscreen-exit-button').on('click', function() {
     currentViewMode = 'pivot';
-    $('#view-mode-select').val('pivot'); // Synchroniser le dropdown original
+    $('#view-mode-select').val('pivot'); // Sync the original dropdown
     grist.setOption('viewMode', currentViewMode).catch(err => {
         console.error("Failed to save viewMode:", err);
     });
