@@ -1,17 +1,17 @@
 /**
- * Gestionnaire de taille des colonnes pour tableaux pivot
- * @fileoverview Permet de redimensionner dynamiquement les colonnes avec multiplicateurs
+ * Column size manager for pivot tables
+ * @fileoverview Allows dynamic resizing of columns via multipliers
  * @version 1.0.0
  */
 
 /**
- * Change la taille des colonnes avec un multiplicateur
- * @param {string|number} multiplier - Facteur de multiplication (ex: "0.8", 0.8)
+ * Change the size of columns with a multiplier
+ * @param {string|number} multiplier - Multiplication factor (e.g., "0.8", 0.8)
  */
 function changeColumnSize(multiplier) {
     const factor = parseFloat(multiplier);
     
-    // Tailles de base (1.0x)
+    // Base sizes (1.0x)
     const baseFontSize = 16;
     const baseHeaderFontSize = 16; 
     const baseValFontSize = 17;
@@ -23,7 +23,7 @@ function changeColumnSize(multiplier) {
     const baseTotalPaddingVertical = 14;
     const baseTotalPaddingHorizontal = 20;
     
-    // Calcul des nouvelles tailles avec limites minimales
+    // Calculate new sizes with minimum limits
     const newFontSize = Math.max(8, Math.round(baseFontSize * factor));
     const newHeaderFontSize = Math.max(8, Math.round(baseHeaderFontSize * factor));
     const newValFontSize = Math.max(8, Math.round(baseValFontSize * factor));
@@ -35,7 +35,7 @@ function changeColumnSize(multiplier) {
     const newTotalPaddingV = Math.max(2, Math.round(baseTotalPaddingVertical * factor));
     const newTotalPaddingH = Math.max(4, Math.round(baseTotalPaddingHorizontal * factor));
     
-    // Créer ou mettre à jour les styles dynamiques
+    // Create or update dynamic styles
     let styleElement = document.getElementById('dynamic-column-styles');
     if (!styleElement) {
         styleElement = document.createElement('style');
@@ -44,7 +44,7 @@ function changeColumnSize(multiplier) {
     }
     
     styleElement.textContent = `
-        /* Styles dynamiques pour tableaux normaux */
+        /* Dynamic styles for normal tables */
         table.pvtTable {
             font-size: ${newFontSize}px !important;
         }
@@ -69,7 +69,7 @@ function changeColumnSize(multiplier) {
             padding: ${newTotalPaddingV}px ${newTotalPaddingH}px !important;
         }
         
-        /* Styles dynamiques pour mode plein écran */
+        /* Dynamic styles for fullscreen mode */
         #fullscreen-table-container table.pvtTable {
             font-size: ${newFontSize}px !important;
         }
@@ -99,15 +99,15 @@ function changeColumnSize(multiplier) {
 }
 
 /**
- * Réinitialise la taille des colonnes à la valeur par défaut
+ * Reset column size to default value
  */
 function resetColumnSize() {
     changeColumnSize('1.0');
 }
 
 /**
- * Obtient la taille actuelle des colonnes depuis le sélecteur
- * @returns {string} Valeur du multiplicateur actuel
+ * Get the current column size from the selector
+ * @returns {string} Current multiplier value
  */
 function getCurrentColumnSize() {
     const selector = document.getElementById('column-size-select');
@@ -115,8 +115,8 @@ function getCurrentColumnSize() {
 }
 
 /**
- * Définit la taille des colonnes et met à jour le sélecteur
- * @param {string|number} size - Taille à appliquer
+ * Set the column size and update the selector
+ * @param {string|number} size - Size to apply
  */
 function setColumnSize(size) {
     const selector = document.getElementById('column-size-select');
@@ -126,9 +126,9 @@ function setColumnSize(size) {
     changeColumnSize(size);
 }
 
-// Exports pour différents environnements
+// Exports for different environments
 if (typeof module !== 'undefined' && module.exports) {
-    // Environment Node.js/CommonJS
+    // Node.js/CommonJS Environment
     module.exports = {
         changeColumnSize,
         resetColumnSize,
@@ -136,7 +136,7 @@ if (typeof module !== 'undefined' && module.exports) {
         setColumnSize
     };
 } else if (typeof window !== 'undefined') {
-    // Environment Browser - Exposition globale
+    // Browser Environment - Global exposure
     window.ColumnSizeManager = {
         changeColumnSize,
         resetColumnSize,
