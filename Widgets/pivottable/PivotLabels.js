@@ -1,39 +1,39 @@
-// Module pour la gestion des étiquettes du tableau croisé dynamique
+// Module for managing pivot table labels
 const PivotLabels = (function() {
-    // Fonction pour ajouter les étiquettes au tableau croisé dynamique
+    // Function to add labels to the pivot table UI
     function addPivotTableLabels() {
-        // 1. Ajouter l'étiquette "Valeur Σ" à côté de la SECONDE liste déroulante (celle du bas)
-        // Recherchons spécifiquement la seconde liste déroulante dans la cellule pvtVals
+        // 1. Add the "Value Σ" label next to the SECOND dropdown (the bottom one)
+        // Specifically look for the second dropdown in the pvtVals cell
         const pvtValsCell = document.querySelector('.pvtVals.pvtUiCell');
         if (pvtValsCell) {
-            // Rechercher tous les éléments select dans cette cellule
+            // Look for all select elements in this cell
             const selects = pvtValsCell.querySelectorAll('select');
             
-            // Si nous avons au moins 2 selects, nous ciblons le second
+            // If there are at least 2 selects, we target the second
             if (selects.length >= 2) {
-                const secondSelect = selects[1]; // Le deuxième select (index 1)
+                const secondSelect = selects[1]; // The second select (index 1)
                 
-                // Vérifier si l'étiquette n'existe pas déjà
+                // Check if the label already exists
                 if (!document.getElementById('sum-value-label')) {
                     const sumLabel = document.createElement('span');
                     sumLabel.id = 'sum-value-label';
-                    sumLabel.textContent = 'Valeur Σ';
+                    sumLabel.textContent = 'Value Σ';
                     sumLabel.style.fontWeight = '600';
                     sumLabel.style.marginRight = '8px';
                     sumLabel.style.color = 'var(--primary-color)';
                     sumLabel.style.display = 'inline-block';
                     sumLabel.style.verticalAlign = 'middle';
                     
-                    // Insérer l'étiquette avant la seconde liste déroulante
+                    // Insert the label before the second dropdown
                     secondSelect.parentNode.insertBefore(sumLabel, secondSelect);
                 }
             } 
-            // Si nous n'avons qu'une seule liste déroulante chercher la seconde 
+            // If there's only one dropdown, look for the second one after <br>
             else if (selects.length === 1) {
-                // Chercher si un élément br précède ce select (indiquant qu'il pourrait être le second)
+                // Look for a <br> before this select (might indicate it's the second)
                 const br = pvtValsCell.querySelector('br');
                 if (br) {
-                    // Trouver le select qui suit le br
+                    // Find the select following the br
                     let nextElement = br.nextElementSibling;
                     while (nextElement && nextElement.tagName !== 'SELECT') {
                         nextElement = nextElement.nextElementSibling;
@@ -42,24 +42,24 @@ const PivotLabels = (function() {
                     if (nextElement && nextElement.tagName === 'SELECT' && !document.getElementById('sum-value-label')) {
                         const sumLabel = document.createElement('span');
                         sumLabel.id = 'sum-value-label';
-                        sumLabel.textContent = 'Valeur Σ';
+                        sumLabel.textContent = 'Value Σ';
                         sumLabel.style.fontWeight = '600';
                         sumLabel.style.marginRight = '8px';
                         sumLabel.style.color = 'var(--primary-color)';
                         sumLabel.style.display = 'inline-block';
                         sumLabel.style.verticalAlign = 'middle';
                         
-                        // Insérer l'étiquette avant ce select
+                        // Insert the label before this select
                         nextElement.parentNode.insertBefore(sumLabel, nextElement);
                     }
                 }
             }
         }
         
-        // 2. Ajouter l'étiquette "Lignes" au-dessus de la zone de rangées, centrée
+        // 2. Add the "Rows" label above the row zone, centered
         const rowsContainer = document.querySelector('.pvtRows');
         if (rowsContainer && !document.getElementById('rows-label')) {
-            // Supprimer l'étiquette existante si elle existe
+            // Remove existing label if it exists
             const existingLabel = document.getElementById('rows-label');
             if (existingLabel) {
                 existingLabel.remove();
@@ -67,44 +67,44 @@ const PivotLabels = (function() {
             
             const rowsLabel = document.createElement('div');
             rowsLabel.id = 'rows-label';
-            rowsLabel.textContent = 'Lignes';
+            rowsLabel.textContent = 'Rows';
             rowsLabel.style.fontWeight = '600';
             rowsLabel.style.color = 'var(--primary-color)';
             rowsLabel.style.padding = '5px 0';
-            rowsLabel.style.textAlign = 'center'; // Centré
+            rowsLabel.style.textAlign = 'center'; // Centered
             rowsLabel.style.fontSize = '14px';
             rowsLabel.style.marginBottom = '5px';
-            rowsLabel.style.pointerEvents = 'none'; // Pour ne pas interférer avec le glisser-déposer
-            rowsLabel.style.position = 'absolute'; // Position absolue
-            rowsLabel.style.width = '100%'; // Largeur complète pour le centrage
-            rowsLabel.style.top = '5px'; // Un peu d'espace en haut
-            rowsLabel.style.left = '0'; // Aligné à gauche du conteneur
+            rowsLabel.style.pointerEvents = 'none'; // Don't interfere with drag & drop
+            rowsLabel.style.position = 'absolute'; // Absolute positioning
+            rowsLabel.style.width = '100%'; // Full width for centering
+            rowsLabel.style.top = '5px'; // Some space at the top
+            rowsLabel.style.left = '0'; // Align left of container
             
-            // Assurons-nous que le conteneur a une position relative pour le positionnement absolu
+            // Ensure the container is relatively positioned for absolute positioning
             if (getComputedStyle(rowsContainer).position === 'static') {
                 rowsContainer.style.position = 'relative';
             }
             
-            // Ajouter un peu d'espace au-dessus du premier élément
+            // Add some space above the first element
             rowsContainer.style.paddingTop = '30px';
             
-            // Insérer l'étiquette au début du conteneur des lignes
+            // Insert the label at the start of the rows container
             rowsContainer.insertBefore(rowsLabel, rowsContainer.firstChild);
         }
         
-        // 3. Ajouter l'étiquette "Colonne" avec un espace réservé stable
-        // D'abord, ajoutons un style global pour réserver l'espace
+        // 3. Add the "Columns" label with a stable reserved space
+        // First, add a global style to reserve the space
         if (!document.getElementById('cols-space-reservation-style')) {
             const colsSpaceStyle = document.createElement('style');
             colsSpaceStyle.id = 'cols-space-reservation-style';
             colsSpaceStyle.textContent = `
-                /* Réserver un espace pour l'étiquette Colonne */
+                /* Reserve space for the Columns label */
                 .pvtCols {
                     position: relative !important;
-                    padding-top: 25px !important; /* Espace pour l'étiquette */
+                    padding-top: 25px !important; /* Space for the label */
                 }
                 
-                /* Assurer la compatibilité avec le mode plein écran */
+                /* Ensure compatibility with fullscreen mode */
                 #fullscreen-table-container .pvtCols {
                     padding-top: 25px !important;
                 }
@@ -114,7 +114,7 @@ const PivotLabels = (function() {
         
         const colsContainer = document.querySelector('.pvtCols');
         if (colsContainer && !document.getElementById('cols-label')) {
-            // Supprimer l'étiquette existante si elle existe
+            // Remove existing label if it exists
             const existingLabel = document.getElementById('cols-label');
             if (existingLabel) {
                 existingLabel.remove();
@@ -122,22 +122,22 @@ const PivotLabels = (function() {
             
             const colsLabel = document.createElement('div');
             colsLabel.id = 'cols-label';
-            colsLabel.textContent = 'Colonnes';
+            colsLabel.textContent = 'Columns';
             colsLabel.style.fontWeight = '600';
             colsLabel.style.color = 'var(--primary-color)';
             colsLabel.style.padding = '3px 8px';
             colsLabel.style.fontSize = '14px';
-            colsLabel.style.pointerEvents = 'none'; // Pour ne pas interférer avec le glisser-déposer
-            colsLabel.style.position = 'absolute'; // Position absolue
-            colsLabel.style.left = '10px'; // Légèrement décalé de la gauche
-            colsLabel.style.top = '3px'; // En haut de la zone réservée
-            colsLabel.style.zIndex = '5'; // S'assurer qu'il est au-dessus des autres éléments
+            colsLabel.style.pointerEvents = 'none'; // Don't interfere with drag & drop
+            colsLabel.style.position = 'absolute'; // Absolute positioning
+            colsLabel.style.left = '10px'; // Slightly offset from the left
+            colsLabel.style.top = '3px'; // At the top of the reserved zone
+            colsLabel.style.zIndex = '5'; // Make sure it's above other elements
             
-            // Insérer l'étiquette au début du conteneur des colonnes
+            // Insert the label at the start of the columns container
             colsContainer.insertBefore(colsLabel, colsContainer.firstChild);
         }
         
-        // Ajouter des styles pour le mode sombre si pas déjà présents
+        // Add styles for dark mode if not already present
         if (!document.getElementById('pivot-labels-dark-mode-styles')) {
             const darkModeStyles = document.createElement('style');
             darkModeStyles.id = 'pivot-labels-dark-mode-styles';
@@ -152,16 +152,16 @@ const PivotLabels = (function() {
         }
     }
 
-    // Observer les changements dans le DOM pour ajouter les étiquettes quand nécessaire
+    // Observe DOM changes to add labels as needed
     function setupLabelsObserver() {
-        // Créer un observateur qui surveille les modifications du DOM
+        // Create an observer to watch for DOM changes
         const observer = new MutationObserver((mutations) => {
-            // Pour chaque mutation, vérifier l'ajout de nouveaux nœuds
+            // For each mutation, check for new nodes
             let shouldAddLabels = false;
             
             for (const mutation of mutations) {
                 if (mutation.addedNodes.length) {
-                    // Vérifier si les éléments de structure du pivot sont présents
+                    // Check if pivot UI structure elements are present
                     const pivotUI = document.querySelector('.pvtUi');
                     if (pivotUI) {
                         shouldAddLabels = true;
@@ -169,7 +169,7 @@ const PivotLabels = (function() {
                     }
                 }
                 
-                // Vérifier également si l'une des étiquettes a été supprimée accidentellement
+                // Also check if any label got accidentally removed
                 if (mutation.removedNodes.length) {
                     if ((!document.getElementById('cols-label') && document.querySelector('.pvtCols')) ||
                         (!document.getElementById('rows-label') && document.querySelector('.pvtRows')) ||
@@ -181,12 +181,12 @@ const PivotLabels = (function() {
             }
             
             if (shouldAddLabels) {
-                // Appliquer les étiquettes avec un court délai pour s'assurer que le DOM est stable
+                // Apply labels with a short delay to ensure DOM is stable
                 setTimeout(addPivotTableLabels, 100);
             }
         });
         
-        // Observer les deux conteneurs (normal et plein écran)
+        // Observe both containers (normal and fullscreen)
         const containers = ['table', 'fullscreen-table-container'];
         
         containers.forEach(containerId => {
@@ -200,9 +200,9 @@ const PivotLabels = (function() {
         });
     }
 
-    // Fonction pour réagir aux interactions qui pourraient modifier le tableau
+    // Listen for interactions that might change the table
     function setupInteractionListeners() {
-        // 1. Lors du changement de vue
+        // 1. On view change
         const viewModeSelect = document.getElementById('view-mode-select');
         if (viewModeSelect) {
             viewModeSelect.addEventListener('change', () => {
@@ -210,7 +210,7 @@ const PivotLabels = (function() {
             });
         }
         
-        // 2. Lors de la sortie du mode plein écran
+        // 2. On exiting fullscreen
         const fullscreenExitButton = document.getElementById('fullscreen-exit-button');
         if (fullscreenExitButton) {
             fullscreenExitButton.addEventListener('click', () => {
@@ -218,9 +218,9 @@ const PivotLabels = (function() {
             });
         }
         
-        // 3. Surveiller les interactions de glisser-déposer avec une approche plus robuste
+        // 3. Monitor drag & drop interactions more robustly
         document.addEventListener('mouseup', (event) => {
-            // Après un glisser-déposer, vérifier si les étiquettes sont toujours présentes
+            // After drag & drop, check if labels are still present
             setTimeout(() => {
                 const needsUpdate = (!document.getElementById('cols-label') && document.querySelector('.pvtCols')) ||
                                   (!document.getElementById('rows-label') && document.querySelector('.pvtRows')) ||
@@ -232,18 +232,18 @@ const PivotLabels = (function() {
             }, 200);
         });
         
-        // 4. Observer les modifications de style en direct
+        // 4. Observe live style changes
         const styleObserver = new MutationObserver((mutations) => {
             for (const mutation of mutations) {
                 if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-                    // Si le style d'un conteneur change, vérifier si les étiquettes sont correctement positionnées
+                    // If a container's style changes, check if labels are correctly positioned
                     setTimeout(addPivotTableLabels, 100);
                     break;
                 }
             }
         });
         
-        // Observer les conteneurs principaux pour les changements de style
+        // Observe main containers for style changes
         const containers = ['.pvtCols', '.pvtRows', '.pvtVals'];
         containers.forEach(selector => {
             const container = document.querySelector(selector);
@@ -253,30 +253,30 @@ const PivotLabels = (function() {
         });
     }
 
-    // Fonction d'initialisation principale
+    // Main initialization function
     function initializePivotTableLabels() {
-        // Essayer d'ajouter les étiquettes immédiatement
+        // Try to add labels immediately
         addPivotTableLabels();
         
-        // Configurer l'observateur pour les changements futurs
+        // Set up the observer for future changes
         setupLabelsObserver();
         
-        // Configurer les écouteurs d'événements
+        // Set up event listeners
         setupInteractionListeners();
         
-        // Vérifier à nouveau après un court délai pour s'assurer que tout est bien en place
+        // Double-check after a short delay to ensure everything is in place
         setTimeout(addPivotTableLabels, 500);
-        setTimeout(addPivotTableLabels, 1000); // Double vérification après un délai plus long
+        setTimeout(addPivotTableLabels, 1000); // Double-check after a longer delay
     }
 
-    // Interface publique du module
+    // Public module interface
     return {
         init: initializePivotTableLabels,
         addLabels: addPivotTableLabels
     };
 })();
 
-// Export pour compatibility
+// Export for compatibility
 function addValueSumLabel() {
     PivotLabels.addLabels();
 }
