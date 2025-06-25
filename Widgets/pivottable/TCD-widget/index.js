@@ -7,12 +7,12 @@ grist.ready({
   requiredAccess: 'read table'
 });
 
-let currentViewMode = 'pivot'; // Mode d'affichage actuel : 'pivot' (normal) ou 'fullscreen' (plein écran)
-let lastPivotData = null;  // Stocke les données brutes du tableau reçues de Grist
-let currentPivotConfig = {};  // Configuration du tableau (rows, cols, vals, aggregatorName, rendererName)
-let pivotTableInitialized = false; // suit l'état d'initialisation du widget 
+let currentViewMode = 'pivot'; // Current display mode: 'pivot' (normal) or 'fullscreen'
+let lastPivotData = null;  // Stores the raw table data received from Grist
+let currentPivotConfig = {};  // Pivot table config (rows, cols, vals, aggregatorName, rendererName)
+let pivotTableInitialized = false; // Tracks pivot widget initialization state
 
-// Fonction pour mettre à jour le tableau même lorsqu'il est en plein écran
+// Function to update the table when in fullscreen mode
 function updateFullscreenTable() {
   const $pivotTableInUI = $('#table').find('table.pvtTable'); 
   const $fullscreenContainer = $('#fullscreen-table-container');
@@ -22,16 +22,15 @@ function updateFullscreenTable() {
     const $clonedTable = $pivotTableInUI.clone(true, true);
     $fullscreenContainer.append($clonedTable);
     
-    // Appliquer les couleurs au tableau cloné
+    // Apply colors to the cloned table
     applyVariableColors();
     
   } else {
-    // Si nous sommes en mode plein écran mais que la table n'est pas encore prête,
-    // afficher un message de chargement au lieu d'un message d'erreur
+    // If we're in fullscreen and the table isn't ready, show a loading message instead of error
     if (currentViewMode === 'fullscreen' && !pivotTableInitialized) {
-      $fullscreenContainer.html('<p style="text-align:center; padding-top:50px;">Chargement du tableau en cours...</p>');
+      $fullscreenContainer.html('<p style="text-align:center; padding-top:50px;">Loading table...</p>');
     } else {
-      $fullscreenContainer.html('<p style="text-align:center; padding-top:50px; font-style:italic;">Aucun tableau à afficher en plein écran.</p>');
+      $fullscreenContainer.html('<p style="text-align:center; padding-top:50px; font-style:italic;">No table to display in fullscreen.</p>');
     }
   }
 }
@@ -40,7 +39,7 @@ function applyViewMode() {
   const $pivotUIContainer = $('#table');
   const $fullscreenContainer = $('#fullscreen-table-container');
   const $body = $('body');
-  // Le sélecteur de vue original et le bouton de sortie sont gérés par CSS via la classe .fullscreen-active
+  // The original view selector and exit button are handled via CSS using the .fullscreen-active class
 
   if (currentViewMode === 'fullscreen') {
     updateFullscreenTable(); 
@@ -72,23 +71,23 @@ function weightedAverage ([val, coef]) {
   });
 }
 
-// Traduction du nom des opérations mathématiques en français
+// Math operation name translation to French
 $.extend(
   $.pivotUtilities.aggregators,
   $.pivotUtilities.locales.fr.aggregators,
   { 'Moyenne pondérée': weightedAverage }
 );
 
-// Traduction du nom des types de visualisation en français
+// Renderer type name translation to French
 $.extend($.pivotUtilities.locales.fr.renderers,
          $.pivotUtilities.export_renderers);
 
-// Fonction qui attend que le tableau croisé dynamique soit complètement chargé, et applique le mode plein écran si nécessaire
+// Function that waits until the pivot table is fully loaded and applies fullscreen if needed
 function checkPivotTableAndApplyFullscreen() {
   const $pivotTable = $('#table').find('table.pvtTable');
   
   if ($pivotTable.length > 0) {
-    // Le tableau est prêt, mettons à jour le mode plein écran si nécessaire
+    // Table is ready, update fullscreen if needed
     if (currentViewMode === 'fullscreen') {
       updateFullscreenTable();
     }
@@ -96,44 +95,44 @@ function checkPivotTableAndApplyFullscreen() {
     return true;
   }
   
-  // Si le tableau n'est pas encore prêt, attendre un peu et réessayer 
+  // If the table isn't ready yet, wait and retry
   return false;
 }
 
-// Rendu allégé de la pivot table sans les autres possibilités de visualisation + traduction de Moyenne pondérée
+// Lightweight rendering of pivot table (no alternative visualizations) + French translation of Weighted Average
 grist.onRecords(async rec => {
-  lastPivotData = rec;  // Sauvegarde globale des données reçues
-  pivotTableInitialized = false; // Réinitialiser l'état d'initialisation
+  lastPivotData = rec;  // Save received data globally
+  pivotTableInitialized = false; // Reset initialization state
 
-  // Récupération des options de configuration précédemment sauvegardées
+  // Retrieve previous config options saved in Grist
   let settings = await grist.getOption('settings') ?? {};
   let { rows, cols, vals, aggregatorName, rendererName } = settings;
 
-  // // Récupération de la taille des colonnes sauvegardée
+  // // Retrieve saved column size
   try {
-  const savedColumnSize = await grist.getOption('columnSize');
-  if (savedColumnSize) {
-    $('#column-size-select').val(savedColumnSize);
-    changeColumnSize(savedColumnSize);
-  } else {
+    const savedColumnSize = await grist.getOption('columnSize');
+    if (savedColumnSize) {
+      $('#column-size-select').val(savedColumnSize);
+      changeColumnSize(savedColumnSize);
+    } else {
+      changeColumnSize('1.0');
+    }
+  } catch (e) {
+    console.error("Error loading columnSize from Grist options:", e);
     changeColumnSize('1.0');
   }
-} catch (e) {
-  console.error("Error loading columnSize from Grist options:", e);
-  changeColumnSize('1.0');
-}
 
-  // Stockage centralisé de la config pour facilité de mise à jour
+  // Centralized storage for config to make updates easier
   currentPivotConfig = { rows, cols, vals, aggregatorName, rendererName };
 
-  // l'ancien label était en anglais, on le mappe en français
+  // The old label was in English, map it to French
   const mapEnToFr = { 'Weighted Average': 'Moyenne pondérée' };
   if (aggregatorName in mapEnToFr) {
     aggregatorName = mapEnToFr[aggregatorName];
-    currentPivotConfig.aggregatorName = aggregatorName;  // Mise à jour dans config centrale
+    currentPivotConfig.aggregatorName = aggregatorName;  // Update in central config
   }
 
-  let firstRefresh = true; // Pour éviter d’écrire dans grist à la première initialisation
+  let firstRefresh = true; // Avoid writing to Grist on initial load
 
   $('#table').pivotUI(
     rec,
@@ -142,12 +141,12 @@ grist.onRecords(async rec => {
       cols: currentPivotConfig.cols,
       vals: currentPivotConfig.vals,
 
-      // Lors d’une modification par l’utilisateur
+      // On user edit
       onRefresh(config) {
         if (firstRefresh) { 
           firstRefresh = false; 
           
-          // Appliquer les couleurs lors de la première initialisation
+          // Apply colors on first initialization
           setTimeout(() => {
             applyVariableColors();
           }, 150);
@@ -162,28 +161,28 @@ grist.onRecords(async rec => {
           rendererName: config.rendererName,
         };
 
-        // Sauvegarde des options modifiées dans Grist
+        // Save updated options in Grist
         grist.setOption('settings', currentPivotConfig);
 
-        // Si on est en mode fullscreen, mettre à jour le tableau cloné
+        // If in fullscreen, update the cloned table
         if (currentViewMode === 'fullscreen') {
           updateFullscreenTable();
         }
-        // Réappliquer les couleurs après modification
+        // Re-apply colors after modification
         applyVariableColors();
       },
 
       aggregatorName: currentPivotConfig.aggregatorName,
       rendererName: currentPivotConfig.rendererName,
     },
-    false,  // overwrite = false, on ne remplace pas tout, on conserve ce qui existe
-    'fr'    // locale française pour les labels par défaut
+    false,  // overwrite = false, don't replace everything, retain what's there
+    'fr'    // French locale for default labels
   );
 
-  // Créer de manière dynamique les Labels "colonnes" "lignes" "Valeurs"
+  // Dynamically create "Columns" "Rows" "Values" labels
   PivotLabels.init(); 
 
-  // Appliquer les couleurs après l'initialisation complète
+  // Apply colors after full initialization
   setTimeout(() => {
     applyVariableColors();
   }, 200);
@@ -199,7 +198,7 @@ grist.onRecords(async rec => {
   }
   applyViewMode();
 
-  // Vérifier périodiquement si le tableau est chargé pour le mode plein écran
+  // Periodically check if the table is loaded for fullscreen mode
   if (currentViewMode === 'fullscreen') {
     const checkInterval = setInterval(() => {
       if (checkPivotTableAndApplyFullscreen()) {
@@ -207,12 +206,12 @@ grist.onRecords(async rec => {
       }
     }, 200);
     
-    // Arrêter de vérifier après 5 secondes dans tous les cas
+    // Stop checking after 5 seconds regardless
     setTimeout(() => clearInterval(checkInterval), 5000);
   }
 });
 $(document).ready(function() {
-  // Gestionnaire pour le sélecteur de vue original
+  // Handler for the main view selector
   $('#view-mode-select').on('change', function() {
     currentViewMode = $(this).val();
     grist.setOption('viewMode', currentViewMode).catch(err => {
@@ -221,7 +220,7 @@ $(document).ready(function() {
     applyViewMode();
   });
 
-  // Gestionnaire pour le bouton "Quitter plein écran"
+  // Handler for the "Exit fullscreen" button
   $('#fullscreen-exit-button').on('click', function() {
     currentViewMode = 'pivot';
     $('#view-mode-select').val('pivot');
@@ -231,39 +230,39 @@ $(document).ready(function() {
     applyViewMode();
   });
 
-  // Gestionnaire pour la taille des colonnes
+  // Handler for column size
   $('#column-size-select').on('change', function() {
     const selectedSize = $(this).val();
     
-    // Sauvegarder dans Grist
+    // Save in Grist
     grist.setOption('columnSize', selectedSize).catch(err => {
       console.error("Failed to save columnSize:", err);
     });
     
-    // Appliquer la nouvelle taille
+    // Apply new size
     changeColumnSize(selectedSize);
     
-    // Si on est en mode plein écran, mettre à jour le contenu
+    // If in fullscreen, update the content
     if (currentViewMode === 'fullscreen') {
       setTimeout(() => {
         updateFullscreenTable();
       }, 100);
     }
     
-    // Réappliquer les couleurs après changement de taille
+    // Re-apply colors after size change
     setTimeout(() => {
       applyVariableColors();
     }, 150);
   });
 
-  // Observer pour réappliquer les couleurs automatiquement
-  // Observer les mutations DOM pour réappliquer les couleurs quand nécessaire
+  // Observer to reapply colors automatically
+  // Observe DOM mutations to reapply colors as needed
   const observer = new MutationObserver(function(mutations) {
     let shouldReapplyColors = false;
     
     mutations.forEach(function(mutation) {
       if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-        // Vérifier si des éléments .pvtAttr ont été ajoutés
+        // Check if .pvtAttr elements were added
         mutation.addedNodes.forEach(function(node) {
           if (node.nodeType === 1) { // Element node
             if ($(node).find('.pvtAttr').length > 0 || $(node).hasClass('pvtAttr')) {
@@ -279,7 +278,7 @@ $(document).ready(function() {
     }
   });
   
-  // Observer les changements dans les containers de pivot
+  // Observe changes in the pivot containers
   const targetNode = document.getElementById('table');
   if (targetNode) {
     observer.observe(targetNode, { 
