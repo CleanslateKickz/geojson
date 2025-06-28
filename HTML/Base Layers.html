@@ -1,0 +1,399 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Map with Dynamic Base Layers</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <!-- Clustering CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+    <!-- Tailwind CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body { margin: 0; padding: 0; }
+        #map { 
+            position: absolute; 
+            top: 0; 
+            bottom: 0; 
+            width: 100%; 
+            height: 100vh; 
+        }
+        .logo-overlay {
+            width: 25px;
+            height: 25px;
+        }
+        .control-panel {
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        .modal {
+            z-index: 2000;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+        }
+        .layer-button {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: white;
+            transition: all 0.2s ease;
+        }
+        .layer-button:hover {
+            background: #f3f4f6;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .layer-button.active {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+        .layer-button img {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+        .layer-preview {
+            position: absolute;
+            top: -120px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+            z-index: 1001;
+        }
+        .layer-button:hover .layer-preview {
+            display: block;
+        }
+        .layer-preview img {
+            width: 200px;
+            height: 120px;
+            border-radius: 8px;
+            border: 2px solid #e5e7eb;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .action-button {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        .action-button:hover {
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <!-- Control Panel -->
+    <div class="control-panel absolute top-4 right-4 max-w-sm w-full">
+        <div class="flex flex-col space-y-3">
+            <h3 class="text-sm font-semibold text-gray-800">Base Layers</h3>
+            <div id="layer-buttons" class="grid grid-cols-1 gap-2">
+                <!-- Layer buttons populated dynamically -->
+            </div>
+            <button onclick="copyTileURL()" class="action-button bg-blue-600 text-white hover:bg-blue-700">Copy Tile URL</button>
+            <button onclick="showAddLayerModal()" class="action-button bg-green-600 text-white hover:bg-green-700">Add New Layer</button>
+            <div id="copy-feedback" class="text-sm text-green-600 hidden">URL copied to clipboard!</div>
+        </div>
+    </div>
+
+    <!-- Modal for Adding New Layer -->
+    <div id="add-layer-modal" class="modal hidden fixed inset-0 flex items-center justify-center">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+            <h2 class="text-lg font-semibold text-gray-800 mb-4">Add New Base Layer</h2>
+            <div class="flex flex-col space-y-4">
+                <div>
+                    <label for="layer-name" class="text-sm font-medium text-gray-700">Layer Name</label>
+                    <input id="layer-name" type="text" class="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-500" placeholder="e.g., Custom Layer">
+                </div>
+                <div>
+                    <label for="layer-url" class="text-sm font-medium text-gray-700">Tile URL</label>
+                    <input id="layer-url" type="text" class="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-500" placeholder="e.g., https://tile.example.com/{z}/{x}/{y}.png">
+                </div>
+                <div class="flex justify-end space-x-2">
+                    <button onclick="closeAddLayerModal()" class="action-button bg-gray-300 text-gray-800 hover:bg-gray-400">Cancel</button>
+                    <button onclick="addNewLayer()" class="action-button bg-blue-600 text-white hover:bg-blue-700">Add Layer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Map Container -->
+    <div id="map"></div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    <script>
+        // Initialize the map
+        const map = L.map('map').setView([44.0, -120.5], 7);
+
+        // Default base layers with preview images
+        const defaultBaseLayers = {
+            googleHybrid: {
+                layer: L.tileLayer('http://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}', {
+                    attribution: '',
+                    name: 'Google Hybrid'
+                }),
+                url: 'http://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}',
+                name: 'Google Hybrid',
+                preview: 'https://mt0.google.com/vt/lyrs=y&hl=en&x=0&y=0&z=2' // Low-zoom sample
+            },
+            jawgStreets: {
+                layer: L.tileLayer('https://tile.jawg.io/jawg-streets/{z}/{x}/{y}{r}.png?access-token=bs12XjUq7hHD2pgakKp7AcM1Y3Dk7BkLvf162PpbLxMsvgyclXR5HLnYEnI2Zkoa', {
+                    attribution: '',
+                    name: 'Jawg Streets'
+                }),
+                url: 'https://tile.jawg.io/jawg-streets/{z}/{x}/{y}{r}.png?access-token=bs12XjUq7hHD2pgakKp7AcM1Y3Dk7BkLvf162PpbLxMsvgyclXR5HLnYEnI2Zkoa',
+                name: 'Jawg Streets',
+                preview: 'https://tile.jawg.io/jawg-streets/2/0/0.png?access-token=bs12XjUq7hHD2pgakKp7AcM1Y3Dk7BkLvf162PpbLxMsvgyclXR5HLnYEnI2Zkoa'
+            },
+            rawSatellite: {
+                layer: L.tileLayer('https://api.maptiler.com/tiles/satellite-v2/{z}/{x}/{y}.jpg?key=TbsQ5qLxJHC20Jv4Th7E', {
+                    attribution: '',
+                    name: 'rawSatellite'
+                }),
+                url: 'https://api.maptiler.com/tiles/satellite-v2/{z}/{x}/{y}.jpg?key=TbsQ5qLxJHC20Jv4Th7E',
+                name: 'Raw Satellite',
+                preview: 'https://api.maptiler.com/tiles/satellite-v2/2/0/0.jpg?key=TbsQ5qLxJHC20Jv4Th7E'
+            },
+            EsriWorldImagery: {
+                layer: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                    attribution: '',
+                    name: 'EsriWorldImagery'
+                }),
+                url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                name: 'Esri World Imagery',
+                preview: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/2/0/0'
+            },
+            ArcGIS: {
+                layer: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                    attribution: '',
+                    name: 'ArcGIS'
+                }),
+                url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                name: 'ArcGIS',
+                preview: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/2/0/0'
+            },
+            Aquarelle: {
+                layer: L.tileLayer('https://api.maptiler.com/maps/aquarelle/{z}/{x}/{y}.png?key=TbsQ5qLxJHC20Jv4Th7E', {
+                    attribution: '',
+                    name: 'Aquarelle'
+                }),
+                url: 'https://api.maptiler.com/maps/aquarelle/{z}/{x}/{y}.png?key=TbsQ5qLxJHC20Jv4Th7E',
+                name: 'Aquarelle',
+                preview: 'https://api.maptiler.com/maps/aquarelle/2/0/0.png?key=TbsQ5qLxJHC20Jv4Th7E'
+            },
+            esriFirefly: {
+                layer: L.tileLayer('https://fly.maptiles.arcgis.com/arcgis/rest/services/World_Imagery_Firefly/MapServer/tile/{z}/{y}/{x}', {
+                    attribution: '',
+                    name: 'esriFirefly'
+                }),
+                url: 'https://fly.maptiles.arcgis.com/arcgis/rest/services/World_Imagery_Firefly/MapServer/tile/{z}/{y}/{x}',
+                name: 'Esri Firefly',
+                preview: 'https://fly.maptiles.arcgis.com/arcgis/rest/services/World_Imagery_Firefly/MapServer/tile/2/0/0'
+            }
+        };
+
+        // Load custom layers from localStorage
+        let baseLayers = { ...defaultBaseLayers };
+        const storedLayers = localStorage.getItem('customBaseLayers');
+        if (storedLayers) {
+            const customLayers = JSON.parse(storedLayers);
+            Object.keys(customLayers).forEach(key => {
+                baseLayers[key] = {
+                    layer: L.tileLayer(customLayers[key].url, {
+                        attribution: '',
+                        name: key
+                    }),
+                    url: customLayers[key].url,
+                    name: customLayers[key].name,
+                    preview: 'https://via.placeholder.com/200x120?text=Custom+Layer' // Placeholder for custom layers
+                };
+            });
+        }
+
+        // Add default layer to map
+        let currentLayer = baseLayers.googleHybrid.layer;
+        currentLayer.addTo(map);
+        let currentLayerKey = 'googleHybrid';
+
+        // Populate layer buttons
+        const layerButtonsContainer = document.getElementById('layer-buttons');
+        function populateLayerButtons() {
+            layerButtonsContainer.innerHTML = '';
+            Object.keys(baseLayers).forEach(key => {
+                const button = document.createElement('button');
+                button.className = `layer-button ${key === currentLayerKey ? 'active' : ''}`;
+                button.dataset.layer = key;
+                button.innerHTML = `
+                    <img src="${baseLayers[key].preview}" alt="${baseLayers[key].name} preview">
+                    <span class="text-sm font-medium text-gray-700">${baseLayers[key].name}</span>
+                    <div class="layer-preview">
+                        <img src="${baseLayers[key].preview}" alt="${baseLayers[key].name} preview">
+                    </div>
+                `;
+                button.addEventListener('click', () => {
+                    document.querySelectorAll('.layer-button').forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    map.removeLayer(currentLayer);
+                    currentLayer = baseLayers[key].layer;
+                    currentLayerKey = key;
+                    currentLayer.addTo(map);
+                });
+                layerButtonsContainer.appendChild(button);
+            });
+        }
+        populateLayerButtons();
+
+        // Create a marker cluster group
+        const markers = L.markerClusterGroup({
+            maxClusterRadius: 35
+        });
+
+        // Function to add logo overlay
+        function addLogoOverlay(lat, lng, logoUrl) {
+            const logoIcon = L.icon({
+                iconUrl: logoUrl,
+                iconSize: [35, 35],
+                iconAnchor: [25, 25],
+            });
+            const marker = L.marker([lat, lng], { icon: logoIcon });
+            markers.addLayer(marker);
+        }
+
+        // Add locations
+        addLogoOverlay(45.551483, -122.903465, 'https://upload.wikimedia.org/wikipedia/commons/2/20/Dutch_Bros_Coffee_wordmark.svg');
+        addLogoOverlay(45.503908, -122.522899, 'https://upload.wikimedia.org/wikipedia/commons/2/20/Dutch_Bros_Coffee_wordmark.svg');
+        addLogoOverlay(45.519211, -123.10437, 'https://upload.wikimedia.org/wikipedia/commons/2/20/Dutch_Bros_Coffee_wordmark.svg');
+        addLogoOverlay(45.503939, -122.483825, 'https://upload.wikimedia.org/wikipedia/commons/2/20/Dutch_Bros_Coffee_wordmark.svg');
+        addLogoOverlay(42.04982, -124.2569847, 'https://upload.wikimedia.org/wikipedia/commons/2/20/Dutch_Bros_Coffee_wordmark.svg');
+        addLogoOverlay(42.2089191, -121.7508268, 'https://upload.wikimedia.org/wikipedia/commons/2/20/Dutch_Bros_Coffee_wordmark.svg');
+        addLogoOverlay(42.279165, -122.8207062, 'https://upload.wikimedia.org/wikipedia/commons/2/20/Dutch_Bros_Coffee_wordmark.svg');
+        addLogoOverlay(45.5187932, -122.4702868, 'https://upload.wikimedia.org/wikipedia/commons/2/20/Dutch_Bros_Coffee_wordmark.svg');
+
+        // Add the cluster group to the map
+        map.addLayer(markers);
+
+        // Copy URL to clipboard
+        function copyTileURL() {
+            const url = baseLayers[currentLayerKey].url;
+            navigator.clipboard.writeText(url).then(() => {
+                const feedback = document.getElementById('copy-feedback');
+                feedback.classList.remove('hidden');
+                setTimeout(() => feedback.classList.add('hidden'), 2000);
+            }).catch(err => {
+                console.error('Failed to copy URL:', err);
+                alert('Failed to copy URL to clipboard.');
+            });
+        }
+
+        // Modal control
+        function showAddLayerModal() {
+            document.getElementById('add-layer-modal').classList.remove('hidden');
+        }
+
+        function closeAddLayerModal() {
+            document.getElementById('add-layer-modal').classList.add('hidden');
+            document.getElementById('layer-name').value = '';
+            document.getElementById('layer-url').value = '';
+        }
+
+        // Add new layer
+        function addNewLayer() {
+            const layerName = document.getElementById('layer-name').value.trim();
+            const layerUrl = document.getElementById('layer-url').value.trim();
+
+            if (!layerName || !layerUrl) {
+                alert('Please provide both a layer name and a valid tile URL.');
+                return;
+            }
+
+            // Validate URL (basic check for {z}/{x}/{y})
+            if (!layerUrl.includes('{z}') || !layerUrl.includes('{x}') || !layerUrl.includes('{y}')) {
+                alert('Tile URL must contain {z}, {x}, and {y} placeholders.');
+                return;
+            }
+
+            const layerKey = `custom_${Date.now()}`;
+            baseLayers[layerKey] = {
+                layer: L.tileLayer(layerUrl, {
+                    attribution: '',
+                    name: layerName
+                }),
+                url: layerUrl,
+                name: layerName,
+                preview: 'https://via.placeholder.com/200x120?text=Custom+Layer'
+            };
+
+            // Update localStorage
+            const customLayers = {};
+            Object.keys(baseLayers).forEach(key => {
+                if (!Object.keys(defaultBaseLayers).includes(key)) {
+                    customLayers[key] = { url: baseLayers[key].url, name: baseLayers[key].name, preview: baseLayers[key].preview };
+                }
+            });
+            localStorage.setItem('customBaseLayers', JSON.stringify(customLayers));
+
+            // Update buttons and switch to new layer
+            populateLayerButtons();
+            map.removeLayer(currentLayer);
+            currentLayer = baseLayers[layerKey].layer;
+            currentLayerKey = layerKey;
+            document.querySelectorAll('.layer-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.layer-button[data-layer="${layerKey}"]`).classList.add('active');
+            currentLayer.addTo(map);
+
+            closeAddLayerModal();
+        }
+    </script>
+</body>
+</html>
