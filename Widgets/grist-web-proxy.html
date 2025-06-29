@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Grist Proxied URL Viewer</title>
+    <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #f5f5f5;
+      }
+
+      iframe {
+        position: fixed; 
+        top: 0;
+        left: 0; 
+        bottom: 0; 
+        right: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background: white;
+      }
+
+      .error-container {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #fee;
+        border: 2px solid #f87171;
+        border-radius: 8px;
+        padding: 2rem;
+        max-width: 400px;
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .loading-container {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        border: 2px solid #3b82f6;
+        border-radius: 8px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .spinner {
+        border: 4px solid #f3f4f6;
+        border-top: 4px solid #3b82f6;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+      }
+
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+
+      .config-panel {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 10px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-family: monospace;
+        z-index: 1000;
+        max-width: 300px;
+        display: none;
+      }
+
+      .toggle-config {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background: #3b82f6;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 11px;
+        z-index: 1001;
+      }
+
+      .url-input {
+        width: 100%;
+        padding: 8px;
+        margin: 5px 0;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-family: monospace;
+        font-size: 11px;
+      }
+
+      .btn {
+        background: #10b981;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 11px;
+        margin: 5px 2px;
+      }
+
+      .btn:hover {
+        background: #059669;
+      }
+
+      .status {
+        font-size: 10px;
+        margin-top: 5px;
+        padding: 5px;
+        border-radius: 3px;
+      }
+
+      .status.success {
+        background: #d1fae5;
+        color: #065f46;
+      }
+
+      .status.error {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+    </style>
+  </head>
+  <body>
+    <iframe id="inlineFrame" sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-top-navigation">
+    </iframe>
+    
+    <div id="loading" class="loading-container">
+      <div class="spinner"></div>
+      <div>Loading content...</div>
+    </div>
+
+    <div id="error" class="error-container" style="display: none;">
+      <h3>🚫 Content Loading Error</h3>
+      <p id="error-message">Waiting for data...</p>
+      <div id="error-details" style="margin-top: 1rem; font-size: 0.9em; color: #666;"></div>
+    </div>
+
+    <button class="toggle-config" onclick="toggleConfig()">⚙️</button>
+    
+    <div id="config-panel" class="config-panel">
+      <h4 style="margin-top: 0;">Proxy Configuration</h4>
+      <label>Proxy Server:</label>
+      <input type="text" id="proxy-host" class="url-input" placeholder="http://your-server:8088" />
+      
+      <label>Original URL:</label>
+      <input type="text" id="original-url" class="url-input" readonly />
+      
+      <label>Proxied URL:</label>
+      <input type="text" id="proxied-url" class="url-input" readonly />
+      
+      <button class="btn" onclick="testProxy()">Test Proxy</button>
+      <button class="btn" onclick="applyConfig()">Apply</button>
+      <button class="btn" onclick="resetConfig()" style="background: #ef4444;">Reset</button>
+      
+      <div id="proxy-status" class="status"></div>
+    </div>
+
+    <script>
+      // Configuration
+      let config = {
+        proxyHost: localStorage.getItem('grist-proxy-host') || 'http://localhost:8088',
+        useProxy: localStorage.getItem('grist-use-proxy') !== 'false'
+      };
+
+      // DOM elements
+      const iframe = document.getElementById('inlineFrame');
+      const loadingDiv = document.getElementById('loading');
+      const errorDiv = document.getElementById('error');
+      const errorMessage = document.getElementById('error-message');
+      const errorDetails = document.getElementById('error-details');
+      const configPanel = document.getElementById('config-panel');
+      const proxyHostInput = document.getElementById('proxy-host');
+      const originalUrlInput = document.getElementById('original-url');
+      const proxiedUrlInput = document.getElementById('proxied-url');
+      const proxyStatus = document.getElementById('proxy-status');
+
+      // Initialize inputs
+      proxyHostInput.value = config.proxyHost;
+
+      // Utility functions
+      function showLoading() {
+        loadingDiv.style.display = 'block';
+        errorDiv.style.display = 'none';
+        iframe.style.display = 'none';
+      }
+
+      function showError(message, details = '') {
+        loadingDiv.style.display = 'none';
+        errorDiv.style.display = 'block';
+        iframe.style.display = 'none';
+        errorMessage.textContent = message;
+        errorDetails.textContent = details;
+      }
+
+      function showContent() {
+        loadingDiv.style.display = 'none';
+        errorDiv.style.display = 'none';
+        iframe.style.display = 'block';
+      }
+
+      function convertToProxyUrl(originalUrl) {
+        if (!originalUrl || !config.useProxy) return originalUrl;
+        
+        try {
+          const url = new URL(originalUrl);
+          const proxyBase = config.proxyHost.replace(/\/$/, '');
+          return `${proxyBase}${url.pathname}${url.search}${url.hash}`;
+        } catch (e) {
+          console.error('Error converting URL:', e);
+          return originalUrl;
+        }
+      }
+
+      function updateUrlDisplays(originalUrl) {
+        originalUrlInput.value = originalUrl || '';
+        proxiedUrlInput.value = originalUrl ? convertToProxyUrl(originalUrl) : '';
+      }
+
+      function loadUrl(url) {
+        if (!url) {
+          showError('No URL provided', 'Please configure a URL column in Grist.');
+          return;
+        }
+
+        showLoading();
+        updateUrlDisplays(url);
+
+        const finalUrl = config.useProxy ? convertToProxyUrl(url) : url;
+        
+        // Set iframe source
+        iframe.src = finalUrl;
+
+        // Handle iframe load events
+        iframe.onload = function() {
+          showContent();
+          console.log(`✅ Successfully loaded: ${finalUrl}`);
+        };
+
+        iframe.onerror = function() {
+          showError(
+            'Failed to load content',
+            `Could not load ${config.useProxy ? 'proxied' : 'direct'} URL. ${config.useProxy ? 'Check if proxy server is running.' : 'Site may have iframe restrictions.'}`
+          );
+        };
+
+        // Timeout fallback
+        setTimeout(() => {
+          if (loadingDiv.style.display !== 'none') {
+            showContent(); // Assume it loaded even if onload didn't fire
+          }
+        }, 5000);
+      }
+
+      // Configuration functions
+      function toggleConfig() {
+        configPanel.style.display = configPanel.style.display === 'none' ? 'block' : 'none';
+      }
+
+      function applyConfig() {
+        config.proxyHost = proxyHostInput.value.replace(/\/$/, '');
+        config.useProxy = true;
+        
+        localStorage.setItem('grist-proxy-host', config.proxyHost);
+        localStorage.setItem('grist-use-proxy', 'true');
+        
+        // Reload current URL with new config
+        const currentOriginalUrl = originalUrlInput.value;
+        if (currentOriginalUrl) {
+          loadUrl(currentOriginalUrl);
+        }
+        
+        showStatus('Configuration applied successfully!', 'success');
+      }
+
+      function resetConfig() {
+        config.useProxy = false;
+        localStorage.setItem('grist-use-proxy', 'false');
+        
+        const currentOriginalUrl = originalUrlInput.value;
+        if (currentOriginalUrl) {
+          loadUrl(currentOriginalUrl);
+        }
+        
+        showStatus('Using direct URLs (no proxy)', 'success');
+      }
+
+      async function testProxy() {
+        const testUrl = `${config.proxyHost}/health`;
+        showStatus('Testing proxy...', '');
+        
+        try {
+          const response = await fetch(testUrl, { 
+            method: 'GET',
+            mode: 'cors',
+            headers: {
+              'Accept': 'text/plain'
+            }
+          });
+          
+          if (response.ok) {
+            const text = await response.text();
+            showStatus(`✅ Proxy is working! Response: ${text}`, 'success');
+          } else {
+            showStatus(`❌ Proxy returned ${response.status}: ${response.statusText}`, 'error');
+          }
+        } catch (error) {
+          showStatus(`❌ Cannot reach proxy: ${error.message}`, 'error');
+        }
+      }
+
+      function showStatus(message, type) {
+        proxyStatus.textContent = message;
+        proxyStatus.className = `status ${type}`;
+        
+        if (type) {
+          setTimeout(() => {
+            proxyStatus.textContent = '';
+            proxyStatus.className = 'status';
+          }, 3000);
+        }
+      }
+
+      // Grist integration
+      grist.ready({
+        columns: ['URL'], 
+        requiredAccess: 'read table'
+      });
+
+      grist.onRecord(function(record, mappings) {
+        const mapped = grist.mapColumnNames(record, mappings);
+        
+        if (mapped && mapped.URL) {
+          loadUrl(mapped.URL);
+        } else {
+          showError(
+            'Column mapping required',
+            'Please map the URL column in your Grist widget configuration.'
+          );
+        }
+      });
+
+      // Handle configuration panel clicks
+      document.addEventListener('click', function(e) {
+        if (!configPanel.contains(e.target) && !e.target.classList.contains('toggle-config')) {
+          configPanel.style.display = 'none';
+        }
+      });
+
+      console.log('🚀 Grist Proxied URL Viewer initialized');
+      console.log('📊 Current config:', config);
+    </script>
+  </body>
+</html>
