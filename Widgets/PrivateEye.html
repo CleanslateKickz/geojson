@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-gray-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="frame-src 'self' https://www.privateeye.com;">
+    <title>PrivateEye Search Widget</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/heroicons/2.1.1/24/outline/heroicons.min.css" rel="stylesheet">
+    <style>
+        @import url('https://rsms.me/inter/inter.css');
+        html { font-family: 'Inter', sans-serif; }
+        .icon { width: 1.25rem; height: 1.25rem; stroke-width: 1.5; }
+        .spinner {
+            animation: spin 1s linear infinite;
+            width: 1.25rem; height: 1.25rem;
+        }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .max-h-0 { max-height: 0; }
+        .max-h-60 { max-height: 15rem; }
+    </style>
+</head>
+<body class="h-full flex flex-col overflow-hidden antialiased">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 p-4 shadow-sm flex justify-between items-center z-20 shrink-0">
+        <div class="flex items-center space-x-3">
+            <svg class="h-8 w-8 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+            </svg>
+            <h1 class="text-xl font-semibold text-gray-800">PrivateEye Search</h1>
+        </div>
+        <div class="flex items-center space-x-2">
+            <div id="gristStatus" class="text-sm text-gray-500">
+                <span id="connectionStatus">Connecting to Grist...</span>
+            </div>
+            <button id="togglePanelBtn" class="p-2 rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" aria-expanded="true" aria-controls="inputPanel">
+                <svg id="toggleIcon" class="h-6 w-6 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                </svg>
+                <span class="sr-only">Toggle Input Panel</span>
+            </button>
+        </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden">
+        <!-- Input Panel -->
+        <aside id="inputPanel" class="bg-white w-full md:w-1/3 lg:w-1/4 border-r border-gray-200 shadow-lg transition-transform duration-300 ease-in-out transform translate-x-0 flex flex-col fixed md:relative z-30 h-full">
+            <div class="p-6 overflow-y-auto">
+                <div id="recordInfo" class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md hidden">
+                    <div class="flex items-center">
+                        <svg class="h-4 w-4 text-blue-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span class="text-sm font-medium text-blue-800">Record Selected</span>
+                    </div>
+                    <p class="text-xs text-blue-600 mt-1">Data auto-populated from Grist</p>
+                </div>
+
+                <form id="searchForm" class="space-y-6">
+                    <!-- Input Fields -->
+                    <div>
+                        <label for="name" class="block text-sm font-medium leading-6 text-gray-900">Person's Name</label>
+                        <div class="mt-2">
+                            <input type="text" id="name" placeholder="First Last (e.g., Florian Davis)" class="block w-full rounded-md border-0 py-2.5 px-3.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 transition-shadow">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="address" class="block text-sm font-medium leading-6 text-gray-900">Address</label>
+                        <div class="mt-2">
+                            <input type="text" id="address" placeholder="Number Street, City, State ZIP" class="block w-full rounded-md border-0 py-2.5 px-3.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 transition-shadow">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="phone" class="block text-sm font-medium leading-6 text-gray-900">Phone Number</label>
+                        <div class="mt-2">
+                            <input type="tel" id="phone" placeholder="xxx-xxx-xxxx" class="block w-full rounded-md border-0 py-2.5 px-3.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 transition-shadow">
+                        </div>
+                    </div>
+
+                    <!-- Search Buttons -->
+                    <div class="space-y-3 pt-4 border-t border-gray-200">
+                        <button type="submit" data-search-type="name" class="search-btn flex w-full justify-center items-center gap-x-2 rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" /></svg>
+                            <span>Search by Name & Address</span>
+                        </button>
+                        <button type="submit" data-search-type="address" class="search-btn flex w-full justify-center items-center gap-x-2 rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50">
+                             <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" /></svg>
+                            <span>Search by Address</span>
+                        </button>
+                        <button type="submit" data-search-type="phone" class="search-btn flex w-full justify-center items-center gap-x-2 rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 6.75Z" /></svg>
+                            <span>Search by Phone</span>
+                        </button>
+                    </div>
+                </form>
+                <div id="messageArea" role="alert" class="text-sm mt-6 text-center p-3 rounded-md hidden"></div>
+            </div>
+
+            <!-- Search History Section -->
+            <div id="historySection" class="mt-auto border-t border-gray-200 p-4 bg-gray-50">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-sm font-medium text-gray-600">Search History</h3>
+                    <button id="clearHistoryBtn" class="text-xs text-indigo-600 hover:text-indigo-800 font-semibold">Clear All</button>
+                </div>
+                <div id="historyList" class="mt-2 space-y-2 overflow-y-auto transition-all duration-300 max-h-60">
+                    <!-- History items will be injected here -->
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area (Iframe) -->
+        <main class="flex-1 bg-gray-100 flex items-center justify-center relative">
+            <iframe id="resultFrame" class="w-full h-full border-none absolute top-0 left-0 hidden" title="Search Result"></iframe>
+            <div id="welcomeMessage" class="text-center text-gray-500 p-4">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" aria-hidden="true">
+                    <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                </svg>
+                <h3 class="mt-2 text-lg font-medium text-gray-900">PrivateEye Search</h3>
+                <p class="mt-1 text-sm text-gray-500">Select a record in Grist to auto-populate fields, then choose a search type.</p>
+                <button id="clearAllBtn" class="mt-4 inline-flex items-center gap-x-1.5 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                    <svg class="-ml-0.5 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                    New Search
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Grist Integration ---
+            let gristReady = false;
+            let currentRecord = null;
+
+            // Initialize Grist plugin
+            grist.ready({
+                requiredAccess: 'full',
+                columns: [
+                    { name: 'Name', type: 'Text' },
+                    { name: 'Owner_Address', type: 'Text' },
+                    { name: 'Phone', type: 'Text' }
+                ]
+            });
+
+            // Handle record selection from Grist
+            grist.onRecord(function(record) {
+                currentRecord = record;
+                populateFromGrist(record);
+                updateConnectionStatus('Connected - Record loaded');
+                document.getElementById('recordInfo').classList.remove('hidden');
+            });
+
+            // Handle Grist ready state
+            grist.onNewRecord(function() {
+                clearFields();
+                document.getElementById('recordInfo').classList.add('hidden');
+                updateConnectionStatus('Connected - No record selected');
+            });
+
+            const populateFromGrist = (record) => {
+                if (record) {
+                    // Map Grist column names to form fields
+                    ui.inputs.name.value = record.Name || '';
+                    ui.inputs.address.value = record.Owner_Address || '';
+                    ui.inputs.phone.value = record.Phone || '';
+                    
+                    // Validate populated fields
+                    Object.entries(ui.inputs).forEach(([key, input]) => {
+                        if (input.value.trim() !== '') {
+                            const isValid = format[key] ? format[key](input.value) !== null : true;
+                            setInputValidationState(input, isValid);
+                        }
+                    });
+                }
+            };
+
+            const clearFields = () => {
+                Object.values(ui.inputs).forEach(input => {
+                    input.value = '';
+                    input.classList.remove('ring-red-500', 'ring-green-500');
+                });
+            };
+
+            const updateConnectionStatus = (status) => {
+                document.getElementById('connectionStatus').textContent = status;
+            };
+
+            // --- DOM Element Selectors ---
+            const ui = {
+                inputPanel: document.getElementById('inputPanel'),
+                toggleBtn: document.getElementById('togglePanelBtn'),
+                toggleIcon: document.getElementById('toggleIcon'),
+                searchForm: document.getElementById('searchForm'),
+                messageArea: document.getElementById('messageArea'),
+                resultFrame: document.getElementById('resultFrame'),
+                welcomeMessage: document.getElementById('welcomeMessage'),
+                clearAllBtn: document.getElementById('clearAllBtn'),
+                history: {
+                    section: document.getElementById('historySection'),
+                    list: document.getElementById('historyList'),
+                    clearBtn: document.getElementById('clearHistoryBtn')
+                },
+                inputs: {
+                    name: document.getElementById('name'),
+                    address: document.getElementById('address'),
+                    phone: document.getElementById('phone')
+                },
+                searchBtns: document.querySelectorAll('.search-btn')
+            };
+
+            // --- State Management ---
+            let isPanelOpen = window.innerWidth > 768;
+            let searchHistory = [];
+
+            // --- Utility & Formatting Functions ---
+            const format = {
+                name: (str) => { 
+                    const p = str.trim().split(/\s+/); 
+                    return (p.length < 2 || p[0] === '' || p[1] === '') ? null : { 
+                        first: p[0].toLowerCase(), 
+                        last: p[p.length - 1].toLowerCase() 
+                    }; 
+                },
+                address: (str) => { 
+                    const m = str.trim().match(/^\s*(\d+)\s+(.+?),\s*([^,]+?),\s*([A-Z]{2})\s*(\d{5})\s*$/i); 
+                    return m ? { 
+                        number: m[1], 
+                        street: m[2].trim().toLowerCase().replace(/\s+/g, '-'), 
+                        city: m[3].trim().toLowerCase().replace(/\s+/g, '-'), 
+                        state: m[4].toLowerCase() 
+                    } : null; 
+                },
+                phone: (str) => { 
+                    const c = str.replace(/\D/g, ''); 
+                    return c.length !== 10 ? null : c.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3'); 
+                }
+            };
+
+            // --- UI Update Functions ---
+            const showMessage = (text, type = 'error') => {
+                ui.messageArea.textContent = text;
+                ui.messageArea.className = `text-sm mt-6 text-center p-3 rounded-md ${type === 'error' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}`;
+                ui.messageArea.classList.remove('hidden');
+            };
+            
+            const clearMessage = () => { 
+                ui.messageArea.classList.add('hidden'); 
+                ui.messageArea.textContent = ''; 
+            };
+            
+            const setPanelState = (open) => {
+                isPanelOpen = open;
+                if (isPanelOpen) {
+                    ui.inputPanel.classList.remove('-translate-x-full', 'hidden');
+                    ui.inputPanel.classList.add('translate-x-0');
+                } else {
+                    ui.inputPanel.classList.add('-translate-x-full');
+                    setTimeout(() => {
+                        if (!isPanelOpen) ui.inputPanel.classList.add('hidden');
+                    }, 300);
+                    ui.inputPanel.classList.remove('translate-x-0');
+                }
+                ui.toggleIcon.classList.toggle('rotate-180', !isPanelOpen);
+                ui.toggleBtn.setAttribute('aria-expanded', isPanelOpen);
+            };
+
+            const setInputValidationState = (input, isValid) => {
+                input.classList.toggle('ring-red-500', !isValid);
+                input.classList.toggle('ring-green-500', isValid);
+                if (isValid) {
+                    setTimeout(() => input.classList.remove('ring-green-500'), 2000);
+                }
+            };
+
+            const setLoadingState = (isLoading, clickedBtn) => {
+                ui.searchBtns.forEach(btn => {
+                    btn.disabled = isLoading;
+                    const span = btn.querySelector('span');
+                    const icon = btn.querySelector('svg');
+                    
+                    if (isLoading && btn === clickedBtn) {
+                        span.textContent = 'Searching...';
+                        icon.classList.add('spinner');
+                    } else if (!isLoading) {
+                        span.textContent = btn.dataset.searchType === 'name' ? 'Search by Name & Address' : `Search by ${btn.dataset.searchType.charAt(0).toUpperCase() + btn.dataset.searchType.slice(1)}`;
+                        icon.classList.remove('spinner');
+                    }
+                });
+            };
+
+            const resetToInitialState = () => {
+                if (currentRecord) {
+                    populateFromGrist(currentRecord);
+                } else {
+                    clearFields();
+                }
+                clearMessage();
+                ui.resultFrame.src = 'about:blank';
+                ui.resultFrame.classList.add('hidden');
+                ui.welcomeMessage.classList.remove('hidden');
+                setLoadingState(false);
+            };
+
+            // --- History Functions ---
+            const renderHistory = () => {
+                ui.history.list.innerHTML = '';
+                if (searchHistory.length === 0) {
+                    ui.history.list.innerHTML = '<p class="text-xs text-gray-400 text-center p-2">No recent searches.</p>';
+                    ui.history.clearBtn.classList.add('hidden');
+                    return;
+                }
+                ui.history.clearBtn.classList.remove('hidden');
+                searchHistory.forEach(item => {
+                    const btn = document.createElement('button');
+                    btn.className = 'w-full text-left p-2 rounded-md hover:bg-gray-200 text-xs text-gray-700 truncate';
+                    btn.textContent = item.label;
+                    btn.title = item.label;
+                    btn.onclick = () => {
+                        Object.keys(item.values).forEach(key => ui.inputs[key].value = item.values[key]);
+                        const fakeSubmitter = document.querySelector(`button[data-search-type="${item.type}"]`);
+                        handleSearch(new Event('submit'), fakeSubmitter);
+                    };
+                    ui.history.list.prepend(btn);
+                });
+            };
+
+            const addToHistory = (type, values, label) => {
+                const newEntry = { type, values, label, timestamp: new Date().toISOString() };
+                searchHistory = [newEntry, ...searchHistory.filter(item => item.label !== label)].slice(0, 10);
+                renderHistory();
+            };
+
+            const clearHistory = () => {
+                searchHistory = [];
+                renderHistory();
+            };
+
+            // --- Main Logic ---
+            const handleSearch = (event, submitterOverride) => {
+                event.preventDefault();
+                clearMessage();
+
+                const submitter = submitterOverride || event.submitter;
+                const searchType = submitter?.dataset.searchType;
+                if (!searchType) return;
+
+                setLoadingState(true, submitter);
+
+                const values = { 
+                    name: ui.inputs.name.value, 
+                    address: ui.inputs.address.value, 
+                    phone: ui.inputs.phone.value 
+                };
+                let url = '', validationError = '', historyLabel = '';
+
+                try {
+                    switch (searchType) {
+                        case 'name':
+                            const nameData = format.name(values.name);
+                            const addressDataForName = format.address(values.address);
+                            if (!nameData || !addressDataForName) throw new Error('A valid name and full address are required.');
+                            url = `https://www.privateeye.com/name/${nameData.first}-${nameData.last}/${addressDataForName.state}/${addressDataForName.city}`;
+                            historyLabel = `${values.name}, ${values.address}`;
+                            break;
+                        case 'address':
+                            const addressData = format.address(values.address);
+                            if (!addressData) throw new Error('Please provide a valid address (Number Street, City, State ZIP).');
+                            url = `https://www.privateeye.com/postal-address/${addressData.state}/${addressData.city}/${addressData.street}/${addressData.number}`;
+                            historyLabel = values.address;
+                            break;
+                        case 'phone':
+                            const phoneData = format.phone(values.phone);
+                            if (!phoneData) throw new Error('Please provide a valid 10-digit phone number.');
+                            url = `https://www.privateeye.com/phone-number/${phoneData}`;
+                            historyLabel = values.phone;
+                            break;
+                    }
+                } catch (e) {
+                    validationError = e.message;
+                }
+
+                if (validationError) {
+                    showMessage(validationError, 'error');
+                    setLoadingState(false);
+                } else if (url) {
+                    ui.welcomeMessage.classList.add('hidden');
+                    ui.resultFrame.classList.remove('hidden');
+                    ui.resultFrame.src = url;
+
+                    ui.resultFrame.onload = () => {
+                        showMessage(`Search for "${historyLabel}" complete.`, 'info');
+                        setLoadingState(false);
+                        addToHistory(searchType, values, historyLabel);
+                    };
+                    ui.resultFrame.onerror = () => {
+                        showMessage(`Failed to load results for "${historyLabel}".`, 'error');
+                        setLoadingState(false);
+                    };
+
+                    if (window.innerWidth < 768) {
+                        setPanelState(false);
+                    }
+                }
+            };
+
+            // --- Event Listeners ---
+            ui.toggleBtn.addEventListener('click', () => setPanelState(!isPanelOpen));
+            ui.searchForm.addEventListener('submit', handleSearch);
+            ui.clearAllBtn.addEventListener('click', resetToInitialState);
+            ui.history.clearBtn.addEventListener('click', clearHistory);
+
+            Object.entries(ui.inputs).forEach(([key, input]) => {
+                input.addEventListener('blur', () => {
+                    const value = input.value;
+                    if (value.trim() === '') {
+                        input.classList.remove('ring-red-500', 'ring-green-500');
+                        return;
+                    }
+                    const isValid = format[key] ? format[key](value) !== null : true;
+                    setInputValidationState(input, isValid);
+                });
+            });
+
+            // --- Initial State Setup ---
+            setPanelState(isPanelOpen);
+            renderHistory();
+            updateConnectionStatus('Initializing...');
+        });
+    </script>
+</body>
+</html>
