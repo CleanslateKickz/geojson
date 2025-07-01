@@ -97,7 +97,12 @@
         type: 'Text',
         optional: false
       }],
-      selection: true
+      // `selection: true` allows this widget to LISTEN to selections (e.g., from the main Grist table).
+      // The `onRecord` handler uses this to update the search bar when you click a row.
+      selection: true,
+      // `allowSelectBy: true` allows OTHER widgets to select this widget as a source for linking.
+      // This is the key change that makes this widget appear in the "select by" dropdown of other widgets.
+      allowSelectBy: true
     });
     
     isReady = true;
