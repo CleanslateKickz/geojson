@@ -11,6 +11,7 @@
   <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
 
   <style>
+    /* ... styles unchanged ... */
     body{
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       margin: 0;
@@ -20,9 +21,7 @@
       height: 100vh;
       box-sizing: border-box;
     }
-    
     .hidden { display: none !important; }
-    
     #initial-message {
       display: flex;
       justify-content: center;
@@ -32,7 +31,6 @@
       color: #6c757d;
       text-align: center;
     }
-    
     #comp-details {
       display: flex;
       gap: 24px;
@@ -46,7 +44,6 @@
       height: calc(100vh - 80px);
       overflow-y: auto;
     }
-    
     .left-column {
       flex: 1;
       min-width: 300px;
@@ -54,14 +51,12 @@
       flex-direction: column;
       gap: 20px;
     }
-    
     .right-column {
       flex: 2;
       display: flex;
       flex-direction: column;
       gap: 16px;
     }
-    
     #property-image {
       width: 100%;
       height: auto;
@@ -69,13 +64,11 @@
       border-radius: 6px;
       object-fit: cover;
     }
-    
     #map {
       width: 100%;
       height: 300px;
       border-radius: 6px;
     }
-    
     #property-address-header {
       display: grid;
       grid-template-columns: 2fr 1fr 100px;
@@ -83,7 +76,6 @@
       align-items: center;
       margin-bottom: 16px;
     }
-    
     .collapsible-header {
       font-size: 1.1em;
       color: #007bff;
@@ -97,36 +89,30 @@
       justify-content: space-between;
       align-items: center;
     }
-    
     .toggle-icon {
       font-family: monospace;
       font-size: 1.4em;
     }
-    
     .collapsible-content {
       max-height: 0;
       overflow: hidden;
       transition: max-height 0.3s ease-out;
       padding: 0 4px;
     }
-    
     .collapsible-content.active {
       max-height: 1000px;
       transition: max-height 0.5s ease-in;
       padding: 8px 4px 16px 4px;
     }
-    
     .details-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 16px 20px;
     }
-    
     .detail-item {
       display: flex;
       flex-direction: column;
     }
-    
     .detail-label {
       font-size: 0.8em;
       color: #6c757d;
@@ -134,7 +120,6 @@
       margin-bottom: 4px;
       font-weight: 600;
     }
-    
     .editable-input {
       font-size: 1em;
       font-family: inherit;
@@ -145,40 +130,32 @@
       box-sizing: border-box;
       transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
     }
-    
     .editable-input:focus {
       border-color: #80bdff;
       outline: 0;
       box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
     }
-    
     .editable-input:hover {
       border-color: #007bff;
     }
-    
     textarea.editable-input {
       resize: vertical;
       min-height: 100px;
     }
-    
     .saved-highlight {
       background-color: #d4edda !important;
       border-color: #28a745 !important;
     }
-    
     .error-highlight {
       background-color: #f8d7da !important;
       border-color: #dc3545 !important;
     }
-    
     .currency::before {
       content: '$';
     }
-    
     .percentage::after {
       content: '%';
     }
-    
     .formatted-number {
       text-align: right;
     }
@@ -195,13 +172,11 @@
       <img id="property-image" src="" alt="Property Image">
       <div id="map"></div>
     </div>
-    
     <div class="right-column">
       <div class="detail-item">
         <span class="detail-label">Property Name</span>
         <input type="text" id="property-name" class="editable-input" data-col-id="Property_Name">
       </div>
-      
       <div id="property-address-header">
         <div class="detail-item">
           <span class="detail-label">Address</span>
@@ -216,7 +191,6 @@
           <input type="number" id="property-zip" class="editable-input" data-col-id="Zip">
         </div>
       </div>
-      
       <div class="detail-section">
         <h3 class="collapsible-header">Sale Information <span class="toggle-icon">-</span></h3>
         <div class="collapsible-content active">
@@ -240,7 +214,6 @@
           </div>
         </div>
       </div>
-      
       <div class="detail-section">
         <h3 class="collapsible-header">Property Details <span class="toggle-icon">+</span></h3>
         <div class="collapsible-content">
@@ -272,14 +245,12 @@
           </div>
         </div>
       </div>
-      
       <div class="detail-section">
         <h3 class="collapsible-header">Transaction Notes <span class="toggle-icon">+</span></h3>
         <div class="collapsible-content">
           <textarea id="transaction-notes" class="editable-input" data-col-id="Transaction_Notes" placeholder="Enter transaction notes..."></textarea>
         </div>
       </div>
-      
       <div class="detail-section">
         <h3 class="collapsible-header">Parties Involved <span class="toggle-icon">+</span></h3>
         <div class="collapsible-content">
@@ -336,10 +307,8 @@
     let marker = null;
     let isRendering = false;
 
-    // Utility: Attach listeners after every render
     function attachInputListeners() {
       document.querySelectorAll('.editable-input').forEach(input => {
-        // Remove previous event listeners to avoid double-firing
         input.removeEventListener('change', handleInputChange);
         input.removeEventListener('blur', handleInputChange);
         input.addEventListener('change', handleInputChange);
@@ -347,7 +316,6 @@
       });
     }
 
-    // Utility: List of all column IDs used in this widget
     const GRIST_COLUMNS = [
       'Property_Image', 'PropertyID', 'Property_Name', 'Property_Address', 'Property_City', 'Zip',
       'Sale_Price', 'Sale_Date', 'Cap_Rate', 'Sale_Condition', 'Size', 'Land_Area_SF',
@@ -358,7 +326,6 @@
     ];
 
     function render(record) {
-      // Defensive: Show the "select a row" message if record is null
       if (!record || !record.id) {
         document.getElementById('initial-message').classList.remove('hidden');
         document.getElementById('comp-details').classList.add('hidden');
@@ -371,16 +338,11 @@
       document.getElementById('initial-message').classList.add('hidden');
       document.getElementById('comp-details').classList.remove('hidden');
 
-      // Populate all input fields
       document.querySelectorAll('.editable-input').forEach(input => {
         const colId = input.dataset.colId;
         if (!colId) return;
-
         let value = record[colId];
-
-        // Field-specific formatting
         if (colId === 'Sale_Date') {
-          // Grist Date type: value is "YYYY-MM-DD" or null/empty
           input.value = value || '';
         } else if (colId === 'Cap_Rate') {
           input.value = (typeof value === 'number') ? (value * 100).toFixed(2) : '';
@@ -391,16 +353,11 @@
         }
       });
 
-      // Set property image
       const imageElement = document.getElementById('property-image');
       imageElement.src = record.Property_Image || 'https://via.placeholder.com/400x300.png?text=No+Image';
 
-      // Update map
       updateMap(record);
-
-      // Re-attach listeners after render
       attachInputListeners();
-
       isRendering = false;
     }
 
@@ -412,11 +369,8 @@
       if (!columnId) return;
 
       let value = input.value.trim();
-
-      // Clear any previous highlights
       input.classList.remove('saved-highlight', 'error-highlight');
 
-      // Conversion and validation
       if (input.type === 'number') {
         if (value === '') {
           value = null;
@@ -430,15 +384,14 @@
           if (columnId === 'Cap_Rate') value = value / 100;
         }
       } else if (input.type === 'date') {
-        // For Grist 'Date' type, just use the string "YYYY-MM-DD" or null
         value = value || null;
       } else if (value === '') {
         value = null;
       }
 
-      // Save to Grist
       try {
-        await grist.selectedTable.updateRecord(currentRecordId, { [columnId]: value });
+        const table = await grist.selectedTable; // FIX: always await this!
+        await table.updateRecord(currentRecordId, { [columnId]: value });
         input.classList.add('saved-highlight');
         setTimeout(() => input.classList.remove('saved-highlight'), 1500);
       } catch (err) {
@@ -465,7 +418,6 @@
       }
     }
 
-    // Collapsible sections
     document.querySelectorAll('.collapsible-header').forEach(header => {
       header.addEventListener('click', function() {
         const content = this.nextElementSibling;
@@ -475,15 +427,12 @@
       });
     });
 
-    // Grist Widget Initialization
     grist.ready({
       requiredAccess: 'full',
       columns: GRIST_COLUMNS
     });
 
     grist.onRecord(render);
-
-    // First-time listener attachment for static DOM
     attachInputListeners();
 
     console.log('Widget initialized and ready for editing');
