@@ -169,6 +169,8 @@
         </div>
     </div>
     <script>
+    document.addEventListener("DOMContentLoaded", function() {
+
         let currentRecord = null;
         let propertiesDataFetchedForCurrentUser = false; // Flag to track if properties are fetched
         let isPropertiesSectionVisible = false; // Track visibility state
@@ -377,9 +379,6 @@
             togglePropertiesBtn.classList.remove('active');
             isPropertiesSectionVisible = false;
             propertiesDataFetchedForCurrentUser = false; 
-            // propertiesTableBodyEl.innerHTML = ''; // Content will be loaded on demand
-            // noPropertiesMessageEl.style.display = 'none';
-
 
             let accountsText = !isEmpty(record.Accounts) ? getFirstDelimitedItem(record.Accounts) : '';
             const ownerDisplayName = record.Name || record.Owner_Full_Name || 'Unknown Owner';
@@ -467,17 +466,16 @@
                 'Title', 'Pref', 'Date', 'Plans_to_Buy', 'Plans_to_Sell', 'Contact_1', 'Contact_2',
                 'Contact_3', 'Contact_4', 'Phone', 'Phone_2', 'Phone_3', 'Phone_4', 'Extra_Notes'
             ],
-            requiredAccess: 'full'
+            requiredAccess: 'full',
+            // ADDED: This allows the widget to listen to selections from the table or other linked widgets.
+            selection: true
         });
 
-        grist.onRecord(function(record) {
-            // loadingStateEl.style.display = 'block'; // Optional: show loading spinner briefly
-            // ownerContentEl.style.display = 'none';
-            // setTimeout(() => { // Simulate loading if needed or remove for direct update
-                updateOwnerDisplay(record);
-            //     loadingStateEl.style.display = 'none';
-            //     if (record) ownerContentEl.style.display = 'block';
-            // }, record ? 50 : 0); // Shorter delay if a record is present
+        grist.onRecord(function(record, mappings) {
+            // The `mappings` argument is important when linked to another widget.
+            // `mapColumnNames` ensures we use the correct data even if column names are aliased.
+            const mappedRecord = grist.mapColumnNames(record, mappings);
+            updateOwnerDisplay(mappedRecord);
         });
 
         document.addEventListener('click', function(e) {
@@ -493,29 +491,7 @@
                 }
             }
         });
-    </script>
-    <script>
-window.addEventListener('message', async (event) => {
-  const grist = event.data.grist;
-  if (grist) {
-    // Accept selections from "Owners_" table
-    grist.onSelectedRow(async (rowId, tableId) => {
-      if (tableId === "Owners_" && rowId) {
-        await renderOwnerDetails(rowId);
-      }
     });
-  }
-});
-
-// Update interface with selected owner data
-async function renderOwnerDetails(rowId) {
-  // Fetch owner data using `aceData` API
-  const ownerData = await aceData.getTable('Owners_').getRow(rowId);
-  
-  // Update DOM with owner data (example)
-  document.getElementById('selectedOwnerName').textContent = ownerData.Name;
-  document.getElementById('selectedOwnerAddress').src = ownerData.Address_Image;
-}
-</script>
+    </script>
 </body>
 </html>
