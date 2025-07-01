@@ -156,7 +156,7 @@
             console.log('Cursor position set to row:', r.id);
 
             // Broadcast selection so this widget appears as a selector for others
-            grist.selectionChanged({ selected: [r.id] });
+            grist.setSelectedRows([{ id: r.id }]);
           };
           suggestionsContainer.appendChild(li);
         });
