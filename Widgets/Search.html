@@ -185,5 +185,39 @@
       }
     });
   </script>
+  <script>
+// Listen for selections (e.g., if other widgets act as selectors)
+window.addEventListener('message', async (event) => {
+  const grist = event.data.grist;
+  if (grist) {
+    // Listen for row selections from target table
+    grist.onSelectedRow(async (rowId, tableId) => {
+      if (tableId === "OWNERS" && rowId) {
+        await autofillFields(rowId);
+      }
+    });
+
+      // Broadcast selections based on user input
+      document.getElementById('searchButton').addEventListener('click', async () => {
+          const name = document.getElementById('name').value;
+          const address = document.getElementById('address').value;
+          const phone = document.getElementById('phone').value;
+          const matchingOwnerId = await performSearch(name, address, phone); // Your search logic
+          await grist.setSelectedRows([{ id: matchingOwnerId, tableId: "OWNERS" }]);
+      });
+  }
+});
+
+    // Example search result handler
+    async function performSearch(name, address, phone) {
+        // Add logic to find an owner rowID from inputs
+        return 1; // Replace with actual result
+    }
+
+    // Auto-fill fields when another widget selects a row
+    function autofillFields(rowId) {
+        // Add logic to populate your UI with data from `aceData` or API
+    }
+</script>
 </body>
 </html>
