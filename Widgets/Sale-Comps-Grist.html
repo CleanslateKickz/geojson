@@ -336,52 +336,57 @@
     let marker = null;
     let isRendering = false;
 
+    // Utility: Attach listeners after every render
+    function attachInputListeners() {
+      document.querySelectorAll('.editable-input').forEach(input => {
+        // Remove previous event listeners to avoid double-firing
+        input.removeEventListener('change', handleInputChange);
+        input.removeEventListener('blur', handleInputChange);
+        input.addEventListener('change', handleInputChange);
+        input.addEventListener('blur', handleInputChange);
+      });
+    }
+
+    // Utility: List of all column IDs used in this widget
+    const GRIST_COLUMNS = [
+      'Property_Image', 'PropertyID', 'Property_Name', 'Property_Address', 'Property_City', 'Zip',
+      'Sale_Price', 'Sale_Date', 'Cap_Rate', 'Sale_Condition', 'Size', 'Land_Area_SF',
+      'Property_Type', 'Secondary_Type', 'Market_Time', 'Property_County', 'Transaction_Notes',
+      'Listing_Broker', 'Listing_Brokerage', 'Buyers_Broker', 'Buyers_Brokerage',
+      'Buyer_Contact', 'Seller_Contact', 'Buyer_Company', 'Buyer_Address',
+      'Seller_Company', 'Seller_Address', 'Latitude', 'Longitude'
+    ];
+
     function render(record) {
+      // Defensive: Show the "select a row" message if record is null
       if (!record || !record.id) {
         document.getElementById('initial-message').classList.remove('hidden');
         document.getElementById('comp-details').classList.add('hidden');
         return;
       }
-      
-      console.log('Rendering record:', record);
+
       isRendering = true;
       currentRecordId = record.id;
-      
+
       document.getElementById('initial-message').classList.add('hidden');
       document.getElementById('comp-details').classList.remove('hidden');
-      
+
       // Populate all input fields
       document.querySelectorAll('.editable-input').forEach(input => {
         const colId = input.dataset.colId;
         if (!colId) return;
-        
-        console.log(`Setting ${colId} to:`, record[colId]);
-        
-        // Special handling for specific fields
+
+        let value = record[colId];
+
+        // Field-specific formatting
         if (colId === 'Sale_Date') {
-          // Handle Grist date field (Unix timestamp)
-          if (record.Sale_Date && typeof record.Sale_Date === 'number') {
-            const date = new Date(record.Sale_Date * 1000);
-            const year = date.getUTCFullYear();
-            const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-            const day = String(date.getUTCDate()).padStart(2, '0');
-            input.value = `${year}-${month}-${day}`;
-          } else {
-            input.value = '';
-          }
+          // Grist Date type: value is "YYYY-MM-DD" or null/empty
+          input.value = value || '';
         } else if (colId === 'Cap_Rate') {
-          // Convert decimal to percentage for display
-          if (record.Cap_Rate !== null && record.Cap_Rate !== undefined) {
-            input.value = (record.Cap_Rate * 100).toFixed(2);
-          } else {
-            input.value = '';
-          }
-        } else if (colId === 'Sale_Price' && record[colId]) {
-          // Format large numbers with commas for readability
-          input.value = record[colId];
+          input.value = (typeof value === 'number') ? (value * 100).toFixed(2) : '';
+        } else if (colId === 'Sale_Price' || colId === 'Size' || colId === 'Land_Area_SF' || colId === 'Market_Time' || colId === 'Zip') {
+          input.value = (typeof value === 'number') ? value : (value ?? '');
         } else {
-          // Standard field handling
-          const value = record[colId];
           input.value = (value === null || value === undefined) ? '' : value;
         }
       });
@@ -389,28 +394,29 @@
       // Set property image
       const imageElement = document.getElementById('property-image');
       imageElement.src = record.Property_Image || 'https://via.placeholder.com/400x300.png?text=No+Image';
-      
+
       // Update map
       updateMap(record);
-      
+
+      // Re-attach listeners after render
+      attachInputListeners();
+
       isRendering = false;
     }
 
     async function handleInputChange(event) {
       if (!currentRecordId || isRendering) return;
-      
+
       const input = event.target;
       const columnId = input.dataset.colId;
       if (!columnId) return;
-      
-      console.log(`Updating ${columnId} with value:`, input.value);
-      
+
       let value = input.value.trim();
-      
+
       // Clear any previous highlights
       input.classList.remove('saved-highlight', 'error-highlight');
-      
-      // Handle different input types and conversions
+
+      // Conversion and validation
       if (input.type === 'number') {
         if (value === '') {
           value = null;
@@ -421,107 +427,65 @@
             setTimeout(() => input.classList.remove('error-highlight'), 2000);
             return;
           }
-          
-          // Special handling for Cap Rate (convert percentage back to decimal)
-          if (columnId === 'Cap_Rate') {
-            value = value / 100;
-          }
+          if (columnId === 'Cap_Rate') value = value / 100;
         }
       } else if (input.type === 'date') {
-        if (value) {
-          // Convert date input to Unix timestamp for Grist
-          const date = new Date(`${value}T00:00:00Z`);
-          value = Math.floor(date.getTime() / 1000);
-        } else {
-          value = null;
-        }
+        // For Grist 'Date' type, just use the string "YYYY-MM-DD" or null
+        value = value || null;
       } else if (value === '') {
         value = null;
       }
-      
-      console.log(`Sending to Grist - ${columnId}:`, value);
-      
+
+      // Save to Grist
       try {
         await grist.selectedTable.updateRecord(currentRecordId, { [columnId]: value });
-        
-        // Visual feedback for successful save
         input.classList.add('saved-highlight');
-        setTimeout(() => {
-          input.classList.remove('saved-highlight');
-        }, 1500);
-        
-        console.log(`Successfully updated ${columnId}`);
+        setTimeout(() => input.classList.remove('saved-highlight'), 1500);
       } catch (err) {
-        console.error(`Failed to save ${columnId}:`, err);
         input.classList.add('error-highlight');
-        setTimeout(() => {
-          input.classList.remove('error-highlight');
-        }, 2000);
+        setTimeout(() => input.classList.remove('error-highlight'), 2000);
       }
     }
-    
-    // Add event listeners to all editable inputs
-    document.querySelectorAll('.editable-input').forEach(input => {
-      input.addEventListener('change', handleInputChange);
-      input.addEventListener('blur', handleInputChange); // Also save on blur for better UX
-    });
 
     function updateMap(record) {
       const { Latitude, Longitude, Property_Name, Property_Address } = record;
-      
       if (Latitude && Longitude && !isNaN(Latitude) && !isNaN(Longitude)) {
         if (!map) {
-          // Initialize map
           map = L.map('map').setView([Latitude, Longitude], 15);
-          L.tileLayer('http://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}', {
-            attribution: ''
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
           }).addTo(map);
           marker = L.marker([Latitude, Longitude]).addTo(map);
         } else {
-          // Update existing map
           map.setView([Latitude, Longitude], 15);
           marker.setLatLng([Latitude, Longitude]);
         }
-        
-        // Update popup content
-        const popupContent = `<b>${Property_Name || 'Property'}</b><br>${Property_Address || 'Address not available'}`;
-        marker.bindPopup(popupContent).openPopup();
-        
-        // Ensure map renders properly
-        setTimeout(() => {
-          if (map) {
-            map.invalidateSize();
-          }
-        }, 100);
+        marker.bindPopup(`<b>${Property_Name || 'Property'}</b><br>${Property_Address || ''}`).openPopup();
+        setTimeout(() => { if (map) map.invalidateSize(); }, 100);
       }
     }
-    
-    // Collapsible sections functionality
+
+    // Collapsible sections
     document.querySelectorAll('.collapsible-header').forEach(header => {
       header.addEventListener('click', function() {
         const content = this.nextElementSibling;
         const icon = this.querySelector('.toggle-icon');
-        
         content.classList.toggle('active');
         icon.textContent = content.classList.contains('active') ? '-' : '+';
       });
     });
 
-    // Initialize Grist widget
+    // Grist Widget Initialization
     grist.ready({
       requiredAccess: 'full',
-      columns: [
-        'Property_Image', 'PropertyID', 'Property_Name', 'Property_Address', 'Property_City', 'Zip', 
-        'Sale_Price', 'Sale_Date', 'Cap_Rate', 'Sale_Condition', 'Size', 'Land_Area_SF', 
-        'Property_Type', 'Secondary_Type', 'Market_Time', 'Property_County', 'Transaction_Notes', 
-        'Listing_Broker', 'Listing_Brokerage', 'Buyers_Broker', 'Buyers_Brokerage', 
-        'Buyer_Contact', 'Seller_Contact', 'Buyer_Company', 'Buyer_Address', 
-        'Seller_Company', 'Seller_Address', 'Latitude', 'Longitude'
-      ]
+      columns: GRIST_COLUMNS
     });
-    
+
     grist.onRecord(render);
-    
+
+    // First-time listener attachment for static DOM
+    attachInputListeners();
+
     console.log('Widget initialized and ready for editing');
   </script>
 </body>
