@@ -6,18 +6,14 @@
   <title>Owner Search Widget</title>
   <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
   <style>
-    /* --- NEW COMPACT STYLES --- */
+    /* --- NEW COMPACT STYLES (REVISED) --- */
     body { 
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
       background-color: #f5f5f5;
       
-      /* Use flexbox to perfectly center the search bar without large padding */
-      display: flex;
-      align-items: center; /* Vertical centering */
-      justify-content: center; /* Horizontal centering */
-      min-height: 100vh; /* Ensure body takes full height for centering */
+      /* Use simple padding to push the search bar to the top */
+      padding: 8px;
       margin: 0;
-      padding: 4px; /* Minimal padding to prevent touching edges */
       box-sizing: border-box;
       overflow: hidden; /* Prevent any potential scrollbars */
     }
@@ -25,12 +21,13 @@
       position: relative; 
       width: 100%;
       max-width: 400px; 
+      margin: 0 auto; /* Keep it centered horizontally */
     }
     .search-bar { 
       width: 100%; 
-      padding: 8px 12px; /* Reduced padding for a more compact field */
+      padding: 8px 12px; /* Reduced padding for a compact field */
       font-size: 14px; /* Slightly smaller font */
-      border: 1px solid #d1d5db; /* A softer gray for the border */
+      border: 1px solid #d1d5db; 
       border-radius: 6px; 
       outline: none; 
       background: #fff; 
@@ -43,11 +40,11 @@
     }
     .search-bar:focus { 
       border-color: #007bff; 
-      box-shadow: 0 0 0 2px rgba(0,123,255,.15); /* Subtler focus ring */
+      box-shadow: 0 0 0 2px rgba(0,123,255,.15); 
     }
     .suggestions { 
       list-style: none; 
-      margin: 2px 0 0; /* Tighter spacing below the search bar */
+      margin: 2px 0 0; 
       padding: 0; 
       border: 1px solid #d1d5db;
       border-radius: 6px; 
@@ -61,19 +58,19 @@
       box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
     .suggestions li { 
-      padding: 8px 12px; /* Match the search bar padding */
-      font-size: 14px; /* Match the search bar font size */
+      padding: 8px 12px;
+      font-size: 14px;
       cursor: pointer; 
     }
     .suggestions li:hover { 
       background: #f0f0f0; 
     }
     .status-message { 
-      font-size: 12px; /* Smaller status message font */
+      font-size: 12px;
       color: #6b7280; 
-      margin-top: 4px; /* Tighter margin */
+      margin-top: 4px;
       text-align: center; 
-      height: 16px; /* Reserve space to prevent layout shift */
+      height: 16px; 
       line-height: 16px;
     }
   </style>
@@ -164,8 +161,10 @@
             li.onclick = () => {
               searchInput.value = r[searchColumnName];
               suggestionsContainer.style.display = 'none';
+              
+              // FUNCTIONAL FIX: Use setCursorPos to trigger the selection.
+              // This is a more fundamental action that avoids the LinkingState error.
               grist.setCursorPos({ rowId: r.id });
-              grist.setSelectedRows([{ id: r.id }]);
             };
             suggestionsContainer.appendChild(li);
           });
@@ -183,12 +182,13 @@
         }
       });
 
-      grist.onRecord((record) => {
-        if (record && record[searchColumnName] && isReady) {
-          if (searchInput.value !== record[searchColumnName]) {
-            searchInput.value = record[searchColumnName];
+      grist.onRecord((record, mappings) => {
+        const mappedRecord = grist.mapColumnNames(record, mappings);
+        if (mappedRecord && mappedRecord[searchColumnName] && isReady) {
+          if (searchInput.value !== mappedRecord[searchColumnName]) {
+            searchInput.value = mappedRecord[searchColumnName];
           }
-        } else if (!record && isReady) {
+        } else if (!mappedRecord && isReady) {
           searchInput.value = '';
         }
       });
