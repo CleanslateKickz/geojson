@@ -140,24 +140,36 @@
                     { name: 'Name', type: 'Text' },
                     { name: 'Owner_Address', type: 'Text' },
                     { name: 'Phone', type: 'Text' }
-                ]
+                ],
+                // ADDED: This allows the widget to listen to selections from the table or other linked widgets.
+                selection: true
             });
 
             // Handle record selection from Grist
-            grist.onRecord(function(record) {
-                currentRecord = record;
-                populateFromGrist(record);
-                updateConnectionStatus('Connected - Record loaded');
-                document.getElementById('recordInfo').classList.remove('hidden');
+            grist.onRecord(function(record, mappings) {
+                // `mapColumnNames` is essential for robust linking
+                const mappedRecord = grist.mapColumnNames(record, mappings);
+                currentRecord = mappedRecord;
+                
+                if (mappedRecord) {
+                    populateFromGrist(mappedRecord);
+                    updateConnectionStatus(`Connected - Displaying ID ${mappedRecord.id}`);
+                    document.getElementById('recordInfo').classList.remove('hidden');
+                } else {
+                    // This handles the case where the selection is cleared
+                    clearFields();
+                    document.getElementById('recordInfo').classList.add('hidden');
+                    updateConnectionStatus('Connected - No record selected');
+                }
             });
 
-            // Handle Grist ready state
-            grist.onNewRecord(function() {
-                clearFields();
-                document.getElementById('recordInfo').classList.add('hidden');
-                updateConnectionStatus('Connected - No record selected');
+            // This is useful for when the table is sorted or filtered and the cursor moves
+            grist.onRecords(function(records, mappings) {
+                // If there's a selected record, onRecord will be called.
+                // If the selection becomes empty, onRecord(null) will be called.
+                // This handler can be used for more complex scenarios, but onRecord is sufficient here.
             });
-
+            
             const populateFromGrist = (record) => {
                 if (record) {
                     // Map Grist column names to form fields
@@ -428,30 +440,5 @@
             updateConnectionStatus('Initializing...');
         });
     </script>
-    <script>
-window.addEventListener('message', async (event) => {
-  const grist = event.data.grist;
-  if (grist) {
-    // Accept selections from "Owners_" table
-    grist.onSelectedRow(async (rowId, tableId) => {
-      if (tableId === "Owners_" && rowId) {
-        await updateReportFields(rowId);
-      }
-    });
-
-    // Broadcast selections from this widget(only if needed)
-    document.getElementById('searchControl').addEventListener('click', async () => {
-      const results = await performOwnerSearch(); // Your logic
-      const selectedOwnerId = results[0]?.id || null;
-      await grist.setSelectedRows([{ id: selectedOwnerId, tableId: "Owners_" }]);
-    });
-  }
-});
-
-// Update UI for selected owner
-function updateReportFields(rowId) {
-    // Fetch data and update fields
-}
-</script>
 </body>
 </html>
