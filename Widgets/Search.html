@@ -3,19 +3,65 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Owner Search Widget (Hybrid Workaround)</title>
+  <title>Owner Search Widget</title>
   <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
   <style>
-    /* CSS is unchanged */
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 16px; background-color: #f5f5f5; }
-    .search-container { position: relative; max-width: 400px; margin: 0 auto; }
-    .search-bar { width: 100%; padding: 12px 16px; font-size: 16px; border: 1px solid #e0e0e0; border-radius: 8px; outline: none; background: #fff; box-sizing: border-box; }
-    .search-bar:disabled { background-color: #e9ecef; cursor: not-allowed; }
-    .search-bar:focus { border-color: #007bff; box-shadow: 0 0 0 3px rgba(0,123,255,.1); }
-    .suggestions { list-style: none; margin: 4px 0 0; padding: 0; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; position: absolute; width: 100%; max-height: 200px; overflow-y: auto; z-index: 1000; display: none; }
-    .suggestions li { padding: 10px 16px; cursor: pointer; }
-    .suggestions li:hover { background: #f0f0f0; }
-    .status-message { font-size: 14px; color: #6b7280; margin-top: 8px; text-align: center; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+      margin: 0; 
+      padding: 16px; 
+      background-color: #f5f5f5; 
+    }
+    .search-container { 
+      position: relative; 
+      max-width: 400px; 
+      margin: 0 auto; 
+    }
+    .search-bar { 
+      width: 100%; 
+      padding: 12px 16px; 
+      font-size: 16px; 
+      border: 1px solid #e0e0e0; 
+      border-radius: 8px; 
+      outline: none; 
+      background: #fff; 
+      box-sizing: border-box; 
+    }
+    .search-bar:disabled { 
+      background-color: #e9ecef; 
+      cursor: not-allowed; 
+    }
+    .search-bar:focus { 
+      border-color: #007bff; 
+      box-shadow: 0 0 0 3px rgba(0,123,255,.1); 
+    }
+    .suggestions { 
+      list-style: none; 
+      margin: 4px 0 0; 
+      padding: 0; 
+      border: 1px solid #e0e0e0; 
+      border-radius: 8px; 
+      background: #fff; 
+      position: absolute; 
+      width: 100%; 
+      max-height: 200px; 
+      overflow-y: auto; 
+      z-index: 1000; 
+      display: none; 
+    }
+    .suggestions li { 
+      padding: 10px 16px; 
+      cursor: pointer; 
+    }
+    .suggestions li:hover { 
+      background: #f0f0f0; 
+    }
+    .status-message { 
+      font-size: 14px; 
+      color: #6b7280; 
+      margin-top: 8px; 
+      text-align: center; 
+    }
   </style>
 </head>
 <body>
@@ -27,8 +73,8 @@
 
   <script>
     let allRecords = [];
-    // KEPT: We still use a hard-coded column name for the widget's internal logic.
-    const searchColumnName = "Name";
+    let searchColumnName = "Name"; // Default column
+    let isReady = false;
 
     const searchInput = document.querySelector('.search-bar');
     const suggestionsContainer = document.querySelector('.suggestions');
@@ -42,37 +88,75 @@
       };
     }
 
-    grist.onRecords((records) => {
-      allRecords = records || [];
-      searchInput.disabled = false;
-      searchInput.placeholder = `Search in "${searchColumnName}"...`;
+    // Initialize the widget first
+    grist.ready({
+      requiredAccess: 'full',
+      columns: [{
+        name: 'searchColumn',
+        title: 'Search Column',
+        type: 'Text',
+        optional: false
+      }]
+    });
+    
+    // Set ready flag after initialization
+    isReady = true;
+    console.log('Grist widget ready');
+
+    // Handle options changes (when user configures the widget)
+    grist.onOptions((options) => {
+      if (options && options.searchColumn) {
+        searchColumnName = options.searchColumn;
+        searchInput.placeholder = `Search in "${searchColumnName}"...`;
+      }
     });
 
-    // The handleSearch function is unchanged
+    // Handle record changes
+    grist.onRecords((records) => {
+      allRecords = records || [];
+      if (isReady) {
+        searchInput.disabled = false;
+        if (!searchInput.placeholder.includes('Search')) {
+          searchInput.placeholder = `Search in "${searchColumnName}"...`;
+        }
+      }
+    });
+
     const handleSearch = debounce(() => {
-      if (!searchColumnName) { return; }
+      if (!searchColumnName || !isReady) { 
+        return; 
+      }
+      
       const query = searchInput.value.trim().toLowerCase();
       suggestionsContainer.innerHTML = '';
+      
       if (!query) {
         suggestionsContainer.style.display = 'none';
         statusMessageEl.textContent = '';
         return;
       }
+
       const matches = allRecords.filter(r => {
         if (!r.hasOwnProperty(searchColumnName)) return false;
         const val = r[searchColumnName];
         return val && typeof val === 'string' && val.toLowerCase().includes(query);
       });
+
       if (matches.length > 0) {
         suggestionsContainer.style.display = 'block';
         statusMessageEl.textContent = '';
+        
         matches.forEach(r => {
           const li = document.createElement('li');
           li.textContent = r[searchColumnName];
           li.onclick = () => {
             searchInput.value = r[searchColumnName];
             suggestionsContainer.style.display = 'none';
+            
+            // This is the key fix - properly set the cursor position
+            // which will trigger other widgets to update via Grist's linking system
             grist.setCursorPos({ rowId: r.id });
+            console.log('Cursor position set to row:', r.id);
           };
           suggestionsContainer.appendChild(li);
         });
@@ -83,23 +167,22 @@
     }, 300);
 
     searchInput.addEventListener('input', handleSearch);
+    
+    // Close suggestions when clicking outside
     document.addEventListener('click', (e) => {
       if (!e.target.closest('.search-container')) {
         suggestionsContainer.style.display = 'none';
       }
     });
 
-    // *** THE FIX ***
-    // We RESTORE the `columns` configuration here.
-    // This tells Grist's linking system that this widget is a valid source for "SELECT BY".
-    // The Creator Panel UI for this widget will still be broken, but that's okay.
-    grist.ready({
-      requiredAccess: 'full',
-      columns: [{
-        name: 'searchColumnName',
-        title: 'Search Column',
-        type: 'Text'
-      }]
+    // Handle cursor position changes from other widgets
+    grist.onRecord((record) => {
+      if (record && record[searchColumnName] && isReady) {
+        // Update search input to show the currently selected record
+        if (searchInput.value !== record[searchColumnName]) {
+          searchInput.value = record[searchColumnName];
+        }
+      }
     });
   </script>
 </body>
