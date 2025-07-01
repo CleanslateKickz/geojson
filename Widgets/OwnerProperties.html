@@ -494,5 +494,28 @@
             }
         });
     </script>
+    <script>
+window.addEventListener('message', async (event) => {
+  const grist = event.data.grist;
+  if (grist) {
+    // Accept selections from "OWNERS" table
+    grist.onSelectedRow(async (rowId, tableId) => {
+      if (tableId === "OWNERS" && rowId) {
+        await renderOwnerDetails(rowId);
+      }
+    });
+  }
+});
+
+// Update interface with selected owner data
+async function renderOwnerDetails(rowId) {
+  // Fetch owner data using `aceData` API
+  const ownerData = await aceData.getTable('OWNERS').getRow(rowId);
+  
+  // Update DOM with owner data (example)
+  document.getElementById('selectedOwnerName').textContent = ownerData.Name;
+  document.getElementById('selectedOwnerAddress').src = ownerData.Address_Image;
+}
+</script>
 </body>
 </html>
