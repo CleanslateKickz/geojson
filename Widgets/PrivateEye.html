@@ -428,5 +428,30 @@
             updateConnectionStatus('Initializing...');
         });
     </script>
+    <script>
+window.addEventListener('message', async (event) => {
+  const grist = event.data.grist;
+  if (grist) {
+    // Accept selections from "OWNERS" table
+    grist.onSelectedRow(async (rowId, tableId) => {
+      if (tableId === "OWNERS" && rowId) {
+        await updateReportFields(rowId);
+      }
+    });
+
+    // Broadcast selections from this widget(only if needed)
+    document.getElementById('searchControl').addEventListener('click', async () => {
+      const results = await performOwnerSearch(); // Your logic
+      const selectedOwnerId = results[0]?.id || null;
+      await grist.setSelectedRows([{ id: selectedOwnerId, tableId: "OWNERS" }]);
+    });
+  }
+});
+
+// Update UI for selected owner
+function updateReportFields(rowId) {
+    // Fetch data and update fields
+}
+</script>
 </body>
 </html>
