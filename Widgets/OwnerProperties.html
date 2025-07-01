@@ -498,9 +498,9 @@
 window.addEventListener('message', async (event) => {
   const grist = event.data.grist;
   if (grist) {
-    // Accept selections from "OWNERS" table
+    // Accept selections from "Owners_" table
     grist.onSelectedRow(async (rowId, tableId) => {
-      if (tableId === "OWNERS" && rowId) {
+      if (tableId === "Owners_" && rowId) {
         await renderOwnerDetails(rowId);
       }
     });
@@ -510,7 +510,7 @@ window.addEventListener('message', async (event) => {
 // Update interface with selected owner data
 async function renderOwnerDetails(rowId) {
   // Fetch owner data using `aceData` API
-  const ownerData = await aceData.getTable('OWNERS').getRow(rowId);
+  const ownerData = await aceData.getTable('Owners_').getRow(rowId);
   
   // Update DOM with owner data (example)
   document.getElementById('selectedOwnerName').textContent = ownerData.Name;
