@@ -72,127 +72,121 @@
   </div>
 
   <script>
-    let allRecords = [];
-    let searchColumnName = "Name"; // Default column
-    let isReady = false;
+    // Wait for the DOM to be fully loaded before initializing the widget
+    document.addEventListener("DOMContentLoaded", function() {
+      let allRecords = [];
+      let searchColumnName = "Name"; // Default column
+      let isReady = false;
 
-    const searchInput = document.querySelector('.search-bar');
-    const suggestionsContainer = document.querySelector('.suggestions');
-    const statusMessageEl = document.querySelector('.status-message');
+      const searchInput = document.querySelector('.search-bar');
+      const suggestionsContainer = document.querySelector('.suggestions');
+      const statusMessageEl = document.querySelector('.status-message');
 
-    function debounce(func, wait) {
-      let timeout;
-      return function(...args) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, args), wait);
-      };
-    }
-
-    // Initialize the widget as a selectable source
-    grist.ready({
-      requiredAccess: 'full',
-      columns: [{
-        name: 'searchColumn',
-        title: 'Search Column',
-        type: 'Text',
-        optional: false
-      }],
-      // `selection: true` allows this widget to LISTEN to selections (e.g., from the main Grist table).
-      // The `onRecord` handler uses this to update the search bar when you click a row.
-      selection: true,
-      // `allowSelectBy: true` allows OTHER widgets to select this widget as a source for linking.
-      // This is the key change that makes this widget appear in the "select by" dropdown of other widgets.
-      allowSelectBy: true
-    });
-    
-    isReady = true;
-    console.log('Grist widget ready');
-
-    grist.onOptions((options) => {
-      if (options && options.searchColumn) {
-        searchColumnName = options.searchColumn;
-        searchInput.placeholder = `Search in "${searchColumnName}"...`;
+      function debounce(func, wait) {
+        let timeout;
+        return function(...args) {
+          clearTimeout(timeout);
+          timeout = setTimeout(() => func.apply(this, args), wait);
+        };
       }
-    });
 
-    grist.onRecords((records) => {
-      allRecords = records || [];
-      if (isReady) {
-        searchInput.disabled = false;
-        if (!searchInput.placeholder.includes('Search')) {
+      // Initialize the widget as a selectable source
+      grist.ready({
+        requiredAccess: 'full',
+        columns: [{
+          name: 'searchColumn',
+          title: 'Search Column',
+          type: 'Text',
+          optional: false
+        }],
+        selection: true,
+        allowSelectBy: true
+      });
+      
+      isReady = true;
+      console.log('Grist widget ready');
+
+      grist.onOptions((options) => {
+        if (options && options.searchColumn) {
+          searchColumnName = options.searchColumn;
           searchInput.placeholder = `Search in "${searchColumnName}"...`;
         }
-      }
-    });
-
-    const handleSearch = debounce(() => {
-      if (!searchColumnName || !isReady) { 
-        return; 
-      }
-      
-      const query = searchInput.value.trim().toLowerCase();
-      suggestionsContainer.innerHTML = '';
-      
-      if (!query) {
-        suggestionsContainer.style.display = 'none';
-        statusMessageEl.textContent = '';
-        return;
-      }
-
-      const matches = allRecords.filter(r => {
-        if (!r.hasOwnProperty(searchColumnName)) return false;
-        const val = r[searchColumnName];
-        return val && typeof val === 'string' && val.toLowerCase().includes(query);
       });
 
-      if (matches.length > 0) {
-        suggestionsContainer.style.display = 'block';
-        statusMessageEl.textContent = '';
-        
-        matches.forEach(r => {
-          const li = document.createElement('li');
-          li.textContent = r[searchColumnName];
-          li.onclick = () => {
-            searchInput.value = r[searchColumnName];
-            suggestionsContainer.style.display = 'none';
-
-            // Set cursor position for Grist linking
-            grist.setCursorPos({ rowId: r.id });
-            console.log('Cursor position set to row:', r.id);
-
-            // Broadcast selection so this widget appears as a selector for others
-            grist.setSelectedRows([{ id: r.id }]);
-          };
-          suggestionsContainer.appendChild(li);
-        });
-      } else {
-        suggestionsContainer.style.display = 'none';
-        statusMessageEl.textContent = 'No matching owners found.';
-      }
-    }, 300);
-
-    searchInput.addEventListener('input', handleSearch);
-    
-    // Close suggestions when clicking outside
-    document.addEventListener('click', (e) => {
-      if (!e.target.closest('.search-container')) {
-        suggestionsContainer.style.display = 'none';
-      }
-    });
-
-    // Handle cursor position changes from other widgets
-    grist.onRecord((record) => {
-      if (record && record[searchColumnName] && isReady) {
-        if (searchInput.value !== record[searchColumnName]) {
-          searchInput.value = record[searchColumnName];
+      grist.onRecords((records) => {
+        allRecords = records || [];
+        if (isReady) {
+          searchInput.disabled = false;
+          if (!searchInput.placeholder.includes('Search')) {
+            searchInput.placeholder = `Search in "${searchColumnName}"...`;
+          }
         }
-      }
-    });
+      });
 
-    // Optionally, listen for selection requests from Grist for advanced scenarios
-    // grist.on('requestSelection', (selection) => {
-    //   // Handle selection requests (e.g., highlight, scroll to row, etc.)
-    // });
+      const handleSearch = debounce(() => {
+        if (!searchColumnName || !isReady) { 
+          return; 
+        }
+        
+        const query = searchInput.value.trim().toLowerCase();
+        suggestionsContainer.innerHTML = '';
+        
+        if (!query) {
+          suggestionsContainer.style.display = 'none';
+          statusMessageEl.textContent = '';
+          return;
+        }
+
+        const matches = allRecords.filter(r => {
+          if (!r.hasOwnProperty(searchColumnName)) return false;
+          const val = r[searchColumnName];
+          return val && typeof val === 'string' && val.toLowerCase().includes(query);
+        });
+
+        if (matches.length > 0) {
+          suggestionsContainer.style.display = 'block';
+          statusMessageEl.textContent = '';
+          
+          matches.forEach(r => {
+            const li = document.createElement('li');
+            li.textContent = r[searchColumnName];
+            li.onclick = () => {
+              searchInput.value = r[searchColumnName];
+              suggestionsContainer.style.display = 'none';
+
+              // Set cursor position for Grist linking
+              grist.setCursorPos({ rowId: r.id });
+              console.log('Cursor position set to row:', r.id);
+
+              // Broadcast selection so this widget appears as a selector for others
+              grist.setSelectedRows([{ id: r.id }]);
+            };
+            suggestionsContainer.appendChild(li);
+          });
+        } else {
+          suggestionsContainer.style.display = 'none';
+          statusMessageEl.textContent = 'No matching owners found.';
+        }
+      }, 300);
+
+      searchInput.addEventListener('input', handleSearch);
+      
+      // Close suggestions when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.search-container')) {
+          suggestionsContainer.style.display = 'none';
+        }
+      });
+
+      // Handle cursor position changes from other widgets
+      grist.onRecord((record) => {
+        if (record && record[searchColumnName] && isReady) {
+          if (searchInput.value !== record[searchColumnName]) {
+            searchInput.value = record[searchColumnName];
+          }
+        }
+      });
+    });
   </script>
 </body>
 </html>
