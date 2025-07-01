@@ -25,20 +25,23 @@
 
     <!-- Header -->
     <header class="bg-white border-b border-gray-200 p-4 shadow-sm flex justify-between items-center z-20 shrink-0">
-        <div class="flex items-center space-x-3">
+        <!-- REVISED: The entire left section is now the toggle button -->
+        <div id="togglePanelBtn" class="flex items-center space-x-3 cursor-pointer p-2 -m-2 rounded-md hover:bg-gray-100" role="button" aria-expanded="true" aria-controls="inputPanel">
             <svg class="h-8 w-8 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
             </svg>
             <h1 class="text-xl font-semibold text-gray-800">PrivateEye Search</h1>
+            <!-- The toggle icon is now here, but controlled by the same JS -->
+             <svg id="toggleIcon" class="h-6 w-6 text-gray-500 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+            </svg>
         </div>
         <div class="flex items-center space-x-2">
             <div id="gristStatus" class="text-sm text-gray-500">
                 <span id="connectionStatus">Connecting to Grist...</span>
             </div>
-            <button id="togglePanelBtn" class="p-2 rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" aria-expanded="true" aria-controls="inputPanel">
-                <svg id="toggleIcon" class="h-6 w-6 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-                </svg>
+            <!-- OLD toggle button is now hidden -->
+            <button class="p-2 rounded-md text-gray-500 hidden" aria-hidden="true">
                 <span class="sr-only">Toggle Input Panel</span>
             </button>
         </div>
@@ -141,13 +144,11 @@
                     { name: 'Owner_Address', type: 'Text' },
                     { name: 'Phone', type: 'Text' }
                 ],
-                // ADDED: This allows the widget to listen to selections from the table or other linked widgets.
                 selection: true
             });
 
             // Handle record selection from Grist
             grist.onRecord(function(record, mappings) {
-                // `mapColumnNames` is essential for robust linking
                 const mappedRecord = grist.mapColumnNames(record, mappings);
                 currentRecord = mappedRecord;
                 
@@ -156,28 +157,18 @@
                     updateConnectionStatus(`Connected - Displaying ID ${mappedRecord.id}`);
                     document.getElementById('recordInfo').classList.remove('hidden');
                 } else {
-                    // This handles the case where the selection is cleared
                     clearFields();
                     document.getElementById('recordInfo').classList.add('hidden');
                     updateConnectionStatus('Connected - No record selected');
                 }
             });
-
-            // This is useful for when the table is sorted or filtered and the cursor moves
-            grist.onRecords(function(records, mappings) {
-                // If there's a selected record, onRecord will be called.
-                // If the selection becomes empty, onRecord(null) will be called.
-                // This handler can be used for more complex scenarios, but onRecord is sufficient here.
-            });
             
             const populateFromGrist = (record) => {
                 if (record) {
-                    // Map Grist column names to form fields
                     ui.inputs.name.value = record.Name || '';
                     ui.inputs.address.value = record.Owner_Address || '';
                     ui.inputs.phone.value = record.Phone || '';
                     
-                    // Validate populated fields
                     Object.entries(ui.inputs).forEach(([key, input]) => {
                         if (input.value.trim() !== '') {
                             const isValid = format[key] ? format[key](input.value) !== null : true;
