@@ -192,7 +192,7 @@ window.addEventListener('message', async (event) => {
   if (grist) {
     // Listen for row selections from target table
     grist.onSelectedRow(async (rowId, tableId) => {
-      if (tableId === "OWNERS" && rowId) {
+      if (tableId === "Owners_" && rowId) {
         await autofillFields(rowId);
       }
     });
@@ -203,7 +203,7 @@ window.addEventListener('message', async (event) => {
           const address = document.getElementById('address').value;
           const phone = document.getElementById('phone').value;
           const matchingOwnerId = await performSearch(name, address, phone); // Your search logic
-          await grist.setSelectedRows([{ id: matchingOwnerId, tableId: "OWNERS" }]);
+          await grist.setSelectedRows([{ id: matchingOwnerId, tableId: "Owners_" }]);
       });
   }
 });
