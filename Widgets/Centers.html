@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oregon Shopping Centers Map</title>
+    
+    <!-- Grist API -->
+    <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+
+    <!-- Leaflet (Mapping Library) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Leaflet.markercluster (for clustering markers) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
+    <!-- Chart.js (for the pie chart) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
+    <style>
+        /* --- Basic Layout & Theming --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+        }
+        .app-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+        #map {
+            flex-grow: 1;
+            height: 100%;
+            background-color: #e0e0e0;
+        }
+        #sidebar {
+            width: 380px;
+            flex-shrink: 0;
+            height: 100%;
+            background-color: #ffffff;
+            box-shadow: 0 0 15px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+        }
+
+        /* --- Sidebar Header & Navigation --- */
+        .sidebar-header {
+            padding: 16px;
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            flex-shrink: 0;
+        }
+        .sidebar-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+        .navigation-controls { display: flex; justify-content: space-between; align-items: center; }
+        .nav-button {
+            background-color: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.4);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        .nav-button:hover { background-color: rgba(255,255,255,0.4); }
+        .nav-button:disabled { background-color: rgba(0,0,0,0.1); cursor: not-allowed; border-color: transparent; }
+
+        /* --- Sidebar Content --- */
+        .sidebar-content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        .placeholder {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            text-align: center;
+            color: #7f8c8d;
+        }
+        .placeholder-icon { font-size: 48px; margin-bottom: 16px; }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* --- Center & Property Details --- */
+        .details-section { margin-bottom: 20px; }
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+        .center-name { font-size: 22px; font-weight: bold; color: #34495e; margin-bottom: 4px; }
+        .center-type { font-size: 14px; color: #95a5a6; font-style: italic; margin-bottom: 12px; }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 8px;
+            font-size: 13px;
+        }
+        .info-item { background: #f8f9fa; padding: 8px; border-radius: 4px; }
+        .info-label { font-weight: 600; color: #7f8c8d; font-size: 11px; text-transform: uppercase; margin-bottom: 2px; }
+        .info-value { color: #34495e; }
+        #chart-container { position: relative; height: 220px; width: 100%; margin-top: 16px; }
+        
+        /* --- UPDATED: Property Cards Styles --- */
+        .property-card {
+            background: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            padding: 12px;
+            transition: all 0.2s ease-in-out;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+        .property-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .property-card-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 4px;
+            flex-shrink: 0;
+            background-color: #f0f2f5;
+        }
+        .property-card-content { flex-grow: 1; }
+        .property-header { cursor: pointer; }
+        .property-name { font-weight: 600; color: #2c3e50; }
+        .property-owner { font-size: 12px; color: #7f8c8d; }
+        .property-details {
+            display: none;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px dashed #e9ecef;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+        .property-card.expanded .property-details { display: block; }
+        .property-card.expanded .property-header { color: #e74c3c; }
+
+
+        /* --- Leaflet Popup Customization --- */
+        .leaflet-popup-content-wrapper { border-radius: 8px; }
+        .custom-popup .leaflet-popup-content { margin: 12px; width: auto !important; }
+        .popup-title { font-weight: bold; font-size: 16px; margin-bottom: 8px; }
+        .popup-image { width: 100%; height: 120px; object-fit: cover; border-radius: 4px; margin-bottom: 8px; background-color: #f0f2f5;}
+        .popup-info p { margin: 4px 0; }
+        .popup-links a { margin-right: 8px; text-decoration: none; }
+
+        /* --- Responsive for smaller screens --- */
+        @media (max-width: 768px) {
+            .app-container { flex-direction: column-reverse; }
+            #sidebar { width: 100%; height: 45vh; box-shadow: 0 -5px 15px rgba(0,0,0,0.1); }
+            #map { height: 55vh; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div id="sidebar">
+            <div class="sidebar-header">
+                <h1 class="sidebar-title">Oregon Shopping Centers</h1>
+                <div class="navigation-controls">
+                    <button id="prevBtn" class="nav-button" disabled>⬅️ Previous</button>
+                    <span id="navCounter" style="font-size: 14px;"></span>
+                    <button id="nextBtn" class="nav-button" disabled>Next ➡️</button>
+                </div>
+            </div>
+            <div class="sidebar-content" id="sidebarContent">
+                <div class="placeholder" id="initialState">
+                    <div class="spinner"></div>
+                    <p style="margin-top: 16px;">Loading data from Grist...</p>
+                </div>
+                <div class="placeholder" id="noSelectionState" style="display: none;">
+                    <div class="placeholder-icon">🗺️</div>
+                    <h3>Select a Center</h3>
+                    <p>Click a center on the map to see details.</p>
+                </div>
+                <div id="centerDetailsContainer" style="display: none;">
+                    <!-- Center Details will be injected here -->
+                </div>
+            </div>
+        </div>
+        <div id="map"></div>
+    </div>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        // --- Global State, Constants & DOM Elements ---
+        let map;
+        let centerMarkersLayer;
+        let propertyMarkersLayer;
+        let ownershipChart;
+        let allCenters = [];
+        let propertiesByCenterId = new Map();
+        let currentCenterIndex = -1;
+
+        const sidebarContentEl = document.getElementById('sidebarContent');
+        const initialStateEl = document.getElementById('initialState');
+        const noSelectionStateEl = document.getElementById('noSelectionState');
+        const centerDetailsContainerEl = document.getElementById('centerDetailsContainer');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const navCounterEl = document.getElementById('navCounter');
+
+        const classificationColors = {
+          "Not Interested/DNC": "#FF5252", "IPA": "#9C27B0", "Eric": "#FF9800",
+          "Broker/Eh": "#9E9E9E", "Never": "#2196F3", "Call Relationship": "#FFEB3B",
+          "Contact": "#4CAF50", "Call Again": "#92d694"
+        };
+
+        const classifyIcons = {
+          "Not Interested/DNC": new L.Icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }),
+          "IPA": new L.Icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }),
+          "Eric": new L.Icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }),
+          "Broker/Eh": new L.Icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-grey.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }),
+          "Never": new L.Icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }),
+          "Call Relationship": new L.Icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-yellow.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }),
+          "Contact": new L.Icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }),
+          "Call Again": new L.Icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] })
+        };
+        
+        // --- Helper Functions ---
+        
+        function columnarToRowFormat(columnarData) {
+            if (!columnarData || !columnarData.id || !Array.isArray(columnarData.id)) return [];
+            const numRows = columnarData.id.length;
+            const columnNames = Object.keys(columnarData);
+            const rowData = [];
+            for (let i = 0; i < numRows; i++) {
+                const fields = {};
+                for (const colName of columnNames) {
+                    if (colName !== 'id' && colName !== 'manualSort') {
+                        fields[colName] = columnarData[colName][i];
+                    }
+                }
+                rowData.push({ id: columnarData.id[i], ...fields });
+            }
+            return rowData;
+        }
+
+        function formatNumber(num) {
+            return (typeof num === 'number' && !isNaN(num)) ? num.toLocaleString() : 'N/A';
+        }
+
+        // --- UPDATED: createPropertyPopup now includes Property_Id ---
+        function createPropertyPopup(prop) {
+            const imageUrl = prop.Pop_up_IMG || (prop.ImageURLs ? prop.ImageURLs.split(' ')[0] : '');
+            
+            const links = [
+                { url: prop.GIS_URL, text: 'GIS' },
+                { url: prop.CoStar, text: 'CoStar' },
+                { url: prop.Street_View, text: 'Street View' }
+            ].filter(link => link.url).map(link => `<a href="${link.url}" target="_blank">${link.text}</a>`).join(' ');
+
+            return `
+                <div class="custom-popup">
+                    ${imageUrl ? `<img src="${imageUrl}" class="popup-image" alt="Property Image" onerror="this.style.display='none'">` : ''}
+                    <div class="popup-title">${prop.Property_Name || prop.Address_Concatenate || 'Unnamed Property'}</div>
+                    <div class="popup-info">
+                        <p><strong>ID:</strong> ${prop.Property_Id || 'N/A'}</p>
+                        <p><strong>Owner:</strong> ${prop.PrimaryOwner || 'N/A'}</p>
+                        <p><strong>Type:</strong> ${prop.Secondary_Type ? prop.Secondary_Type.slice(1).join(', ') : 'N/A'}</p>
+                        <p><strong>Last Sale:</strong> ${prop.Last_Sale_Price ? `$${formatNumber(prop.Last_Sale_Price)}` : 'N/A'}</p>
+                    </div>
+                    <div class="popup-links">${links}</div>
+                </div>
+            `;
+        }
+        
+        // --- Main Application Logic ---
+
+        function initializeMap(centers) {
+            map = L.map('map').setView([43.8041, -120.5542], 7); 
+
+            L.tileLayer('http://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}', {
+                attribution: '© Google',
+                subdomains:['mt0','mt1','mt2','mt3']
+            }).addTo(map);
+
+            centerMarkersLayer = L.markerClusterGroup();
+            
+            centers.forEach(center => {
+                if (center.Latitude && center.Longitude) {
+                    const marker = L.marker([center.Latitude, center.Longitude]);
+                    marker.bindTooltip(center.Center_Name || 'Unnamed Center');
+                    marker.on('click', () => {
+                        const index = allCenters.findIndex(c => c.Center_ID === center.Center_ID);
+                        selectCenter(index);
+                    });
+                    centerMarkersLayer.addLayer(marker);
+                }
+            });
+
+            map.addLayer(centerMarkersLayer);
+            propertyMarkersLayer = L.layerGroup().addTo(map);
+        }
+        
+        function selectCenter(index) {
+            if (index < 0 || index >= allCenters.length) return;
+
+            currentCenterIndex = index;
+            const center = allCenters[index];
+            const properties = propertiesByCenterId.get(center.Center_ID) || [];
+
+            updateSidebar(center, properties);
+            updateNavigation();
+            
+            propertyMarkersLayer.clearLayers();
+            if (properties.length > 0) {
+                const propertyBounds = [];
+                properties.forEach(prop => {
+                    if(prop.Latitude && prop.Longitude) {
+                        const classification = prop.Classify_Color;
+                        const markerIcon = classifyIcons[classification] || new L.Icon.Default(); 
+                        
+                        const propMarker = L.marker([prop.Latitude, prop.Longitude], { icon: markerIcon })
+                            .bindPopup(createPropertyPopup(prop));
+                        propertyMarkersLayer.addLayer(propMarker);
+                        propertyBounds.push([prop.Latitude, prop.Longitude]);
+                    }
+                });
+                
+                if (propertyBounds.length > 1) {
+                    map.flyToBounds(propertyBounds, { padding: [50, 50] });
+                } else if (propertyBounds.length === 1) {
+                    map.flyTo(propertyBounds[0], 16);
+                }
+
+            } else if (center.Latitude && center.Longitude) {
+                map.flyTo([center.Latitude, center.Longitude], 15);
+            }
+        }
+
+        function updateSidebar(center, properties) {
+            initialStateEl.style.display = 'none';
+            noSelectionStateEl.style.display = 'none';
+
+            const centerDetailsHtml = `
+                <div class="details-section">
+                    <h2 class="center-name">${center.Center_Name || 'Unnamed Center'}</h2>
+                    <p class="center-type">${center.Center_Type || 'N/A'}</p>
+                    <div class="info-grid">
+                        <div class="info-item"><div class="info-label">Tenants</div><div class="info-value">${center.Anchor_Tenants || 'N/A'}</div></div>
+                        <div class="info-item"><div class="info-label">GLA/RBA</div><div class="info-value">${formatNumber(center.RBA_GLA)} sqft</div></div>
+                        <div class="info-item"><div class="info-label">County</div><div class="info-value">${center.County || 'N/A'}</div></div>
+                        <div class="info-item"><div class="info-label">Built</div><div class="info-value">${center.Year_Built || 'N/A'}</div></div>
+                    </div>
+                </div>
+                <div class="details-section">
+                    <h3 class="section-title">Ownership Analytics</h3>
+                    <p style="font-size: 13px; color: #555;">Based on ${properties.length} properties in this center.</p>
+                    <div id="chart-container">
+                        <canvas id="ownershipChart"></canvas>
+                    </div>
+                </div>
+                <div class="details-section">
+                    <h3 class="section-title">Properties (${properties.length})</h3>
+                    <div id="propertiesList">
+                        ${properties.length > 0 ? properties.map(createPropertyCard).join('') : '<p>No properties found for this center.</p>'}
+                    </div>
+                </div>
+            `;
+            centerDetailsContainerEl.innerHTML = centerDetailsHtml;
+            centerDetailsContainerEl.style.display = 'block';
+
+            createOwnershipChart(properties);
+        }
+
+        // --- UPDATED: createPropertyCard now has an image and includes Property_Id ---
+        function createPropertyCard(prop) {
+            const secondaryType = Array.isArray(prop.Secondary_Type) && prop.Secondary_Type.length > 1 ? prop.Secondary_Type.slice(1).join(', ') : (prop.Secondary_Type || 'N/A');
+            const imageUrl = prop.Pop_up_IMG || '';
+
+            return `
+                <div class="property-card">
+                    <img class="property-card-image" src="${imageUrl}" onerror="this.style.visibility='hidden'">
+                    <div class="property-card-content">
+                        <div class="property-header" onclick="this.closest('.property-card').classList.toggle('expanded')">
+                            <div class="property-name">${prop.Property_Name || prop.Address_Concatenate}</div>
+                            <div class="property-owner">${prop.PrimaryOwner || 'Unknown Owner'}</div>
+                        </div>
+                        <div class="property-details">
+                            <p><strong>Property ID:</strong> ${prop.Property_Id || 'N/A'}</p>
+                            <p><strong>Address:</strong> ${prop.Property_Address || 'N/A'}</p>
+                            <p><strong>Type:</strong> ${secondaryType}</p>
+                            <p><strong>Parcel:</strong> ${prop.Parcel || 'N/A'}</p>
+                            <p><strong>Built:</strong> ${prop.YearB || 'N/A'}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function createOwnershipChart(properties) {
+            if (ownershipChart) {
+                ownershipChart.destroy();
+            }
+            const ctx = document.getElementById('ownershipChart').getContext('2d');
+            
+            const stats = {};
+            properties.forEach(p => {
+                const classification = p.Classify_Color || 'Unclassified';
+                stats[classification] = (stats[classification] || 0) + 1;
+            });
+
+            const labels = Object.keys(stats);
+            const data = Object.values(stats);
+            const backgroundColors = labels.map(label => classificationColors[label] || '#9E9E9E');
+            
+            ownershipChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Property Ownership',
+                        data: data,
+                        backgroundColor: backgroundColors,
+                        borderColor: '#ffffff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { size: 11 } } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    let value = context.raw;
+                                    let total = context.chart.getDatasetMeta(0).total;
+                                    let percentage = (value / total * 100).toFixed(1) + '%';
+                                    return `${label}: ${value} (${percentage})`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateNavigation() {
+            if (allCenters.length > 0) {
+              prevBtn.disabled = (currentCenterIndex <= 0);
+              nextBtn.disabled = (currentCenterIndex >= allCenters.length - 1);
+              navCounterEl.textContent = currentCenterIndex >= 0 ? `${currentCenterIndex + 1} / ${allCenters.length}` : `0 / ${allCenters.length}`;
+            } else {
+              prevBtn.disabled = true;
+              nextBtn.disabled = true;
+              navCounterEl.textContent = '0 / 0';
+            }
+        }
+        
+        // --- Grist Integration ---
+        grist.ready({ requiredAccess: 'full' });
+
+        async function main() {
+            try {
+                const [centersData, propertiesData] = await Promise.all([
+                    grist.docApi.fetchTable('Centers'),
+                    grist.docApi.fetchTable('Properties_')
+                ]);
+                
+                allCenters = columnarToRowFormat(centersData).filter(c => c.Center_ID && c.Latitude && c.Longitude);
+                const allProperties = columnarToRowFormat(propertiesData);
+
+                allCenters.sort((a, b) => a.Longitude - b.Longitude);
+                
+                allProperties.forEach(prop => {
+                    const centerRefId = prop.Center_ID;
+                    const parentCenter = allCenters.find(c => c.id === centerRefId);
+                    
+                    if (parentCenter) {
+                        const centerKey = parentCenter.Center_ID;
+                        if (!propertiesByCenterId.has(centerKey)) {
+                            propertiesByCenterId.set(centerKey, []);
+                        }
+                        propertiesByCenterId.get(centerKey).push(prop);
+                    }
+                });
+
+                initialStateEl.style.display = 'none';
+                noSelectionStateEl.style.display = 'block';
+                
+                initializeMap(allCenters);
+                updateNavigation();
+
+            } catch (e) {
+                console.error("Failed to load Grist data:", e);
+                initialStateEl.innerHTML = `<div class="placeholder-icon">⚠️</div><h3>Error Loading Data</h3><p>${e.message}</p>`;
+            }
+        }
+        
+        main();
+
+        // --- Event Listeners ---
+        prevBtn.addEventListener('click', () => {
+            if (currentCenterIndex > 0) {
+                selectCenter(currentCenterIndex - 1);
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentCenterIndex < allCenters.length - 1) {
+                selectCenter(currentCenterIndex + 1);
+            }
+        });
+    });
+    </script>
+</body>
+</html>
