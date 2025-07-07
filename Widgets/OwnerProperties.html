@@ -11,10 +11,10 @@
         body {font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,sans-serif;background:linear-gradient(135deg,#f0f9ff 0%,#fff 100%);min-height:100vh;padding:8px;overflow-x:hidden;}
         .widget-container {width:100%;background:#fff;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.1);overflow:hidden;min-height:calc(100vh - 16px);}
         .widget-header {background:linear-gradient(135deg,#2c3e50 0%,#3498db 100%);color:#fff;padding:16px;position:relative;overflow:hidden;display:flex;align-items:center;gap:16px;}
-        .widget-header::before {content:'';position:absolute;top:-50%;right:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(255,255,255,0.1) 0%,transparent 50%);animation:shimmer 4s ease-in-out infinite;}
+        .widget-header::before {content:'';position:absolute;top:-50%;right:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(255,255,255,0.1) 0%,transparent 50%);animation:shimmer 4s linear infinite;}
         @keyframes shimmer {0%,100%{transform:rotate(0deg);}50%{transform:rotate(180deg);}}
         .profile-image-container {position:relative;z-index:2;flex-shrink:0;}
-        .profile-image {width:80px;height:80px;border-radius:50%;border:4px solid rgba(255,255,255,0.3);object-fit:cover;transition:all 0.3s ease;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;color:#fff;font-size:32px;font-weight:bold;}
+        .profile-image {width:80px;height:80px;border-radius:50%;border:4px solid rgba(255,255,255,0.3);object-fit:cover;transition:all 0.3s ease;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:32px;}
         .profile-image:hover {transform:scale(1.05);border-color:rgba(255,255,255,0.6);}
         .header-info {flex:1;position:relative;z-index:2; min-width: 0;} /* Added min-width for flex shrink */
         .owner-title {font-size:24px;font-weight:700;margin-bottom:6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
@@ -28,15 +28,15 @@
         .card-title {font-size:11px;font-weight:600;color:#7f8c8d;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
         .card-value {font-size:14px;font-weight:600;color:#2c3e50;line-height:1.3;}
         .status-badges {display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
-        .badge {display: inline-block;padding:0.25em 0.9em;border-radius:999px;font-size:13px;font-weight:600;letter-spacing:.5px;margin-right:6px;margin-bottom:4px;background:#eee;color:#333;box-shadow:0 1px 2px rgba(0,0,0,0.02);border:none;vertical-align:middle;transition:background 0.2s,color 0.2s;user-select:none;}
-        .badge-red {background:#fce4e4;color:#d32f2f;} .badge-orange {background:#fff3e0;color:#f57c00;} .badge-yellow {background:#fffde7;color:#fbc02d;} .badge-green {background:#e8f5e9;color:#388e3c;} .badge-blue {background:#e3f2fd;color:#1976d2;} .badge-purple {background:#f3e5f5;color:#8e24aa;} .badge-cyan {background:#e0f7fa;color:#0097a7;} .badge-grey {background:#ececec;color:#616161;} .badge-dark {background:#263238;color:#fff;} .badge-black {background:#111;color:#fff;} .badge-pink {background:#ffebee;color:#c2185b;}
+        .badge {display: inline-block;padding:0.25em 0.9em;border-radius:999px;font-size:13px;font-weight:600;letter-spacing:.5px;margin-right:6px;margin-bottom:4px;background:#eee;color:#333;box-shadow:0 2px 5px rgba(0,0,0,0.04);}
+        .badge-red {background:#fce4e4;color:#d32f2f;} .badge-orange {background:#fff3e0;color:#f57c00;} .badge-yellow {background:#fffde7;color:#fbc02d;} .badge-green {background:#e8f5e9;color:#388e3c;}
         .badge:hover {transform:scale(1.05);}
         .contact-section {background:linear-gradient(135deg,#ecf0f1,#bdc3c7);border-radius:8px;padding:16px;margin-bottom:16px;}
         .section-title {font-size:16px;font-weight:700;color:#2c3e50;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
         .contact-grid {display:grid;grid-template-columns:1fr;gap:8px;}
         .contact-item {display:flex;align-items:center;gap:10px;padding:8px;background:#fff;border-radius:6px;transition:all 0.3s ease;font-size:13px;}
         .contact-item:hover {background:#f1f2f6;transform:translateX(2px);}
-        .contact-icon {width:20px;height:20px;background:linear-gradient(135deg,#3498db,#2980b9);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:bold;flex-shrink:0;}
+        .contact-icon {width:20px;height:20px;background:linear-gradient(135deg,#3498db,#2980b9);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:bold;}
         .contact-info {flex:1;min-width:0;}
         .contact-label {font-size:10px;color:#7f8c8d;font-weight:600;}
         .contact-value {font-size:12px;color:#2c3e50;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -55,7 +55,7 @@
         .property-label {font-size:9px;opacity:.8;text-transform:uppercase;letter-spacing:.3px;color:#fff;}
         .loading {text-align:center;padding:40px;color:#7f8c8d;}
         .spinner {border:3px solid #f3f3f3;border-top:3px solid #3498db;border-radius:50%;width:30px;height:30px;animation:spin 1s linear infinite;margin:0 auto 16px;}
-        .spinner-small {border:2px solid #f3f3f3;border-top:2px solid #3498db;border-radius:50%;width:16px;height:16px;animation:spin 1s linear infinite;display:inline-block; margin-right: 8px; vertical-align: middle;}
+        .spinner-small {border:2px solid #f3f3f3;border-top:2px solid #3498db;border-radius:50%;width:16px;height:16px;animation:spin 1s linear infinite;display:inline-block; margin-right: 8px; vertical-align:middle;}
         @keyframes spin {0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
 
         /* --- Styles for Owned Properties Section --- */
@@ -207,6 +207,45 @@
             return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
         }
 
+        // --- Begin: Avatar Placeholder Function ---
+        function getProfilePlaceholderImage(genderRaw, ageRaw) {
+            // Clean up gender and age, allow for missing or ambiguous data
+            let gender = "";
+            if (typeof genderRaw === "string") {
+                gender = genderRaw.trim().toLowerCase();
+            }
+            let age = 0;
+            if (typeof ageRaw === "number") age = ageRaw;
+            if (typeof ageRaw === "string") {
+                // Try to parse as number
+                let parsed = parseInt(ageRaw.replace(/[^\d]/g, ""), 10);
+                if (!isNaN(parsed)) age = parsed;
+            }
+
+            // Default images
+            const images = {
+                man: "https://cleanslatekickz.github.io/geojson/Images/ManInvestor.png",
+                olderMan: "https://cleanslatekickz.github.io/geojson/Images/olderMan.png",
+                lady: "https://cleanslatekickz.github.io/geojson/Images/LadyInvestor.png",
+                olderLady: "https://cleanslatekickz.github.io/geojson/Images/olderLady.png"
+            };
+
+            if (gender.startsWith("f")) {
+                // Female
+                if (age > 0 && age >= 60) return images.olderLady;
+                return images.lady;
+            } else if (gender.startsWith("m")) {
+                // Male
+                if (age > 0 && age >= 60) return images.olderMan;
+                return images.man;
+            } else {
+                // If gender is unknown, default by age
+                if (age > 0 && age >= 60) return images.olderMan;
+                return images.man;
+            }
+        }
+        // --- End: Avatar Placeholder Function ---
+
         const BADGE_STYLE_MAP = {
             "NOT INTERESTED/DNC": "red", "DNC": "red", "ANGRY": "red", "RUDE": "red", "DEVELOPER": "red",
             "OPERATOR | OWNER U": "red", "COMPANY": "red", "✋ RUDE ✋": "red", "❗ DNC ❗": "red", "👿 ANGRY 👿": "red",
@@ -243,10 +282,17 @@
         function updateProfileImage(record) {
             const imageUrl = record.Profile_Image;
             const initials = getInitials(record.Name || record.Owner_Full_Name);
+
+            // logic for placeholder image selection
+            const gender = record.Gender;
+            const age = record.Age;
+
             if (imageUrl && typeof imageUrl === 'string' && imageUrl.trim()) {
-                profileImageEl.innerHTML = `<img src="${imageUrl}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.textContent='${initials}';">`;
+                profileImageEl.innerHTML = `<img src="${imageUrl}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentNode.textContent='${initials}';">`;
             } else {
-                profileImageEl.textContent = initials;
+                // Use the new avatar logic
+                const placeholderUrl = getProfilePlaceholderImage(gender, age);
+                profileImageEl.innerHTML = `<img src="${placeholderUrl}" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
             }
         }
 
@@ -310,7 +356,7 @@
                                 <td>${address}</td>
                                 <td>${typeInfo || 'N/A'}</td>
                                 <td>
-                                    ${imageUrl ? `<img src="${imageUrl}" alt="Property Image" class="property-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';"><span class="no-image-text" style="display:none;">No Image</span>` : '<span class="no-image-text">No Image</span>'}
+                                    ${imageUrl ? `<img src="${imageUrl}" alt="Property Image" class="property-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">` : '<span class="no-image-text">No image</span>'}
                                 </td>
                             </tr>
                         `;
@@ -419,7 +465,7 @@
             if (Array.isArray(record.Tranche) && record.Tranche[0] === 'L') trancheVal = record.Tranche.slice(1).filter(x => !isEmpty(x)).join(', ');
             else if (!isEmpty(record.Tranche)) trancheVal = record.Tranche;
             if (!isEmpty(trancheVal)) infoCardsHtml += `<div class="info-card"><div class="card-title">Market Tranche</div><div class="card-value">${trancheVal}</div></div>`;
-            if (record.Constant_Call_VM_s !== undefined && record.Constant_Call_VM_s !== null) infoCardsHtml += `<div class="info-card"><div class="card-title">VM Preference</div><div class="card-value">${record.Constant_Call_VM_s ? '📠 Accepts VMs' : '✖️ No VMs'}</div></div>`;
+            if (record.Constant_Call_VM_s !== undefined && record.Constant_Call_VM_s !== null) infoCardsHtml += `<div class="info-card"><div class="card-title">VM Preference</div><div class="card-value">${record.Constant_Call_VM_s}</div></div>`;
             infoGridEl.innerHTML = infoCardsHtml;
 
             let contactItemsHtml = '';
@@ -427,17 +473,17 @@
             if (!isEmpty(record.Phone)) contactItemsHtml += `<div class="contact-item"><div class="contact-icon">📱</div><div class="contact-info"><div class="contact-label">Phone</div><div class="contact-value">${record.Phone}</div></div></div>`;
             let firstOwnerAddress = getFirstDelimitedItem(record.Owner_Address);
             if (!isEmpty(firstOwnerAddress)) contactItemsHtml += `<div class="contact-item"><div class="contact-icon">🏠</div><div class="contact-info"><div class="contact-label">Address</div><div class="contact-value">${firstOwnerAddress}</div></div></div>`;
-            if (!isEmpty(record.LinkedIn)) contactItemsHtml += `<div class="contact-item"><div class="contact-icon">🔗</div><div class="contact-info"><div class="contact-label">LinkedIn</div><div class="contact-value">View Profile</div></div></div>`;
+            if (!isEmpty(record.LinkedIn)) contactItemsHtml += `<div class="contact-item"><div class="contact-icon">🔗</div><div class="contact-info"><div class="contact-label">LinkedIn</div><div class="contact-value">${record.LinkedIn}</div></div></div>`;
             let firstOtherOwner = getFirstDelimitedItem(record.Other_Owners);
             if (!isEmpty(firstOtherOwner)) contactItemsHtml += `<div class="contact-item"><div class="contact-icon">👥</div><div class="contact-info"><div class="contact-label">Co-Owner</div><div class="contact-value">${firstOtherOwner}</div></div></div>`;
             contactGridEl.innerHTML = contactItemsHtml;
             contactSectionEl.style.display = contactItemsHtml ? "block" : "none";
 
             let timelineItemsHtml = '';
-            if (!isEmpty(record.Date) && !isEmpty(record.Last_Call_Segment)) timelineItemsHtml += `<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-content"><div class="timeline-date">${formatDate(record.Date)}</div><div class="timeline-text">Last contact - ${record.Last_Call_Segment}</div></div></div>`;
-            if (!isEmpty(record.Past_Contact_)) timelineItemsHtml += `<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-content"><div class="timeline-date">Previous</div><div class="timeline-text">Past contact established</div></div></div>`;
+            if (!isEmpty(record.Date) && !isEmpty(record.Last_Call_Segment)) timelineItemsHtml += `<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-content"><div class="timeline-date">${formatDate(record.Date)}</div><div class="timeline-text">${record.Last_Call_Segment}</div></div></div>`;
+            if (!isEmpty(record.Past_Contact_)) timelineItemsHtml += `<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-content"><div class="timeline-date">Previous</div><div class="timeline-text">${record.Past_Contact_}</div></div></div>`;
             if (!isEmpty(record.Contact_1)) timelineItemsHtml += `<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-content"><div class="timeline-date">Contact 1</div><div class="timeline-text">${record.Contact_1}</div></div></div>`;
-            activityTimelineEl.innerHTML = timelineItemsHtml || `<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-content"><div class="timeline-text">No activity recorded</div></div></div>`;
+            activityTimelineEl.innerHTML = timelineItemsHtml || `<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-content"><div class="timeline-text">No activity recorded.</div></div></div>`;
 
             let propertyStatsHtml = '';
             if (!isEmpty(record.Prop_Rate)) propertyStatsHtml += `<div class="property-stat"><div class="property-number">${record.Prop_Rate}</div><div class="property-label">Prop Rate</div></div>`;
