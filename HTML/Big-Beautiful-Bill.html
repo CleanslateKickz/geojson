@@ -3,59 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>One Big Beautiful Bill - CRE Insights</title>
+    <title>One Big Beautiful Bill Act: Impact on Commercial Real Estate</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .accordion-button {
             cursor: pointer;
             padding: 1rem;
-            background-color: #f3f4f6;
+            background-color: #1f2937;
+            color: #ffffff;
             border: none;
             width: 100%;
             text-align: left;
-            font-size: 1.125rem;
+            font-size: 1.25rem;
             font-weight: 600;
             transition: background-color 0.2s;
         }
         .accordion-button:hover {
-            background-color: #e5e7eb;
+            background-color: #374151;
         }
         .accordion-content {
             display: none;
-            padding: 1rem;
-            background-color: #ffffff;
-            border: 1px solid #e5e7eb;
+            padding: 1.5rem;
+            background-color: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
         }
         .accordion-content.active {
             display: block;
         }
         .table-container {
+            width: 100%;
             overflow-x: auto;
         }
         table {
             width: 100%;
             border-collapse: collapse;
+            background-color: #ffffff;
         }
         th, td {
-            padding: 0.75rem;
+            padding: 1rem;
             border: 1px solid #e5e7eb;
             text-align: left;
+            font-size: 0.95rem;
         }
         th {
-            background-color: #f9fafb;
+            background-color: #1f2937;
+            color: #ffffff;
             font-weight: 600;
         }
         td {
-            background-color: #ffffff;
+            color: #4b5563;
+        }
+        .header {
+            background-color: #111827;
+            color: #ffffff;
+            padding: 2rem;
+            text-align: center;
+        }
+        .subheader {
+            color: #9ca3af;
+            font-size: 1rem;
+            margin-bottom: 2rem;
         }
     </style>
 </head>
-<body class="bg-gray-100 font-sans">
-    <div class="container mx-auto p-6 max-w-4xl">
-        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">One Big Beautiful Bill Act: Impact on Commercial Real Estate</h1>
-        <p class="text-gray-600 mb-8 text-center">Signed into law on July 4, 2025, by President Trump, the One Big Beautiful Bill Act introduces key tax provisions affecting commercial real estate (CRE) owners, particularly those in retail. Below are the key provisions, pros and cons for CRE owners, and broader impacts on the government, economy, and taxes.</p>
+<body class="bg-gray-100 font-sans text-gray-800">
+    <div class="header">
+        <h1 class="text-4xl font-bold">One Big Beautiful Bill Act: Impact on Commercial Real Estate</h1>
+        <p class="subheader">Signed into law on July 4, 2025, by President Trump, this act introduces key tax provisions affecting commercial real estate (CRE) owners, particularly in retail. Explore the provisions, pros, cons, and broader impacts below.</p>
+    </div>
 
-        <!-- Key Tax Provisions Table -->
+    <!-- Key Tax Provisions Table -->
+    <div class="container mx-auto px-4 py-6">
         <div class="mb-6">
             <button class="accordion-button" onclick="toggleAccordion('tax-provisions')">Key Tax Provisions Affecting Commercial Real Estate</button>
             <div id="tax-provisions" class="accordion-content">
@@ -197,8 +215,8 @@
         </div>
 
         <!-- Contact Section -->
-        <div class="text-center mt-8">
-            <p class="text-gray-600">For personalized advice on how the One Big Beautiful Bill Act impacts your retail properties, contact your commercial real estate broker or tax professional.</p>
+        <div class="text-center py-6 bg-gray-200">
+            <p class="text-gray-700">For personalized advice on how the One Big Beautiful Bill Act impacts your retail properties, contact your commercial real estate broker or tax professional.</p>
         </div>
     </div>
 
