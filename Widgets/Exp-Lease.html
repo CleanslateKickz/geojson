@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tenant Lease Widget</title>
+    <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; background: linear-gradient(135deg, #f0f9ff 0%, #fff 100%); min-height: 100vh; padding: 8px; overflow-x: hidden; }
+        .widget-container { width: 100%; background: #fff; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); overflow: hidden; min-height: calc(100vh - 16px); }
+        .widget-header { background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); color: #fff; padding: 16px; position: relative; overflow: hidden; display: flex; align-items: center; gap: 16px; }
+        .widget-header::before { content: ''; position: absolute; top: -50%; right: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 50%); animation: shimmer 4s ease-in-out infinite; }
+        @keyframes shimmer { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(180deg); } }
+        .profile-image-container { position: relative; z-index: 2; flex-shrink: 0; }
+        .profile-image { width: 80px; height: 80px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.3); object-fit: cover; transition: all 0.3s ease; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 32px; font-weight: bold; }
+        .profile-image:hover { transform: scale(1.05); border-color: rgba(255,255,255,0.6); }
+        .header-info { flex: 1; position: relative; z-index: 2; min-width: 0; }
+        .tenant-title { font-size: 24px; font-weight: 700; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .tenant-subtitle { font-size: 14px; opacity: .9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .header-actions { display: flex; align-items: center; gap: 12px; }
+        .widget-content { padding: 16px; max-height: calc(100vh - (80px + 32px + 16px)); overflow-y: auto; }
+        .tenant-details-section { background: linear-gradient(135deg, #fff, #f8f9fa); border-radius: 8px; padding: 16px; border: 1px solid #e9ecef; }
+        .section-title { font-size: 16px; font-weight: 700; color: #2c3e50; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+        .section-title::after { content: '▼'; margin-left: auto; transition: transform 0.3s ease; }
+        .section-title.collapsed::after { content: '▶'; }
+        .section-content { display: block; }
+        .section-content.collapsed { display: none; }
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px; }
+        .info-card { background: #f8f9fa; border-radius: 8px; padding: 12px; border-left: 3px solid #3498db; transition: all 0.3s ease; position: relative; overflow: hidden; }
+        .info-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.1); border-left-color: #e74c3c; }
+        .card-title { font-size: 11px; font-weight: 600; color: #7f8c8d; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+        .card-value { font-size: 14px; font-weight: 600; color: #2c3e50; line-height: 1.3; }
+        .action-button { padding: 10px 16px; border-radius: 6px; font-weight: 600; color: #fff; text-decoration: none; transition: all 0.3s ease; }
+        .costar-button { background: linear-gradient(135deg, #3498db, #2980b9); }
+        .costar-button:hover { background: linear-gradient(135deg, #2980b9, #1f618d); transform: translateY(-2px); }
+        .tenant-url-button { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+        .tenant-url-button:hover { background: linear-gradient(135deg, #27ae60, #219653); transform: translateY(-2px); }
+        .website-button { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
+        .website-button:hover { background: linear-gradient(135deg, #8e44ad, #7d3c98); transform: translateY(-2px); }
+        .property-image { width: 80px; height: 80px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.3); object-fit: cover; margin-right: 16px; }
+        .no-data { text-align: center; padding: 40px 20px; color: #7f8c8d; }
+        .no-data-icon { font-size: 48px; margin-bottom: 16px; }
+        .loading { text-align: center; padding: 40px; color: #7f8c8d; }
+        .spinner { border: 3px solid #f3f3f3; border-top: 3px solid #3498db; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto 16px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <div class="widget-header">
+            <img id="propertyImage" src="" alt="Property Image" class="property-image" style="display: none;">
+            <div class="header-info">
+                <div class="tenant-title" id="tenantName">Select a Tenant</div>
+                <div class="tenant-subtitle" id="tenantSubtitle">Choose a tenant to view details</div>
+            </div>
+            <div class="header-actions">
+                <a id="costarLink" href="#" target="_blank" class="action-button costar-button">View CoStar Property</a>
+                <a id="tenantUrlLink" href="#" target="_blank" class="action-button tenant-url-button">View Tenant Lease</a>
+                <a id="websiteLink" href="#" target="_blank" class="action-button website-button">Visit Website</a>
+            </div>
+        </div>
+        <div class="widget-content">
+            <div id="loadingState" class="loading" style="display: none;">
+                <div class="spinner"></div>
+                <div>Loading tenant information...</div>
+            </div>
+            <div id="noDataState" class="no-data">
+                <div class="no-data-icon">📋</div>
+                <div><strong>No Tenant Selected</strong></div>
+                <div>Click on a row in your Sidebar_WA_AZ_OR table to view detailed information here.</div>
+            </div>
+            <div id="tenantContent" style="display: none;">
+                <div class="tenant-details-section" id="tenantDetails">
+                    <div class="section-title" data-section="property">🏠 Property Info</div>
+                    <div class="section-content" id="property-content">
+                        <div class="info-grid">
+                            <div class="info-card"><div class="card-title">Address</div><div class="card-value" id="address"></div></div>
+                            <div class="info-card"><div class="card-title">Property Type</div><div class="card-value" id="property-type"></div></div>
+                            <div class="info-card"><div class="card-title">Secondary Type</div><div class="card-value" id="secondary-type"></div></div>
+                            <div class="info-card"><div class="card-title">Center Type</div><div class="card-value" id="center-type"></div></div>
+                            <div class="info-card"><div class="card-title">Market</div><div class="card-value" id="market"></div></div>
+                            <div class="info-card"><div class="card-title">Submarket</div><div class="card-value" id="submarket"></div></div>
+                            <div class="info-card"><div class="card-title">Building Name</div><div class="card-value" id="building-name"></div></div>
+                            <div class="info-card"><div class="card-title">Center Name</div><div class="card-value" id="center-name"></div></div>
+                        </div>
+                    </div>
+                    <div class="section-title" data-section="financial">💰 Financials</div>
+                    <div class="section-content" id="financial-content">
+                        <div class="info-grid">
+                            <div class="info-card"><div class="card-title">Rent SF Year</div><div class="card-value" id="rent-sf-year"></div></div>
+                            <div class="info-card"><div class="card-title">SF Occupied</div><div class="card-value" id="sf-occupied"></div></div>
+                            <div class="info-card"><div class="card-title">Moved In</div><div class="card-value" id="moved-in"></div></div>
+                            <div class="info-card"><div class="card-title">Commencement</div><div class="card-value" id="commencement"></div></div>
+                            <div class="info-card"><div class="card-title">% of Building</div><div class="card-value" id="of-building"></div></div>
+                        </div>
+                    </div>
+                    <div class="section-title" data-section="contacts">👥 Contacts <span>(Click to toggle)</span></div>
+                    <div class="section-content collapsed" id="contacts-content">
+                        <div class="info-grid">
+                            <div class="info-card"><div class="card-title">Landlord</div><div class="card-value" id="landlord"></div></div>
+                            <div class="info-card"><div class="card-title">Landlord Representative</div><div class="card-value" id="landlord-rep"></div></div>
+                            <div class="info-card"><div class="card-title">Tenant Representative</div><div class="card-value" id="tenant-rep"></div></div>
+                            <div class="info-card"><div class="card-title">Best Tenant Contact</div><div class="card-value" id="best-tenant-contact"></div></div>
+                            <div class="info-card"><div class="card-title">Best Tenant Phone</div><div class="card-value" id="best-tenant-phone"></div></div>
+                            <div class="info-card"><div class="card-title">Location Phone</div><div class="card-value" id="location-phone"></div></div>
+                        </div>
+                    </div>
+                    <div class="section-title" data-section="classifications">📊 Classifications <span>(Click to toggle)</span></div>
+                    <div class="section-content collapsed" id="classifications-content">
+                        <div class="info-grid">
+                            <div class="info-card"><div class="card-title">NAICS</div><div class="card-value" id="naics"></div></div>
+                            <div class="info-card"><div class="card-title">SIC</div><div class="card-value" id="sic"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let columnNames = [];
+            let currentRecord = null;
+
+            // DOM Elements
+            const profileImageEl = document.getElementById('propertyImage');
+            const tenantNameEl = document.getElementById('tenantName');
+            const tenantSubtitleEl = document.getElementById('tenantSubtitle');
+            const loadingStateEl = document.getElementById('loadingState');
+            const noDataStateEl = document.getElementById('noDataState');
+            const tenantContentEl = document.getElementById('tenantContent');
+            const costarLinkEl = document.getElementById('costarLink');
+            const tenantUrlLinkEl = document.getElementById('tenantUrlLink');
+            const websiteLinkEl = document.getElementById('websiteLink');
+            const addressEl = document.getElementById('address');
+            const propertyTypeEl = document.getElementById('property-type');
+            const secondaryTypeEl = document.getElementById('secondary-type');
+            const centerTypeEl = document.getElementById('center-type');
+            const marketEl = document.getElementById('market');
+            const submarketEl = document.getElementById('submarket');
+            const buildingNameEl = document.getElementById('building-name');
+            const centerNameEl = document.getElementById('center-name');
+            const rentSfYearEl = document.getElementById('rent-sf-year');
+            const sfOccupiedEl = document.getElementById('sf-occupied');
+            const movedInEl = document.getElementById('moved-in');
+            const commencementEl = document.getElementById('commencement');
+            const ofBuildingEl = document.getElementById('of-building');
+            const landlordEl = document.getElementById('landlord');
+            const landlordRepEl = document.getElementById('landlord-rep');
+            const tenantRepEl = document.getElementById('tenant-rep');
+            const bestTenantContactEl = document.getElementById('best-tenant-contact');
+            const bestTenantPhoneEl = document.getElementById('best-tenant-phone');
+            const locationPhoneEl = document.getElementById('location-phone');
+            const naicsEl = document.getElementById('naics');
+            const sicEl = document.getElementById('sic');
+
+            function formatDate(dateStr) {
+                if (!dateStr) return 'N/A';
+                try {
+                    const date = new Date(dateStr);
+                    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+                } catch (e) {
+                    return dateStr;
+                }
+            }
+
+            function getInitials(name) {
+                if (!name) return '🏬';
+                return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+            }
+
+            function isEmpty(val) {
+                return val === null || val === undefined || (typeof val === 'string' && val.trim() === '') || val === 'N/A';
+            }
+
+            function formatValue(value, columnName) {
+                if (isEmpty(value)) return 'N/A';
+                if (columnName === 'Commencement' || columnName === 'Moved_In' || columnName === 'Signed') {
+                    return formatDate(value);
+                }
+                if (Array.isArray(value)) {
+                    return value.join(', ');
+                }
+                return value.toString();
+            }
+
+            async function fetchColumnNames() {
+                try {
+                    const columnarData = await grist.docApi.fetchTable('Sidebar_WA_AZ_OR', { limit: 1 });
+                    columnNames = Object.keys(columnarData).filter(col => col !== 'id' && col !== 'manualSort' && col !== 'Location_Type' && col !== 'Star_Rating');
+                } catch (error) {
+                    console.error('Error fetching column names:', error);
+                    loadingStateEl.innerHTML = '<div style="color: red;">Error loading data. Check console.</div>';
+                    loadingStateEl.style.display = 'block';
+                    noDataStateEl.style.display = 'none';
+                    tenantContentEl.style.display = 'none';
+                }
+            }
+
+            function updateTenantDisplay(record, mappings) {
+                currentRecord = record ? grist.mapColumnNames(record, mappings) : null;
+
+                if (!currentRecord) {
+                    noDataStateEl.style.display = 'block';
+                    tenantContentEl.style.display = 'none';
+                    tenantNameEl.textContent = 'Select a Tenant';
+                    tenantSubtitleEl.textContent = 'Choose a tenant to view details';
+                    profileImageEl.style.display = 'none';
+                    return;
+                }
+
+                loadingStateEl.style.display = 'none';
+                noDataStateEl.style.display = 'none';
+                tenantContentEl.style.display = 'block';
+
+                const tenantName = currentRecord.Tenant_Name || 'Unknown Tenant';
+                tenantNameEl.textContent = tenantName;
+                tenantSubtitleEl.textContent = currentRecord.Addy_Concat || 'No Address';
+
+                costarLinkEl.href = currentRecord.CoStar || '#';
+                tenantUrlLinkEl.href = currentRecord.TenantURL || '#';
+                tenantUrlLinkEl.style.display = isEmpty(currentRecord.TenantURL) ? 'none' : 'inline-block';
+                websiteLinkEl.href = currentRecord.Website || '#';
+                websiteLinkEl.style.display = isEmpty(currentRecord.Website) ? 'none' : 'inline-block';
+
+                if (!isEmpty(currentRecord.image)) {
+                    profileImageEl.src = currentRecord.image;
+                    profileImageEl.style.display = 'block';
+                    profileImageEl.onerror = () => {
+                        profileImageEl.style.display = 'none';
+                    };
+                } else {
+                    profileImageEl.style.display = 'none';
+                }
+
+                addressEl.textContent = formatValue(currentRecord.Addy_Concat, 'Addy_Concat');
+                propertyTypeEl.textContent = formatValue(currentRecord.Property_Type, 'Property_Type');
+                secondaryTypeEl.textContent = formatValue(currentRecord.Secondary_Type, 'Secondary_Type');
+                centerTypeEl.textContent = formatValue(currentRecord.Center_Type, 'Center_Type');
+                marketEl.textContent = formatValue(currentRecord.Market, 'Market');
+                submarketEl.textContent = formatValue(currentRecord.Submarket, 'Submarket');
+                buildingNameEl.textContent = formatValue(currentRecord.Building_Name, 'Building_Name');
+                centerNameEl.textContent = formatValue(currentRecord.Center_Name, 'Center_Name');
+                rentSfYearEl.textContent = formatValue(currentRecord.Rent_SF_year, 'Rent_SF_year');
+                sfOccupiedEl.textContent = formatValue(currentRecord.SF_Occupied, 'SF_Occupied');
+                movedInEl.textContent = formatValue(currentRecord.Moved_In, 'Moved_In');
+                commencementEl.textContent = formatValue(currentRecord.Commencement, 'Commencement');
+                ofBuildingEl.textContent = formatValue(currentRecord.of_Building, 'of_Building');
+                landlordEl.textContent = formatValue(currentRecord.Landlord, 'Landlord');
+                landlordRepEl.textContent = formatValue(currentRecord.Landlord_Representative, 'Landlord_Representative');
+                tenantRepEl.textContent = formatValue(currentRecord.Tenant_Representative, 'Tenant_Representative');
+                bestTenantContactEl.textContent = formatValue(currentRecord.Best_Tenant_Contact, 'Best_Tenant_Contact');
+                bestTenantPhoneEl.textContent = formatValue(currentRecord.Best_Tenant_Phone, 'Best_Tenant_Phone');
+                locationPhoneEl.textContent = formatValue(currentRecord.Location_Phone, 'Location_Phone');
+                naicsEl.textContent = formatValue(currentRecord.NAICS, 'NAICS');
+                sicEl.textContent = formatValue(currentRecord.SIC, 'SIC');
+            }
+
+            // Toggle collapsible sections
+            document.querySelectorAll('.section-title').forEach(title => {
+                title.addEventListener('click', function() {
+                    const section = this.getAttribute('data-section');
+                    const content = document.getElementById(`${section}-content`);
+                    const isCollapsed = content.classList.toggle('collapsed');
+                    this.classList.toggle('collapsed', isCollapsed);
+                });
+            });
+
+            // Initialize Grist
+            grist.ready({
+                requiredAccess: 'full',
+                selection: true
+            });
+
+            // Listen for record selection from Grist table
+            grist.onRecord(function(record, mappings) {
+                loadingStateEl.style.display = 'block';
+                updateTenantDisplay(record, mappings);
+                loadingStateEl.style.display = 'none';
+            });
+
+            // Fetch column names on load
+            fetchColumnNames();
+        });
+    </script>
+</body>
+</html>
