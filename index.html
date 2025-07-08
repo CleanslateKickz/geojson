@@ -28,7 +28,6 @@
       border-color: #3b82f6;
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
     }
-
     h1 {
       text-align: center;
       font-size: 2.5rem;
@@ -42,7 +41,6 @@
       gap: 0.75rem;
     }
     .sub { color: #555; font-size: 1.1rem; margin-bottom: 2em; text-align: center; }
-
     .section-title {
       font-size: 2rem;
       color: #222;
@@ -121,13 +119,6 @@
       margin-bottom: 0.4em;
       text-shadow: 0 1px 2px rgba(0,0,0,0.23);
     }
-    .card-desc svg {
-      width: 18px;
-      height: 18px;
-      margin-right: 2px;
-      fill: #e5e7eb;
-      opacity: 0.86;
-    }
     .card-link {
       display: inline-block;
       background: #3b82f6;
@@ -146,11 +137,9 @@
       transform: translateY(-1px) scale(1.03);
     }
     .loading { color: #A0AEC0; text-align: center; margin-top: 2em; font-size: 1.1em;}
-
     .footer { text-align: center; margin: 4em 0 2em; color: #6b7280; font-size: 0.96em; border-top: 1px solid #e5e7eb; padding-top: 1rem;}
     .footer a { color: #3b82f6; text-decoration: none; transition: color 0.2s;}
     .footer a:hover { color: #2563eb; }
-
     @media (max-width: 1024px) {
       h1 { font-size: 2rem; }
       .section-title { font-size: 1.42rem; }
@@ -172,20 +161,12 @@
     <div class="search-bar">
       <input type="text" placeholder="Search projects and tools..." id="projectSearch">
     </div>
-
-    <!-- Tools & Utilities (HTML top-level projects) -->
     <div class="section-title"><i class="fas fa-globe"></i> Tools & Utilities</div>
     <div id="tools-utilities" class="gallery"><div class="loading">Loading tools...</div></div>
-
-    <!-- Additional HTML Projects (HTML subfolders) -->
     <div class="section-title"><i class="fas fa-folder"></i> Additional HTML Projects</div>
     <div id="additional-projects" class="gallery"><div class="loading">Loading projects...</div></div>
-
-    <!-- Widgets (Widgets folder, only direct .html files) -->
     <div class="section-title"><i class="fas fa-puzzle-piece"></i> Widgets</div>
     <div id="widgets" class="gallery"><div class="loading">Loading widgets...</div></div>
-
-    <!-- RetailStat newsletters (retailstat folder) -->
     <div class="section-title"><i class="fas fa-newspaper"></i> RetailStat Newsletters</div>
     <div class="gallery">
       <div class="card">
@@ -207,8 +188,6 @@
         </div>
       </div>
     </div>
-
-    <!-- GeoJSON Data -->
     <div class="section-title"><i class="fas fa-database"></i> GeoJSON Files & Data</div>
     <div class="gallery">
       <div class="card">
@@ -227,7 +206,7 @@
     &mdash; <a href="https://github.com/CleanslateKickz/geojson" target="_blank"><i class="fab fa-github"></i> Repo</a>
   </div>
   <script>
-    // Image/descriptions mapping for HTML/Widgets
+    // Mapping for images, alt, desc, button for HTML/Widgets
     const htmlImageMap = {
       "CRE-Toolkit":         {img:"Images/CRE-Toolkit.png",   alt:"CRE Analysis Toolkit", desc:"Tools for STNL and Multi-Tenant Properties", btn:"Open Toolkit"},
       "Day Care Property Investment Analysis": {img:"Images/Day-Care.png", alt:"Day Care Analysis", desc:"Property Investment Analysis", btn:"View Analysis"},
@@ -253,17 +232,18 @@
       "Calculator":          {img:"https://via.placeholder.com/320x180?text=Calculator", alt:"Calculator", desc:"Simple on-page calculator", btn:"Open Calculator"}
     };
 
-    // Helper: get image/desc/btn for a file
+    // Fallback image
+    const FALLBACK_IMG = "https://via.placeholder.com/320x180?text=Project";
     function getImgObj(map, filePath, fallbackBtn) {
       filePath = filePath.replace(/\.html?$/i,"");
       if (map[filePath]) return map[filePath];
       const base = filePath.split(/[\\/]/).pop();
       if (map[base]) return map[base];
-      return {img:"https://via.placeholder.com/320x180?text=Project", alt:base, desc:"", btn:fallbackBtn};
+      return {img:FALLBACK_IMG, alt:base, desc:"", btn:fallbackBtn};
     }
 
-    // Split HTML into "top-level" (for Tools & Utilities) and subfolder (for Additional Projects)
-    async function fetchHtmlFilesWithSubfolders(apiPath, subfolder) {
+    // Fetch top-level HTML files and subfolder HTML files separately
+    async function fetchTopAndSubfolderHtml(apiPath, subfolder) {
       const url = `https://api.github.com/repos/CleanslateKickz/geojson/contents/${apiPath}`;
       try {
         const resp = await fetch(url);
@@ -275,14 +255,31 @@
             topLevel.push({ name: item.name, path: `${subfolder}/${item.name}` });
           } else if (item.type === "dir") {
             // Recursively fetch files in subfolder
-            const subfiles = await fetchHtmlFilesWithSubfolders(`${apiPath}/${item.name}`, `${subfolder}/${item.name}`);
-            // Attach subfolder info for filtering
-            subfiles.forEach(f => { f._subfolder = true; });
+            const subfiles = await fetchAllHtmlInSubfolders(`${apiPath}/${item.name}`, `${subfolder}/${item.name}`);
             subfolderFiles = subfolderFiles.concat(subfiles);
           }
         }
         return {topLevel, subfolderFiles};
       } catch (e) { return {topLevel:[], subfolderFiles:[]}; }
+    }
+    // Recursively fetch all HTML files in subfolders (not top-level)
+    async function fetchAllHtmlInSubfolders(apiPath, subfolder) {
+      const url = `https://api.github.com/repos/CleanslateKickz/geojson/contents/${apiPath}`;
+      try {
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error("Failed to fetch");
+        const items = await resp.json();
+        let found = [];
+        for (const item of items) {
+          if (item.type === "file" && /\.html?$/i.test(item.name)) {
+            found.push({ name: item.name, path: `${subfolder}/${item.name}` });
+          } else if (item.type === "dir") {
+            const subfound = await fetchAllHtmlInSubfolders(`${apiPath}/${item.name}`, `${subfolder}/${item.name}`);
+            found = found.concat(subfound);
+          }
+        }
+        return found;
+      } catch (e) { return []; }
     }
 
     // Fetch only top-level html files in Widgets/
@@ -309,10 +306,9 @@
         return;
       }
       files.forEach(f => {
-        // For some files, use folder/file for mapping (e.g., Tenant-Locations/Tim Hortons)
+        // Use folder/file for mapping if present
         let mapKey = f.path.replace(/^HTML\//,"").replace(/^Widgets\//,"").replace(/\.html?$/,"");
         if (f.path.startsWith("HTML/") && f.path.includes("/")) {
-          // For subfolders, use subfolder/file for mapping if present
           const parts = f.path.replace(/^HTML\//,"").split("/");
           if (parts.length > 1) mapKey = parts.slice(0,-1).join("/") + "/" + parts[parts.length-1].replace(/\.html?$/,"");
         }
@@ -334,7 +330,7 @@
     // Main dynamic loading logic
     (async function(){
       // HTML: tools-utilities (top-level), additional-projects (subfolders)
-      const {topLevel, subfolderFiles} = await fetchHtmlFilesWithSubfolders('HTML', 'HTML');
+      const {topLevel, subfolderFiles} = await fetchTopAndSubfolderHtml('HTML', 'HTML');
       showCards(topLevel, "tools-utilities", htmlImageMap, "Open Project");
       showCards(subfolderFiles, "additional-projects", htmlImageMap, "Open Project");
       // Widgets: only top-level
