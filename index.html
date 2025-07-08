@@ -206,40 +206,37 @@
     &mdash; <a href="https://github.com/CleanslateKickz/geojson" target="_blank"><i class="fab fa-github"></i> Repo</a>
   </div>
   <script>
-    // Mapping for images, alt, desc, button for HTML/Widgets
+    // Mapping for images, alt, desc, button for HTML/Widgets (customize as needed)
     const htmlImageMap = {
-      "CRE-Toolkit":         {img:"Images/CRE-Toolkit.png",   alt:"CRE Analysis Toolkit", desc:"Tools for STNL and Multi-Tenant Properties", btn:"Open Toolkit"},
-      "Day Care Property Investment Analysis": {img:"Images/Day-Care.png", alt:"Day Care Analysis", desc:"Property Investment Analysis", btn:"View Analysis"},
-      "Sherwin-Williams":    {img:"Images/Sherwin-Williams.png", alt:"Sherwin-Williams", desc:"Property Analysis", btn:"Open"},
-      "Base Layers":         {img:"Images/Base Layers.png",   alt:"Base Layers", desc:"Map tile style gallery and preview", btn:"Open Project"},
-      "Grove-Plaza":         {img:"Images/Grove Plaza.png",   alt:"Grove Plaza", desc:"Analysis for Grove Plaza properties", btn:"Open Project"},
-      "On-Markets-Mobile":   {img:"https://via.placeholder.com/320x180?text=On-Markets+Mobile", alt:"On-Markets Mobile", desc:"Mobile-optimized listings view", btn:"Open Project"},
-      "Oregon vs. Washington":{img:"Images/OregonvsWashington.png", alt:"Oregon vs Washington", desc:"Comparative market analysis", btn:"Open Project"},
-      "The AI Resilience Formula": {img:"Images/AI Resilience.png", alt:"AI Resilience Formula", desc:"AI-driven investment insights", btn:"Open Project"},
-      "PrivateEye Search Tool": {img:"Images/PrivateEye.png", alt:"PrivateEye", desc:"Lookup tool for PrivateEye data", btn:"Open Tool"},
-      "OwnerProperties-Window": {img:"Images/OwnerProperties.png", alt:"Owner Properties Window", desc:"Interactive property details view", btn:"Open Project"},
-      "Tenant-Locations/Tim Hortons": {img:"Images/Tim Hortons.png", alt:"Tenant Locations: Tim Hortons", desc:"Tim Hortons USA locations", btn:"Open Project"},
-      "Grist - Listings Embed": {img:"Images/Grist - Listings.png", alt:"Grist Listings", desc:"On-Markets Listings", btn:"Open"},
-      "1031-Exchange/Claude-OR-1031": {img:"Images/1031 Strategic Guide.png", alt:"Oregon 1031 Claude", desc:"Guide for exchanging Oregon properties", btn:"Read Guide"},
-      "1031-Exchange/GPT-1031-(1)":   {img:"Images/1031 Strategic Guide.png", alt:"Oregon 1031 GPT v1", desc:"Concise 1031 rationale", btn:"Read Guide"},
-      "1031-Exchange/GPT-1031-(2)":   {img:"Images/1031 Strategic Guide.png", alt:"Oregon 1031 GPT v2", desc:"Tab-based Tailwind/AlpineJS version", btn:"Read Guide"}
+      // Example:
+      // "Big-Beautiful-Bill": {img:"Images/Big-Beautiful-Bill.png", alt:"Big Beautiful Bill", desc:"Project description", btn:"Open Project"},
+      // Add more custom mappings here if you want to override the auto-detect
     };
     const widgetsImageMap = {
-      "PrivateEye":          {img:"Images/PrivateEye.png", alt:"PrivateEye", desc:"Lookup tool for PrivateEye data", btn:"Open Widget"},
-      "ArcGIS URL Formatter":{img:"https://via.placeholder.com/320x180?text=ArcGIS+URL+Formatter", alt:"ArcGIS URL Formatter", desc:"Format ArcGIS URLs for GeoJSON", btn:"Open Widget"},
-      "DynamicSizeTenant":   {img:"https://via.placeholder.com/320x180?text=Dynamic+Size+Tenant+Map", alt:"Dynamic Size Tenant Map", desc:"Interactive Leaflet/Cluster map", btn:"Open Widget"},
-      "TenantMap":           {img:"https://via.placeholder.com/320x180?text=Tenant+Map+Standard", alt:"Tenant Map Standard", desc:"Clustered map for directories", btn:"Open Map"},
-      "Calculator":          {img:"https://via.placeholder.com/320x180?text=Calculator", alt:"Calculator", desc:"Simple on-page calculator", btn:"Open Calculator"}
+      // Custom mappings for widgets, if needed
     };
 
     // Fallback image
     const FALLBACK_IMG = "https://via.placeholder.com/320x180?text=Project";
+    // Try .png, then .jpg, then fallback
+    function getAutoImg(base) {
+      const png = `Images/${base}.png`;
+      const jpg = `Images/${base}.jpg`;
+      // We'll use PNG by default, and rely on <img onerror> for fallback.
+      return png;
+    }
     function getImgObj(map, filePath, fallbackBtn) {
-      filePath = filePath.replace(/\.html?$/i,"");
+      filePath = filePath.replace(/\.html?$/i, "");
       if (map[filePath]) return map[filePath];
       const base = filePath.split(/[\\/]/).pop();
       if (map[base]) return map[base];
-      return {img:FALLBACK_IMG, alt:base, desc:"", btn:fallbackBtn};
+      // Auto-detect image (PNG, fallback to placeholder via onerror)
+      return {
+        img: getAutoImg(base),
+        alt: base.replace(/-/g," "),
+        desc: "",
+        btn: fallbackBtn
+      };
     }
 
     // Fetch top-level HTML files and subfolder HTML files separately
@@ -289,7 +286,6 @@
         const resp = await fetch(url);
         if (!resp.ok) throw new Error("Failed to fetch");
         const files = await resp.json();
-        // Only files (not directories), only .html
         return files.filter(f => f.type === "file" && /\.html?$/i.test(f.name)).map(f => ({
           name: f.name,
           path: `Widgets/${f.name}`
@@ -306,7 +302,6 @@
         return;
       }
       files.forEach(f => {
-        // Use folder/file for mapping if present
         let mapKey = f.path.replace(/^HTML\//,"").replace(/^Widgets\//,"").replace(/\.html?$/,"");
         if (f.path.startsWith("HTML/") && f.path.includes("/")) {
           const parts = f.path.replace(/^HTML\//,"").split("/");
@@ -315,7 +310,8 @@
         const imgObj = getImgObj(map, mapKey, fallbackBtn);
         gallery.innerHTML += `
           <div class="card">
-            <img class="card-image" src="${imgObj.img}" alt="${imgObj.alt}"/>
+            <img class="card-image" src="${imgObj.img}" alt="${imgObj.alt}"
+                 onerror="this.onerror=null;this.src='https://via.placeholder.com/320x180?text=Project';">
             <div class="card-overlay"></div>
             <div class="card-content">
               <div class="card-title">${imgObj.alt || f.name.replace(/\.html?$/,'')}</div>
@@ -329,16 +325,14 @@
 
     // Main dynamic loading logic
     (async function(){
-      // HTML: tools-utilities (top-level), additional-projects (subfolders)
       const {topLevel, subfolderFiles} = await fetchTopAndSubfolderHtml('HTML', 'HTML');
       showCards(topLevel, "tools-utilities", htmlImageMap, "Open Project");
       showCards(subfolderFiles, "additional-projects", htmlImageMap, "Open Project");
-      // Widgets: only top-level
       const widgets = await fetchTopLevelWidgetHtmlFiles();
       showCards(widgets, "widgets", widgetsImageMap, "Open Widget");
     })();
 
-    // ---- Search functionality ----
+    // Search functionality
     document.getElementById('projectSearch').addEventListener('input', function(e) {
       const searchTerm = e.target.value.toLowerCase();
       const cards = document.querySelectorAll('.card');
