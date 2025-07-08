@@ -8,71 +8,215 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
     body { background: #f9fafb; font-family: 'Inter', Arial, sans-serif; margin: 0; color: #222; }
-    .container { max-width: 1180px; margin: 0 auto; padding: 2rem 1rem; }
-    h1 { font-size: 2.2rem; margin-bottom: 0.25em; color: #1e40af; display: flex; align-items: center; gap: 0.5em; }
-    .sub { color: #555; font-size: 1.1rem; margin-bottom: 2em; }
-    .section-title { font-size: 1.3rem; color: #2563eb; margin-top: 2.5em; margin-bottom: 1em; display: flex; align-items: center; gap: 8px;}
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5em;}
-    .card {
-      background: #fff; border-radius: 12px; box-shadow: 0 2px 10px rgba(30,64,175,0.09);
-      padding: 0; display: flex; flex-direction: column; overflow: hidden; min-height: 260px;
-      transition: box-shadow .18s;
-      position: relative;
+    .container { max-width: 1280px; margin: 0 auto; padding: 2.5rem 1.5rem; }
+    .search-bar {
+      max-width: 600px;
+      margin: 2rem auto 3rem;
+      text-align: center;
     }
-    .card:hover { box-shadow: 0 6px 18px rgba(59, 130, 246, 0.14);}
-    .card-img { width: 100%; height: 180px; object-fit: cover; background: #e5e7eb; }
-    .card-content { padding: 1.1em 1em 1.3em; display: flex; flex-direction: column; gap: 0.7em; flex: 1; }
-    .card-title { font-size: 1.08rem; font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 0.5em;}
-    .card-desc { color: #444; font-size: 0.97em; }
-    .card-link { margin-top: auto; display: inline-block; background: #3b82f6; color: #fff; text-decoration: none; padding: 0.45em 1.2em; border-radius: 999px; font-size: 0.94em; font-weight: 500; transition: background .15s;}
-    .card-link:hover { background: #1e40af;}
+    .search-bar input {
+      width: 100%;
+      padding: 0.75rem 1.25rem;
+      border: 1px solid #d1d5db;
+      border-radius: 9999px;
+      font-size: 1rem;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      transition: all 0.2s ease;
+    }
+    .search-bar input:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #1e40af;
+      margin-bottom: 1.3rem;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+    }
+    .sub { color: #555; font-size: 1.1rem; margin-bottom: 2em; text-align: center; }
+
+    .section-title {
+      font-size: 2rem;
+      color: #222;
+      font-weight: 600;
+      margin: 2.5em 0 1.2em 0;
+      display: flex;
+      align-items: center;
+      gap: 0.75em;
+      border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 0.5rem;
+      justify-content: center;
+    }
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 2rem;
+      margin: 2.5rem 0 1rem 0;
+    }
+    .card {
+      position: relative;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+      background: #fff;
+      min-height: 220px;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.25s cubic-bezier(.4,2,.6,1), box-shadow 0.25s cubic-bezier(.4,2,.6,1);
+    }
+    .card:hover {
+      transform: translateY(-8px) scale(1.025);
+      box-shadow: 0 8px 32px rgba(59,130,246,0.18), 0 2px 8px rgba(0,0,0,0.07);
+    }
+    .card-image {
+      width: 100%;
+      height: 170px;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.32s cubic-bezier(.4,2,.6,1);
+      background: #e5e7eb;
+    }
+    .card:hover .card-image {
+      transform: scale(1.05);
+    }
+    .card-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(30,41,59,0.66) 62%, rgba(0,0,0,0.05) 100%);
+      z-index: 1;
+      pointer-events: none;
+    }
+    .card-content {
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      z-index: 2;
+      color: #fff;
+      padding: 1.3rem 1.5rem 1.1rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5em;
+      pointer-events: auto;
+    }
+    .card-title {
+      font-size: 1.32rem;
+      font-weight: 600;
+      line-height: 1.3;
+      margin-bottom: 0.18em;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.23);
+    }
+    .card-desc {
+      font-size: 1.04rem;
+      color: #e5e7eb;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.4em;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.23);
+    }
+    .card-desc svg {
+      width: 18px;
+      height: 18px;
+      margin-right: 2px;
+      fill: #e5e7eb;
+      opacity: 0.86;
+    }
+    .card-link {
+      display: inline-block;
+      background: #3b82f6;
+      color: #fff;
+      padding: 0.54em 1.4em;
+      border-radius: 9999px;
+      text-decoration: none;
+      font-size: 1.07rem;
+      font-weight: 600;
+      transition: background 0.18s, transform 0.17s;
+      margin-top: 0.15em;
+      box-shadow: 0 2px 8px rgba(59,130,246,0.07);
+    }
+    .card-link:hover {
+      background: #2563eb;
+      transform: translateY(-1px) scale(1.03);
+    }
     .loading { color: #A0AEC0; text-align: center; margin-top: 2em; font-size: 1.1em;}
-    .footer { text-align: center; margin: 3em 0 1em; color: #6b7280; font-size: 0.9em;}
-    @media (max-width: 700px) { .container{padding:1.1rem 0.3rem;} h1{font-size:1.3rem;} .section-title{font-size:1.08rem;} .card-img{height:120px;} }
+
+    .footer { text-align: center; margin: 4em 0 2em; color: #6b7280; font-size: 0.96em; border-top: 1px solid #e5e7eb; padding-top: 1rem;}
+    .footer a { color: #3b82f6; text-decoration: none; transition: color 0.2s;}
+    .footer a:hover { color: #2563eb; }
+
+    @media (max-width: 1024px) {
+      h1 { font-size: 2rem; }
+      .section-title { font-size: 1.42rem; }
+      .gallery { gap: 1.3rem; }
+    }
+    @media (max-width: 700px) {
+      .container{padding:1.1rem 0.3rem;}
+      h1{font-size:1.4rem;}
+      .section-title{font-size:1.1rem;}
+      .gallery{grid-template-columns:1fr;gap:1.1rem;}
+      .card-image{height:120px;}
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1><i class="fas fa-map-marked-alt"></i> CleanslateKickz GeoJSON & Real Estate Tools</h1>
     <div class="sub">Your hub for interactive maps, widgets, and real estate dashboards.</div>
+    <div class="search-bar">
+      <input type="text" placeholder="Search projects and tools..." id="projectSearch">
+    </div>
 
-    <!-- Tools (HTML folder) -->
-    <div class="section-title"><i class="fas fa-wrench"></i> Custom Tools & Dashboards</div>
-    <div id="html-tools" class="grid"><div class="loading">Loading tools...</div></div>
+    <!-- Tools & Utilities (HTML top-level projects) -->
+    <div class="section-title"><i class="fas fa-globe"></i> Tools & Utilities</div>
+    <div id="tools-utilities" class="gallery"><div class="loading">Loading tools...</div></div>
 
-    <!-- Widgets (Widgets folder) -->
+    <!-- Additional HTML Projects (HTML subfolders) -->
+    <div class="section-title"><i class="fas fa-folder"></i> Additional HTML Projects</div>
+    <div id="additional-projects" class="gallery"><div class="loading">Loading projects...</div></div>
+
+    <!-- Widgets (Widgets folder, only direct .html files) -->
     <div class="section-title"><i class="fas fa-puzzle-piece"></i> Widgets</div>
-    <div id="widgets" class="grid"><div class="loading">Loading widgets...</div></div>
+    <div id="widgets" class="gallery"><div class="loading">Loading widgets...</div></div>
 
     <!-- RetailStat newsletters (retailstat folder) -->
     <div class="section-title"><i class="fas fa-newspaper"></i> RetailStat Newsletters</div>
-    <div class="grid">
+    <div class="gallery">
       <div class="card">
-        <img class="card-img" src="https://via.placeholder.com/320x180?text=Newsletters+Archive" alt="RetailStat Newsletters"/>
+        <img class="card-image" src="https://via.placeholder.com/320x180?text=Newsletters+Archive" alt="RetailStat Newsletters"/>
+        <div class="card-overlay"></div>
         <div class="card-content">
-          <div class="card-title"><i class="fas fa-archive"></i> RetailStat Archive</div>
-          <div class="card-desc">Browse all newsletters and reports in the <b>retailstat</b> folder.</div>
-          <a class="card-link" href="retailstat/index.html">Open Archive</a>
+          <div class="card-title">Newsletters Archive</div>
+          <div class="card-desc">Monthly and bi-monthly news</div>
+          <a class="card-link" href="retailstat/index.html">Open RetailStat Archive</a>
         </div>
       </div>
       <div class="card">
-        <img class="card-img" src="https://via.placeholder.com/320x180?text=Latest+Newsletter" alt="Latest Newsletter"/>
+        <img class="card-image" src="https://via.placeholder.com/320x180?text=Latest+Newsletter" alt="Latest Newsletter"/>
+        <div class="card-overlay"></div>
         <div class="card-content">
-          <div class="card-title"><i class="fas fa-file-alt"></i> Latest Newsletter</div>
-          <div class="card-desc">Jump directly to the newest upload (auto-updated in Archive view).</div>
-          <a class="card-link" href="retailstat/June-17-2025.html">Open Latest</a>
+          <div class="card-title">Latest Newsletter</div>
+          <div class="card-desc">Jump to the newest upload</div>
+          <a class="card-link" href="retailstat/June-17-2025.html">Open Latest Newsletter</a>
         </div>
       </div>
     </div>
 
     <!-- GeoJSON Data -->
     <div class="section-title"><i class="fas fa-database"></i> GeoJSON Files & Data</div>
-    <div class="grid">
+    <div class="gallery">
       <div class="card">
-        <img class="card-img" src="https://via.placeholder.com/320x180?text=GeoJSON+Directory" alt="GeoJSON Directory"/>
+        <img class="card-image" src="https://via.placeholder.com/320x180?text=GeoJSON+Directory" alt="GeoJSON Directory"/>
+        <div class="card-overlay"></div>
         <div class="card-content">
-          <div class="card-title"><i class="fas fa-folder"></i> GeoJSON Directory</div>
-          <div class="card-desc">Browse raw GeoJSON data on GitHub.</div>
+          <div class="card-title">GeoJSON Directory</div>
+          <div class="card-desc">Browse GeoJSON files on GitHub</div>
           <a class="card-link" href="https://github.com/CleanslateKickz/geojson/tree/main/geojson" target="_blank">Browse on GitHub</a>
         </div>
       </div>
@@ -83,105 +227,131 @@
     &mdash; <a href="https://github.com/CleanslateKickz/geojson" target="_blank"><i class="fab fa-github"></i> Repo</a>
   </div>
   <script>
-    // Mapping: filename (without .html) to image/alt for /HTML
+    // Image/descriptions mapping for HTML/Widgets
     const htmlImageMap = {
-      "CRE-Toolkit":         {img: "Images/CRE-Toolkit.png", alt: "CRE Analysis Toolkit", desc: "Tools for STNL and Multi-Tenant Properties"},
-      "Day Care Property Investment Analysis": {img: "Images/Day-Care.png", alt: "Day Care Analysis", desc: "Property Investment Analysis"},
-      "Sherwin-Williams":    {img: "Images/Sherwin-Williams.png", alt: "Sherwin-Williams", desc: "Property Analysis"},
-      "Base Layers":         {img: "Images/Base Layers.png", alt: "Base Layers", desc: "Map tile style gallery and preview"},
-      "Grove-Plaza":         {img: "Images/Grove Plaza.png", alt: "Grove Plaza", desc: "Analysis for Grove Plaza properties"},
-      "On-Markets-Mobile":   {img: "https://via.placeholder.com/320x180?text=On-Markets+Mobile", alt: "On-Markets Mobile", desc: "Mobile-optimized listings view"},
-      "Oregon vs. Washington":{img: "Images/OregonvsWashington.png", alt: "Oregon vs Washington", desc: "Comparative market analysis"},
-      "The AI Resilience Formula": {img: "Images/AI Resilience.png", alt: "AI Resilience Formula", desc: "AI-driven investment insights"},
-      "PrivateEye Search Tool":    {img: "Images/PrivateEye.png", alt: "PrivateEye", desc: "Lookup tool for PrivateEye data"},
-      "OwnerProperties-Window":    {img: "Images/OwnerProperties.png", alt: "Owner Properties Window", desc: "Interactive property details view"},
-      "1031-Exchange/Claude-OR-1031": {img: "Images/1031 Strategic Guide.png", alt: "Oregon 1031 Claude", desc: "Guide for exchanging Oregon properties"},
-      "1031-Exchange/GPT-1031-(1)":   {img: "Images/1031 Strategic Guide.png", alt: "Oregon 1031 GPT v1", desc: "Concise 1031 rationale"},
-      "1031-Exchange/GPT-1031-(2)":   {img: "Images/1031 Strategic Guide.png", alt: "Oregon 1031 GPT v2", desc: "Tab-based Tailwind/AlpineJS version"}
+      "CRE-Toolkit":         {img:"Images/CRE-Toolkit.png",   alt:"CRE Analysis Toolkit", desc:"Tools for STNL and Multi-Tenant Properties", btn:"Open Toolkit"},
+      "Day Care Property Investment Analysis": {img:"Images/Day-Care.png", alt:"Day Care Analysis", desc:"Property Investment Analysis", btn:"View Analysis"},
+      "Sherwin-Williams":    {img:"Images/Sherwin-Williams.png", alt:"Sherwin-Williams", desc:"Property Analysis", btn:"Open"},
+      "Base Layers":         {img:"Images/Base Layers.png",   alt:"Base Layers", desc:"Map tile style gallery and preview", btn:"Open Project"},
+      "Grove-Plaza":         {img:"Images/Grove Plaza.png",   alt:"Grove Plaza", desc:"Analysis for Grove Plaza properties", btn:"Open Project"},
+      "On-Markets-Mobile":   {img:"https://via.placeholder.com/320x180?text=On-Markets+Mobile", alt:"On-Markets Mobile", desc:"Mobile-optimized listings view", btn:"Open Project"},
+      "Oregon vs. Washington":{img:"Images/OregonvsWashington.png", alt:"Oregon vs Washington", desc:"Comparative market analysis", btn:"Open Project"},
+      "The AI Resilience Formula": {img:"Images/AI Resilience.png", alt:"AI Resilience Formula", desc:"AI-driven investment insights", btn:"Open Project"},
+      "PrivateEye Search Tool": {img:"Images/PrivateEye.png", alt:"PrivateEye", desc:"Lookup tool for PrivateEye data", btn:"Open Tool"},
+      "OwnerProperties-Window": {img:"Images/OwnerProperties.png", alt:"Owner Properties Window", desc:"Interactive property details view", btn:"Open Project"},
+      "Tenant-Locations/Tim Hortons": {img:"Images/Tim Hortons.png", alt:"Tenant Locations: Tim Hortons", desc:"Tim Hortons USA locations", btn:"Open Project"},
+      "Grist - Listings Embed": {img:"Images/Grist - Listings.png", alt:"Grist Listings", desc:"On-Markets Listings", btn:"Open"},
+      "1031-Exchange/Claude-OR-1031": {img:"Images/1031 Strategic Guide.png", alt:"Oregon 1031 Claude", desc:"Guide for exchanging Oregon properties", btn:"Read Guide"},
+      "1031-Exchange/GPT-1031-(1)":   {img:"Images/1031 Strategic Guide.png", alt:"Oregon 1031 GPT v1", desc:"Concise 1031 rationale", btn:"Read Guide"},
+      "1031-Exchange/GPT-1031-(2)":   {img:"Images/1031 Strategic Guide.png", alt:"Oregon 1031 GPT v2", desc:"Tab-based Tailwind/AlpineJS version", btn:"Read Guide"}
     };
-    // Mapping for /Widgets
     const widgetsImageMap = {
-      "PrivateEye":          {img: "Images/PrivateEye.png", alt: "PrivateEye", desc: "Lookup tool for PrivateEye data"},
-      "ArcGIS URL Formatter":{img: "https://via.placeholder.com/320x180?text=ArcGIS+URL+Formatter", alt: "ArcGIS URL Formatter", desc: "Format ArcGIS URLs for GeoJSON"},
-      "DynamicSizeTenant":   {img: "https://via.placeholder.com/320x180?text=Dynamic+Size+Tenant+Map", alt: "Dynamic Size Tenant Map", desc: "Interactive Leaflet/Cluster map"},
-      "TenantMap":           {img: "https://via.placeholder.com/320x180?text=Tenant+Map+Standard", alt: "Tenant Map Standard", desc: "Clustered map for directories"},
-      "Calculator":          {img: "https://via.placeholder.com/320x180?text=Calculator", alt: "Calculator", desc: "Simple on-page calculator"},
-      "drop-down-widget/index": {img: "https://via.placeholder.com/320x180?text=Drop-down+Widget", alt: "Drop-down Widget", desc: "Selection widget for directories"},
-      "Embed/Grist - Listings Embed": {img: "Images/Grist - Listings.png", alt: "Grist Listings", desc: "On-Markets Listings"}
+      "PrivateEye":          {img:"Images/PrivateEye.png", alt:"PrivateEye", desc:"Lookup tool for PrivateEye data", btn:"Open Widget"},
+      "ArcGIS URL Formatter":{img:"https://via.placeholder.com/320x180?text=ArcGIS+URL+Formatter", alt:"ArcGIS URL Formatter", desc:"Format ArcGIS URLs for GeoJSON", btn:"Open Widget"},
+      "DynamicSizeTenant":   {img:"https://via.placeholder.com/320x180?text=Dynamic+Size+Tenant+Map", alt:"Dynamic Size Tenant Map", desc:"Interactive Leaflet/Cluster map", btn:"Open Widget"},
+      "TenantMap":           {img:"https://via.placeholder.com/320x180?text=Tenant+Map+Standard", alt:"Tenant Map Standard", desc:"Clustered map for directories", btn:"Open Map"},
+      "Calculator":          {img:"https://via.placeholder.com/320x180?text=Calculator", alt:"Calculator", desc:"Simple on-page calculator", btn:"Open Calculator"}
     };
 
-    // Helper: fetch folder contents from GitHub API and filter for .html files
-    async function fetchHtmlFiles(apiPath, subfolder) {
-      const url = `https://api.github.com/repos/CleanslateKickz/geojson/contents/${apiPath}`;
-      try {
-        const resp = await fetch(url);
-        if (!resp.ok) throw new Error("Failed to fetch");
-        const files = await resp.json();
-        // Only HTML files
-        return files.filter(f => f.type === "file" && /\.html?$/i.test(f.name)).map(f => ({
-          name: f.name,
-          path: `${subfolder}/${f.name}`
-        }));
-      } catch (e) { return []; }
+    // Helper: get image/desc/btn for a file
+    function getImgObj(map, filePath, fallbackBtn) {
+      filePath = filePath.replace(/\.html?$/i,"");
+      if (map[filePath]) return map[filePath];
+      const base = filePath.split(/[\\/]/).pop();
+      if (map[base]) return map[base];
+      return {img:"https://via.placeholder.com/320x180?text=Project", alt:base, desc:"", btn:fallbackBtn};
     }
-    // Helper for subfolders (e.g., HTML/Tool-Box)
+
+    // Split HTML into "top-level" (for Tools & Utilities) and subfolder (for Additional Projects)
     async function fetchHtmlFilesWithSubfolders(apiPath, subfolder) {
-      // Fetch all files and subfolders in apiPath, recursively.
       const url = `https://api.github.com/repos/CleanslateKickz/geojson/contents/${apiPath}`;
       try {
         const resp = await fetch(url);
         if (!resp.ok) throw new Error("Failed to fetch");
         const items = await resp.json();
-        let result = [];
+        let topLevel = [], subfolderFiles = [];
         for (const item of items) {
           if (item.type === "file" && /\.html?$/i.test(item.name)) {
-            result.push({ name: item.name, path: `${subfolder}/${item.name}` });
+            topLevel.push({ name: item.name, path: `${subfolder}/${item.name}` });
           } else if (item.type === "dir") {
             // Recursively fetch files in subfolder
             const subfiles = await fetchHtmlFilesWithSubfolders(`${apiPath}/${item.name}`, `${subfolder}/${item.name}`);
-            result = result.concat(subfiles);
+            // Attach subfolder info for filtering
+            subfiles.forEach(f => { f._subfolder = true; });
+            subfolderFiles = subfolderFiles.concat(subfiles);
           }
         }
-        return result;
+        return {topLevel, subfolderFiles};
+      } catch (e) { return {topLevel:[], subfolderFiles:[]}; }
+    }
+
+    // Fetch only top-level html files in Widgets/
+    async function fetchTopLevelWidgetHtmlFiles() {
+      const url = `https://api.github.com/repos/CleanslateKickz/geojson/contents/Widgets`;
+      try {
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error("Failed to fetch");
+        const files = await resp.json();
+        // Only files (not directories), only .html
+        return files.filter(f => f.type === "file" && /\.html?$/i.test(f.name)).map(f => ({
+          name: f.name,
+          path: `Widgets/${f.name}`
+        }));
       } catch (e) { return []; }
     }
 
-    function getImgObj(map, filePath) {
-      // Try full path, then strip index.html, then just base name
-      filePath = filePath.replace(/\.html?$/i,"");
-      if (map[filePath]) return map[filePath];
-      const base = filePath.split(/[\\/]/).pop();
-      if (map[base]) return map[base];
-      return {img:"https://via.placeholder.com/320x180?text=Project", alt:base, desc:""};
-    }
-
-    // Display cards for files in a grid
-    function showCards(files, gridId, map, section) {
-      const grid = document.getElementById(gridId);
-      grid.innerHTML = "";
+    // Render gallery cards
+    function showCards(files, galleryId, map, fallbackBtn) {
+      const gallery = document.getElementById(galleryId);
+      gallery.innerHTML = "";
       if (!files.length) {
-        grid.innerHTML = `<div class="loading">No ${section} found.</div>`;
+        gallery.innerHTML = `<div class="loading">No projects found.</div>`;
         return;
       }
       files.forEach(f => {
-        const imgObj = getImgObj(map, f.path.replace(/^HTML\//,"").replace(/^Widgets\//,""));
-        grid.innerHTML += `
+        // For some files, use folder/file for mapping (e.g., Tenant-Locations/Tim Hortons)
+        let mapKey = f.path.replace(/^HTML\//,"").replace(/^Widgets\//,"").replace(/\.html?$/,"");
+        if (f.path.startsWith("HTML/") && f.path.includes("/")) {
+          // For subfolders, use subfolder/file for mapping if present
+          const parts = f.path.replace(/^HTML\//,"").split("/");
+          if (parts.length > 1) mapKey = parts.slice(0,-1).join("/") + "/" + parts[parts.length-1].replace(/\.html?$/,"");
+        }
+        const imgObj = getImgObj(map, mapKey, fallbackBtn);
+        gallery.innerHTML += `
           <div class="card">
-            <img class="card-img" src="${imgObj.img}" alt="${imgObj.alt}"/>
+            <img class="card-image" src="${imgObj.img}" alt="${imgObj.alt}"/>
+            <div class="card-overlay"></div>
             <div class="card-content">
-              <div class="card-title">${imgObj.alt}</div>
-              <div class="card-desc">${imgObj.desc || "Open <code>" + f.path + "</code>"}</div>
-              <a class="card-link" href="${f.path}">Open</a>
+              <div class="card-title">${imgObj.alt || f.name.replace(/\.html?$/,'')}</div>
+              <div class="card-desc">${imgObj.desc || ""}</div>
+              <a class="card-link" href="${f.path}" target="_blank">${imgObj.btn || fallbackBtn}</a>
             </div>
           </div>
         `;
       });
     }
 
-    // Load HTML tools (including subfolders for 1031 Exchange etc)
-    fetchHtmlFilesWithSubfolders('HTML', 'HTML').then(files => showCards(files, 'html-tools', htmlImageMap, "tools"));
-    // Load Widgets (including subfolders for Embed, drop-down-widget etc)
-    fetchHtmlFilesWithSubfolders('Widgets', 'Widgets').then(files => showCards(files, 'widgets', widgetsImageMap, "widgets"));
+    // Main dynamic loading logic
+    (async function(){
+      // HTML: tools-utilities (top-level), additional-projects (subfolders)
+      const {topLevel, subfolderFiles} = await fetchHtmlFilesWithSubfolders('HTML', 'HTML');
+      showCards(topLevel, "tools-utilities", htmlImageMap, "Open Project");
+      showCards(subfolderFiles, "additional-projects", htmlImageMap, "Open Project");
+      // Widgets: only top-level
+      const widgets = await fetchTopLevelWidgetHtmlFiles();
+      showCards(widgets, "widgets", widgetsImageMap, "Open Widget");
+    })();
+
+    // ---- Search functionality ----
+    document.getElementById('projectSearch').addEventListener('input', function(e) {
+      const searchTerm = e.target.value.toLowerCase();
+      const cards = document.querySelectorAll('.card');
+      cards.forEach(card => {
+        const title = card.querySelector('.card-title') ? card.querySelector('.card-title').textContent.toLowerCase() : "";
+        const desc = card.querySelector('.card-desc') ? card.querySelector('.card-desc').textContent.toLowerCase() : "";
+        card.style.display = (title.includes(searchTerm) || desc.includes(searchTerm)) ? '' : 'none';
+      });
+    });
   </script>
 </body>
 </html>
