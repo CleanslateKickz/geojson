@@ -1,710 +1,187 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GeoJSON Repository & Real Estate Tools - CleanslateKickz</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.css">
-    <link rel="icon" type="image/x-icon" href="Images/Directory.png">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #f9fafb;
-            margin: 0;
-            color: #1f2937;
-            line-height: 1.6;
-        }
-        header {
-            background: linear-gradient(90deg, #1e40af, #3b82f6);
-            color: white;
-            padding: 3rem 2rem;
-            text-align: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        header h1 {
-            margin: 0;
-            font-size: 2.5rem;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
-        header p {
-            margin: 0.5rem 0 0;
-            font-size: 1.1rem;
-            font-weight: 400;
-            opacity: 0.9;
-        }
-        .main-section {
-            max-width: 1280px;
-            margin: 0 auto;
-            padding: 2.5rem 1.5rem;
-        }
-        .search-bar {
-            max-width: 600px;
-            margin: 2rem auto 3rem;
-            text-align: center;
-        }
-        .search-bar input {
-            width: 100%;
-            padding: 0.75rem 1.25rem;
-            border: 1px solid #d1d5db;
-            border-radius: 9999px; /* Rounded edges for modern look */
-            font-size: 1rem;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-            transition: all 0.2s ease;
-        }
-        .search-bar input:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-        }
-        .dir-list {
-            margin: 4rem 0;
-        }
-        .dir-list h2 {
-            color: #1f2937;
-            font-size: 1.875rem;
-            font-weight: 600;
-            margin-bottom: 2rem;
-            text-align: center;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 0.75rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 1px solid #e5e7eb;
-        }
-        .dir-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 2rem;
-            padding: 0 1rem;
-        }
-        .dir-card {
-            position: relative;
-            width: 100%;
-            height: 220px;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .dir-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-        }
-        .dir-card img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s ease;
-        }
-        .dir-card:hover img {
-            transform: scale(1.05);
-        }
-        .dir-card::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent 60%);
-            z-index: 1;
-        }
-        .dir-card-content {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 1.25rem 1.5rem;
-            z-index: 2;
-            color: white;
-        }
-        .dir-card-content .title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            line-height: 1.3;
-            margin-bottom: 0.25rem;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-        }
-        .dir-card-content .description {
-            font-size: 0.875rem;
-            color: #e5e7eb;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 0.75rem;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-        }
-        .dir-card-content .description svg {
-            width: 16px;
-            height: 16px;
-            fill: #e5e7eb;
-        }
-        .dir-card-content a {
-            display: inline-block;
-            background: #3b82f6;
-            color: white;
-            padding: 0.5rem 1.25rem;
-            border-radius: 9999px; /* Rounded button */
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: background 0.2s ease, transform 0.2s ease;
-        }
-        .dir-card-content a:hover {
-            background: #2563eb;
-            transform: translateY(-1px);
-        }
-        .footer {
-            text-align: center;
-            margin: 4rem 0 2rem;
-            color: #6b7280;
-            font-size: 0.875rem;
-            border-top: 1px solid #e5e7eb;
-            padding-top: 1rem;
-        }
-        .footer a {
-            color: #3b82f6;
-            text-decoration: none;
-            transition: color 0.2s ease;
-        }
-        .footer a:hover {
-            color: #2563eb;
-        }
-        @media (max-width: 1024px) {
-            header h1 {
-                font-size: 2rem;
-            }
-            header p {
-                font-size: 1rem;
-            }
-            .main-section {
-                padding: 2rem 1rem;
-            }
-            .dir-list h2 {
-                font-size: 1.5rem;
-            }
-            .dir-grid {
-                gap: 1.5rem;
-            }
-        }
-        @media (max-width: 640px) {
-            header {
-                padding: 2rem 1rem;
-            }
-            header h1 {
-                font-size: 1.75rem;
-            }
-            .search-bar {
-                margin: 1.5rem auto 2.5rem;
-            }
-            .dir-card {
-                height: 180px;
-            }
-            .dir-card-content .title {
-                font-size: 1rem;
-            }
-            .dir-card-content .description {
-                font-size: 0.8rem;
-            }
-            .dir-card-content a {
-                font-size: 0.85rem;
-                padding: 0.4rem 1rem;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>CleanslateKickz GeoJSON & Real Estate Tools</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    body { background: #f9fafb; font-family: 'Inter', Arial, sans-serif; margin: 0; color: #222; }
+    .container { max-width: 1180px; margin: 0 auto; padding: 2rem 1rem; }
+    h1 { font-size: 2.2rem; margin-bottom: 0.25em; color: #1e40af; display: flex; align-items: center; gap: 0.5em; }
+    .sub { color: #555; font-size: 1.1rem; margin-bottom: 2em; }
+    .section-title { font-size: 1.3rem; color: #2563eb; margin-top: 2.5em; margin-bottom: 1em; display: flex; align-items: center; gap: 8px;}
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5em;}
+    .card {
+      background: #fff; border-radius: 12px; box-shadow: 0 2px 10px rgba(30,64,175,0.09);
+      padding: 0; display: flex; flex-direction: column; overflow: hidden; min-height: 260px;
+      transition: box-shadow .18s;
+      position: relative;
+    }
+    .card:hover { box-shadow: 0 6px 18px rgba(59, 130, 246, 0.14);}
+    .card-img { width: 100%; height: 180px; object-fit: cover; background: #e5e7eb; }
+    .card-content { padding: 1.1em 1em 1.3em; display: flex; flex-direction: column; gap: 0.7em; flex: 1; }
+    .card-title { font-size: 1.08rem; font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 0.5em;}
+    .card-desc { color: #444; font-size: 0.97em; }
+    .card-link { margin-top: auto; display: inline-block; background: #3b82f6; color: #fff; text-decoration: none; padding: 0.45em 1.2em; border-radius: 999px; font-size: 0.94em; font-weight: 500; transition: background .15s;}
+    .card-link:hover { background: #1e40af;}
+    .loading { color: #A0AEC0; text-align: center; margin-top: 2em; font-size: 1.1em;}
+    .footer { text-align: center; margin: 3em 0 1em; color: #6b7280; font-size: 0.9em;}
+    @media (max-width: 700px) { .container{padding:1.1rem 0.3rem;} h1{font-size:1.3rem;} .section-title{font-size:1.08rem;} .card-img{height:120px;} }
+  </style>
 </head>
 <body>
-    <header>
-        <div class="container">
-            <h1><i class="fas fa-map-marked-alt"></i> CleanslateKickz GeoJSON & Real Estate Tools</h1>
-            <p>Your hub for interactive maps, widgets, and real estate dashboards.</p>
+  <div class="container">
+    <h1><i class="fas fa-map-marked-alt"></i> CleanslateKickz GeoJSON & Real Estate Tools</h1>
+    <div class="sub">Your hub for interactive maps, widgets, and real estate dashboards.</div>
+
+    <!-- Tools (HTML folder) -->
+    <div class="section-title"><i class="fas fa-wrench"></i> Custom Tools & Dashboards</div>
+    <div id="html-tools" class="grid"><div class="loading">Loading tools...</div></div>
+
+    <!-- Widgets (Widgets folder) -->
+    <div class="section-title"><i class="fas fa-puzzle-piece"></i> Widgets</div>
+    <div id="widgets" class="grid"><div class="loading">Loading widgets...</div></div>
+
+    <!-- RetailStat newsletters (retailstat folder) -->
+    <div class="section-title"><i class="fas fa-newspaper"></i> RetailStat Newsletters</div>
+    <div class="grid">
+      <div class="card">
+        <img class="card-img" src="https://via.placeholder.com/320x180?text=Newsletters+Archive" alt="RetailStat Newsletters"/>
+        <div class="card-content">
+          <div class="card-title"><i class="fas fa-archive"></i> RetailStat Archive</div>
+          <div class="card-desc">Browse all newsletters and reports in the <b>retailstat</b> folder.</div>
+          <a class="card-link" href="retailstat/index.html">Open Archive</a>
         </div>
-    </header>
-
-    <main class="main-section">
-        <div class="search-bar">
-            <input type="text" placeholder="Search projects and tools..." id="projectSearch">
-        </div>
-
-        <!-- Tools & Utilities -->
-        <section class="dir-list">
-            <h2><i class="fas fa-globe"></i> Tools & Utilities</h2>
-            <div class="dir-grid">
-                <div class="dir-card">
-                    <img src="Images/CRE-Toolkit.png" alt="CRE Analysis Toolkit" loading="lazy"/>
-                    <div class="dir-card-content">
-                        <div class="title">CRE Analysis Toolkit</div>
-                        <div class="description">
-                            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                            Tools for STNL and Multi-Tenant Properties
-                        </div>
-                        <a href="HTML/CRE-Toolkit.html" target="_blank">Open Toolkit</a>
-                    </div>
-                </div>
-                <div class="dir-card">
-                    <img src="Images/Day-Care.png" alt="Day Care Analysis" loading="lazy"/>
-                    <div class="dir-card-content">
-                        <div class="title">Day Care Analysis</div>
-                        <div class="description">
-                            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                            Property Investment Analysis
-                        </div>
-                        <a href="HTML/Day%20Care%20Property%20Investment%20Analysis.html" target="_blank">View Analysis</a>
-                    </div>
-                </div>
-                <div class="dir-card">
-                    <img src="Images/Sherwin-Williams.png" alt="Sherwin-Williams" loading="lazy"/>
-                    <div class="dir-card-content">
-                        <div class="title">Sherwin-Williams</div>
-                        <div class="description">
-                            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                            Property Analysis
-                        </div>
-                        <a href="HTML/Sherwin-Williams.html" target="_blank">Open</a>
-                    </div>
-                </div>
-            </div>
-        </section>
-      
-      <!-- Additional HTML Projects -->
-        <section class="dir-list">
-            <h2><i class="fas fa-folder"></i> Additional HTML Projects</h2>
-            <div class="dir-grid">
-                <!-- Base Layers (new card) -->
-                <div class="dir-card">
-                    <img src="Images/Base Layers.png" alt="Base Layers" loading="lazy"/>
-                    <div class="dir-card-content">
-                        <div class="title">Base Layers</div>
-                        <div class="description">
-                            Map tile style gallery and preview
-                        </div>
-                        <a href="HTML/Base%20Layers.html" target="_blank">Open Project</a>
-                    </div>
-                </div>
-                <!-- PrivateEye Search Tool (new card) -->
-                <div class="dir-card">
-                    <img src="Images/PrivateEye.png" alt="PrivateEye" loading="lazy"/>
-                    <div class="dir-card-content">
-                        <div class="title">PrivateEye</div>
-                        <div class="description">
-                            Lookup tool for PrivateEye data
-                        </div>
-                        <a href="HTML/Tool-Box/PrivateEye%20Search%20Tool.html" target="_blank">Open Tool</a>
-                    </div>
-                </div>
-                <div class="dir-card">
-                    <img src="Images/Tim Hortons.png" alt="Tim Hortons" loading="lazy"/>
-                    <div class="dir-card-content">
-                        <div class="title">Tenant Locations: Tim Hortons</div>
-                        <div class="description">
-                            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                            Tim Hortons USA locations
-                        </div>
-                        <a href="HTML/Tenant-Locations/Tim%20Hortons.html" target="_blank">Open Project</a>
-                    </div>
-                </div>
-                <div class="dir-card">
-                    <img src="Images/Grove Plaza.png" alt="Grove Plaza" loading="lazy"/>
-                    <div class="dir-card-content">
-                        <div class="title">Grove Plaza</div>
-                        <div class="description">
-                            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                            Analysis for Grove Plaza properties
-                        </div>
-                        <a href="HTML/Grove-Plaza.html" target="_blank">Open Project</a>
-                    </div>
-                </div>
-                <div class="dir-card">
-                    <img src="https://via.placeholder.com/320x220?text=On-Markets+Mobile" alt="On-Markets Mobile" loading="lazy"/>
-                    <div class="dir-card-content">
-                        <div class="title">On-Markets Mobile</div>
-                        <div class="description">
-                            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                            Mobile-optimized listings view
-                        </div>
-                        <a href="HTML/On-Markets-Mobile.html" target="_blank">Open Project</a>
-                    </div>
-                </div>
-                <div class="dir-card">
-                    <img src="Images/OregonvsWashington.png" alt="Oregon vs Washington" loading="lazy"/>
-                    <div class="dir-card-content">
-                        <div class="title">Oregon vs. Washington</div>
-                        <div class="description">
-                            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                            Comparative market analysis
-                        </div>
-                        <a href="HTML/Oregon%20vs.%20Washington.html" target="_blank">Open Project</a>
-                    </div>
-                </div>
-                <div class="dir-card">
-                    <img src="Images/AI Resilience.png" alt="AI Resilience Formula" loading="lazy"/>
-                    <div class="dir-card-content">
-                        <div class="title">AI Resilience Formula</div>
-                        <div class="description">
-                            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                            AI-driven investment insights
-                        </div>
-                        <a href="HTML/The%20AI%20Resilience%20Formula.html" target="_blank">Open Project</a>
-                    </div>
-                </div>
-                <div class="dir-card">
-                    <img src="Images/OwnerProperties.png" alt="Owner Properties Window" loading="lazy"/>
-                    <div class="dir-card-content">
-                        <div class="title">Owner Properties Window</div>
-                        <div class="description">
-                            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                            Interactive property details view
-                        </div>
-                        <a href="Widgets/OwnerProperties-Window.html" target="_blank">Open Project</a>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Add Project Button & Modal -->
-<button id="addProjectBtn" style="
-  position: fixed; bottom: 2rem; right: 2rem; z-index: 1000;
-  background: #3b82f6; color: white; border: none; border-radius: 50%; width: 56px; height: 56px; font-size: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.2); cursor: pointer;
-" title="Add New Project">+</button>
-<div id="addProjectModal" style="display:none; position:fixed; top:0;left:0;right:0;bottom:0; background:rgba(0,0,0,0.45); z-index:1100; align-items:center; justify-content:center;">
-  <div style="background:white; padding:2rem; border-radius:12px; max-width:400px; margin:auto; box-shadow:0 4px 24px rgba(0,0,0,0.15); position:relative;">
-    <h2 style="margin-top:0;">Add New Project</h2>
-    <form id="projectForm">
-      <label>Title<br><input name="title" type="text" required style="width:100%;"></label><br><br>
-      <label>Description<br><input name="description" type="text" required style="width:100%;"></label><br><br>
-      <label>Image URL<br><input name="image" type="text" placeholder="Images/yourimg.png or https://..." style="width:100%;"></label><br><br>
-      <label>Page/Widget URL<br><input name="url" type="text" required placeholder="HTML/Tool.html" style="width:100%;"></label><br><br>
-      <button type="submit" style="background:#3b82f6; color:white; border:none; padding:0.5rem 1.2rem; border-radius:8px;">Add</button>
-      <button type="button" id="cancelModal" style="margin-left:0.75rem; background:#eee; border:none; padding:0.5rem 1.2rem; border-radius:8px;">Cancel</button>
-    </form>
-  </div>
-</div>
-      
-      <!-- Interactive Maps & Dashboards -->
-        <section class="dir-list">
-            <h2><i class="fas fa-globe"></i> Interactive Maps & Dashboards</h2>
-            <div class="dir-grid">
-                <div class="dir-card">
-                    <img src="Images/Property Lookup Map.png" alt="Property Lookup Map" loading="lazy"/>
-                    <div class="dir-card-content">
-                        <div class="title">Property Lookup Map</div>
-                        <div class="description">
-                            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                            Nationwide map with search and tax/GIS links
-                        </div>
-                        <a href="HTML/national/index.html" target="_blank">Open National Map</a>
-                    </div>
-                </div>
-                <div class="dir-card">
-                    <img src="Images/Images Gallery.png" alt="Images Gallery" loading="lazy"/>
-                    <div class="dir-card-content">
-                        <div class="title">Images Gallery</div>
-                        <div class="description">
-                            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                            Preview images in /Images/ folder
-                        </div>
-                        <a href="images.html" target="_blank">Open Gallery</a>
-                    </div>
-                </div>
-                <div class="dir-card">
-                    <img src="Images/Grist - Listings.png" alt="Grist Listings" loading="lazy"/>
-                    <div class="dir-card-content">
-                        <div class="title">Grist - Listings</div>
-                        <div class="description">
-                            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                            On-Markets Listings
-                        </div>
-                        <a href="Widgets/Embed/Grist%20-%20Listings%20Embed.html" target="_blank">Open</a>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- RetailStat Newsletters -->
-        <section class="dir-list">
-            <h2><i class="fas fa-newspaper"></i> RetailStat Newsletters</h2>
-            <div class="dir-grid">
-                <div class="dir-card">
-                    <img src="https://via.placeholder.com/320x220?text=Newsletters+Archive" alt="Newsletters Archive" loading="lazy"/>
-                    <div class="dir-card-content">
-                        <div class="title">Newsletters Archive</div>
-                        <div class="description">
-                            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                            Monthly and bi-monthly news
-                        </div>
-                        <a href="retailstat/index.html" target="_blank">Open RetailStat Archive</a>
-                    </div>
-                </div>
-                <div class="dir-card">
-                    <img src="https://via.placeholder.com/320x220?text=Latest+Newsletter" alt="Latest Newsletter" loading="lazy"/>
-                    <div class="dir-card-content">
-                        <div class="title">Latest Newsletter</div>
-                        <div class="description">
-                            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                            Jump to the newest upload
-                        </div>
-                        <a href="retailstat/June-17-2025.html" target="_blank">Open Latest Newsletter</a>
-                    </div>
-                </div>
-                <div class="dir-card">
-                    <img src="Images/Retail Outlook 2H25 Update.png" alt="Retail Outlook" loading="lazy"/>
-                    <div class="dir-card-content">
-                        <div class="title">Retail Outlook</div>
-                        <div class="description">
-                            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                            2H25 Update
-                        </div>
-                        <a href="retailstat/Retail%20Outlook%20-%202H25%20Update.pdf" target="_blank">Open</a>
-                    </div>
-                </div>
-                <div class="dir-card">
-                    <img src="Images/Merger&Acquisition.png" alt="M&A Activity" loading="lazy"/>
-                    <div class="dir-card-content">
-                        <div class="title">M&A Activity</div>
-                        <div class="description">
-                            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                            Merger & Acquisition Update
-                        </div>
-                        <a href="retailstat/M&A%20Activity%20Update%20-%20June%2017.pdf" target="_blank">Open</a>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 1031 Exchange Playbooks -->
-        <section class="dir-list">
-            <h2><i class="fas fa-folder-open"></i> 1031 Exchange Playbooks</h2>
-            <div class="dir-grid">
-                <div class="dir-card">
-                    <img src="Images/1031 Strategic Guide.png" alt="Oregon 1031 Claude" loading="lazy"/>
-                    <div class="dir-card-content">
-                        <div class="title">Oregon 1031 Strategic Guide (Claude)</div>
-                        <div class="description">
-                            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                            Guide for exchanging Oregon properties
-                        </div>
-                        <a href="HTML/1031-Exchange/Claude-OR-1031.html" target="_blank">Read Guide</a>
-                    </div>
-                </div>
-                <div class="dir-card">
-                    <img src="Images/1031 Strategic Guide.png" alt="Oregon 1031 GPT v1" loading="lazy"/>
-                    <div class="dir-card-content">
-                        <div class="title">Oregon 1031 Strategic Guide (GPT v1)</div>
-                        <div class="description">
-                            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                            Concise 1031 rationale
-                        </div>
-                        <a href="HTML/1031-Exchange/GPT-1031-(1).html" target="_blank">Read Guide</a>
-                    </div>
-                </div>
-                <div class="dir-card">
-                    <img src="Images/1031 Strategic Guide.png" alt="Oregon 1031 GPT v2" loading="lazy"/>
-                    <div class="dir-card-content">
-                        <div class="title">Oregon 1031 Strategic Guide (GPT v2)</div>
-                        <div class="description">
-                            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                            Tab-based Tailwind/AlpineJS version
-                        </div>
-                        <a href="HTML/1031-Exchange/GPT-1031-(2).html" target="_blank">Read Guide</a>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- GeoJSON Files & Raw Data -->
-        <section class="dir-list">
-            <h2><i class="fas fa-database"></i> GeoJSON Files & Raw Data</h2>
-            <div class="dir-grid">
-                <div class="dir-card">
-                    <img src="https://via.placeholder.com/320x220?text=GeoJSON+Directory" alt="GeoJSON Directory" loading="lazy"/>
-                    <div class="dir-card-content">
-                        <div class="title">GeoJSON Directory</div>
-                        <div class="description">
-                            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                            Browse GeoJSON files on GitHub
-                        </div>
-                        <a href="https://github.com/CleanslateKickz/geojson/tree/main/geojson" target="_blank">Browse on GitHub</a>
-                    </div>
-                </div>
-                <div class="dir-card">
-                    <img src="https://via.placeholder.com/320x220?text=Recent+GeoJSONs" alt="Recent GeoJSONs" loading="lazy"/>
-                    <div class="dir-card-content">
-                        <div class="title">Recent GeoJSONs</div>
-                        <div class="description">
-                            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                            Preview recent .geojson uploads
-                        </div>
-                        <a href="#recentFiles" onclick="document.getElementById('recentFiles').scrollIntoView({behavior:'smooth'}); return false;">Show Recent Files</a>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Widgets & Tools -->
-        <section class="dir-list">
-            <h2><i class="fas fa-puzzle-piece"></i> Widgets & Tools</h2>
-            <div class="dir-grid">
-                <!-- PrivateEye Search Tool (new card) -->
-                <div class="dir-card">
-                    <img src="Images/PrivateEye.png" alt="PrivateEye" loading="lazy"/>
-                    <div class="dir-card-content">
-                        <div class="title">PrivateEye</div>
-                        <div class="description">
-                            Lookup tool for PrivateEye data
-                        </div>
-                        <a href="Widgets/PrivateEye.html" target="_blank">Open Widget</a>
-                    </div>
-                </div>
-                <div class="dir-card">
-                    <img src="https://via.placeholder.com/320x220?text=ArcGIS+URL+Formatter" alt="ArcGIS URL Formatter" loading="lazy"/>
-                    <div class="dir-card-content">
-                        <div class="title">ArcGIS URL Formatter</div>
-                        <div class="description">
-                            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                            Format ArcGIS URLs for GeoJSON
-                        </div>
-                        <a href="Widgets/ArcGIS URL Formatter.html" target="_blank">Open Widget</a>
-                    </div>
-                </div>
-                <div class="dir-card">
-                    <img src="https://via.placeholder.com/320x220?text=Dynamic+Size+Tenant+Map" alt="Dynamic Size Tenant Map" loading="lazy"/>
-                    <div class="dir-card-content">
-                        <div class="title">Dynamic Size Tenant Map</div>
-                        <div class="description">
-                            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                            Interactive Leaflet/Cluster map
-                        </div>
-                        <a href="Widgets/DynamicSizeTenant.html" target="_blank">Open Widget</a>
-                    </div>
-                </div>
-                <div class="dir-card">
-                    <img src="https://via.placeholder.com/320x220?text=Tenant+Map+Standard" alt="Tenant Map Standard" loading="lazy"/>
-                    <div class="dir-card-content">
-                        <div class="title">Tenant Map (Standard)</div>
-                        <div class="description">
-                            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                            Clustered map for directories
-                        </div>
-                        <a href="Widgets/TenantMap.html" target="_blank">Open Map</a>
-                    </div>
-                </div>
-                <div class="dir-card">
-                    <img src="https://via.placeholder.com/320x220?text=Calculator" alt="Calculator" loading="lazy"/>
-                    <div class="dir-card-content">
-                        <div class="title">Calculator</div>
-                        <div class="description">
-                            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                            Simple on-page calculator
-                        </div>
-                        <a href="Widgets/Calculator.html" target="_blank">Open Calculator</a>
-                    </div>
-                </div>
-                <div class="dir-card">
-                    <img src="https://via.placeholder.com/320x220?text=Drop-down+Widget" alt="Drop-down Widget" loading="lazy"/>
-                    <div class="dir-card-content">
-                        <div class="title">Drop-down Widget</div>
-                        <div class="description">
-                            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                            Selection widget for directories
-                        </div>
-                        <a href="Widgets/drop-down-widget/index.html" target="_blank">Open Widget</a>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Recent Files Section -->
-        <div id="recentFiles" class="files-list">
-            <h2><i class="fas fa-clock"></i> Recent Files</h2>
-            <div class="loading-placeholder">Loading repository contents...</div>
-        </div>
-    </main>
-
-    <footer class="footer">
-        <p>© 2025 <a href="https://github.com/CleanslateKickz" target="_blank">CleanslateKickz</a> — <a href="https://github.com/CleanslateKickz/geojson" target="_blank"><i class="fab fa-github"></i> Repo</a></p>
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js"></script>
-    <script src="js/main.js"></script>
-    <script>
-        document.getElementById('projectSearch').addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            const cards = document.querySelectorAll('.dir-card');
-            cards.forEach(card => {
-                const title = card.querySelector('.title').textContent.toLowerCase();
-                const description = card.querySelector('.description').textContent.toLowerCase();
-                card.style.display = (title.includes(searchTerm) || description.includes(searchTerm)) ? '' : 'none';
-            });
-        });
-    </script>
-    <script>
-// --- Modal open/close logic ---
-const addBtn = document.getElementById('addProjectBtn');
-const modal = document.getElementById('addProjectModal');
-const cancelModal = document.getElementById('cancelModal');
-addBtn.onclick = () => { modal.style.display = 'flex'; };
-cancelModal.onclick = () => { modal.style.display = 'none'; };
-window.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
-
-// --- Inject new project into the DOM and store in localStorage ---
-const projectForm = document.getElementById('projectForm');
-projectForm.onsubmit = function(e) {
-  e.preventDefault();
-  const data = Object.fromEntries(new FormData(projectForm).entries());
-
-  // Use a default image if none provided
-  const image = data.image || 'https://via.placeholder.com/320x220?text=New+Project';
-
-  // Find where to append: for demo, append to first .dir-grid, or pick your preferred section
-  const grid = document.querySelector('.dir-grid');
-  if (grid) {
-    const card = document.createElement('div');
-    card.className = 'dir-card';
-    card.innerHTML = `
-      <img src="${image}" alt="${data.title}" loading="lazy"/>
-      <div class="dir-card-content">
-        <div class="title">${data.title}</div>
-        <div class="description">${data.description}</div>
-        <a href="${data.url}" target="_blank">Open</a>
       </div>
-    `;
-    grid.prepend(card); // Add to top
-    saveProjectToLocal(data); // Persist to localStorage
-  }
-  modal.style.display = 'none';
-  projectForm.reset();
-};
-
-// --- localStorage persistence (optional, for demo; not cross-device) ---
-function saveProjectToLocal(project) {
-  let projects = JSON.parse(localStorage.getItem('customProjects') || '[]');
-  projects.unshift(project);
-  localStorage.setItem('customProjects', JSON.stringify(projects));
-}
-function loadProjectsFromLocal() {
-  let projects = JSON.parse(localStorage.getItem('customProjects') || '[]');
-  const grid = document.querySelector('.dir-grid');
-  if (grid && projects.length) {
-    for (const data of projects) {
-      const image = data.image || 'https://via.placeholder.com/320x220?text=New+Project';
-      const card = document.createElement('div');
-      card.className = 'dir-card';
-      card.innerHTML = `
-        <img src="${image}" alt="${data.title}" loading="lazy"/>
-        <div class="dir-card-content">
-          <div class="title">${data.title}</div>
-          <div class="description">${data.description}</div>
-          <a href="${data.url}" target="_blank">Open</a>
+      <div class="card">
+        <img class="card-img" src="https://via.placeholder.com/320x180?text=Latest+Newsletter" alt="Latest Newsletter"/>
+        <div class="card-content">
+          <div class="card-title"><i class="fas fa-file-alt"></i> Latest Newsletter</div>
+          <div class="card-desc">Jump directly to the newest upload (auto-updated in Archive view).</div>
+          <a class="card-link" href="retailstat/June-17-2025.html">Open Latest</a>
         </div>
-      `;
-      grid.appendChild(card);
+      </div>
+    </div>
+
+    <!-- GeoJSON Data -->
+    <div class="section-title"><i class="fas fa-database"></i> GeoJSON Files & Data</div>
+    <div class="grid">
+      <div class="card">
+        <img class="card-img" src="https://via.placeholder.com/320x180?text=GeoJSON+Directory" alt="GeoJSON Directory"/>
+        <div class="card-content">
+          <div class="card-title"><i class="fas fa-folder"></i> GeoJSON Directory</div>
+          <div class="card-desc">Browse raw GeoJSON data on GitHub.</div>
+          <a class="card-link" href="https://github.com/CleanslateKickz/geojson/tree/main/geojson" target="_blank">Browse on GitHub</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer">
+    &copy; 2025 <a href="https://github.com/CleanslateKickz" target="_blank">CleanslateKickz</a>
+    &mdash; <a href="https://github.com/CleanslateKickz/geojson" target="_blank"><i class="fab fa-github"></i> Repo</a>
+  </div>
+  <script>
+    // Mapping: filename (without .html) to image/alt for /HTML
+    const htmlImageMap = {
+      "CRE-Toolkit":         {img: "Images/CRE-Toolkit.png", alt: "CRE Analysis Toolkit", desc: "Tools for STNL and Multi-Tenant Properties"},
+      "Day Care Property Investment Analysis": {img: "Images/Day-Care.png", alt: "Day Care Analysis", desc: "Property Investment Analysis"},
+      "Sherwin-Williams":    {img: "Images/Sherwin-Williams.png", alt: "Sherwin-Williams", desc: "Property Analysis"},
+      "Base Layers":         {img: "Images/Base Layers.png", alt: "Base Layers", desc: "Map tile style gallery and preview"},
+      "Grove-Plaza":         {img: "Images/Grove Plaza.png", alt: "Grove Plaza", desc: "Analysis for Grove Plaza properties"},
+      "On-Markets-Mobile":   {img: "https://via.placeholder.com/320x180?text=On-Markets+Mobile", alt: "On-Markets Mobile", desc: "Mobile-optimized listings view"},
+      "Oregon vs. Washington":{img: "Images/OregonvsWashington.png", alt: "Oregon vs Washington", desc: "Comparative market analysis"},
+      "The AI Resilience Formula": {img: "Images/AI Resilience.png", alt: "AI Resilience Formula", desc: "AI-driven investment insights"},
+      "PrivateEye Search Tool":    {img: "Images/PrivateEye.png", alt: "PrivateEye", desc: "Lookup tool for PrivateEye data"},
+      "OwnerProperties-Window":    {img: "Images/OwnerProperties.png", alt: "Owner Properties Window", desc: "Interactive property details view"},
+      "1031-Exchange/Claude-OR-1031": {img: "Images/1031 Strategic Guide.png", alt: "Oregon 1031 Claude", desc: "Guide for exchanging Oregon properties"},
+      "1031-Exchange/GPT-1031-(1)":   {img: "Images/1031 Strategic Guide.png", alt: "Oregon 1031 GPT v1", desc: "Concise 1031 rationale"},
+      "1031-Exchange/GPT-1031-(2)":   {img: "Images/1031 Strategic Guide.png", alt: "Oregon 1031 GPT v2", desc: "Tab-based Tailwind/AlpineJS version"}
+    };
+    // Mapping for /Widgets
+    const widgetsImageMap = {
+      "PrivateEye":          {img: "Images/PrivateEye.png", alt: "PrivateEye", desc: "Lookup tool for PrivateEye data"},
+      "ArcGIS URL Formatter":{img: "https://via.placeholder.com/320x180?text=ArcGIS+URL+Formatter", alt: "ArcGIS URL Formatter", desc: "Format ArcGIS URLs for GeoJSON"},
+      "DynamicSizeTenant":   {img: "https://via.placeholder.com/320x180?text=Dynamic+Size+Tenant+Map", alt: "Dynamic Size Tenant Map", desc: "Interactive Leaflet/Cluster map"},
+      "TenantMap":           {img: "https://via.placeholder.com/320x180?text=Tenant+Map+Standard", alt: "Tenant Map Standard", desc: "Clustered map for directories"},
+      "Calculator":          {img: "https://via.placeholder.com/320x180?text=Calculator", alt: "Calculator", desc: "Simple on-page calculator"},
+      "drop-down-widget/index": {img: "https://via.placeholder.com/320x180?text=Drop-down+Widget", alt: "Drop-down Widget", desc: "Selection widget for directories"},
+      "Embed/Grist - Listings Embed": {img: "Images/Grist - Listings.png", alt: "Grist Listings", desc: "On-Markets Listings"}
+    };
+
+    // Helper: fetch folder contents from GitHub API and filter for .html files
+    async function fetchHtmlFiles(apiPath, subfolder) {
+      const url = `https://api.github.com/repos/CleanslateKickz/geojson/contents/${apiPath}`;
+      try {
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error("Failed to fetch");
+        const files = await resp.json();
+        // Only HTML files
+        return files.filter(f => f.type === "file" && /\.html?$/i.test(f.name)).map(f => ({
+          name: f.name,
+          path: `${subfolder}/${f.name}`
+        }));
+      } catch (e) { return []; }
     }
-  }
-}
-document.addEventListener('DOMContentLoaded', loadProjectsFromLocal);
-</script>
+    // Helper for subfolders (e.g., HTML/Tool-Box)
+    async function fetchHtmlFilesWithSubfolders(apiPath, subfolder) {
+      // Fetch all files and subfolders in apiPath, recursively.
+      const url = `https://api.github.com/repos/CleanslateKickz/geojson/contents/${apiPath}`;
+      try {
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error("Failed to fetch");
+        const items = await resp.json();
+        let result = [];
+        for (const item of items) {
+          if (item.type === "file" && /\.html?$/i.test(item.name)) {
+            result.push({ name: item.name, path: `${subfolder}/${item.name}` });
+          } else if (item.type === "dir") {
+            // Recursively fetch files in subfolder
+            const subfiles = await fetchHtmlFilesWithSubfolders(`${apiPath}/${item.name}`, `${subfolder}/${item.name}`);
+            result = result.concat(subfiles);
+          }
+        }
+        return result;
+      } catch (e) { return []; }
+    }
+
+    function getImgObj(map, filePath) {
+      // Try full path, then strip index.html, then just base name
+      filePath = filePath.replace(/\.html?$/i,"");
+      if (map[filePath]) return map[filePath];
+      const base = filePath.split(/[\\/]/).pop();
+      if (map[base]) return map[base];
+      return {img:"https://via.placeholder.com/320x180?text=Project", alt:base, desc:""};
+    }
+
+    // Display cards for files in a grid
+    function showCards(files, gridId, map, section) {
+      const grid = document.getElementById(gridId);
+      grid.innerHTML = "";
+      if (!files.length) {
+        grid.innerHTML = `<div class="loading">No ${section} found.</div>`;
+        return;
+      }
+      files.forEach(f => {
+        const imgObj = getImgObj(map, f.path.replace(/^HTML\//,"").replace(/^Widgets\//,""));
+        grid.innerHTML += `
+          <div class="card">
+            <img class="card-img" src="${imgObj.img}" alt="${imgObj.alt}"/>
+            <div class="card-content">
+              <div class="card-title">${imgObj.alt}</div>
+              <div class="card-desc">${imgObj.desc || "Open <code>" + f.path + "</code>"}</div>
+              <a class="card-link" href="${f.path}">Open</a>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    // Load HTML tools (including subfolders for 1031 Exchange etc)
+    fetchHtmlFilesWithSubfolders('HTML', 'HTML').then(files => showCards(files, 'html-tools', htmlImageMap, "tools"));
+    // Load Widgets (including subfolders for Embed, drop-down-widget etc)
+    fetchHtmlFilesWithSubfolders('Widgets', 'Widgets').then(files => showCards(files, 'widgets', widgetsImageMap, "widgets"));
+  </script>
 </body>
 </html>
