@@ -6,7 +6,7 @@
   "grist": [
     {
       "name": "Map",
-      "url": "https://gristlabs.github.io/grist-widget/map/index.html",
+      "url": "https://cleanslatekickz.github.io/geojson/Widgets/Map/MapWidget.html",
       "widgetId": "@gristlabs/widget-map#map",
       "published": true,
       "accessLevel": "full",
@@ -14,8 +14,8 @@
       "description": "Display locations on a map using either addresses or latitude and longitude coordinates..",
       "authors": [
         {
-          "name": "Grist Labs",
-          "url": "https://github.com/gristlabs"
+          "name": "Grist Lab",
+          "url": "https://cleanslatekickz.github.io/geojson"
         }
       ],
       "isGristLabsMaintained": false
