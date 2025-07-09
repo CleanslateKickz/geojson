@@ -111,13 +111,6 @@
     <div id="property-details" class="property-details hidden"></div>
     <div class="sidebar-resizer" id="sidebar-resizer"></div>
   </div>
-  <div id="arcgis-map-container" class="arcgis-map-container">
-    <div class="arcgis-map-controls">
-      <button id="arcgis-expand-btn" class="arcgis-map-toggle" title="Expand/Shrink Panel">↔️</button>
-      <button id="arcgis-close-btn" class="arcgis-map-toggle" title="Close Panel">✖️</button>
-    </div>
-    <iframe id="arcgis-iframe" src="https://www.arcgis.com/apps/instant/basic/index.html?appid=8826413257c943a48d51287764106441" allowfullscreen></iframe>
-  </div>
   <!-- Leaflet and other JS libraries -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet-geosearch@3.0.0/dist/geosearch.umd.js"></script>
@@ -907,51 +900,6 @@
           }
         });
 
-        // --- ArcGIS Map Integration ---
-        function initArcGISMapIntegration() {
-          const arcgisContainer = document.getElementById('arcgis-map-container');
-          const expandButton = document.getElementById('arcgis-expand-btn');
-          const closeButton = document.getElementById('arcgis-close-btn');
-          const iframe = document.getElementById('arcgis-iframe');
-          const arcgisToggleBtn = document.getElementById('arcgis-toggle');
-          let arcgisMapVisible = false;
-          if (!arcgisContainer || !expandButton || !closeButton || !iframe) return;
-          expandButton.addEventListener('click', function() {
-            arcgisContainer.classList.toggle('expanded');
-            document.body.classList.toggle('arcgis-map-expanded');
-            amap.invalidateSize();
-          });
-          closeButton.addEventListener('click', function() {
-            arcisContainer.style.display = 'none';
-            arcgisMapVisible = false;
-            document.body.classList.remove('arcgis-map-active');
-            document.body.classList.remove('arcgis-map-expanded');
-            amap.invalidateSize();
-            if (arcgisToggleBtn) arcisToggleBtn.classList.remove('active');
-          });
-          if (arcgisToggleBtn) {
-            arcisToggleBtn.addEventListener('click', function() {
-              if (arcgisMapVisible) {
-                arcisContainer.style.display = 'none';
-                arcgisMapVisible = false;
-                document.body.classList.remove('arcgis-map-active');
-                document.body.classList.remove('arcgis-map-expanded');
-                this.classList.remove('active');
-              } else {
-                arcisContainer.style.display = 'block';
-                arcgisMapVisible = true;
-                document.body.classList.add('arcgis-map-active');
-                if (arcgisContainer.classList.contains('expanded')) {
-                  document.body.classList.add('arcgis-map-expanded');
-                }
-                this.classList.add('active');
-              }
-              amap.invalidateSize();
-            });
-          }
-        }
-        initArcGISMapIntegration();
-
         // --- Layer Controls ---
         // Remove layer controls logic
 
@@ -964,4 +912,4 @@
   </script>
   <!-- You will need to copy/adapt the rest of the JS logic from standalone-map.js here, replacing fetchGeoJSON with fetchGristData and using propertyFeatures as your data source. -->
 </body>
-</html> 
+</html>
