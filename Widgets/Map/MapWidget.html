@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grist Map Widget</title>
+  <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-geosearch@3.0.0/dist/geosearch.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+  <link rel="stylesheet" href="https://unpkg.com/tippy.js@6.3.7/dist/tippy.css" />
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.23/dist/full.min.css" rel="stylesheet" type="text/css" />
+  <link rel="stylesheet" href="screen.css" />
+  <link rel="stylesheet" href="modern-ui.css" />
+  <style>
+    html, body { height: 100%; width: 100%; }
+    body { background: #B9DFF8; }
+    /* Add any additional widget-specific styles here */
+    
+    /* Popup Styles */
+    .card {
+      position: relative;
+      width: 220px;
+      height: 130px;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      background: white;
+    }
+    
+    .card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .card-content {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(transparent, rgba(0,0,0,0.8));
+      color: white;
+      padding: 12px;
+    }
+    
+    .card-content .title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      line-height: 1.2;
+    }
+    
+    .card-content .location {
+      font-size: 12px;
+      opacity: 0.9;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+    }
+    
+    .card-content .location svg {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+    }
+    
+    .card-content .location:hover {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body class="bg-[#B9DFF8] min-h-screen">
+  <!-- Map and sidebar UI copied from index.html -->
+  <div id="map" class="w-full h-screen"></div>
+  <div id="loading-indicator" class="loading-overlay">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Loading map data...</div>
+  </div>
+  <!-- Remove county-info card and map legend from HTML -->
+  <!-- Remove this block from the HTML -->
+  <!--
+  <div id="county-info" class="county-info-card hidden">
+    <h3 id="county-name"></h3>
+    <div class="county-button-container">
+      <a id="tax-button" href="#" class="info-button" target="_blank">🔍</a>
+      <a id="gis-button" href="#" class="info-button gis-button" target="_blank">🌎</a>
+    </div>
+  </div>
+  -->
+  <!-- Remove map legend from HTML -->
+  <!-- <div id="map-legend" class="legend">...</div> -->
+  <div id="sidebar" class="property-sidebar">
+    <button id="sidebar-toggle-btn" class="sidebar-toggle-btn" title="Collapse Sidebar">☰</button>
+    <div class="sidebar-header">
+      <h3>Properties</h3>
+      <span id="property-count" class="property-count">0 properties</span>
+      <button id="close-sidebar" class="close-sidebar-button" title="Close Sidebar">✖️</button>
+    </div>
+    <div class="sidebar-controls">
+      <div class="search-filter">
+        <input type="text" id="sidebar-search" class="search-input" placeholder="Search properties..." />
+        <button id="clear-search" class="clear-search-button" title="Clear search">✖️</button>
+      </div>
+    </div>
+    <div id="property-list" class="property-list"></div>
+    <div id="property-details" class="property-details hidden"></div>
+    <div class="sidebar-resizer" id="sidebar-resizer"></div>
+  </div>
+  <div id="arcgis-map-container" class="arcgis-map-container">
+    <div class="arcgis-map-controls">
+      <button id="arcgis-expand-btn" class="arcgis-map-toggle" title="Expand/Shrink Panel">↔️</button>
+      <button id="arcgis-close-btn" class="arcgis-map-toggle" title="Close Panel">✖️</button>
+    </div>
+    <iframe id="arcgis-iframe" src="https://www.arcgis.com/apps/instant/basic/index.html?appid=8826413257c943a48d51287764106441" allowfullscreen></iframe>
+  </div>
+  <!-- Leaflet and other JS libraries -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-geosearch@3.0.0/dist/geosearch.umd.js"></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+  <script src="county-data.js"></script>
+  <script>
+    // --- Utility: Convert Grist columnar data to row format ---
+    function columnarToRowFormat(columnarData) {
+      if (!columnarData || !columnarData.id || !Array.isArray(columnarData.id)) return [];
+      const numRows = columnarData.id.length;
+      const columnNames = Object.keys(columnarData);
+      const rowData = [];
+      for (let i = 0; i < numRows; i++) {
+        const fields = {};
+        for (const colName of columnNames) {
+          if (colName !== 'id' && colName !== 'manualSort') fields[colName] = columnarData[colName][i];
+        }
+        rowData.push({ id: columnarData.id[i], fields });
+      }
+      return rowData;
+    }
+
+    // --- Utility: Owner Lookup and Field Value ---
+    function getOwnerById(ownerId) {
+      if (!owners || !Array.isArray(owners)) return null;
+      return owners.find(o => o.id === ownerId)?.fields || null;
+    }
+    function getFieldValue(val) {
+      if (Array.isArray(val)) {
+        if (val[0] === 'L') return val.slice(1).join(', ');
+        return val[val.length - 1] || '';
+      }
+      return val !== undefined && val !== null ? val : '';
+    }
+
+    // --- Utility: Throttle, Markdown, Phone, Toast, Copy ---
+    function throttle(func, limit) {
+      let inThrottle;
+      return function() {
+        const args = arguments, context = this;
+        if (!inThrottle) {
+          func.apply(context, args);
+          inThrottle = true;
+          setTimeout(() => inThrottle = false, limit);
+        }
+      };
+    }
+    function parseMarkdown(text) {
+      if (text === null || text === undefined || String(text).trim() === '' || text === 'N/A') {
+        return '<span class="na-value">N/A</span>';
+      }
+      let html = String(text);
+      html = html.replace(/</g, '<').replace(/>/g, '>');
+      html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+      html = html.replace(/\[(.*?)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+      html = html.replace(/(?:\r\n|\r|\n)/g, '<br>');
+      return html;
+    }
+    function formatPhoneNumber(phoneNumber) {
+      const digitsOnly = String(phoneNumber).replace(/[^0-9]/g, '');
+      if (digitsOnly.length === 10) {
+        return `(${digitsOnly.substring(0, 3)}) ${digitsOnly.substring(3, 6)}-${digitsOnly.substring(6, 10)}`;
+      } else if (digitsOnly.length > 10) {
+        const nationalNumber = digitsOnly.substring(digitsOnly.length - 10);
+        if (nationalNumber.length === 10) {
+          return `(${nationalNumber.substring(0, 3)}) ${nationalNumber.substring(3, 6)}-${nationalNumber.substring(6, 10)}`;
+        }
+      }
+      return phoneNumber;
+    }
+    function showToast(message, type = 'info') {
+      const toast = document.createElement('div');
+      toast.className = `toast-notification ${type}`;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.classList.add('active'), 10);
+      setTimeout(() => {
+        toast.classList.remove('active');
+        setTimeout(() => {
+          if (toast.parentNode) {
+            document.body.removeChild(toast);
+          }
+        }, 300);
+      }, 3000);
+    }
+    window.copyToClipboard = function(text) {
+      if (!text || typeof text !== 'string') { console.warn("Copy attempt with invalid text:", text); return; }
+      navigator.clipboard.writeText(text).then(() => {
+        const tooltip = document.createElement('div'); tooltip.className = 'copy-tooltip active'; tooltip.textContent = 'Copied!'; document.body.appendChild(tooltip);
+        setTimeout(() => { tooltip.classList.remove('active'); setTimeout(() => { if (tooltip.parentNode) { document.body.removeChild(tooltip); } }, 300); }, 1200);
+      }, (err) => { console.error('Could not copy text: ', err); showToast('Failed to copy text.', 'error'); });
+    };
+
+    // --- Phone Row Rendering (Standalone Map Logic) ---
+    function renderPhoneRowWithButtons(phoneKey, notesKey, owner) {
+      const phoneVal = owner && owner[phoneKey];
+      if (phoneVal === null || phoneVal === undefined || String(phoneVal).trim() === '' || phoneVal === 'N/A') {
+        return '';
+      }
+      const notesVal = owner && owner[notesKey];
+      const formattedPhoneDigits = String(phoneVal).replace(/[^0-9]/g, '');
+      const notesDisplay = parseMarkdown(notesVal);
+      return `
+        <tr>
+          <td style="white-space:nowrap;">${formatPhoneNumber(phoneVal)}</td>
+          <td>${notesDisplay}</td>
+          <td class="phone-actions-cell" style="white-space:nowrap;">
+            <button class="phone-action-btn" title="Call via Webex (SIP)"><a href="sip:${formattedPhoneDigits}">📠</a></button>
+            <button class="phone-action-btn" title="Call via Phone Link (TEL)"><a href="tel:+1${formattedPhoneDigits}">📱</a></button>
+          </td>
+        </tr>`;
+    }
+
+    // --- Main Map Widget Logic ---
+    let owners = [];
+    let properties = [];
+    let ownerMap = {};
+    let propertyFeatures = [];
+    let amap;
+    let markersLayer;
+    let originalData;
+    let visibleProperties = [];
+    let isDetailViewActive = false;
+    let activeFilters = { classifications: {} };
+    let searchFilter = '';
+
+    // --- Fetch Owners and Properties from Grist ---
+    async function fetchGristData() {
+      console.log('Fetching Grist data...');
+      const [ownersCol, propsCol] = await Promise.all([
+        grist.docApi.fetchTable('Owners_'),
+        grist.docApi.fetchTable('Properties_')
+      ]);
+      owners = columnarToRowFormat(ownersCol);
+      properties = columnarToRowFormat(propsCol);
+      console.log('Owners loaded:', owners.length, owners);
+      console.log('Properties loaded:', properties.length, properties);
+      // Build ownerMap for quick lookup
+      ownerMap = {};
+      owners.forEach(o => { ownerMap[o.id] = o.fields; });
+      // Build propertyFeatures for map (GeoJSON-like)
+      propertyFeatures = properties.map(p => {
+        const f = p.fields;
+        return {
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: [parseFloat(f.Longitude), parseFloat(f.Latitude)]
+          },
+          properties: {
+            ...f,
+            id: p.id,
+            PrimaryOwner: (f.Name && Array.isArray(f.Name) && f.Name.length > 0 && ownerMap[f.Name[0]]) ? ownerMap[f.Name[0]].Name : f.PrimaryOwner
+          }
+        };
+      }).filter(f => !isNaN(f.geometry.coordinates[0]) && !isNaN(f.geometry.coordinates[1]));
+      console.log('propertyFeatures for map:', propertyFeatures.length, propertyFeatures);
+      originalData = { type: 'FeatureCollection', features: propertyFeatures };
+    }
+
+    // --- Marker Icon Utility ---
+    function getMarkerIcon(classification) {
+      // For now, always return the default icon. You can expand this for custom icons/colors.
+      return new L.Icon.Default();
+    }
+
+    // --- Map Rendering Logic ---
+    function createPopupContent(props, coordinates) {
+      const propertyId = props["Property_Id"] || props["Property Id"] || props.id;
+      const displayName = props.PrimaryOwner || props.Name || "Unnamed Property";
+      const imgSrc = props["Pop_up_IMG"] || '';
+      const hasImage = imgSrc && imgSrc.trim() !== '';
+      const address = props["Address_Concatenate"] || '';
+      return `
+        <div class="card">
+          ${hasImage ? `<img src="${imgSrc}" alt="${displayName}" loading="lazy" onerror="this.onerror=null; this.src='https://placehold.co/220x130/e5e7eb/9ca3af?text=No+Image';">` : `<div style="position:absolute; width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#e5e7eb; color:#9ca3af; font-size:14px;">No Image</div>`}
+          <div class="card-content">
+            <div class="title">${displayName}</div>
+            <div class="location" style="user-select:none" onclick="if(window.openPropertySidebar){window.openPropertySidebar('${propertyId}');}">
+              <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+              ${address ? address : 'View Property'}
+            </div>
+          </div>
+        </div>`;
+    }
+    window.openPropertySidebar = function(propertyId) {
+      if (!propertyId) return;
+      if (typeof showPropertyDetails === 'function') {
+        showPropertyDetails(propertyId);
+        if (amap && amap.closePopup) { amap.closePopup(); }
+      }
+    };
+    function updateMap(data) {
+      if (!amap) { console.error("Map not init."); return; }
+      if (!markersLayer) {
+        markersLayer = L.markerClusterGroup({
+          disableClusteringAtZoom: 18,
+          maxClusterRadius: 45,
+          spiderfyOnMaxZoom: true,
+          zoomToBoundsOnClick: true,
+          chunkedLoading: true,
+          chunkInterval: 200,
+          chunkDelay: 50,
+          removeOutsideVisibleBounds: true
+        });
+        amap.addLayer(markersLayer);
+      } else {
+        markersLayer.clearLayers();
+      }
+      const markers = [];
+      if (!data.features || !Array.isArray(data.features) || data.features.length === 0) {
+        console.warn('No property features found. Adding fallback marker.');
+        const fallback = L.marker([44.0, -120.5]).bindPopup('No properties found.');
+        markersLayer.addLayer(fallback);
+        return;
+      }
+      data.features.forEach(feature => {
+        const props = feature.properties;
+        const coords = feature.geometry?.coordinates;
+        if (!coords || coords.length < 2 || typeof coords[1] !== 'number' || typeof coords[0] !== 'number' || isNaN(coords[1]) || isNaN(coords[0])) return;
+        const lat = coords[1];
+        const lon = coords[0];
+        const propertyId = props["Property_Id"] || props["Property Id"] || props.id;
+        if (propertyId && !isNaN(lat) && !isNaN(lon)) {
+          const marker = L.marker([lat, lon], {
+            icon: getMarkerIcon(props["Classify Color"]),
+            propertyId: propertyId
+          });
+          const popupContent = createPopupContent(props, [lat, lon]);
+          marker.bindPopup(popupContent, {
+            minWidth: 180,
+            maxWidth: 220,
+            closeButton: true,
+            autoPan: true,
+            autoPanPadding: L.point(40, 40)
+          });
+          marker.on('click', function(e) {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar.classList.contains('active') && this.options.propertyId) {
+              const currentPropId = this.options.propertyId;
+              document.querySelectorAll('.property-item.active').forEach(item => item.classList.remove('active'));
+              const listItem = document.querySelector(`.property-item[data-id="${currentPropId}"]`);
+              if (listItem) {
+                listItem.classList.add('active');
+                if (!document.getElementById('property-list').classList.contains('hidden')) {
+                  listItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+              }
+            }
+          });
+          markers.push(marker);
+        }
+      });
+      console.log(`Adding ${markers.length} markers.`);
+      if (markers.length === 0) {
+        const fallback = L.marker([44.0, -120.5]).bindPopup('No valid property coordinates.');
+        markersLayer.addLayer(fallback);
+      } else {
+        markersLayer.addLayers(markers);
+      }
+    }
+
+    // --- Utility: Filter Sidebar ---
+    function filterSidebar(value, triggerDetails = false) {
+      searchFilter = value || '';
+      updateSidebar();
+      // Find best match for pan/zoom and open details
+      if (searchFilter.trim() !== '') {
+        const filterLower = searchFilter.trim().toLowerCase();
+        const matches = visibleProperties.filter(feature => {
+          const props = feature.properties;
+          const name = (props.Name && typeof props.Name === 'string') ? props.Name.toLowerCase() : '';
+          const address = (props.Address_Concatenate && typeof props.Address_Concatenate === 'string') ? props.Address_Concatenate.toLowerCase() : '';
+          const id = (props.Property_Id || props['Property Id'] || props.id || '').toString().toLowerCase();
+          return name.includes(filterLower) || address.includes(filterLower) || id.includes(filterLower);
+        });
+        if (matches.length === 1 || triggerDetails) {
+          const match = matches[0];
+          if (match) {
+            const coords = match.geometry.coordinates;
+            const propertyId = match.properties.Property_Id || match.properties['Property Id'] || match.properties.id;
+            if (coords && !isNaN(coords[0]) && !isNaN(coords[1])) {
+              amap.flyTo([coords[1], coords[0]], 18, { duration: 0.5 });
+            }
+            showPropertyDetails(propertyId);
+            selectRow(propertyId);
+          }
+        }
+      }
+    }
+
+    // --- Sidebar Toggle Button ---
+    function initSidebarToggle() {
+      const sidebarToggleButton = document.createElement('button');
+      sidebarToggleButton.className = 'sidebar-toggle-button';
+      sidebarToggleButton.innerHTML = '📋';
+      sidebarToggleButton.title = 'Toggle Property Sidebar';
+      sidebarToggleButton.style.position = 'absolute';
+      sidebarToggleButton.style.bottom = '30px';
+      sidebarToggleButton.style.left = '10px';
+      sidebarToggleButton.style.zIndex = '1001';
+      document.body.appendChild(sidebarToggleButton);
+      
+      const sidebar = document.getElementById('sidebar');
+      const closeSidebarBtn = document.getElementById('close-sidebar');
+      
+      sidebarToggleButton.addEventListener('click', function() {
+        sidebar.classList.toggle('active');
+      });
+      
+      if (closeSidebarBtn) {
+        closeSidebarBtn.addEventListener('click', function() {
+          sidebar.classList.remove('active');
+        });
+      }
+    }
+    initSidebarToggle();
+
+    // --- Hamburger menu collapse/expand ---
+    document.getElementById('sidebar-toggle-btn').addEventListener('click', function() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('sidebar-collapsed');
+    });
+
+    // --- Sidebar and Property List Logic ---
+    let lastVisiblePropertyIds = [];
+    function updateSidebar() {
+      if (!amap || !originalData) return;
+      const bounds = amap.getBounds();
+      const propertyList = document.getElementById('property-list');
+      const propertyCount = document.getElementById('property-count');
+      if (!propertyList || !propertyCount) return;
+      const isSearching = searchFilter.length > 0;
+      visibleProperties = originalData.features.filter(feature => {
+        const props = feature.properties;
+        const coords = feature.geometry?.coordinates;
+        if (!coords || coords.length < 2 || typeof coords[1] !== 'number' || typeof coords[0] !== 'number') return false;
+        const latLng = L.latLng(coords[1], coords[0]);
+        if (!latLng || isNaN(latLng.lat) || isNaN(latLng.lng)) return false;
+        const inBounds = bounds.contains(latLng);
+        const matchesFilters = true;
+        const addressString = props["Address_Concatenate"] ? props["Address_Concatenate"].toString().toLowerCase() : null;
+        let ownerName = '';
+        if (Array.isArray(props.Name)) {
+          const ownerId = props.Name[props.Name.length - 1];
+          const owner = getOwnerById(ownerId);
+          ownerName = owner ? (owner.Name || owner.Owner_Full_Name || '') : '';
+        } else {
+          ownerName = props.PrimaryOwner || '';
+        }
+        const ownerString = ownerName.toLowerCase();
+        const searchFilterLower = searchFilter.toLowerCase();
+        if (isSearching) {
+          return (
+            (addressString && addressString.includes(searchFilterLower)) ||
+            (ownerString && ownerString.includes(searchFilterLower))
+          ) && matchesFilters;
+        } else {
+          return matchesFilters && inBounds;
+        }
+      });
+      // Only update if visible property IDs have changed
+      const currentIds = visibleProperties.map(f => f.properties.id).join(',');
+      if (currentIds === lastVisiblePropertyIds) return;
+      lastVisiblePropertyIds = currentIds;
+      visibleProperties.sort((a, b) => {
+        let nameA = '';
+        let nameB = '';
+        if (Array.isArray(a.properties.Name)) {
+          const ownerIdA = a.properties.Name[a.properties.Name.length - 1];
+          const ownerA = getOwnerById(ownerIdA);
+          nameA = ownerA ? (ownerA.Name || ownerA.Owner_Full_Name || '') : '';
+        } else {
+          nameA = a.properties.PrimaryOwner || '';
+        }
+        if (Array.isArray(b.properties.Name)) {
+          const ownerIdB = b.properties.Name[b.properties.Name.length - 1];
+          const ownerB = getOwnerById(ownerIdB);
+          nameB = ownerB ? (ownerB.Name || ownerB.Owner_Full_Name || '') : '';
+        } else {
+          nameB = b.properties.PrimaryOwner || '';
+        }
+        return nameA.localeCompare(nameB);
+      });
+      propertyCount.textContent = `${visibleProperties.length}`;
+      const fragment = document.createDocumentFragment();
+      visibleProperties.slice(0, 100).forEach(feature => {
+        const props = feature.properties;
+        const coords = feature.geometry.coordinates;
+        const propertyId = props["Property_Id"] || props["Property Id"] || props.id;
+        let ownerName = '';
+        if (Array.isArray(props.Name)) {
+          const ownerId = props.Name[props.Name.length - 1];
+          const owner = getOwnerById(ownerId);
+          ownerName = owner ? (owner.Name || owner.Owner_Full_Name || '') : '';
+        } else {
+          ownerName = props.PrimaryOwner || '';
+        }
+        // --- Property Type/Secondary Type logic ---
+        let typeString = '';
+        const propertyType = getFieldValue(props["Property_Type"]);
+        let secondaryType = '';
+        if (Array.isArray(props["Secondary_Type"])) {
+          if (props["Secondary_Type"][0] === 'L') {
+            secondaryType = props["Secondary_Type"].slice(1).join(', ');
+          } else {
+            secondaryType = props["Secondary_Type"].join(', ');
+          }
+        } else {
+          secondaryType = getFieldValue(props["Secondary_Type"]);
+        }
+        if (propertyType) typeString += propertyType;
+        if (secondaryType) typeString += (typeString ? ' | ' : '') + secondaryType;
+        const propertyItem = document.createElement('div');
+        propertyItem.className = 'property-item';
+        propertyItem.style.display = 'flex';
+        propertyItem.style.flexDirection = 'row';
+        propertyItem.style.alignItems = 'center';
+        propertyItem.innerHTML = `
+          <div class="property-thumbnail">
+            ${props["Pop_up_IMG"] ? `<img src="${props["Pop_up_IMG"]}" alt="${ownerName || 'Property'}" loading="lazy" onerror="this.onerror=null; this.replaceWith('<span>No Img</span>')">` : '<span>No Img</span>'}
+          </div>
+          <div class="property-info" style="flex:1; min-width:0;">
+            <h4 style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${ownerName || 'Unnamed Owner'}">${ownerName || 'Unnamed Owner'}</h4>
+            <div class="property-type" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${typeString || ''}">${typeString || ''}</div>
+            <div class="property-address" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${getFieldValue(props["Address_Concatenate"]) || ''}">${getFieldValue(props["Address_Concatenate"]) || ''}</div>
+            <div class="property-id" style="font-size:12px; color:#6b7280;">ID: ${propertyId}</div>
+          </div>`;
+        if (propertyId && !isNaN(coords[0]) && !isNaN(coords[1])) {
+          propertyItem.dataset.lat = coords[1];
+          propertyItem.dataset.lng = coords[0];
+          propertyItem.dataset.id = propertyId;
+        }
+        propertyItem.addEventListener('click', function(e) {
+          const lat = parseFloat(this.dataset.lat);
+          const lng = parseFloat(this.dataset.lng);
+          const id = this.dataset.id; // This should be the Grist row id
+          if (isNaN(lat) || isNaN(lng) || !id) return;
+          amap.flyTo([lat, lng], 18, { duration: 0.5 });
+          document.querySelectorAll('.property-item.active').forEach(item => item.classList.remove('active'));
+          this.classList.add('active');
+          if (markersLayer) {
+            markersLayer.eachLayer(layer => {
+              if (layer.options?.propertyId == id) {
+                setTimeout(() => { if (layer._map) layer.openPopup(); }, 400);
+              }
+            });
+          }
+          showPropertyDetails(id);
+          selectRow(id);
+        });
+        fragment.appendChild(propertyItem);
+      });
+      propertyList.innerHTML = '';
+      propertyList.appendChild(fragment);
+    }
+
+    // --- Aggressive throttling for sidebar updates ---
+    // REMOVE any global amap.on('moveend', ...) or amap.on('zoomend', ...) calls outside of initializeMap
+
+    // --- Sidebar Resizer JS ---
+    (function() {
+      const sidebar = document.getElementById('sidebar');
+      const resizer = document.getElementById('sidebar-resizer');
+      let isResizing = false;
+      let startX, startWidth;
+      resizer.addEventListener('mousedown', function(e) {
+        isResizing = true;
+        startX = e.clientX;
+        startWidth = sidebar.offsetWidth;
+        document.body.style.cursor = 'ew-resize';
+        document.body.style.userSelect = 'none';
+      });
+      document.addEventListener('mousemove', function(e) {
+        if (!isResizing) return;
+        let newWidth = startWidth + (e.clientX - startX);
+        newWidth = Math.max(300, Math.min(600, newWidth));
+        sidebar.style.width = newWidth + 'px';
+      });
+      document.addEventListener('mouseup', function() {
+        if (isResizing) {
+          isResizing = false;
+          document.body.style.cursor = '';
+          document.body.style.userSelect = '';
+        }
+      });
+    })();
+
+    // --- Map Initialization ---
+    function initializeMap() {
+      const hybridLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'], attribution: '' });
+      amap = L.map('map', {
+        layers: [hybridLayer],
+        center: [44.0, -120.5],
+        zoom: 7,
+        wheelPxPerZoomLevel: 90,
+        maxZoom: 20,
+        zoomSnap: 0.5,
+        zoomDelta: 0.5
+      });
+      // Only add one zoom control (default position)
+      // No need to add L.control.zoom() again
+      // Initialize marker cluster group
+      markersLayer = L.markerClusterGroup({
+        disableClusteringAtZoom: 18,
+        maxClusterRadius: 45,
+        spiderfyOnMaxZoom: true,
+        zoomToBoundsOnClick: true,
+        chunkedLoading: true,
+        chunkInterval: 200,
+        chunkDelay: 50,
+        removeOutsideVisibleBounds: true
+      });
+      amap.addLayer(markersLayer);
+      // Add map event listeners (throttled sidebar update)
+      amap.on('moveend', throttle(updateSidebar, 400));
+      amap.on('zoomend', throttle(updateSidebar, 400));
+      console.log('Map initialized successfully');
+    }
+
+    // --- Widget Initialization ---
+    // --- Grist Widget Configuration ---
+    grist.ready({
+      requiredAccess: 'full',
+      selection: true,
+      allowSelectBy: true
+    });
+
+    function selectRow(rowId) {
+      if (rowId) grist.setCursorPos({ rowId });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Show loading indicator
+      document.getElementById('loading-indicator').style.display = 'flex';
+      // First, initialize the map
+      initializeMap();
+      // Then fetch data and update the map only if amap is ready
+      fetchGristData().then(() => {
+        // Hide loading indicator
+        document.getElementById('loading-indicator').style.display = 'none';
+        if (amap) {
+          updateMap(originalData);
+        } else {
+          console.error('Map not initialized!');
+        }
+        
+        // --- Utility and Map Logic ---
+        // Classification colors and icons
+        const classificationColors = {
+          "Not Interested/DNC": "#FF5252",
+          "IPA": "#9C27B0",
+          "Eric": "#FF9800",
+          "Broker/Eh": "#9E9E9E",
+          "Never": "#2196F3",
+          "Call Relationship": "#FFEB3B",
+          "Contact": "#4CAF50",
+          "Call Again": "#92d694"
+        };
+        const defaultIcon = new L.Icon.Default();
+        const classifyIcons = {
+          "Not Interested/DNC": new L.Icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }),
+          "IPA": new L.Icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }),
+          "Eric": new L.Icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }),
+          "Broker/Eh": new L.Icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-grey.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }),
+          "Never": new L.Icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }),
+          "Call Relationship": new L.Icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-yellow.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }),
+          "Contact": new L.Icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }),
+          "Call Again": new L.Icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] })
+        };
+        function getMarkerIcon(classification) { return classifyIcons[classification] || defaultIcon; }
+        function throttle(func, limit) { let inThrottle; return function() { const args = arguments, context = this; if (!inThrottle) { func.apply(context, args); inThrottle = true; setTimeout(() => inThrottle = false, limit); } }; }
+        function parseMarkdown(text) {
+          if (text === null || text === undefined || String(text).trim() === '' || text === 'N/A') {
+             return '<span class="na-value">N/A</span>';
+          }
+          let html = String(text);
+          html = html.replace(/</g, '<').replace(/>/g, '>');
+          html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+          html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+          html = html.replace(/\[(.*?)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+          html = html.replace(/(?:\r\n|\r|\n)/g, '<br>');
+          return html;
+        }
+        function formatPhoneNumber(phoneNumber) {
+          const digitsOnly = String(phoneNumber).replace(/[^0-9]/g, '');
+          if (digitsOnly.length === 10) {
+            return `(${digitsOnly.substring(0, 3)}) ${digitsOnly.substring(3, 6)}-${digitsOnly.substring(6, 10)}`;
+          } else if (digitsOnly.length > 10) {
+            const nationalNumber = digitsOnly.substring(digitsOnly.length - 10);
+            if (nationalNumber.length === 10) {
+              return `(${nationalNumber.substring(0, 3)}) ${nationalNumber.substring(3, 6)}-${nationalNumber.substring(6, 10)}`;
+            }
+          }
+          return phoneNumber;
+        }
+        function showToast(message, type = 'info') {
+          const toast = document.createElement('div');
+          toast.className = `toast-notification ${type}`;
+          toast.textContent = message;
+          document.body.appendChild(toast);
+          setTimeout(() => toast.classList.add('active'), 10);
+          setTimeout(() => {
+            toast.classList.remove('active');
+            setTimeout(() => {
+              if (toast.parentNode) {
+                document.body.removeChild(toast);
+              }
+            }, 300);
+          }, 3000);
+        }
+        window.copyToClipboard = function(text) {
+          if (!text || typeof text !== 'string') { console.warn("Copy attempt with invalid text:", text); return; }
+          navigator.clipboard.writeText(text).then(() => {
+              const tooltip = document.createElement('div'); tooltip.className = 'copy-tooltip active'; tooltip.textContent = 'Copied!'; document.body.appendChild(tooltip);
+              setTimeout(() => { tooltip.classList.remove('active'); setTimeout(() => { if (tooltip.parentNode) { document.body.removeChild(tooltip); } }, 300); }, 1200);
+          }, (err) => { console.error('Could not copy text: ', err); showToast('Failed to copy text.', 'error'); });
+        };
+        // Sidebar search and clear event listeners
+        const searchInput = document.getElementById('sidebar-search');
+        const clearSearch = document.getElementById('clear-search');
+        if (searchInput) {
+          let debounceTimeout;
+          searchInput.addEventListener('input', function(e) {
+            clearTimeout(debounceTimeout);
+            debounceTimeout = setTimeout(() => {
+              filterSidebar(this.value);
+            }, 200);
+          });
+          searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+              filterSidebar(this.value, true);
+            }
+          });
+        }
+        if (clearSearch) {
+          clearSearch.addEventListener('click', () => {
+            if (searchInput) {
+              searchInput.value = '';
+              filterSidebar('');
+            }
+          });
+        }
+        // Marker click handler to highlight sidebar item
+        if (markersLayer) {
+          markersLayer.eachLayer(layer => {
+            layer.on('click', function() {
+              const propertyId = this.options?.propertyId;
+              document.querySelectorAll('.property-item.active').forEach(item => item.classList.remove('active'));
+              const listItem = document.querySelector(`.property-item[data-id="${propertyId}"]`);
+              if (listItem) listItem.classList.add('active');
+            });
+          });
+        }
+        // Call updateSidebar after map initialization and on move
+        // REMOVE any global amap.on('moveend', ...) or amap.on('zoomend', ...) calls outside of initializeMap
+        updateSidebar();
+
+        // --- Property Details Panel Logic ---
+        function showPropertyDetails(lookupId) {
+          if (!lookupId) return; // Prevent undefined/null/empty
+          if (!originalData) return;
+          // Try to find by Grist row id first
+          let feature = originalData.features.find(f => f.properties.id == lookupId);
+          // Fallback to Property_Id if not found
+          if (!feature) {
+            feature = originalData.features.find(f => (f.properties.Property_Id || f.properties['Property Id']) == lookupId);
+          }
+          const propertyDetails = document.getElementById('property-details');
+          const propertyList = document.getElementById('property-list');
+          if (!feature) {
+            propertyDetails.innerHTML = `<div class="p-4">Property details could not be loaded for ID: ${lookupId}.</div> <button class="back-button m-4">⬅️ Back</button>`;
+            propertyDetails.classList.remove('hidden');
+            propertyList.classList.add('hidden');
+            return;
+          }
+          const props = feature.properties;
+          let owner = null;
+          if (Array.isArray(props.Name)) {
+            const ownerId = props.Name[props.Name.length - 1];
+            owner = getOwnerById(ownerId);
+          }
+          // --- Property Type/Secondary Type logic ---
+          let typeString = '';
+          const propertyType = getFieldValue(props["Property_Type"]);
+          let secondaryType = '';
+          if (Array.isArray(props["Secondary_Type"])) {
+            if (props["Secondary_Type"][0] === 'L') {
+              secondaryType = props["Secondary_Type"].slice(1).join(', ');
+            } else {
+              secondaryType = props["Secondary_Type"].join(', ');
+            }
+          } else {
+            secondaryType = getFieldValue(props["Secondary_Type"]);
+          }
+          if (propertyType) typeString += propertyType;
+          if (secondaryType) typeString += (typeString ? ' | ' : '') + secondaryType;
+          // Helper for safe value
+          const safeValue = (obj, key) => obj && obj[key] !== undefined && obj[key] !== null && obj[key] !== '' ? getFieldValue(obj[key]) : '';
+          propertyDetails.innerHTML = `
+            <div class="details-inner-container">
+              <div class="property-nav-bar">
+                <div class="property-nav-left">
+                  <button class="back-button">← Back</button>
+                </div>
+                <div class="property-nav-right">
+                  <button class="info-button" id="prev-property-btn">⬅️</button>
+                  <button class="info-button" id="next-property-btn">➡️</button>
+                </div>
+              </div>
+              <div class="details-view-header">
+                <div class="details-view-image">
+                  ${props["Pop_up_IMG"] ? `<img src="${props["Pop_up_IMG"]}" alt="${safeValue(props, "Property_Name")}" onerror="this.onerror=null; this.src='https://placehold.co/400x200/e5e7eb/9ca3af?text=No+Image+Available';">` : `<div class="no-image">No Image Available</div>`}
+                </div>
+                <div class="details-view-info">
+                  <h3 class="details-view-owner">${owner ? (owner.Name || owner.Owner_Full_Name || '') : (props.PrimaryOwner || '')}</h3>
+                  <div class="details-view-type">${typeString}</div>
+                  <div class="details-view-address">${safeValue(props, "Address_Concatenate")}</div>
+                  <div class="details-view-ids">
+                    <span>ID: ${safeValue(props, "Property_Id") || safeValue(props, "Property Id")}</span>
+                    <span>Parcel: ${safeValue(props, "Parcel")}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="details-section">
+                <h4 class="collapsible-header" data-section="phones">Phone Numbers</h4>
+                <div class="collapsible-content" style="display:block;">
+                  <div class="phone-details-table">
+                    <table><thead><tr><th>Phone</th><th>Notes</th><th>Actions</th></tr></thead><tbody>
+                      ${owner ? renderPhoneRowWithButtons('Phone', 'Phone_1_Notes', owner) : ''}
+                      ${owner ? renderPhoneRowWithButtons('Phone_2', 'Phone_2_Notes', owner) : ''}
+                      ${owner ? renderPhoneRowWithButtons('Phone_3', 'Phone_3_Notes', owner) : ''}
+                      ${owner ? renderPhoneRowWithButtons('Phone_4', 'Phone_4_Notes', owner) : ''}
+                      ${owner && !(
+                        owner.Phone || owner.Phone_2 || owner.Phone_3 || owner.Phone_4
+                      ) ? `<tr><td colspan="3" class="no-data-msg">No phone numbers recorded.</td></tr>` : ''}
+                    </tbody></table>
+                  </div>
+                </div>
+              </div>
+            </div>`;
+          propertyList.classList.add('hidden');
+          propertyDetails.classList.remove('hidden');
+          propertyDetails.scrollTop = 0;
+          const backButton = propertyDetails.querySelector('.back-button');
+          if (backButton) {
+            backButton.onclick = function() {
+              propertyDetails.classList.add('hidden');
+              propertyList.classList.remove('hidden');
+              document.querySelectorAll('.property-item.active').forEach(item => item.classList.remove('active'));
+            };
+          }
+          const prevButton = propertyDetails.querySelector('#prev-property-btn');
+          const nextButton = propertyDetails.querySelector('#next-property-btn');
+          if (prevButton && nextButton) {
+            const idx = visibleProperties.findIndex(f => (f.properties["Property_Id"] || f.properties["Property Id"] || f.properties.id) == lookupId);
+            const previousId = idx > 0 ? (visibleProperties[idx-1].properties["Property_Id"] || visibleProperties[idx-1].properties["Property Id"] || visibleProperties[idx-1].properties.id) : null;
+            const nextIdVal = idx < visibleProperties.length-1 ? (visibleProperties[idx+1].properties["Property_Id"] || visibleProperties[idx+1].properties["Property Id"] || visibleProperties[idx+1].properties.id) : null;
+            prevButton.disabled = !previousId;
+            nextButton.disabled = !nextIdVal;
+            if (previousId) prevButton.onclick = function() { showPropertyDetails(previousId); selectRow(previousId); };
+            if (nextIdVal) nextButton.onclick = function() { showPropertyDetails(nextIdVal); selectRow(nextIdVal); };
+          }
+        }
+        window.showPropertyDetails = showPropertyDetails;
+        // Update sidebar property click to open details
+        document.getElementById('property-list').addEventListener('click', function(e) {
+          const item = e.target.closest('.property-item');
+          if (item) {
+            showPropertyDetails(item.dataset.id);
+          }
+        });
+        // Marker click handler to open details
+        if (markersLayer) {
+          markersLayer.eachLayer(layer => {
+            layer.on('click', function() {
+              const propertyId = this.options?.propertyId;
+              showPropertyDetails(propertyId);
+              selectRow(propertyId);
+            });
+          });
+        }
+        grist.onRecord(function(record, mappings) {
+          if (record && record.id) {
+            showPropertyDetails(record.id);
+          }
+        });
+
+        // --- ArcGIS Map Integration ---
+        function initArcGISMapIntegration() {
+          const arcgisContainer = document.getElementById('arcgis-map-container');
+          const expandButton = document.getElementById('arcgis-expand-btn');
+          const closeButton = document.getElementById('arcgis-close-btn');
+          const iframe = document.getElementById('arcgis-iframe');
+          const arcgisToggleBtn = document.getElementById('arcgis-toggle');
+          let arcgisMapVisible = false;
+          if (!arcgisContainer || !expandButton || !closeButton || !iframe) return;
+          expandButton.addEventListener('click', function() {
+            arcgisContainer.classList.toggle('expanded');
+            document.body.classList.toggle('arcgis-map-expanded');
+            amap.invalidateSize();
+          });
+          closeButton.addEventListener('click', function() {
+            arcisContainer.style.display = 'none';
+            arcgisMapVisible = false;
+            document.body.classList.remove('arcgis-map-active');
+            document.body.classList.remove('arcgis-map-expanded');
+            amap.invalidateSize();
+            if (arcgisToggleBtn) arcisToggleBtn.classList.remove('active');
+          });
+          if (arcgisToggleBtn) {
+            arcisToggleBtn.addEventListener('click', function() {
+              if (arcgisMapVisible) {
+                arcisContainer.style.display = 'none';
+                arcgisMapVisible = false;
+                document.body.classList.remove('arcgis-map-active');
+                document.body.classList.remove('arcgis-map-expanded');
+                this.classList.remove('active');
+              } else {
+                arcisContainer.style.display = 'block';
+                arcgisMapVisible = true;
+                document.body.classList.add('arcgis-map-active');
+                if (arcgisContainer.classList.contains('expanded')) {
+                  document.body.classList.add('arcgis-map-expanded');
+                }
+                this.classList.add('active');
+              }
+              amap.invalidateSize();
+            });
+          }
+        }
+        initArcGISMapIntegration();
+
+        // --- Layer Controls ---
+        // Remove layer controls logic
+
+        // --- County Info Card ---
+        // function setupCountyInfo() { ... } (REMOVE)
+        // --- Map Legend ---
+        // function addMapLegend() { ... } (REMOVE)
+      });
+    });
+  </script>
+  <!-- You will need to copy/adapt the rest of the JS logic from standalone-map.js here, replacing fetchGeoJSON with fetchGristData and using propertyFeatures as your data source. -->
+</body>
+</html> 
