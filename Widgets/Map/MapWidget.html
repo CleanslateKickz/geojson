@@ -255,6 +255,19 @@
       // Build propertyFeatures for map (GeoJSON-like)
       propertyFeatures = properties.map(p => {
         const f = p.fields;
+        let ownerClassifyColor = '';
+        // Try array lookup
+        if (f.Name && Array.isArray(f.Name) && f.Name.length > 0 && ownerMap[f.Name[0]]) {
+          ownerClassifyColor = ownerMap[f.Name[0]].Classify_Color || '';
+        }
+        // Try single value lookup if array lookup failed
+        if (!ownerClassifyColor && f.Name && ownerMap[f.Name]) {
+          ownerClassifyColor = ownerMap[f.Name].Classify_Color || '';
+        }
+        // Debug log for diagnosis
+        if (!ownerClassifyColor) {
+          console.log('DEBUG: Property fields:', f, 'f.Name:', f.Name, 'ownerMap[f.Name]:', ownerMap[f.Name], 'ownerMap[f.Name[0]]:', ownerMap[f.Name && f.Name[0]]);
+        }
         return {
           type: 'Feature',
           geometry: {
@@ -264,7 +277,8 @@
           properties: {
             ...f,
             id: p.id,
-            PrimaryOwner: (f.Name && Array.isArray(f.Name) && f.Name.length > 0 && ownerMap[f.Name[0]]) ? ownerMap[f.Name[0]].Name : f.PrimaryOwner
+            PrimaryOwner: (f.Name && Array.isArray(f.Name) && f.Name.length > 0 && ownerMap[f.Name[0]]) ? ownerMap[f.Name[0]].Name : f.PrimaryOwner,
+            Classify_Color: ownerClassifyColor
           }
         };
       }).filter(f => !isNaN(f.geometry.coordinates[0]) && !isNaN(f.geometry.coordinates[1]));
@@ -273,9 +287,35 @@
     }
 
     // --- Marker Icon Utility ---
+    const defaultIcon = new L.Icon.Default();
+    const classifyIcons = {
+      "Not Interested/DNC": new L.Icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }),
+      "IPA": new L.Icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }),
+      "Eric": new L.Icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }),
+      "Broker/Eh": new L.Icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-grey.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }),
+      "Never": new L.Icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }),
+      "Call Relationship": new L.Icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-yellow.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }),
+      "Contact": new L.Icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }),
+      "Call Again": new L.Icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] })
+    };
     function getMarkerIcon(classification) {
-      // For now, always return the default icon. You can expand this for custom icons/colors.
-      return new L.Icon.Default();
+      if (!classification) return defaultIcon;
+      const key = String(classification).trim();
+      // Try direct match
+      if (classifyIcons[key]) return classifyIcons[key];
+      // Try case-insensitive match
+      const found = Object.keys(classifyIcons).find(k => k.toLowerCase() === key.toLowerCase());
+      if (found) return classifyIcons[found];
+      // Optionally, support hex color codes (as a fallback)
+      if (/^#([0-9A-F]{3}){1,2}$/i.test(key)) {
+        // Use a colored SVG marker or fallback to blue
+        return new L.Icon({
+          iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png`,
+          shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+          iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        });
+      }
+      return defaultIcon;
     }
 
     // --- Map Rendering Logic ---
@@ -331,13 +371,15 @@
       data.features.forEach(feature => {
         const props = feature.properties;
         const coords = feature.geometry?.coordinates;
+        // Add this line to debug:
+        console.log('Classify_Color for marker:', props["Classify_Color"]);
         if (!coords || coords.length < 2 || typeof coords[1] !== 'number' || typeof coords[0] !== 'number' || isNaN(coords[1]) || isNaN(coords[0])) return;
         const lat = coords[1];
         const lon = coords[0];
         const propertyId = props["Property_Id"] || props["Property Id"] || props.id;
         if (propertyId && !isNaN(lat) && !isNaN(lon)) {
           const marker = L.marker([lat, lon], {
-            icon: getMarkerIcon(props["Classify Color"]),
+            icon: getMarkerIcon(props["Classify_Color"]),
             propertyId: propertyId
           });
           const popupContent = createPopupContent(props, [lat, lon]);
@@ -451,8 +493,6 @@
         if (!coords || coords.length < 2 || typeof coords[1] !== 'number' || typeof coords[0] !== 'number') return false;
         const latLng = L.latLng(coords[1], coords[0]);
         if (!latLng || isNaN(latLng.lat) || isNaN(latLng.lng)) return false;
-        const inBounds = bounds.contains(latLng);
-        const matchesFilters = true;
         const addressString = props["Address_Concatenate"] ? props["Address_Concatenate"].toString().toLowerCase() : null;
         let ownerName = '';
         if (Array.isArray(props.Name)) {
@@ -465,12 +505,14 @@
         const ownerString = ownerName.toLowerCase();
         const searchFilterLower = searchFilter.toLowerCase();
         if (isSearching) {
+          // When searching, ignore map bounds and only filter by search
           return (
             (addressString && addressString.includes(searchFilterLower)) ||
             (ownerString && ownerString.includes(searchFilterLower))
-          ) && matchesFilters;
+          );
         } else {
-          return matchesFilters && inBounds;
+          // When not searching, filter by map bounds
+          return bounds.contains(latLng);
         }
       });
       // Only update if visible property IDs have changed
@@ -661,28 +703,28 @@
         
         // --- Utility and Map Logic ---
         // Classification colors and icons
-        const classificationColors = {
-          "Not Interested/DNC": "#FF5252",
-          "IPA": "#9C27B0",
-          "Eric": "#FF9800",
-          "Broker/Eh": "#9E9E9E",
-          "Never": "#2196F3",
-          "Call Relationship": "#FFEB3B",
-          "Contact": "#4CAF50",
-          "Call Again": "#92d694"
-        };
-        const defaultIcon = new L.Icon.Default();
-        const classifyIcons = {
-          "Not Interested/DNC": new L.Icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }),
-          "IPA": new L.Icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }),
-          "Eric": new L.Icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }),
-          "Broker/Eh": new L.Icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-grey.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }),
-          "Never": new L.Icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }),
-          "Call Relationship": new L.Icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-yellow.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }),
-          "Contact": new L.Icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }),
-          "Call Again": new L.Icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] })
-        };
-        function getMarkerIcon(classification) { return classifyIcons[classification] || defaultIcon; }
+        // const classificationColors = {
+        //   "Not Interested/DNC": "#FF5252",
+        //   "IPA": "#9C27B0",
+        //   "Eric": "#FF9800",
+        //   "Broker/Eh": "#9E9E9E",
+        //   "Never": "#2196F3",
+        //   "Call Relationship": "#FFEB3B",
+        //   "Contact": "#4CAF50",
+        //   "Call Again": "#92d694"
+        // };
+        // const defaultIcon = new L.Icon.Default();
+        // const classifyIcons = {
+        //   "Not Interested/DNC": new L.Icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }),
+        //   "IPA": new L.Icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }),
+        //   "Eric": new L.Icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }),
+        //   "Broker/Eh": new L.Icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-grey.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }),
+        //   "Never": new L.Icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }),
+        //   "Call Relationship": new L.Icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-yellow.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }),
+        //   "Contact": new L.Icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }),
+        //   "Call Again": new L.Icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] })
+        // };
+        // function getMarkerIcon(classification) { return classifyIcons[classification] || defaultIcon; }
         function throttle(func, limit) { let inThrottle; return function() { const args = arguments, context = this; if (!inThrottle) { func.apply(context, args); inThrottle = true; setTimeout(() => inThrottle = false, limit); } }; }
         function parseMarkdown(text) {
           if (text === null || text === undefined || String(text).trim() === '' || text === 'N/A') {
@@ -897,6 +939,29 @@
         grist.onRecord(function(record, mappings) {
           if (record && record.id) {
             showPropertyDetails(record.id);
+            // Find the feature for this property
+            let feature = originalData.features.find(f => f.properties.id == record.id);
+            if (!feature) {
+              feature = originalData.features.find(f => (f.properties.Property_Id || f.properties['Property Id']) == record.id);
+            }
+            if (feature && feature.geometry && Array.isArray(feature.geometry.coordinates)) {
+              const coords = feature.geometry.coordinates;
+              if (!isNaN(coords[1]) && !isNaN(coords[0])) {
+                amap.flyTo([coords[1], coords[0]], 18, { duration: 0.5 });
+                // Open marker popup
+                if (markersLayer) {
+                  markersLayer.eachLayer(layer => {
+                    if (layer.options?.propertyId == record.id) {
+                      setTimeout(() => { if (layer._map) layer.openPopup(); }, 400);
+                    }
+                  });
+                }
+              }
+            }
+            // Highlight the sidebar item
+            document.querySelectorAll('.property-item.active').forEach(item => item.classList.remove('active'));
+            const listItem = document.querySelector(`.property-item[data-id="${record.id}"]`);
+            if (listItem) listItem.classList.add('active');
           }
         });
 
@@ -911,5 +976,61 @@
     });
   </script>
   <!-- You will need to copy/adapt the rest of the JS logic from standalone-map.js here, replacing fetchGeoJSON with fetchGristData and using propertyFeatures as your data source. -->
+  <style>
+    /* Add or update CSS for compact sidebar */
+    .property-sidebar, .property-list, .property-details {
+      font-size: 13px;
+      padding: 0.5rem 0.5rem 0 0.5rem;
+    }
+    .property-item {
+      padding: 4px 6px;
+      margin-bottom: 2px;
+      border-radius: 4px;
+      min-height: 36px;
+      font-size: 13px;
+    }
+    .property-thumbnail img, .property-thumbnail span {
+      width: 32px;
+      height: 32px;
+      border-radius: 4px;
+      object-fit: cover;
+      font-size: 11px;
+    }
+    .property-info h4 {
+      font-size: 13px;
+      margin-bottom: 2px;
+    }
+    .property-type, .property-address, .property-id {
+      font-size: 12px;
+      margin-bottom: 1px;
+    }
+    .property-details .details-inner-container {
+      padding: 8px 8px 0 8px;
+    }
+    .details-view-header {
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .details-view-image img, .details-view-image .no-image {
+      width: 80px;
+      height: 60px;
+      border-radius: 4px;
+      object-fit: cover;
+      font-size: 11px;
+    }
+    .details-view-info h3 {
+      font-size: 14px;
+      margin-bottom: 2px;
+    }
+    .details-view-type, .details-view-address, .details-view-ids {
+      font-size: 12px;
+      margin-bottom: 1px;
+    }
+    .phone-details-table th, .phone-details-table td {
+      font-size: 12px;
+      padding: 2px 4px;
+    }
+  </style>
 </body>
 </html>
