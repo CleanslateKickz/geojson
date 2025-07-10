@@ -368,6 +368,7 @@
                         </button>`;
                     if (record.CoStar) linksContainer.innerHTML += linkButton(record.CoStar, 'external-link', 'View on CoStar');
                     if (record.Crexi) linksContainer.innerHTML += linkButton(record.Crexi, 'external-link', 'View on Crexi');
+                    if (record.OM) linksContainer.innerHTML += linkButton(record.OM, 'external-link', 'View OM');
                     if (record.OM) linksContainer.innerHTML += copyButton(record.OM, 'copy', 'Copy OM Link');
                     if (linksContainer.innerHTML === '') {
                         linksContainer.innerHTML = '<p class="text-sm text-gray-500 col-span-full">No external resources provided.</p>';
