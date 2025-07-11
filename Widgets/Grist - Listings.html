@@ -35,7 +35,6 @@
             letter-spacing: 0.01em;
             border: none;
         }
-        /* Sleek minimalist filter bar */
         .filter-floatbar {
             display: flex;
             align-items: center;
@@ -101,7 +100,6 @@
 </head>
 <body class="bg-gradient-to-b from-sky-100 to-white min-h-screen">
     <div class="container mx-auto px-4 py-8">
-        <!-- Sleek, minimalist, floating, sticky filter bar -->
         <form id="filter-bar" class="filter-floatbar">
             <div class="filter-group">
                 <select id="type-filter" class="filter-select">
@@ -110,6 +108,8 @@
             </div>
             <div class="filter-group">
                 <select id="sort-filter" class="filter-select">
+                    <option value="modified_desc">Newest (Last Updated)</option>
+                    <option value="created_desc">Newest (Created)</option>
                     <option value="date_desc">Newest (Date Listed)</option>
                     <option value="date_asc">Oldest (Date Listed)</option>
                     <option value="price_desc">Highest Price</option>
@@ -245,51 +245,48 @@
         }
 
         function copyToClipboard(text, button) {
-    // Try Clipboard API first
-    navigator.clipboard.writeText(text).then(() => {
-        showCopied(button);
-    }).catch(() => {
-        // Fallback: create a temp input/select
-        const input = document.createElement('input');
-        input.value = text;
-        input.style.position = 'fixed';
-        input.style.opacity = '0';
-        document.body.appendChild(input);
-        input.select();
-        try {
-            const successful = document.execCommand('copy');
-            document.body.removeChild(input);
-            if (successful) {
+            navigator.clipboard.writeText(text).then(() => {
                 showCopied(button);
-            } else {
-                showCopyFailed(button, text);
+            }).catch(() => {
+                const input = document.createElement('input');
+                input.value = text;
+                input.style.position = 'fixed';
+                input.style.opacity = '0';
+                document.body.appendChild(input);
+                input.select();
+                try {
+                    const successful = document.execCommand('copy');
+                    document.body.removeChild(input);
+                    if (successful) {
+                        showCopied(button);
+                    } else {
+                        showCopyFailed(button, text);
+                    }
+                } catch (err) {
+                    document.body.removeChild(input);
+                    showCopyFailed(button, text);
+                }
+            });
+
+            function showCopied(btn) {
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i data-lucide="check" class="lucide h-4 w-4 mr-2"></i> Copied!';
+                lucide.createIcons();
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    lucide.createIcons();
+                }, 2000);
             }
-        } catch (err) {
-            document.body.removeChild(input);
-            showCopyFailed(button, text);
+
+            function showCopyFailed(btn, text) {
+                btn.innerHTML = '<span style="color:red;">Copy not allowed</span>';
+                setTimeout(() => {
+                    btn.innerHTML = 'Copy OM Link';
+                    lucide.createIcons();
+                }, 3000);
+                window.prompt('Copy this OM link manually:', text);
+            }
         }
-    });
-
-    function showCopied(btn) {
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<i data-lucide="check" class="lucide h-4 w-4 mr-2"></i> Copied!';
-        lucide.createIcons();
-        setTimeout(() => {
-            btn.innerHTML = originalText;
-            lucide.createIcons();
-        }, 2000);
-    }
-
-    function showCopyFailed(btn, text) {
-        btn.innerHTML = '<span style="color:red;">Copy not allowed</span>';
-        setTimeout(() => {
-            btn.innerHTML = 'Copy OM Link';
-            lucide.createIcons();
-        }, 3000);
-        // Optionally, show the OM link in a prompt for manual copy
-        window.prompt('Copy this OM link manually:', text);
-    }
-}
 
         function renderProperties(recordsToRender) {
             propertyGrid.innerHTML = '';
@@ -307,7 +304,7 @@
                 cardElement.style.animationDelay = `${index * 50}ms`;
                 cardElement.classList.add('animate-fadeIn');
 
-                // Days on Market overlay (only if value exists)
+                // Days on Market overlay
                 const daysChipContainer = cardElement.querySelector('.days-chip-container');
                 const dom = getDaysOnMarket(record.Date_Listed);
                 if (record.Date_Listed && dom !== null && !isNaN(dom)) {
@@ -317,7 +314,7 @@
                     daysChipContainer.appendChild(chip);
                 }
 
-                // Property Type overlay (only if value exists)
+                // Property Type overlay
                 const typeChipContainer = cardElement.querySelector('.type-chip-container');
                 if (record.Property_Type) {
                     const chip = document.createElement('span');
@@ -330,7 +327,7 @@
                     const field = el.dataset.templateField;
                     const value = record[field];
                     const formatter = formatters[field] || formatters.default;
-                    if(field === 'Property_Name'){
+                    if (field === 'Property_Name') {
                         el.textContent = formatter(value);
                         el.title = value;
                     } else if (field === 'photo_url') {
@@ -417,7 +414,19 @@
         function sortRecords(records) {
             const sortVal = sortFilterSelect.value;
             let sorted = [...records];
-            if (sortVal === 'date_desc') {
+            if (sortVal === 'modified_desc') {
+                sorted.sort((a, b) => {
+                    const am = a.Last_updated_at ? new Date(a.Last_updated_at) : new Date(0);
+                    const bm = b.Last_updated_at ? new Date(b.Last_updated_at) : new Date(0);
+                    return bm - am;
+                });
+            } else if (sortVal === 'created_desc') {
+                sorted.sort((a, b) => {
+                    const ac = a.Created_at ? new Date(a.Created_at) : new Date(0);
+                    const bc = b.Created_at ? new Date(b.Created_at) : new Date(0);
+                    return bc - ac;
+                });
+            } else if (sortVal === 'date_desc') {
                 sorted.sort((a, b) => {
                     const ad = a.Date_Listed ? new Date(a.Date_Listed) : new Date(0);
                     const bd = b.Date_Listed ? new Date(b.Date_Listed) : new Date(0);
@@ -451,7 +460,7 @@
         sortFilterSelect.addEventListener('change', applyFiltersAndRender);
         resetButton.addEventListener('click', () => {
             typeFilterSelect.value = 'all';
-            sortFilterSelect.value = 'date_desc';
+            sortFilterSelect.value = 'modified_desc';
             applyFiltersAndRender();
         });
         document.getElementById('modal-close-button').addEventListener('click', hideModal);
