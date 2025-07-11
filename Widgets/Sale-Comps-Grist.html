@@ -3,298 +3,606 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Interactive Sale Comp Editor</title>
+  <title>Sale Comp Display Widget</title>
 
-  <!-- Leaflet.js and Grist API -->
+  <!-- Modern UI Libraries -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+  
+  <!-- Leaflet.js -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  
+  <!-- Grist API -->
   <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
 
   <style>
-    /* ... styles unchanged ... */
-    body{
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      margin: 0;
-      padding: 16px;
-      background-color: #f8f9fa;
-      color: #333;
-      height: 100vh;
+    :root {
+      --primary: #4F46E5;
+      --primary-dark: #4338CA;
+      --secondary: #6366F1;
+      --success: #10B981;
+      --info: #3B82F6;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --light: #F9FAFB;
+      --dark: #1F2937;
+      --gray-100: #F3F4F6;
+      --gray-200: #E5E7EB;
+      --gray-300: #D1D5DB;
+      --gray-400: #9CA3AF;
+      --gray-500: #6B7280;
+      --gray-600: #4B5563;
+      --gray-700: #374151;
+      --gray-800: #1F2937;
+      --gray-900: #111827;
+    }
+
+    * {
       box-sizing: border-box;
     }
-    .hidden { display: none !important; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: var(--light);
+      color: var(--gray-800);
+      font-size: 14px;
+      line-height: 1.5;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Loading State */
     #initial-message {
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100%;
-      font-size: 1.2em;
-      color: #6c757d;
+      height: 100vh;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      color: white;
+    }
+
+    .loading-content {
       text-align: center;
     }
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(255, 255, 255, 0.2);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Main Layout */
     #comp-details {
-      display: flex;
-      gap: 24px;
-      max-width: 1200px;
-      margin: 0 auto;
-      background-color: #fff;
-      border: 1px solid #dee2e6;
-      border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0,0,0,.05);
-      padding: 24px;
-      height: calc(100vh - 80px);
-      overflow-y: auto;
-    }
-    .left-column {
-      flex: 1;
-      min-width: 300px;
+      height: 100vh;
       display: flex;
       flex-direction: column;
-      gap: 20px;
     }
-    .right-column {
-      flex: 2;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
+
+    /* Compact Header */
+    .compact-header {
+      background: white;
+      border-bottom: 1px solid var(--gray-200);
+      padding: 12px 20px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
-    #property-image {
-      width: 100%;
-      height: auto;
-      max-height: 250px;
-      border-radius: 6px;
-      object-fit: cover;
-    }
-    #map {
-      width: 100%;
-      height: 300px;
-      border-radius: 6px;
-    }
-    #property-address-header {
-      display: grid;
-      grid-template-columns: 2fr 1fr 100px;
-      gap: 12px;
-      align-items: center;
-      margin-bottom: 16px;
-    }
-    .collapsible-header {
-      font-size: 1.1em;
-      color: #007bff;
-      border-bottom: 2px solid #007bff;
-      padding-bottom: 4px;
-      margin-bottom: 12px;
-      margin-top: 0;
-      cursor: pointer;
-      user-select: none;
+
+    .header-content {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 20px;
     }
-    .toggle-icon {
-      font-family: monospace;
-      font-size: 1.4em;
+
+    .property-info {
+      flex: 1;
     }
-    .collapsible-content {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s ease-out;
-      padding: 0 4px;
+
+    .property-name {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--gray-900);
+      margin: 0;
+      line-height: 1.2;
     }
-    .collapsible-content.active {
-      max-height: 1000px;
-      transition: max-height 0.5s ease-in;
-      padding: 8px 4px 16px 4px;
+
+    .property-address {
+      font-size: 0.875rem;
+      color: var(--gray-600);
+      margin: 2px 0 0 0;
     }
-    .details-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px 20px;
+
+    /* Key Metrics Bar */
+    .metrics-bar {
+      display: flex;
+      gap: 24px;
+      align-items: center;
     }
-    .detail-item {
+
+    .metric-item {
       display: flex;
       flex-direction: column;
+      align-items: center;
+      padding: 0 12px;
+      border-right: 1px solid var(--gray-200);
     }
-    .detail-label {
-      font-size: 0.8em;
-      color: #6c757d;
+
+    .metric-item:last-child {
+      border-right: none;
+    }
+
+    .metric-value {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1;
+    }
+
+    .metric-label {
+      font-size: 0.75rem;
+      color: var(--gray-500);
       text-transform: uppercase;
-      margin-bottom: 4px;
+      letter-spacing: 0.5px;
+      margin-top: 2px;
+    }
+
+    /* Content Area */
+    .content-area {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* Left Panel - Visual Info */
+    .visual-panel {
+      width: 320px;
+      background: white;
+      border-right: 1px solid var(--gray-200);
+      padding: 16px;
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+
+    .property-image {
+      width: 100%;
+      aspect-ratio: 16/10;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    #map {
+      width: 100%;
+      height: 200px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Right Panel - Data */
+    .data-panel {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      background: var(--gray-100);
+    }
+
+    /* Tab Navigation */
+    .tab-navigation {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 20px;
+      background: white;
+      padding: 4px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .tab-button {
+      flex: 1;
+      padding: 8px 16px;
+      border: none;
+      background: transparent;
+      color: var(--gray-600);
+      font-size: 0.875rem;
+      font-weight: 500;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .tab-button:hover {
+      background: var(--gray-100);
+      color: var(--gray-800);
+    }
+
+    .tab-button.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Data Cards */
+    .data-card {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--gray-900);
+      margin: 0 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-title i {
+      color: var(--primary);
+      font-size: 1.125rem;
+    }
+
+    /* Compact Data Grid */
+    .data-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .data-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .data-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--gray-500);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .data-value {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--gray-800);
+      padding: 8px 12px;
+      background: var(--gray-100);
+      border-radius: 6px;
+      min-height: 36px;
+      display: flex;
+      align-items: center;
+    }
+
+    .data-value.empty {
+      color: var(--gray-400);
+      font-style: italic;
+    }
+
+    .data-value.currency {
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .data-value.number {
       font-weight: 600;
     }
-    .editable-input {
-      font-size: 1em;
-      font-family: inherit;
-      padding: 10px;
-      border: 1px solid #ced4da;
-      border-radius: 4px;
-      width: 100%;
-      box-sizing: border-box;
-      transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+
+    /* Notes Section */
+    .notes-section {
+      background: var(--gray-50);
+      border-radius: 6px;
+      padding: 12px;
+      min-height: 80px;
+      font-size: 0.875rem;
+      line-height: 1.6;
+      color: var(--gray-700);
     }
-    .editable-input:focus {
-      border-color: #80bdff;
-      outline: 0;
-      box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+
+    .notes-section.empty {
+      color: var(--gray-400);
+      font-style: italic;
     }
-    .editable-input:hover {
-      border-color: #007bff;
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .visual-panel {
+        width: 280px;
+      }
+      
+      .metrics-bar {
+        gap: 16px;
+      }
+      
+      .metric-item {
+        padding: 0 8px;
+      }
     }
-    textarea.editable-input {
-      resize: vertical;
-      min-height: 100px;
+
+    @media (max-width: 768px) {
+      .content-area {
+        flex-direction: column;
+      }
+      
+      .visual-panel {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--gray-200);
+        max-height: 300px;
+      }
+      
+      .header-content {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .metrics-bar {
+        width: 100%;
+        justify-content: space-between;
+      }
+      
+      .tab-navigation {
+        flex-wrap: wrap;
+      }
+      
+      .tab-button {
+        flex: 0 0 calc(50% - 2px);
+      }
     }
-    .saved-highlight {
-      background-color: #d4edda !important;
-      border-color: #28a745 !important;
+
+    /* Utility Classes */
+    .hidden {
+      display: none !important;
     }
-    .error-highlight {
-      background-color: #f8d7da !important;
-      border-color: #dc3545 !important;
-    }
-    .currency::before {
-      content: '$';
-    }
-    .percentage::after {
-      content: '%';
-    }
-    .formatted-number {
+
+    .text-right {
       text-align: right;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 4px;
+      background: var(--gray-200);
+      color: var(--gray-700);
+    }
+
+    .badge.badge-success {
+      background: #D1FAE5;
+      color: #065F46;
+    }
+
+    .badge.badge-warning {
+      background: #FEF3C7;
+      color: #92400E;
     }
   </style>
 </head>
 <body>
 
   <div id="initial-message">
-    <p>Click on a row to view and edit property details.</p>
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <h5>Select a property to view details</h5>
+    </div>
   </div>
 
   <div id="comp-details" class="hidden">
-    <div class="left-column">
-      <img id="property-image" src="" alt="Property Image">
-      <div id="map"></div>
+    <!-- Compact Header -->
+    <div class="compact-header">
+      <div class="header-content">
+        <div class="property-info">
+          <h1 class="property-name" id="header-name">Property Name</h1>
+          <p class="property-address" id="header-address">Property Address</p>
+        </div>
+        <div class="metrics-bar">
+          <div class="metric-item">
+            <div class="metric-value" id="stat-price">$0</div>
+            <div class="metric-label">Sale Price</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-value" id="stat-cap-rate">0%</div>
+            <div class="metric-label">Cap Rate</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-value" id="stat-psf">$0</div>
+            <div class="metric-label">$/SF</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-value" id="stat-size">0</div>
+            <div class="metric-label">Size (SF)</div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="right-column">
-      <div class="detail-item">
-        <span class="detail-label">Property Name</span>
-        <input type="text" id="property-name" class="editable-input" data-col-id="Property_Name">
+
+    <!-- Main Content Area -->
+    <div class="content-area">
+      <!-- Visual Panel -->
+      <div class="visual-panel">
+        <img id="property-image" class="property-image" src="" alt="Property Image">
+        <div id="map"></div>
       </div>
-      <div id="property-address-header">
-        <div class="detail-item">
-          <span class="detail-label">Address</span>
-          <input type="text" id="property-address" class="editable-input" data-col-id="Property_Address">
+
+      <!-- Data Panel -->
+      <div class="data-panel">
+        <!-- Tab Navigation -->
+        <div class="tab-navigation">
+          <button class="tab-button active" data-tab="overview">Overview</button>
+          <button class="tab-button" data-tab="transaction">Transaction</button>
+          <button class="tab-button" data-tab="parties">Parties</button>
+          <button class="tab-button" data-tab="notes">Notes</button>
         </div>
-        <div class="detail-item">
-          <span class="detail-label">City</span>
-          <input type="text" id="property-city" class="editable-input" data-col-id="Property_City">
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">Zip</span>
-          <input type="number" id="property-zip" class="editable-input" data-col-id="Zip">
-        </div>
-      </div>
-      <div class="detail-section">
-        <h3 class="collapsible-header">Sale Information <span class="toggle-icon">-</span></h3>
-        <div class="collapsible-content active">
-          <div class="details-grid">
-            <div class="detail-item">
-              <span class="detail-label">Sale Price</span>
-              <input type="number" step="1" id="sale-price" class="editable-input formatted-number" data-col-id="Sale_Price" placeholder="0">
+
+        <!-- Tab Contents -->
+        <div class="tab-content active" id="overview-tab">
+          <div class="data-card">
+            <h3 class="card-title"><i class="bi bi-building"></i> Property Information</h3>
+            <div class="data-grid">
+              <div class="data-item">
+                <div class="data-label">Property Name</div>
+                <div class="data-value" id="property-name"></div>
+              </div>
+              <div class="data-item">
+                <div class="data-label">Property Type</div>
+                <div class="data-value" id="property-type"></div>
+              </div>
+              <div class="data-item">
+                <div class="data-label">Address</div>
+                <div class="data-value" id="property-address"></div>
+              </div>
+              <div class="data-item">
+                <div class="data-label">City</div>
+                <div class="data-value" id="property-city"></div>
+              </div>
+              <div class="data-item">
+                <div class="data-label">County</div>
+                <div class="data-value" id="property-county"></div>
+              </div>
+              <div class="data-item">
+                <div class="data-label">Zip Code</div>
+                <div class="data-value" id="property-zip"></div>
+              </div>
             </div>
-            <div class="detail-item">
-              <span class="detail-label">Sale Date</span>
-              <input type="date" id="sale-date" class="editable-input" data-col-id="Sale_Date">
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Cap Rate (%)</span>
-              <input type="number" step="0.01" id="cap-rate" class="editable-input formatted-number" data-col-id="Cap_Rate" placeholder="0.00">
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Sale Condition</span>
-              <input type="text" id="sale-condition" class="editable-input" data-col-id="Sale_Condition">
+          </div>
+
+          <div class="data-card">
+            <h3 class="card-title"><i class="bi bi-rulers"></i> Property Details</h3>
+            <div class="data-grid">
+              <div class="data-item">
+                <div class="data-label">Building Size</div>
+                <div class="data-value number" id="size"></div>
+              </div>
+              <div class="data-item">
+                <div class="data-label">Land Area</div>
+                <div class="data-value number" id="land-area"></div>
+              </div>
+              <div class="data-item">
+                <div class="data-label">Secondary Type</div>
+                <div class="data-value" id="secondary-type"></div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div class="detail-section">
-        <h3 class="collapsible-header">Property Details <span class="toggle-icon">+</span></h3>
-        <div class="collapsible-content">
-          <div class="details-grid">
-            <div class="detail-item">
-              <span class="detail-label">Size (SF)</span>
-              <input type="number" id="size" class="editable-input formatted-number" data-col-id="Size" placeholder="0">
+
+        <div class="tab-content" id="transaction-tab">
+          <div class="data-card">
+            <h3 class="card-title"><i class="bi bi-cash-stack"></i> Sale Information</h3>
+            <div class="data-grid">
+              <div class="data-item">
+                <div class="data-label">Sale Price</div>
+                <div class="data-value currency" id="sale-price"></div>
+              </div>
+              <div class="data-item">
+                <div class="data-label">Sale Date</div>
+                <div class="data-value" id="sale-date"></div>
+              </div>
+              <div class="data-item">
+                <div class="data-label">Cap Rate</div>
+                <div class="data-value number" id="cap-rate"></div>
+              </div>
+              <div class="data-item">
+                <div class="data-label">Days on Market</div>
+                <div class="data-value number" id="market-time"></div>
+              </div>
+              <div class="data-item">
+                <div class="data-label">Sale Condition</div>
+                <div class="data-value" id="sale-condition"></div>
+              </div>
             </div>
-            <div class="detail-item">
-              <span class="detail-label">Land Area (SF)</span>
-              <input type="number" id="land-area" class="editable-input formatted-number" data-col-id="Land_Area_SF" placeholder="0">
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Property Type</span>
-              <input type="text" id="property-type" class="editable-input" data-col-id="Property_Type">
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Secondary Type</span>
-              <input type="text" id="secondary-type" class="editable-input" data-col-id="Secondary_Type">
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Days on Market</span>
-              <input type="number" id="market-time" class="editable-input formatted-number" data-col-id="Market_Time" placeholder="0">
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">County</span>
-              <input type="text" id="property-county" class="editable-input" data-col-id="Property_County">
+          </div>
+
+          <div class="data-card">
+            <h3 class="card-title"><i class="bi bi-people"></i> Brokers</h3>
+            <div class="data-grid">
+              <div class="data-item">
+                <div class="data-label">Listing Broker</div>
+                <div class="data-value" id="listing-broker"></div>
+              </div>
+              <div class="data-item">
+                <div class="data-label">Listing Brokerage</div>
+                <div class="data-value" id="listing-brokerage"></div>
+              </div>
+              <div class="data-item">
+                <div class="data-label">Buyer's Broker</div>
+                <div class="data-value" id="buyers-broker"></div>
+              </div>
+              <div class="data-item">
+                <div class="data-label">Buyer's Brokerage</div>
+                <div class="data-value" id="buyers-brokerage"></div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div class="detail-section">
-        <h3 class="collapsible-header">Transaction Notes <span class="toggle-icon">+</span></h3>
-        <div class="collapsible-content">
-          <textarea id="transaction-notes" class="editable-input" data-col-id="Transaction_Notes" placeholder="Enter transaction notes..."></textarea>
+
+        <div class="tab-content" id="parties-tab">
+          <div class="data-card">
+            <h3 class="card-title"><i class="bi bi-person-badge"></i> Buyer Information</h3>
+            <div class="data-grid">
+              <div class="data-item">
+                <div class="data-label">Contact</div>
+                <div class="data-value" id="buyer-contact"></div>
+              </div>
+              <div class="data-item">
+                <div class="data-label">Company</div>
+                <div class="data-value" id="buyer-company"></div>
+              </div>
+              <div class="data-item">
+                <div class="data-label">Address</div>
+                <div class="data-value" id="buyer-address"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="data-card">
+            <h3 class="card-title"><i class="bi bi-person-badge"></i> Seller Information</h3>
+            <div class="data-grid">
+              <div class="data-item">
+                <div class="data-label">Contact</div>
+                <div class="data-value" id="seller-contact"></div>
+              </div>
+              <div class="data-item">
+                <div class="data-label">Company</div>
+                <div class="data-value" id="seller-company"></div>
+              </div>
+              <div class="data-item">
+                <div class="data-label">Address</div>
+                <div class="data-value" id="seller-address"></div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="detail-section">
-        <h3 class="collapsible-header">Parties Involved <span class="toggle-icon">+</span></h3>
-        <div class="collapsible-content">
-          <div class="details-grid">
-            <div class="detail-item">
-              <span class="detail-label">Listing Broker</span>
-              <input type="text" id="listing-broker" class="editable-input" data-col-id="Listing_Broker">
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Listing Brokerage</span>
-              <input type="text" id="listing-brokerage" class="editable-input" data-col-id="Listing_Brokerage">
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Buyer's Broker</span>
-              <input type="text" id="buyers-broker" class="editable-input" data-col-id="Buyers_Broker">
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Buyer's Brokerage</span>
-              <input type="text" id="buyers-brokerage" class="editable-input" data-col-id="Buyers_Brokerage">
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Buyer Contact</span>
-              <input type="text" id="buyer-contact" class="editable-input" data-col-id="Buyer_Contact">
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Seller Contact</span>
-              <input type="text" id="seller-contact" class="editable-input" data-col-id="Seller_Contact">
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Buyer Company</span>
-              <input type="text" id="buyer-company" class="editable-input" data-col-id="Buyer_Company">
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Seller Company</span>
-              <input type="text" id="seller-company" class="editable-input" data-col-id="Seller_Company">
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Buyer Address</span>
-              <input type="text" id="buyer-address" class="editable-input" data-col-id="Buyer_Address">
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Seller Address</span>
-              <input type="text" id="seller-address" class="editable-input" data-col-id="Seller_Address">
-            </div>
+
+        <div class="tab-content" id="notes-tab">
+          <div class="data-card">
+            <h3 class="card-title"><i class="bi bi-journal-text"></i> Transaction Notes</h3>
+            <div class="notes-section" id="transaction-notes"></div>
           </div>
         </div>
       </div>
@@ -303,18 +611,9 @@
 
   <script>
     let currentRecordId = null;
+    let currentRecord = null;
     let map = null;
     let marker = null;
-    let isRendering = false;
-
-    function attachInputListeners() {
-      document.querySelectorAll('.editable-input').forEach(input => {
-        input.removeEventListener('change', handleInputChange);
-        input.removeEventListener('blur', handleInputChange);
-        input.addEventListener('change', handleInputChange);
-        input.addEventListener('blur', handleInputChange);
-      });
-    }
 
     const GRIST_COLUMNS = [
       'Property_Image', 'PropertyID', 'Property_Name', 'Property_Address', 'Property_City', 'Zip',
@@ -325,117 +624,205 @@
       'Seller_Company', 'Seller_Address', 'Latitude', 'Longitude'
     ];
 
-    function render(record) {
-      if (!record || !record.id) {
-        document.getElementById('initial-message').classList.remove('hidden');
-        document.getElementById('comp-details').classList.add('hidden');
-        return;
+    // Formatting functions
+    function formatCurrency(value) {
+      if (!value && value !== 0) return '$0';
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }).format(value);
+    }
+
+    function formatNumber(value) {
+      if (!value && value !== 0) return '0';
+      return new Intl.NumberFormat('en-US').format(value);
+    }
+
+    function formatDate(timestamp) {
+      if (!timestamp) return '';
+      const date = new Date(timestamp * 1000);
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    }
+
+    function formatValue(value, type = 'text') {
+      if (value === null || value === undefined || value === '') {
+        return { text: 'Not specified', isEmpty: true };
       }
 
-      isRendering = true;
-      currentRecordId = record.id;
+      switch (type) {
+        case 'currency':
+          return { text: formatCurrency(value), isEmpty: false };
+        case 'number':
+          return { text: formatNumber(value), isEmpty: false };
+        case 'percentage':
+          return { text: `${(value * 100).toFixed(2)}%`, isEmpty: false };
+        case 'date':
+          return { text: formatDate(value), isEmpty: false };
+        default:
+          return { text: String(value), isEmpty: false };
+      }
+    }
 
-      document.getElementById('initial-message').classList.add('hidden');
-      document.getElementById('comp-details').classList.remove('hidden');
+    // Update functions
+    function updateHeader(record) {
+      document.getElementById('header-name').textContent = record.Property_Name || 'Property Name';
+      const address = [record.Property_Address, record.Property_City, record.Zip]
+        .filter(Boolean)
+        .join(', ');
+      document.getElementById('header-address').textContent = address || 'Property Address';
 
-      document.querySelectorAll('.editable-input').forEach(input => {
-        const colId = input.dataset.colId;
-        if (!colId) return;
-        let value = record[colId];
-        if (colId === 'Sale_Date') {
-          input.value = value || '';
-        } else if (colId === 'Cap_Rate') {
-          input.value = (typeof value === 'number') ? (value * 100).toFixed(2) : '';
-        } else if (colId === 'Sale_Price' || colId === 'Size' || colId === 'Land_Area_SF' || colId === 'Market_Time' || colId === 'Zip') {
-          input.value = (typeof value === 'number') ? value : (value ?? '');
-        } else {
-          input.value = (value === null || value === undefined) ? '' : value;
+      // Update metrics
+      const salePrice = record.Sale_Price || 0;
+      const size = record.Size || 0;
+      const capRate = record.Cap_Rate || 0;
+      const pricePerSF = (size > 0) ? (salePrice / size) : 0;
+
+      document.getElementById('stat-price').textContent = formatCurrency(salePrice);
+      document.getElementById('stat-size').textContent = formatNumber(size);
+      document.getElementById('stat-cap-rate').textContent = `${(capRate * 100).toFixed(2)}%`;
+      document.getElementById('stat-psf').textContent = formatCurrency(pricePerSF);
+    }
+
+    function updateDataFields(record) {
+      const fieldMappings = {
+        // Overview tab
+        'property-name': { field: 'Property_Name', type: 'text' },
+        'property-type': { field: 'Property_Type', type: 'text' },
+        'property-address': { field: 'Property_Address', type: 'text' },
+        'property-city': { field: 'Property_City', type: 'text' },
+        'property-county': { field: 'Property_County', type: 'text' },
+        'property-zip': { field: 'Zip', type: 'text' },
+        'size': { field: 'Size', type: 'number' },
+        'land-area': { field: 'Land_Area_SF', type: 'number' },
+        'secondary-type': { field: 'Secondary_Type', type: 'text' },
+        
+        // Transaction tab
+        'sale-price': { field: 'Sale_Price', type: 'currency' },
+        'sale-date': { field: 'Sale_Date', type: 'date' },
+        'cap-rate': { field: 'Cap_Rate', type: 'percentage' },
+        'market-time': { field: 'Market_Time', type: 'number' },
+        'sale-condition': { field: 'Sale_Condition', type: 'text' },
+        'listing-broker': { field: 'Listing_Broker', type: 'text' },
+        'listing-brokerage': { field: 'Listing_Brokerage', type: 'text' },
+        'buyers-broker': { field: 'Buyers_Broker', type: 'text' },
+        'buyers-brokerage': { field: 'Buyers_Brokerage', type: 'text' },
+        
+        // Parties tab
+        'buyer-contact': { field: 'Buyer_Contact', type: 'text' },
+        'buyer-company': { field: 'Buyer_Company', type: 'text' },
+        'buyer-address': { field: 'Buyer_Address', type: 'text' },
+        'seller-contact': { field: 'Seller_Contact', type: 'text' },
+        'seller-company': { field: 'Seller_Company', type: 'text' },
+        'seller-address': { field: 'Seller_Address', type: 'text' }
+      };
+
+      Object.entries(fieldMappings).forEach(([elementId, config]) => {
+        const element = document.getElementById(elementId);
+        if (element) {
+          const formatted = formatValue(record[config.field], config.type);
+          element.textContent = formatted.text;
+          element.classList.toggle('empty', formatted.isEmpty);
         }
       });
 
-      const imageElement = document.getElementById('property-image');
-      imageElement.src = record.Property_Image || 'https://via.placeholder.com/400x300.png?text=No+Image';
-
-      updateMap(record);
-      attachInputListeners();
-      isRendering = false;
-    }
-
-    async function handleInputChange(event) {
-      if (!currentRecordId || isRendering) return;
-
-      const input = event.target;
-      const columnId = input.dataset.colId;
-      if (!columnId) return;
-
-      let value = input.value.trim();
-      input.classList.remove('saved-highlight', 'error-highlight');
-
-      if (input.type === 'number') {
-        if (value === '') {
-          value = null;
-        } else {
-          value = parseFloat(value);
-          if (isNaN(value)) {
-            input.classList.add('error-highlight');
-            setTimeout(() => input.classList.remove('error-highlight'), 2000);
-            return;
-          }
-          if (columnId === 'Cap_Rate') value = value / 100;
-        }
-      } else if (input.type === 'date') {
-        value = value || null;
-      } else if (value === '') {
-        value = null;
-      }
-
-      try {
-        const table = await grist.selectedTable; // FIX: always await this!
-        await table.updateRecord(currentRecordId, { [columnId]: value });
-        input.classList.add('saved-highlight');
-        setTimeout(() => input.classList.remove('saved-highlight'), 1500);
-      } catch (err) {
-        input.classList.add('error-highlight');
-        setTimeout(() => input.classList.remove('error-highlight'), 2000);
+      // Handle notes separately
+      const notesElement = document.getElementById('transaction-notes');
+      const notes = record.Transaction_Notes;
+      if (notes) {
+        notesElement.textContent = notes;
+        notesElement.classList.remove('empty');
+      } else {
+        notesElement.textContent = 'No notes available';
+        notesElement.classList.add('empty');
       }
     }
 
     function updateMap(record) {
       const { Latitude, Longitude, Property_Name, Property_Address } = record;
-      if (Latitude && Longitude && !isNaN(Latitude) && !isNaN(Longitude)) {
+      
+      if (typeof Latitude === 'number' && typeof Longitude === 'number') {
+        const coords = [Latitude, Longitude];
         if (!map) {
-          map = L.map('map').setView([Latitude, Longitude], 15);
-          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
+          map = L.map('map').setView(coords, 15);
+          L.tileLayer('http://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}', {
+              attribution: '© Google Maps'
           }).addTo(map);
-          marker = L.marker([Latitude, Longitude]).addTo(map);
+          marker = L.marker(coords).addTo(map);
         } else {
-          map.setView([Latitude, Longitude], 15);
-          marker.setLatLng([Latitude, Longitude]);
+          map.setView(coords, 15);
+          marker.setLatLng(coords);
         }
-        marker.bindPopup(`<b>${Property_Name || 'Property'}</b><br>${Property_Address || ''}`).openPopup();
-        setTimeout(() => { if (map) map.invalidateSize(); }, 100);
+        
+        const popupContent = `<b>${Property_Name || 'Property'}</b><br>${Property_Address || ''}`;
+        marker.bindPopup(popupContent);
+        
+        setTimeout(() => { map.invalidateSize(); }, 100);
       }
     }
 
-    document.querySelectorAll('.collapsible-header').forEach(header => {
-      header.addEventListener('click', function() {
-        const content = this.nextElementSibling;
-        const icon = this.querySelector('.toggle-icon');
-        content.classList.toggle('active');
-        icon.textContent = content.classList.contains('active') ? '-' : '+';
-      });
-    });
+    // Tab navigation
+    function setupTabNavigation() {
+      const tabButtons = document.querySelectorAll('.tab-button');
+      const tabContents = document.querySelectorAll('.tab-content');
 
+      tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          const targetTab = button.getAttribute('data-tab');
+          
+          // Update active states
+          tabButtons.forEach(btn => btn.classList.remove('active'));
+          tabContents.forEach(content => content.classList.remove('active'));
+          
+          button.classList.add('active');
+          document.getElementById(`${targetTab}-tab`).classList.add('active');
+        });
+      });
+    }
+
+    // Main render function
+    async function render(record) {
+      if (!record || !record.id) {
+        document.getElementById('initial-message').classList.remove('hidden');
+        document.getElementById('comp-details').classList.add('hidden');
+        currentRecordId = null;
+        currentRecord = null;
+        return;
+      }
+
+      currentRecordId = record.id;
+      currentRecord = record;
+
+      document.getElementById('initial-message').classList.add('hidden');
+      document.getElementById('comp-details').classList.remove('hidden');
+      
+      updateHeader(record);
+      updateDataFields(record);
+
+      // Update image
+      const imageElement = document.getElementById('property-image');
+      imageElement.src = record.Property_Image || 'https://via.placeholder.com/400x250/E5E7EB/6B7280?text=No+Image+Available';
+
+      updateMap(record);
+    }
+
+    // Initialize
     grist.ready({
-      requiredAccess: 'full',
-      columns: GRIST_COLUMNS
+        requiredAccess: 'full',
+        columns: GRIST_COLUMNS
     });
 
     grist.onRecord(render);
-    attachInputListeners();
-
-    console.log('Widget initialized and ready for editing');
+    
+    // Set up UI interactions once the document is loaded
+    document.addEventListener('DOMContentLoaded', () => {
+      setupTabNavigation();
+    });
   </script>
 </body>
 </html>
