@@ -54,6 +54,7 @@
         }
         .filter-group {
             flex: 1;
+            position: relative; /* For dropdown positioning */
         }
         .filter-select {
             width: 100%;
@@ -70,7 +71,7 @@
             border-color: #93c5fd;
             box-shadow: 0 0 0 1px #93c5fd;
         }
-        .filter-reset-btn {
+        .filter-reset-btn, .filter-order-btn {
             padding: 0.5rem 1.25rem;
             font-size: 0.95rem;
             font-weight: 500;
@@ -80,8 +81,34 @@
             border: none;
             transition: background 0.2s;
         }
-        .filter-reset-btn:hover {
+        .filter-reset-btn:hover, .filter-order-btn:hover {
             background: #1f2937;
+        }
+        .filter-order-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        #sort-dropdown-menu {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 110%;
+            z-index: 40;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.75rem;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.09);
+            width: auto;
+            max-width: 100%;
+            box-sizing: border-box;
+            max-height: 220px;
+            overflow-y: auto;
+            margin-top: 0.3rem;
+            display: none;
+        }
+        #sort-dropdown-menu.show {
+            display: block;
         }
         @media (max-width: 640px) {
             .filter-floatbar {
@@ -92,7 +119,7 @@
             .filter-select {
                 width: 100%;
             }
-            .filter-reset-btn {
+            .filter-reset-btn, .filter-order-btn {
                 width: 100%;
             }
         }
@@ -107,15 +134,23 @@
                 </select>
             </div>
             <div class="filter-group">
-                <select id="sort-filter" class="filter-select">
-                    <option value="modified_desc">Newest (Last Updated)</option>
-                    <option value="created_desc">Newest (Created)</option>
-                    <option value="date_desc">Newest (Date Listed)</option>
-                    <option value="date_asc">Oldest (Date Listed)</option>
-                    <option value="price_desc">Highest Price</option>
-                    <option value="price_asc">Lowest Price</option>
-                </select>
+                <button id="sort-dropdown-btn" type="button" class="filter-select flex justify-between items-center">
+                    <span id="sort-selected-label">Newest (Last Updated)</span>
+                    <i data-lucide="chevron-down" class="lucide h-4 w-4"></i>
+                </button>
+                <div id="sort-dropdown-menu">
+                    <ul>
+                        <li><button type="button" class="sort-option w-full px-4 py-2 text-left" data-sort="modified">Newest (Last Updated)</button></li>
+                        <li><button type="button" class="sort-option w-full px-4 py-2 text-left" data-sort="created">Newest (Created)</button></li>
+                        <li><button type="button" class="sort-option w-full px-4 py-2 text-left" data-sort="date">Date Listed</button></li>
+                        <li><button type="button" class="sort-option w-full px-4 py-2 text-left" data-sort="price">Price</button></li>
+                    </ul>
+                </div>
             </div>
+            <button id="order-toggle-btn" type="button" class="filter-order-btn" title="Toggle Ascending/Descending">
+                <i id="order-toggle-icon" data-lucide="arrow-down" class="lucide h-4 w-4"></i>
+                <span id="order-toggle-label">Descending</span>
+            </button>
             <button id="reset-filters-button" type="button" class="filter-reset-btn">
                 Reset
             </button>
@@ -128,13 +163,12 @@
         <div class="modal-content fixed left-1/2 top-1/2 w-full max-w-3xl -translate-x-1/2 -translate-y-1/2">
             <div class="relative max-h-[95vh] overflow-y-auto bg-white rounded-lg shadow-xl">
                 <button id="modal-close-button" class="absolute right-4 top-4 text-gray-400 hover:text-gray-600 z-10">
-                    <svg class="lucide lucide-x h-6 w-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                    <svg class="lucide lucide-x h-6 w-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
                 <div id="modal-body"></div>
             </div>
         </div>
     </div>
-
     <template id="property-card-template">
         <div class="group hover:shadow-lg transition-all duration-300 cursor-pointer flex flex-col bg-white rounded-lg border border-gray-200 overflow-hidden">
             <div class="relative overflow-hidden h-48">
@@ -202,7 +236,6 @@
             <div data-template-field="links" class="grid grid-cols-1 sm:grid-cols-3 gap-2"></div>
         </div>
     </template>
-
     <script type="module">
         let allRecords = [];
         const propertyGrid = document.getElementById('property-grid');
@@ -212,16 +245,29 @@
         const modalBody = document.getElementById('modal-body');
         const modalBodyTemplate = document.getElementById('modal-body-template');
         const typeFilterSelect = document.getElementById('type-filter');
-        const sortFilterSelect = document.getElementById('sort-filter');
         const resetButton = document.getElementById('reset-filters-button');
-
+        const sortDropdownBtn = document.getElementById('sort-dropdown-btn');
+        const sortDropdownMenu = document.getElementById('sort-dropdown-menu');
+        const sortSelectedLabel = document.getElementById('sort-selected-label');
+        const orderToggleBtn = document.getElementById('order-toggle-btn');
+        const orderToggleIcon = document.getElementById('order-toggle-icon');
+        const orderToggleLabel = document.getElementById('order-toggle-label');
+        let sortState = {
+            sortBy: 'modified', // 'modified', 'created', 'date', 'price'
+            order: 'desc', // 'asc' or 'desc'
+        };
+        const sortLabels = {
+            modified: 'Newest (Last Updated)',
+            created: 'Newest (Created)',
+            date: 'Date Listed',
+            price: 'Price',
+        };
         const formatters = {
             Price: (val) => val ? `$${Number(val).toLocaleString('en-US')}` : 'N/A',
             RBA: (val) => val ? `${Number(val).toLocaleString()} sq ft` : 'N/A',
             Cap_Rate: (val) => val ? `${(Number(val) * 100).toFixed(2)}%` : 'N/A',
             default: (val) => val || 'N/A',
         };
-
         function getDaysOnMarket(dateVal) {
             if (!dateVal) return null;
             let listedDate;
@@ -243,7 +289,6 @@
             if (diffDays < 0) return 0;
             return diffDays;
         }
-
         function copyToClipboard(text, button) {
             navigator.clipboard.writeText(text).then(() => {
                 showCopied(button);
@@ -267,7 +312,6 @@
                     showCopyFailed(button, text);
                 }
             });
-
             function showCopied(btn) {
                 const originalText = btn.innerHTML;
                 btn.innerHTML = '<i data-lucide="check" class="lucide h-4 w-4 mr-2"></i> Copied!';
@@ -277,7 +321,6 @@
                     lucide.createIcons();
                 }, 2000);
             }
-
             function showCopyFailed(btn, text) {
                 btn.innerHTML = '<span style="color:red;">Copy not allowed</span>';
                 setTimeout(() => {
@@ -287,7 +330,6 @@
                 window.prompt('Copy this OM link manually:', text);
             }
         }
-
         function renderProperties(recordsToRender) {
             propertyGrid.innerHTML = '';
             if (!recordsToRender || recordsToRender.length === 0) {
@@ -296,14 +338,12 @@
                 return;
             }
             statusMessage.style.display = 'none';
-
             recordsToRender.forEach((record, index) => {
                 if (!record || typeof record !== 'object') return;
                 const card = cardTemplate.content.cloneNode(true);
                 const cardElement = card.firstElementChild;
                 cardElement.style.animationDelay = `${index * 50}ms`;
                 cardElement.classList.add('animate-fadeIn');
-
                 // Days on Market overlay
                 const daysChipContainer = cardElement.querySelector('.days-chip-container');
                 const dom = getDaysOnMarket(record.Date_Listed);
@@ -313,7 +353,6 @@
                     chip.textContent = `${dom}d`;
                     daysChipContainer.appendChild(chip);
                 }
-
                 // Property Type overlay
                 const typeChipContainer = cardElement.querySelector('.type-chip-container');
                 if (record.Property_Type) {
@@ -322,7 +361,6 @@
                     chip.textContent = record.Property_Type;
                     typeChipContainer.appendChild(chip);
                 }
-
                 card.querySelectorAll('[data-template-field]').forEach(el => {
                     const field = el.dataset.templateField;
                     const value = record[field];
@@ -344,7 +382,6 @@
             });
             lucide.createIcons();
         }
-
         function showModal(record) {
             if (!record) return;
             const modalContent = modalBodyTemplate.content.cloneNode(true);
@@ -356,11 +393,11 @@
                     const linksContainer = el;
                     linksContainer.innerHTML = '';
                     const linkButton = (url, icon, text) => `
-                        <a href="${url}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 py-2 border border-slate-200 bg-white hover:bg-slate-100 w-full">
+                        <a href="${url}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 py-2 border border-slate-200 bg-white hover:bg-slate-50 transition">
                             <i data-lucide="${icon}" class="lucide h-4 w-4 mr-2"></i> ${text}
                         </a>`;
                     const copyButton = (filePath, icon, text) => `
-                        <button data-copy-path="${filePath}" class="om-copy-button inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 py-2 border border-slate-200 bg-white hover:bg-slate-100 w-full">
+                        <button data-copy-path="${filePath}" class="om-copy-button inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 py-2 border border-slate-200 bg-white hover:bg-slate-50 transition">
                             <i data-lucide="${icon}" class="lucide h-4 w-4 mr-2"></i> ${text}
                         </button>`;
                     if (record.CoStar) linksContainer.innerHTML += linkButton(record.CoStar, 'external-link', 'View on CoStar');
@@ -391,13 +428,11 @@
             modalContainer.classList.add('modal-open');
             lucide.createIcons();
         }
-
         function hideModal() {
             modalContainer.classList.add('hidden');
             modalContainer.classList.remove('modal-open');
             modalBody.innerHTML = '';
         }
-
         function populateTypeFilter(records) {
             const types = new Set(records.map(r => r.Property_Type).filter(Boolean).sort());
             while (typeFilterSelect.options.length > 1) {
@@ -410,42 +445,36 @@
                 typeFilterSelect.appendChild(option);
             });
         }
-
         function sortRecords(records) {
-            const sortVal = sortFilterSelect.value;
+            const { sortBy, order } = sortState;
             let sorted = [...records];
-            if (sortVal === 'modified_desc') {
+            if (sortBy === 'modified') {
                 sorted.sort((a, b) => {
                     const am = a.Last_updated_at ? new Date(a.Last_updated_at) : new Date(0);
                     const bm = b.Last_updated_at ? new Date(b.Last_updated_at) : new Date(0);
-                    return bm - am;
+                    return order === 'desc' ? bm - am : am - bm;
                 });
-            } else if (sortVal === 'created_desc') {
+            } else if (sortBy === 'created') {
                 sorted.sort((a, b) => {
                     const ac = a.Created_at ? new Date(a.Created_at) : new Date(0);
                     const bc = b.Created_at ? new Date(b.Created_at) : new Date(0);
-                    return bc - ac;
+                    return order === 'desc' ? bc - ac : ac - bc;
                 });
-            } else if (sortVal === 'date_desc') {
+            } else if (sortBy === 'date') {
                 sorted.sort((a, b) => {
                     const ad = a.Date_Listed ? new Date(a.Date_Listed) : new Date(0);
                     const bd = b.Date_Listed ? new Date(b.Date_Listed) : new Date(0);
-                    return bd - ad;
+                    return order === 'desc' ? bd - ad : ad - bd;
                 });
-            } else if (sortVal === 'date_asc') {
+            } else if (sortBy === 'price') {
                 sorted.sort((a, b) => {
-                    const ad = a.Date_Listed ? new Date(a.Date_Listed) : new Date(0);
-                    const bd = b.Date_Listed ? new Date(b.Date_Listed) : new Date(0);
-                    return ad - bd;
+                    const ap = parseFloat(a.Price) || 0;
+                    const bp = parseFloat(b.Price) || 0;
+                    return order === 'desc' ? bp - ap : ap - bp;
                 });
-            } else if (sortVal === 'price_desc') {
-                sorted.sort((a, b) => (parseFloat(b.Price) || 0) - (parseFloat(a.Price) || 0));
-            } else if (sortVal === 'price_asc') {
-                sorted.sort((a, b) => (parseFloat(a.Price) || 0) - (parseFloat(b.Price) || 0));
             }
             return sorted;
         }
-
         function applyFiltersAndRender() {
             const typeFilterValue = typeFilterSelect.value;
             let filteredRecords = [...allRecords];
@@ -455,17 +484,50 @@
             filteredRecords = sortRecords(filteredRecords);
             renderProperties(filteredRecords);
         }
-
+        // Dropdown logic
+        sortDropdownBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            sortDropdownMenu.classList.toggle('show');
+            lucide.createIcons();
+        });
+        document.addEventListener('click', (e) => {
+            if (!sortDropdownBtn.contains(e.target) && !sortDropdownMenu.contains(e.target)) {
+                sortDropdownMenu.classList.remove('show');
+            }
+        });
+        sortDropdownMenu.querySelectorAll('.sort-option').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const sortKey = btn.dataset.sort;
+                sortState.sortBy = sortKey;
+                sortState.order = 'desc';
+                sortSelectedLabel.textContent = sortLabels[sortKey];
+                orderToggleLabel.textContent = 'Descending';
+                orderToggleIcon.setAttribute('data-lucide', 'arrow-down');
+                sortDropdownMenu.classList.remove('show');
+                lucide.createIcons();
+                applyFiltersAndRender();
+            });
+        });
+        orderToggleBtn.addEventListener('click', () => {
+            sortState.order = sortState.order === 'desc' ? 'asc' : 'desc';
+            orderToggleLabel.textContent = sortState.order === 'desc' ? 'Descending' : 'Ascending';
+            orderToggleIcon.setAttribute('data-lucide', sortState.order === 'desc' ? 'arrow-down' : 'arrow-up');
+            lucide.createIcons();
+            applyFiltersAndRender();
+        });
         typeFilterSelect.addEventListener('change', applyFiltersAndRender);
-        sortFilterSelect.addEventListener('change', applyFiltersAndRender);
         resetButton.addEventListener('click', () => {
             typeFilterSelect.value = 'all';
-            sortFilterSelect.value = 'modified_desc';
+            sortState.sortBy = 'modified';
+            sortState.order = 'desc';
+            sortSelectedLabel.textContent = sortLabels['modified'];
+            orderToggleLabel.textContent = 'Descending';
+            orderToggleIcon.setAttribute('data-lucide', 'arrow-down');
+            lucide.createIcons();
             applyFiltersAndRender();
         });
         document.getElementById('modal-close-button').addEventListener('click', hideModal);
         document.getElementById('modal-backdrop').addEventListener('click', hideModal);
-
         grist.ready({ requiredAccess: 'read table' });
         grist.onRecords((records) => {
             allRecords = records;
