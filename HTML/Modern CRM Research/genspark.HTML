@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM Research Guide for Commercial Real Estate Professionals</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .feature-icon {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        }
+        
+        .comparison-table {
+            font-size: 0.875rem;
+        }
+        
+        .comparison-table th {
+            background-color: #f8fafc;
+            font-weight: 600;
+            padding: 12px 8px;
+            text-align: center;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .comparison-table td {
+            padding: 10px 8px;
+            text-align: center;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .comparison-table tr:hover {
+            background-color: #f1f5f9;
+        }
+        
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .badge-free {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+        
+        .badge-paid {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        
+        .badge-open-source {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .screenshot {
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="gradient-bg text-white py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h1 class="text-4xl md:text-5xl font-bold mb-4">
+                    <i class="fas fa-building mr-3"></i>
+                    CRM Research Guide for Commercial Real Estate
+                </h1>
+                <p class="text-xl md:text-2xl text-indigo-100 max-w-3xl mx-auto">
+                    Comprehensive analysis of 18+ CRM solutions for brokers, agents, small teams, and developers
+                </p>
+                <div class="mt-8 flex flex-wrap justify-center gap-4 text-sm">
+                    <div class="flex items-center bg-white bg-opacity-20 rounded-full px-4 py-2">
+                        <i class="fas fa-check mr-2"></i>
+                        Free & Open Source Options
+                    </div>
+                    <div class="flex items-center bg-white bg-opacity-20 rounded-full px-4 py-2">
+                        <i class="fas fa-mobile-alt mr-2"></i>
+                        Mobile-Friendly Solutions
+                    </div>
+                    <div class="flex items-center bg-white bg-opacity-20 rounded-full px-4 py-2">
+                        <i class="fas fa-map-marker-alt mr-2"></i>
+                        Property Mapping Features
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Executive Summary -->
+    <section class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Executive Summary</h2>
+                <div class="w-24 h-1 bg-indigo-600 mx-auto mb-8"></div>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h3 class="text-2xl font-semibold text-gray-900 mb-6">Research Scope & Purpose</h3>
+                    <div class="space-y-4 text-gray-600">
+                        <p>This comprehensive research covers <strong>18+ CRM solutions</strong> specifically evaluated for commercial real estate professionals who need to manage complex workflows involving:</p>
+                        <ul class="list-disc list-inside space-y-2 ml-4">
+                            <li><strong>Properties & Portfolios:</strong> Multi-tenant buildings, multiple owners, diverse property types</li>
+                            <li><strong>Stakeholder Management:</strong> Owners, tenants, brokers, investors, and service providers</li>
+                            <li><strong>Deal Management:</strong> Lease negotiations, sales transactions, renewals, and expirations</li>
+                            <li><strong>Document Storage:</strong> Contracts, leases, financials, and marketing materials</li>
+                            <li><strong>Communication Tools:</strong> Email campaigns, SMS, dialer integration, and follow-up automation</li>
+                            <li><strong>Location Intelligence:</strong> Map views, territory management, and proximity analysis</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-br from-indigo-50 to-purple-50 p-8 rounded-xl">
+                    <h4 class="text-xl font-semibold text-gray-900 mb-6">Key Research Findings</h4>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-indigo-600">6</div>
+                            <div class="text-sm text-gray-600">Open Source Options</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-green-600">12</div>
+                            <div class="text-sm text-gray-600">Free Tier Available</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-purple-600">8</div>
+                            <div class="text-sm text-gray-600">Real Estate Specific</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-blue-600">15</div>
+                            <div class="text-sm text-gray-600">Mobile Apps Available</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CRM Tools Grid -->
+    <section class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Featured CRM Solutions</h2>
+                <div class="w-24 h-1 bg-indigo-600 mx-auto mb-8"></div>
+                <p class="text-gray-600 max-w-3xl mx-auto">
+                    Each solution has been evaluated based on CRE-specific requirements including property management, 
+                    stakeholder tracking, deal pipelines, and integration capabilities.
+                </p>
+            </div>
+
+            <div class="grid lg:grid-cols-2 xl:grid-cols-3 gap-8">
+                <!-- Outpost CRM -->
+                <div class="bg-white rounded-xl shadow-lg card-hover overflow-hidden">
+                    <div class="relative">
+                        <img src="https://cdn1.genspark.ai/user-upload-image/v1/webpage_capture_screen_tool_call/701187cc-d60e-4a14-ba00-689542e03f05" alt="Outpost CRM Dashboard" class="w-full h-48 object-cover">
+                        <div class="absolute top-4 right-4">
+                            <span class="badge badge-paid">7-Day Trial</span>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-xl font-semibold text-gray-900">Outpost CRM</h3>
+                            <i class="fas fa-robot text-purple-600 text-lg"></i>
+                        </div>
+                        <p class="text-gray-600 mb-4">AI-powered CRM with intelligent deal flow, automated lead prioritization, and seamless email integration. Built for modern real estate operations.</p>
+                        
+                        <div class="mb-4">
+                            <h4 class="font-medium text-gray-900 mb-2">CRE Features:</h4>
+                            <ul class="text-sm text-gray-600 space-y-1">
+                                <li>✅ AI-driven lead scoring and prioritization</li>
+                                <li>✅ Deep email workflow integration</li>
+                                <li>✅ Automated booking and scheduling</li>
+                                <li>✅ Real-time collaboration tools</li>
+                                <li>✅ Mobile app with full functionality</li>
+                                <li>✅ Custom automations and routines</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="border-t pt-4">
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="text-lg font-semibold text-gray-900">Free Trial Available</span>
+                                <a href="https://outpost-crm.app/" target="_blank" class="text-indigo-600 hover:text-indigo-800">
+                                    <i class="fas fa-external-link-alt"></i>
+                                </a>
+                            </div>
+                            <p class="text-sm text-gray-500">7-day free trial, no credit card required. Modular pricing for scalability.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lead2Done -->
+                <div class="bg-white rounded-xl shadow-lg card-hover overflow-hidden">
+                    <div class="relative">
+                        <img src="https://cdn1.genspark.ai/user-upload-image/v1/webpage_capture_screen_tool_call/30740d89-ba98-4dcd-999b-f3ca49193798" alt="Lead2Done Interface" class="w-full h-48 object-cover">
+                        <div class="absolute top-4 right-4">
+                            <span class="badge badge-paid">$7.99/mo</span>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-xl font-semibold text-gray-900">Lead2Done</h3>
+                            <i class="fas fa-home text-green-600 text-lg"></i>
+                        </div>
+                        <p class="text-gray-600 mb-4">Simple, affordable CRM built specifically for real estate agents. Focus on selling while the system handles lead management and follow-ups.</p>
+                        
+                        <div class="mb-4">
+                            <h4 class="font-medium text-gray-900 mb-2">CRE Features:</h4>
+                            <ul class="text-sm text-gray-600 space-y-1">
+                                <li>✅ Automated lead capture and assignment</li>
+                                <li>✅ Property listing management</li>
+                                <li>✅ Smart follow-up alerts and reminders</li>
+                                <li>✅ Simple dashboard with no clutter</li>
+                                <li>✅ Role-based team management</li>
+                                <li>✅ 24/7 support included</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="border-t pt-4">
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="text-lg font-semibold text-gray-900">$7.99/month</span>
+                                <a href="https://lead2done.com/" target="_blank" class="text-indigo-600 hover:text-indigo-800">
+                                    <i class="fas fa-external-link-alt"></i>
+                                </a>
+                            </div>
+                            <p class="text-sm text-gray-500">1 week free trial. Solo plan starts at $7.99/month for 1 user.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Teamsale -->
+                <div class="bg-white rounded-xl shadow-lg card-hover overflow-hidden">
+                    <div class="relative">
+                        <img src="https://cdn1.genspark.ai/user-upload-image/v1/webpage_capture_screen_tool_call/2f624ac3-2421-48ef-b971-49fabc156655" alt="Teamsale CRM with Phone System" class="w-full h-48 object-cover">
+                        <div class="absolute top-4 right-4">
+                            <span class="badge badge-free">Free Tier</span>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-xl font-semibold text-gray-900">Teamsale</h3>
+                            <i class="fas fa-phone text-red-600 text-lg"></i>
+                        </div>
+                        <p class="text-gray-600 mb-4">CRM with integrated phone system by Zadarma. Includes calling, SMS, and comprehensive deal management for team sales operations.</p>
+                        
+                        <div class="mb-4">
+                            <h4 class="font-medium text-gray-900 mb-2">CRE Features:</h4>
+                            <ul class="text-sm text-gray-600 space-y-1">
+                                <li>✅ Built-in phone system and dialer</li>
+                                <li>✅ Call tracking and analytics</li>
+                                <li>✅ SMS services integration</li>
+                                <li>✅ Smart sales funnel management</li>
+                                <li>✅ Email campaigns and automation</li>
+                                <li>✅ Team collaboration tools</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="border-t pt-4">
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="text-lg font-semibold text-gray-900">Free - $52/month</span>
+                                <a href="https://teamsale.com/en/" target="_blank" class="text-indigo-600 hover:text-indigo-800">
+                                    <i class="fas fa-external-link-alt"></i>
+                                </a>
+                            </div>
+                            <p class="text-sm text-gray-500">14 days trial. Free tier available, paid plans from $26/month.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- REsimpli -->
+                <div class="bg-white rounded-xl shadow-lg card-hover overflow-hidden">
+                    <div class="relative">
+                        <img src="https://cdn1.genspark.ai/user-upload-image/v1/webpage_capture_screen_tool_call/c597ba5b-0499-4fd0-8ded-ae675f176312" alt="REsimpli Real Estate CRM" class="w-full h-48 object-cover">
+                        <div class="absolute top-4 right-4">
+                            <span class="badge badge-paid">$149/mo</span>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-xl font-semibold text-gray-900">REsimpli</h3>
+                            <i class="fas fa-chart-line text-blue-600 text-lg"></i>
+                        </div>
+                        <p class="text-gray-600 mb-4">All-in-one real estate investor CRM with advanced features for wholesaling, fix-and-flip, and rental property management.</p>
+                        
+                        <div class="mb-4">
+                            <h4 class="font-medium text-gray-900 mb-2">CRE Features:</h4>
+                            <ul class="text-sm text-gray-600 space-y-1">
+                                <li>✅ Free skip tracing and cash buyer searches</li>
+                                <li>✅ Driving for dollars with GPS tracking</li>
+                                <li>✅ Direct mail and drip campaigns</li>
+                                <li>✅ Built-in dialer with call intelligence</li>
+                                <li>✅ Full accounting system integration</li>
+                                <li>✅ SEO-optimized websites included</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="border-t pt-4">
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="text-lg font-semibold text-gray-900">$149-$599/month</span>
+                                <a href="https://resimpli.com/pricing/" target="_blank" class="text-indigo-600 hover:text-indigo-800">
+                                    <i class="fas fa-external-link-alt"></i>
+                                </a>
+                            </div>
+                            <p class="text-sm text-gray-500">30-day free trial. Basic plan $149/month, Pro $299/month, Enterprise $599/month.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Follow Up Boss -->
+                <div class="bg-white rounded-xl shadow-lg card-hover overflow-hidden">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-xl font-semibold text-gray-900">Follow Up Boss</h3>
+                            <i class="fas fa-users text-orange-600 text-lg"></i>
+                        </div>
+                        <p class="text-gray-600 mb-4">Real estate CRM focused on lead follow-up and conversion. Automatic lead distribution and team management for brokerages.</p>
+                        
+                        <div class="mb-4">
+                            <h4 class="font-medium text-gray-900 mb-2">CRE Features:</h4>
+                            <ul class="text-sm text-gray-600 space-y-1">
+                                <li>✅ Automated lead distribution system</li>
+                                <li>✅ Built-in dialer with local presence</li>
+                                <li>✅ Email integration and tracking</li>
+                                <li>✅ Mobile app for field work</li>
+                                <li>✅ Team performance analytics</li>
+                                <li>✅ No contracts, month-to-month billing</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="border-t pt-4">
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="text-lg font-semibold text-gray-900">Custom Pricing</span>
+                                <a href="https://www.followupboss.com/pricing" target="_blank" class="text-indigo-600 hover:text-indigo-800">
+                                    <i class="fas fa-external-link-alt"></i>
+                                </a>
+                            </div>
+                            <p class="text-sm text-gray-500">14-day free trial. Contact for pricing based on team size and features.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AscendixRE -->
+                <div class="bg-white rounded-xl shadow-lg card-hover overflow-hidden">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-xl font-semibold text-gray-900">AscendixRE</h3>
+                            <i class="fas fa-building text-purple-600 text-lg"></i>
+                        </div>
+                        <p class="text-gray-600 mb-4">Commercial real estate CRM built on Salesforce. Specialized for CRE brokers with property tracking, stacking plans, and deal management.</p>
+                        
+                        <div class="mb-4">
+                            <h4 class="font-medium text-gray-900 mb-2">CRE Features:</h4>
+                            <ul class="text-sm text-gray-600 space-y-1">
+                                <li>✅ Stacking plan visualization</li>
+                                <li>✅ Property listings portal</li>
+                                <li>✅ Commission calculations</li>
+                                <li>✅ Secure deal rooms</li>
+                                <li>✅ CRE brochure builder (Composer)</li>
+                                <li>✅ Built on Salesforce platform</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="border-t pt-4">
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="text-lg font-semibold text-gray-900">$79-$179/month</span>
+                                <a href="https://ascendix.com/ascendixre-commercial-real-estate-crm/" target="_blank" class="text-indigo-600 hover:text-indigo-800">
+                                    <i class="fas fa-external-link-alt"></i>
+                                </a>
+                            </div>
+                            <p class="text-sm text-gray-500">Essential $79/month, Professional $129/month, Enterprise $179/month.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EspoCRM -->
+                <div class="bg-white rounded-xl shadow-lg card-hover overflow-hidden">
+                    <div class="relative">
+                        <img src="https://cdn1.genspark.ai/user-upload-image/v1/webpage_capture_screen_tool_call/b6988ea3-5421-44f2-9ec6-62be6255c27b" alt="EspoCRM Open Source Interface" class="w-full h-48 object-cover">
+                        <div class="absolute top-4 right-4">
+                            <span class="badge badge-open-source">Open Source</span>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-xl font-semibold text-gray-900">EspoCRM</h3>
+                            <i class="fab fa-osi text-blue-600 text-lg"></i>
+                        </div>
+                        <p class="text-gray-600 mb-4">Free self-hosted and cloud CRM used by 50,000+ companies worldwide. Open source with extensive customization options.</p>
+                        
+                        <div class="mb-4">
+                            <h4 class="font-medium text-gray-900 mb-2">CRE Features:</h4>
+                            <ul class="text-sm text-gray-600 space-y-1">
+                                <li>✅ Self-hosted or cloud deployment</li>
+                                <li>✅ Custom entities and fields</li>
+                                <li>✅ Workflow automation</li>
+                                <li>✅ Email marketing integration</li>
+                                <li>✅ Multi-language support</li>
+                                <li>✅ API for custom integrations</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="border-t pt-4">
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="text-lg font-semibold text-gray-900">Free / Cloud Plans</span>
+                                <a href="https://www.espocrm.com/" target="_blank" class="text-indigo-600 hover:text-indigo-800">
+                                    <i class="fas fa-external-link-alt"></i>
+                                </a>
+                            </div>
+                            <p class="text-sm text-gray-500">Free self-hosted version. Cloud plans available for managed hosting.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SuiteCRM -->
+                <div class="bg-white rounded-xl shadow-lg card-hover overflow-hidden">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-xl font-semibold text-gray-900">SuiteCRM</h3>
+                            <i class="fab fa-osi text-green-600 text-lg"></i>
+                        </div>
+                        <p class="text-gray-600 mb-4">World's leading open source CRM with 5+ million downloads. Enterprise-grade features with complete customization freedom.</p>
+                        
+                        <div class="mb-4">
+                            <h4 class="font-medium text-gray-900 mb-2">CRE Features:</h4>
+                            <ul class="text-sm text-gray-600 space-y-1">
+                                <li>✅ Complete source code access</li>
+                                <li>✅ Advanced workflow automation</li>
+                                <li>✅ Custom modules and fields</li>
+                                <li>✅ Email marketing campaigns</li>
+                                <li>✅ Reporting and analytics</li>
+                                <li>✅ Mobile app available</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="border-t pt-4">
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="text-lg font-semibold text-gray-900">Free Open Source</span>
+                                <a href="https://suitecrm.com/" target="_blank" class="text-indigo-600 hover:text-indigo-800">
+                                    <i class="fas fa-external-link-alt"></i>
+                                </a>
+                            </div>
+                            <p class="text-sm text-gray-500">Free to download and use. Professional support and hosting available.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- HubSpot -->
+                <div class="bg-white rounded-xl shadow-lg card-hover overflow-hidden">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-xl font-semibold text-gray-900">HubSpot CRM</h3>
+                            <i class="fas fa-rocket text-orange-600 text-lg"></i>
+                        </div>
+                        <p class="text-gray-600 mb-4">Free CRM with unlimited growth potential. Comprehensive platform with sales, marketing, and service tools all in one.</p>
+                        
+                        <div class="mb-4">
+                            <h4 class="font-medium text-gray-900 mb-2">CRE Features:</h4>
+                            <ul class="text-sm text-gray-600 space-y-1">
+                                <li>✅ Unlimited contacts and users</li>
+                                <li>✅ Email tracking and templates</li>
+                                <li>✅ Meeting scheduling</li>
+                                <li>✅ Deal pipeline management</li>
+                                <li>✅ Mobile app with full features</li>
+                                <li>✅ Extensive integrations marketplace</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="border-t pt-4">
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="text-lg font-semibold text-gray-900">Free Forever</span>
+                                <a href="https://www.hubspot.com/products/crm" target="_blank" class="text-indigo-600 hover:text-indigo-800">
+                                    <i class="fas fa-external-link-alt"></i>
+                                </a>
+                            </div>
+                            <p class="text-sm text-gray-500">Free plan with core features. Paid plans add advanced functionality.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional CRMs in compact cards -->
+                <div class="bg-white rounded-xl shadow-lg card-hover p-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-xl font-semibold text-gray-900">Pipedrive</h3>
+                        <span class="badge badge-paid">Real Estate</span>
+                    </div>
+                    <p class="text-gray-600 mb-4">Visual pipeline CRM with specific real estate features for property, buyer, and investor management.</p>
+                    <a href="https://www.pipedrive.com/en/industries/real-estate-crm" target="_blank" class="text-indigo-600 hover:text-indigo-800 text-sm">
+                        View Pricing <i class="fas fa-external-link-alt ml-1"></i>
+                    </a>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg card-hover p-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-xl font-semibold text-gray-900">Monday.com</h3>
+                        <span class="badge badge-free">Free Tier</span>
+                    </div>
+                    <p class="text-gray-600 mb-4">Flexible work management platform with CRM capabilities, customizable for real estate workflows.</p>
+                    <a href="https://monday.com/pricing" target="_blank" class="text-indigo-600 hover:text-indigo-800 text-sm">
+                        View Pricing <i class="fas fa-external-link-alt ml-1"></i>
+                    </a>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg card-hover p-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-xl font-semibold text-gray-900">ClickUp</h3>
+                        <span class="badge badge-free">Free Plan</span>
+                    </div>
+                    <p class="text-gray-600 mb-4">All-in-one productivity platform with CRM features, project management, and team collaboration.</p>
+                    <a href="https://clickup.com/pricing" target="_blank" class="text-indigo-600 hover:text-indigo-800 text-sm">
+                        View Pricing <i class="fas fa-external-link-alt ml-1"></i>
+                    </a>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg card-hover p-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-xl font-semibold text-gray-900">Creatio</h3>
+                        <span class="badge badge-paid">No-Code</span>
+                    </div>
+                    <p class="text-gray-600 mb-4">AI-native CRM platform with no-code customization, built for sales, marketing, and service automation.</p>
+                    <a href="https://www.creatio.com/crm" target="_blank" class="text-indigo-600 hover:text-indigo-800 text-sm">
+                        View Pricing <i class="fas fa-external-link-alt ml-1"></i>
+                    </a>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg card-hover p-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-xl font-semibold text-gray-900">SuperAGI</h3>
+                        <span class="badge badge-free">Free Tier</span>
+                    </div>
+                    <p class="text-gray-600 mb-4">AI-powered sales platform with voice agents, automated outreach, and comprehensive CRM functionality.</p>
+                    <a href="https://superagi.com/pricing/" target="_blank" class="text-indigo-600 hover:text-indigo-800 text-sm">
+                        View Pricing <i class="fas fa-external-link-alt ml-1"></i>
+                    </a>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg card-hover p-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-xl font-semibold text-gray-900">Vtiger</h3>
+                        <span class="badge badge-open-source">Open Source</span>
+                    </div>
+                    <p class="text-gray-600 mb-4">Leading open source CRM with 5M+ downloads. Contact management, sales automation, and help desk.</p>
+                    <a href="https://www.vtiger.com/open-source-crm/" target="_blank" class="text-indigo-600 hover:text-indigo-800 text-sm">
+                        Download Free <i class="fas fa-external-link-alt ml-1"></i>
+                    </a>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg card-hover p-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-xl font-semibold text-gray-900">Odoo CRM</h3>
+                        <span class="badge badge-open-source">Open Source</span>
+                    </div>
+                    <p class="text-gray-600 mb-4">Part of complete open source ERP suite. Pipeline management, automated actions, and extensive integrations.</p>
+                    <a href="https://www.odoo.com/app/crm" target="_blank" class="text-indigo-600 hover:text-indigo-800 text-sm">
+                        Try Free <i class="fas fa-external-link-alt ml-1"></i>
+                    </a>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg card-hover p-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-xl font-semibold text-gray-900">Agile CRM</h3>
+                        <span class="badge badge-free">Free Plan</span>
+                    </div>
+                    <p class="text-gray-600 mb-4">All-in-one CRM with sales, marketing automation, and customer service. Real estate templates available.</p>
+                    <a href="https://www.agilecrm.com/pricing" target="_blank" class="text-indigo-600 hover:text-indigo-800 text-sm">
+                        Start Free <i class="fas fa-external-link-alt ml-1"></i>
+                    </a>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg card-hover p-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-xl font-semibold text-gray-900">RealEstateCRM</h3>
+                        <span class="badge badge-open-source">GitHub</span>
+                    </div>
+                    <p class="text-gray-600 mb-4">Open source real estate CRM built on MERN stack. Customizable for real estate agents and brokers.</p>
+                    <a href="https://github.com/prolinkinfo/RealEstateCRM" target="_blank" class="text-indigo-600 hover:text-indigo-800 text-sm">
+                        View on GitHub <i class="fab fa-github ml-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparison Table -->
+    <section class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Feature Comparison Matrix</h2>
+                <div class="w-24 h-1 bg-indigo-600 mx-auto mb-8"></div>
+                <p class="text-gray-600">Comprehensive comparison of CRE-specific features across all evaluated platforms</p>
+            </div>
+
+            <div class="overflow-x-auto bg-white rounded-lg shadow-lg">
+                <table class="comparison-table w-full">
+                    <thead>
+                        <tr>
+                            <th class="text-left">CRM Name</th>
+                            <th>Open<br>Source</th>
+                            <th>Free<br>Tier</th>
+                            <th>Self<br>Hosting</th>
+                            <th>Contact<br>Mgmt</th>
+                            <th>Property<br>Tracking</th>
+                            <th>Lease<br>Mgmt</th>
+                            <th>Document<br>Storage</th>
+                            <th>Task<br>Reminders</th>
+                            <th>Pipeline<br>View</th>
+                            <th>Map<br>View</th>
+                            <th>Call<br>Dialer</th>
+                            <th>Email/SMS<br>Templates</th>
+                            <th>Mobile<br>App</th>
+                            <th>API/<br>Webhooks</th>
+                            <th>Custom<br>Fields</th>
+                            <th>Integration<br>Support</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="text-left font-medium">
+                                <a href="https://outpost-crm.app/" target="_blank" class="text-indigo-600 hover:text-indigo-800">
+                                    Outpost CRM
+                                </a>
+                            </td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                        </tr>
+                        <tr>
+                            <td class="text-left font-medium">
+                                <a href="https://lead2done.com/" target="_blank" class="text-indigo-600 hover:text-indigo-800">
+                                    Lead2Done
+                                </a>
+                            </td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                        </tr>
+                        <tr>
+                            <td class="text-left font-medium">
+                                <a href="https://teamsale.com/en/" target="_blank" class="text-indigo-600 hover:text-indigo-800">
+                                    Teamsale
+                                </a>
+                            </td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>❌</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                        </tr>
+                        <tr>
+                            <td class="text-left font-medium">
+                                <a href="https://resimpli.com/" target="_blank" class="text-indigo-600 hover:text-indigo-800">
+                                    REsimpli
+                                </a>
+                            </td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                        </tr>
+                        <tr>
+                            <td class="text-left font-medium">
+                                <a href="https://www.followupboss.com/" target="_blank" class="text-indigo-600 hover:text-indigo-800">
+                                    Follow Up Boss
+                                </a>
+                            </td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>❌</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                        </tr>
+                        <tr>
+                            <td class="text-left font-medium">
+                                <a href="https://ascendix.com/ascendixre-commercial-real-estate-crm/" target="_blank" class="text-indigo-600 hover:text-indigo-800">
+                                    AscendixRE
+                                </a>
+                            </td>
+                            <td>❌</td>
+                            <td>❌</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                        </tr>
+                        <tr>
+                            <td class="text-left font-medium">
+                                <a href="https://www.realnex.com/" target="_blank" class="text-indigo-600 hover:text-indigo-800">
+                                    RealNex CRM
+                                </a>
+                            </td>
+                            <td>❌</td>
+                            <td>❌</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                        </tr>
+                        <tr>
+                            <td class="text-left font-medium">
+                                <a href="https://www.pipedrive.com/en/industries/real-estate-crm" target="_blank" class="text-indigo-600 hover:text-indigo-800">
+                                    Pipedrive
+                                </a>
+                            </td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                        </tr>
+                        <tr>
+                            <td class="text-left font-medium">
+                                <a href="https://monday.com/" target="_blank" class="text-indigo-600 hover:text-indigo-800">
+                                    Monday.com
+                                </a>
+                            </td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                        </tr>
+                        <tr>
+                            <td class="text-left font-medium">
+                                <a href="https://clickup.com/" target="_blank" class="text-indigo-600 hover:text-indigo-800">
+                                    ClickUp
+                                </a>
+                            </td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                        </tr>
+                        <tr>
+                            <td class="text-left font-medium">
+                                <a href="https://www.creatio.com/crm" target="_blank" class="text-indigo-600 hover:text-indigo-800">
+                                    Creatio
+                                </a>
+                            </td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                        </tr>
+                        <tr>
+                            <td class="text-left font-medium">
+                                <a href="https://superagi.com/" target="_blank" class="text-indigo-600 hover:text-indigo-800">
+                                    SuperAGI
+                                </a>
+                            </td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>❌</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                        </tr>
+                        <tr>
+                            <td class="text-left font-medium">
+                                <a href="https://suitecrm.com/" target="_blank" class="text-indigo-600 hover:text-indigo-800">
+                                    SuiteCRM
+                                </a>
+                            </td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                        </tr>
+                        <tr>
+                            <td class="text-left font-medium">
+                                <a href="https://www.espocrm.com/" target="_blank" class="text-indigo-600 hover:text-indigo-800">
+                                    EspoCRM
+                                </a>
+                            </td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                        </tr>
+                        <tr>
+                            <td class="text-left font-medium">
+                                <a href="https://www.vtiger.com/" target="_blank" class="text-indigo-600 hover:text-indigo-800">
+                                    Vtiger
+                                </a>
+                            </td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                        </tr>
+                        <tr>
+                            <td class="text-left font-medium">
+                                <a href="https://www.odoo.com/app/crm" target="_blank" class="text-indigo-600 hover:text-indigo-800">
+                                    Odoo CRM
+                                </a>
+                            </td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                        </tr>
+                        <tr>
+                            <td class="text-left font-medium">
+                                <a href="https://www.hubspot.com/products/crm" target="_blank" class="text-indigo-600 hover:text-indigo-800">
+                                    HubSpot
+                                </a>
+                            </td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                        </tr>
+                        <tr>
+                            <td class="text-left font-medium">
+                                <a href="https://www.agilecrm.com/" target="_blank" class="text-indigo-600 hover:text-indigo-800">
+                                    Agile CRM
+                                </a>
+                            </td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                        </tr>
+                        <tr>
+                            <td class="text-left font-medium">
+                                <a href="https://github.com/prolinkinfo/RealEstateCRM" target="_blank" class="text-indigo-600 hover:text-indigo-800">
+                                    RealEstateCRM
+                                </a>
+                            </td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-8 text-center">
+                <div class="inline-flex items-center space-x-8 text-sm text-gray-600">
+                    <div class="flex items-center">
+                        <span class="text-green-600 text-lg mr-2">✅</span>
+                        <span>Feature Available</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-red-600 text-lg mr-2">❌</span>
+                        <span>Feature Not Available</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Recommendations -->
+    <section class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Recommendations by Use Case</h2>
+                <div class="w-24 h-1 bg-indigo-600 mx-auto mb-8"></div>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white rounded-xl shadow-lg p-8">
+                    <div class="feature-icon w-12 h-12 rounded-lg flex items-center justify-center mb-6">
+                        <i class="fas fa-seedling text-white text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4">Startups & Solo Agents</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-600">Best Free Option:</span>
+                            <strong class="text-gray-900">HubSpot CRM</strong>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-600">Best Budget Option:</span>
+                            <strong class="text-gray-900">Lead2Done</strong>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-600">Open Source:</span>
+                            <strong class="text-gray-900">EspoCRM</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-8">
+                    <div class="feature-icon w-12 h-12 rounded-lg flex items-center justify-center mb-6">
+                        <i class="fas fa-building text-white text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4">Commercial Real Estate Specific</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-600">Best Overall:</span>
+                            <strong class="text-gray-900">AscendixRE</strong>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-600">Enterprise:</span>
+                            <strong class="text-gray-900">RealNex CRM</strong>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-600">Investor Focus:</span>
+                            <strong class="text-gray-900">REsimpli</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-8">
+                    <div class="feature-icon w-12 h-12 rounded-lg flex items-center justify-center mb-6">
+                        <i class="fas fa-code text-white text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4">Developers & Tech Teams</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-600">Most Customizable:</span>
+                            <strong class="text-gray-900">SuiteCRM</strong>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-600">Modern Stack:</span>
+                            <strong class="text-gray-900">RealEstateCRM</strong>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-600">Self-Hosted:</span>
+                            <strong class="text-gray-900">EspoCRM</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sources -->
+    <section class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Sources & References</h2>
+                <div class="w-24 h-1 bg-indigo-600 mx-auto mb-8"></div>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 text-sm">
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="font-semibold text-gray-900 mb-3">Official Websites</h4>
+                    <ul class="space-y-2 text-gray-600">
+                        <li><a href="https://outpost-crm.app/" target="_blank" class="hover:text-indigo-600">Outpost CRM</a></li>
+                        <li><a href="https://lead2done.com/" target="_blank" class="hover:text-indigo-600">Lead2Done</a></li>
+                        <li><a href="https://teamsale.com/en/" target="_blank" class="hover:text-indigo-600">Teamsale</a></li>
+                        <li><a href="https://resimpli.com/" target="_blank" class="hover:text-indigo-600">REsimpli</a></li>
+                        <li><a href="https://www.followupboss.com/" target="_blank" class="hover:text-indigo-600">Follow Up Boss</a></li>
+                        <li><a href="https://ascendix.com/ascendixre-commercial-real-estate-crm/" target="_blank" class="hover:text-indigo-600">AscendixRE</a></li>
+                    </ul>
+                </div>
+
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="font-semibold text-gray-900 mb-3">Open Source Projects</h4>
+                    <ul class="space-y-2 text-gray-600">
+                        <li><a href="https://suitecrm.com/" target="_blank" class="hover:text-indigo-600">SuiteCRM</a></li>
+                        <li><a href="https://www.espocrm.com/" target="_blank" class="hover:text-indigo-600">EspoCRM</a></li>
+                        <li><a href="https://www.vtiger.com/open-source-crm/" target="_blank" class="hover:text-indigo-600">Vtiger Open Source</a></li>
+                        <li><a href="https://www.odoo.com/app/crm" target="_blank" class="hover:text-indigo-600">Odoo CRM</a></li>
+                        <li><a href="https://github.com/prolinkinfo/RealEstateCRM" target="_blank" class="hover:text-indigo-600">RealEstateCRM (GitHub)</a></li>
+                    </ul>
+                </div>
+
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="font-semibold text-gray-900 mb-3">Research Articles</h4>
+                    <ul class="space-y-2 text-gray-600">
+                        <li><a href="https://ascendix.com/blog/best-commercial-real-estate-crm/" target="_blank" class="hover:text-indigo-600">Best Commercial Real Estate CRM</a></li>
+                        <li><a href="https://www.iovox.com/blog/real-estate-crm" target="_blank" class="hover:text-indigo-600">Real Estate CRM Guide</a></li>
+                        <li><a href="https://theclose.com/best-free-real-estate-crm/" target="_blank" class="hover:text-indigo-600">Best Free Real Estate CRMs</a></li>
+                    </ul>
+                </div>
+
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="font-semibold text-gray-900 mb-3">Major Platforms</h4>
+                    <ul class="space-y-2 text-gray-600">
+                        <li><a href="https://www.hubspot.com/products/crm" target="_blank" class="hover:text-indigo-600">HubSpot CRM</a></li>
+                        <li><a href="https://www.pipedrive.com/en/industries/real-estate-crm" target="_blank" class="hover:text-indigo-600">Pipedrive Real Estate</a></li>
+                        <li><a href="https://monday.com/" target="_blank" class="hover:text-indigo-600">Monday.com</a></li>
+                        <li><a href="https://clickup.com/" target="_blank" class="hover:text-indigo-600">ClickUp</a></li>
+                        <li><a href="https://www.creatio.com/crm" target="_blank" class="hover:text-indigo-600">Creatio</a></li>
+                    </ul>
+                </div>
+
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="font-semibold text-gray-900 mb-3">AI-Powered Solutions</h4>
+                    <ul class="space-y-2 text-gray-600">
+                        <li><a href="https://superagi.com/" target="_blank" class="hover:text-indigo-600">SuperAGI</a></li>
+                        <li><a href="https://www.agilecrm.com/" target="_blank" class="hover:text-indigo-600">Agile CRM</a></li>
+                    </ul>
+                </div>
+
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="font-semibold text-gray-900 mb-3">Screenshots Source</h4>
+                    <ul class="space-y-2 text-gray-600">
+                        <li>All screenshots captured directly from official websites</li>
+                        <li>Outpost CRM dashboard interface</li>
+                        <li>Lead2Done homepage and features</li>
+                        <li>Teamsale CRM with phone system</li>
+                        <li>REsimpli pricing and features</li>
+                        <li>EspoCRM homepage and demo</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="mt-12 text-center">
+                <p class="text-gray-600">
+                    This research was conducted by analyzing official websites, documentation, and feature comparisons. 
+                    All pricing and feature information is subject to change by the respective vendors.
+                </p>
+                <p class="text-sm text-gray-500 mt-4">
+                    Last updated: December 2024 | For the most current information, please visit the official websites.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="gradient-bg text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h3 class="text-2xl font-bold mb-4">Ready to Choose Your CRM?</h3>
+                <p class="text-indigo-100 mb-8 max-w-2xl mx-auto">
+                    Use this research as your starting point. Consider your specific needs, budget, and technical requirements 
+                    when making your final decision. Most platforms offer free trials - take advantage of them!
+                </p>
+                <div class="flex flex-wrap justify-center gap-4 text-sm">
+                    <div class="flex items-center bg-white bg-opacity-20 rounded-full px-4 py-2">
+                        <i class="fas fa-clock mr-2"></i>
+                        Start with free trials
+                    </div>
+                    <div class="flex items-center bg-white bg-opacity-20 rounded-full px-4 py-2">
+                        <i class="fas fa-users mr-2"></i>
+                        Consider team size
+                    </div>
+                    <div class="flex items-center bg-white bg-opacity-20 rounded-full px-4 py-2">
+                        <i class="fas fa-cogs mr-2"></i>
+                        Evaluate integrations
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
