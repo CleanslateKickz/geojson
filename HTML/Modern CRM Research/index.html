@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern CRM Research: Open-Source & Developer-Friendly Tools</title>
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans">
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <header class="text-center mb-16">
+            <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-slate-900">Modern CRM Research</h1>
+            <p class="mt-4 text-lg text-slate-600">A curated list of open-source & developer-friendly tools.</p>
+        </header>
+
+        <main>
+            <section id="comparison-table" class="mb-20">
+                <h2 class="text-2xl font-bold text-slate-900 mb-6">Feature Comparison</h2>
+                <div class="overflow-x-auto bg-white rounded-lg shadow-md border border-slate-200">
+                    <table class="min-w-full divide-y divide-slate-200" id="crm-comparison-table">
+                        <thead class="bg-slate-100">
+                        </thead>
+                        <tbody class="divide-y divide-slate-200">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="crm-details">
+                <h2 class="text-2xl font-bold text-slate-900 mb-8">CRM Deep Dive</h2>
+                <div id="crm-grid" class="grid grid-cols-1 gap-8">
+                </div>
+            </section>
+        </main>
+
+        <footer class="text-center mt-20 py-6 border-t border-slate-200">
+            <p class="text-sm text-slate-500">Research compiled by Neo. Last updated: July 2025.</p>
+        </footer>
+    </div>
+
+    <script type="module" src="app.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
