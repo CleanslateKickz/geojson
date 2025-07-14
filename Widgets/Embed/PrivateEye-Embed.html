@@ -2,23 +2,32 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Grist Widget Embed</title>
+  <title>Grist and SMS Widget Embed</title>
   <link rel="icon" type="image/x-icon" href="../../Images/for-sale-retail.png">
   <style>
     html, body {
       margin: 0;
       padding: 0;
-        height: 100%;
-      }
-      iframe {
-          border: none;
-          width: 100%;
-          height: 99%;
-      }
-    </style>
-    </head>
-    <body>
-        <iframe src="http://localhost:8484/o/docs/2fmMBpqN4uCN/Main-All/p/93?style=singlePage"></iframe>
-        <iframe src="../Messages/smsWidget.html" allow="clipboard-write"></iframe>
-    </body>
+      height: 100%;
+      width: 100%;
+    }
+    .embed-row {
+      display: flex;
+      flex-direction: row;
+      width: 100vw;
+      height: 100vh;
+    }
+    .embed-row iframe {
+      border: none;
+      height: 100vh;
+      width: 50vw;
+    }
+  </style>
+</head>
+<body>
+  <div class="embed-row">
+    <iframe src="http://localhost:8484/o/docs/2fmMBpqN4uCN/Main-All/p/93?style=singlePage"></iframe>
+    <iframe src="../Messages/smsWidget.html" allow="clipboard-write"></iframe>
+  </div>
+</body>
 </html>
