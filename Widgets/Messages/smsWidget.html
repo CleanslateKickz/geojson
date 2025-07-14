@@ -6,9 +6,7 @@
     <title>Interactive SMS Template Sender</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
-
     <style>
-        /* --- FINAL MERGED CSS: COMPACT LAYOUT + INTERACTIVE BUTTONS --- */
         :root {
             --brand-color: #3498db;
             --brand-color-dark: #2980b9;
@@ -20,7 +18,6 @@
             --btn-bg: #f8f9fa;
             --btn-bg-hover: #f1f3f5;
         }
-
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--bg-light);
@@ -32,7 +29,6 @@
             height: 100vh;
             overflow: hidden;
         }
-
         #widget-container {
             background-color: var(--bg-widget);
             border-radius: 8px;
@@ -42,7 +38,6 @@
             display: flex;
             flex-direction: column;
         }
-
         .header {
             display: flex;
             align-items: center;
@@ -50,18 +45,15 @@
             margin-bottom: 20px;
             flex-shrink: 0;
         }
-
         .header h2 {
             margin: 0;
             font-size: 1.25rem;
             font-weight: 600;
         }
-
         .header .icon {
             width: 24px;
             height: 24px;
         }
-        
         .main-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -69,14 +61,12 @@
             flex-grow: 1;
             min-height: 0;
         }
-        
         .left-column, .right-column {
             display: flex;
             flex-direction: column;
             gap: 16px;
             min-width: 0;
         }
-        
         .form-group label, .section-label {
             display: block;
             font-weight: 500;
@@ -86,7 +76,6 @@
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
-
         select {
             width: 100%;
             padding: 8px 10px;
@@ -96,14 +85,11 @@
             font-size: 0.9rem;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
-        
         select:focus {
             outline: none;
             border-color: var(--brand-color);
             box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
         }
-
-        /* --- INTERACTIVE BUTTON STYLES (FROM GROK) --- */
         .button-group {
             display: flex;
             flex-wrap: wrap;
@@ -113,7 +99,7 @@
             padding: 6px 12px;
             background: var(--btn-bg);
             border: 1px solid var(--border-color);
-            border-radius: 16px; /* Pill shape */
+            border-radius: 16px;
             font-size: 0.8rem;
             font-weight: 500;
             color: var(--text-dark);
@@ -130,7 +116,6 @@
             border-color: var(--brand-color-dark);
             font-weight: 600;
         }
-
         .preview-section {
             display: flex;
             flex-direction: column;
@@ -148,7 +133,6 @@
             overflow-y: auto;
             white-space: pre-wrap;
         }
-
         .action-row {
             display: flex;
             align-items: center;
@@ -159,7 +143,6 @@
             flex-grow: 1;
             margin-bottom: 0;
         }
-
         .send-btn {
             display: inline-flex;
             align-items: center;
@@ -180,29 +163,50 @@
         .send-btn:hover { background-color: var(--brand-color-dark); }
         .send-btn.disabled { background-color: #a1a1aa; cursor: not-allowed; }
         .send-btn svg { width: 18px; height: 18px; }
-        
         .info-box {
             text-align: center;
             padding: 40px 20px;
         }
+        .copy-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            margin-left: auto;
+        }
+        .copy-btn {
+            padding: 6px 12px;
+            background: #f8f9fa;
+            border: 1px solid #dadada;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            color: #3498db;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+        .copy-btn:hover {
+            background: #e0e6ed;
+            color: #2980b9;
+        }
+        .copy-msg {
+            font-size: 0.78rem;
+            color: #6b7280;
+            margin-left: 4px;
+        }
     </style>
 </head>
 <body>
-
-    <!-- --- HTML BODY CONTENT --- -->
     <div id="widget-container">
         <div id="no-record" class="info-box">
             <p>Please select a row in the Owners table to begin.</p>
         </div>
-
         <div id="main-content" style="display: none;">
             <div class="header">
-                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="icon">
-                  <path d="M3.5 2A1.5 1.5 0 002 3.5V12.5A1.5 1.5 0 003.5 14h10.25a.75.75 0 010 1.5H3.5A3 3 0 01.5 12.5V3.5A3 3 0 013.5.5h13A3 3 0 0119.5 3.5v8a3 3 0 01-3 3H9.25a.75.75 0 010-1.5H16.5A1.5 1.5 0 0018 11.5v-8A1.5 1.5 0 0016.5 2H3.5z" /><path d="M7.83 8.97a.75.75 0 01-1.06 1.06l-2.5-2.5a.75.75 0 010-1.06l2.5-2.5a.75.75 0 011.06 1.06L6.39 6.5H13.5a.75.75 0 010 1.5H6.39l1.44 1.47z" />
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
                 </svg>
                 <h2>Interactive SMS Templates</h2>
             </div>
-      
             <div class="main-grid">
                 <div class="left-column">
                     <div class="form-group">
@@ -231,7 +235,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="right-column">
                     <div class="preview-section">
                         <label class="section-label">Preview</label>
@@ -239,28 +242,30 @@
                     </div>
                 </div>
             </div>
-
             <div class="action-row">
                  <div class="form-group">
                     <label for="phone-select">Send to</label>
                     <select id="phone-select"></select>
                 </div>
                 <a id="send-sms-link" class="send-btn disabled" href="#" target="_blank">
-                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="currentColor"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2 .01 7z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 20 20" fill="white">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                    </svg>
                     Send
                 </a>
             </div>
+            <div id="copy-row" class="copy-row" style="display:none;">
+                <button id="copy-btn" class="copy-btn">Copy to clipboard</button>
+                <span id="copy-msg" class="copy-msg" style="display:none;">Copied!</span>
+            </div>
         </div>
     </div>
-    
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            console.log("SMS Widget script loaded. Grist API will be initialized shortly.");
-
             const TEMPLATES = {
                 standard: { name: "Standard Introduction", text: "Hi {{firstName}}, this is Sam Gfroerer with M&M. I just tried giving you a quick call — I specialize in {{propertyFocus}} and wanted to connect regarding your {{propertyIdentifier}} in {{propertyCity}}. Let me know if there's a good time to chat, or feel free to text back. Looking forward to connecting!" },
-                followUp: { name: "Brief Follow-up", text: "Hi {{firstName}}, Sam from M&M here. Just called about your {{propertyIdentifier}} in {{propertyCity}}. I help investors with {{propertyFocus}} - would love to connect when you have a moment. Text or call back when convenient!" },
-                valueProp: { name: "Value Proposition", text: "Hi {{firstName}}, this is Sam with M&M. I specialize in maximizing returns on {{propertyFocus}} like your {{propertyIdentifier}} in {{propertyCity}}. Just tried calling - would appreciate a few minutes to discuss how I can help. Feel free to text back!" }
+                followUp: { name: "Brief Follow-up", text: "Hi {{firstName}}, Sam from M&M here. Just called about your {{propertyIdentifier}} in {{propertyCity}}. I help investors with {{propertyFocus}}. Free to connect via text!" },
+                valueProp: { name: "Value Proposition", text: "Hi {{firstName}}, this is Sam with M&M. I specialize in maximizing returns on {{propertyFocus}} like your {{propertyIdentifier}} in {{propertyCity}}. Let's connect soon." }
             };
 
             const ELS = {
@@ -274,15 +279,17 @@
                 sendSmsLink: document.getElementById('send-sms-link'),
                 noRecordDiv: document.getElementById('no-record'),
                 mainContentDiv: document.getElementById('main-content'),
+                copyRow: document.getElementById('copy-row'),
+                copyBtn: document.getElementById('copy-btn'),
+                copyMsg: document.getElementById('copy-msg'),
             };
 
             let g_currentOwnerRecord = null;
             let g_relatedProperties = [];
             const PHONE_COLUMN_KEYS = ['Phone', 'Phone_2', 'Phone_3', 'Phone_4'];
+            let lastMessageSent = "";
 
-            const getFirstName = (fullName) => (fullName && typeof fullName === 'string') ? fullName.split(' ')[0] : '[First Name]';
-            const sanitizePhone = (phone) => (phone && typeof phone === 'string') ? phone.replace(/\D/g, '') : '';
-            const columnarToRowFormat = (data) => {
+            function columnarToRowFormat(data) {
                 if (!data || !data.id || !Array.isArray(data.id)) return [];
                 const keys = Object.keys(data);
                 return data.id.map((id, i) => {
@@ -290,7 +297,10 @@
                     for (const key of keys) if (key !== 'id') row.fields[key] = data[key][i];
                     return row;
                 });
-            };
+            }
+
+            const getFirstName = (fullName) => (fullName && typeof fullName === 'string') ? fullName.split(' ')[0] : '[First Name]';
+            const sanitizePhone = (phone) => (phone && typeof phone === 'string') ? phone.replace(/\D/g, '') : '';
 
             async function fetchAndFilterProperties(ownerId) {
                 try {
@@ -301,7 +311,6 @@
                         return ownerRefList && Array.isArray(ownerRefList) && ownerRefList.includes(ownerId);
                     });
                 } catch (err) {
-                    console.error("Error fetching/filtering properties:", err);
                     g_relatedProperties = [];
                 }
             }
@@ -310,6 +319,7 @@
                 if (!g_currentOwnerRecord) {
                     ELS.mainContentDiv.style.display = 'none';
                     ELS.noRecordDiv.style.display = 'block';
+                    ELS.copyRow.style.display = 'none';
                     return;
                 }
                 ELS.mainContentDiv.style.display = 'block';
@@ -366,6 +376,10 @@
                     ELS.sendSmsLink.classList.add('disabled');
                     ELS.sendSmsLink.title = !sanitizedPhone ? 'No valid phone number selected' : 'A property must be selected';
                 }
+
+                ELS.copyRow.style.display = 'none';
+                ELS.copyMsg.style.display = 'none';
+                lastMessageSent = ""; // reset
             }
             
             function handleButtonClick(event) {
@@ -378,12 +392,31 @@
                 renderAll();
             }
 
-            ELS.templateSelect.innerHTML = Object.keys(TEMPLATES).map(key => `<option value="${key}">${TEMPLATES[key].name}</option>`).join('');
+            ELS.sendSmsLink.addEventListener('click', function(e) {
+                if (ELS.sendSmsLink.classList.contains('disabled')) return;
+                const msg = ELS.previewBox.textContent;
+                if (msg && msg.length > 0) {
+                    lastMessageSent = `Just sent this text: "${msg}"`;
+                    ELS.copyRow.style.display = 'flex';
+                    ELS.copyMsg.style.display = 'none';
+                }
+            });
 
+            ELS.copyBtn.addEventListener('click', function() {
+                if (!lastMessageSent) return;
+                navigator.clipboard.writeText(lastMessageSent).then(() => {
+                    ELS.copyMsg.style.display = 'inline';
+                    setTimeout(() => {
+                        ELS.copyMsg.style.display = 'none';
+                    }, 1500);
+                });
+            });
+
+            ELS.templateSelect.innerHTML = Object.keys(TEMPLATES).map(key => `<option value="${key}">${TEMPLATES[key].name}</option>`).join('');
             [ELS.templateSelect, ELS.propertySelect, ELS.phoneSelect].forEach(el => el.addEventListener('change', renderAll));
             ELS.propertyFocusGroup.addEventListener('click', handleButtonClick);
             ELS.propertyIdentifierGroup.addEventListener('click', handleButtonClick);
-            
+
             grist.ready({ requiredAccess: 'full' });
             grist.onRecord(async (record) => {
                 if (record) {
