@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Enhanced Sale Comps Gallery Widget</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+  <style>
+    :root {
+      --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      --warning-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+      --glass-bg: rgba(255, 255, 255, 0.15);
+      --glass-border: rgba(255, 255, 255, 0.2);
+      --dark-glass: rgba(0, 0, 0, 0.1);
+      --text-primary: #1a1a1a;
+      --text-secondary: #6b7280;
+      --text-light: #9ca3af;
+      --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.08);
+      --shadow-hover: 0 8px 40px rgba(0, 0, 0, 0.12);
+      --shadow-strong: 0 20px 60px rgba(0, 0, 0, 0.15);
+      --border-radius: 16px;
+      --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+      background: linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+    body::before {
+      content:'';
+      position:fixed;top:0;left:0;width:100%;height:100%;
+      background:radial-gradient(circle at 20% 20%,rgba(255,255,255,0.1) 0%,transparent 50%),
+                 radial-gradient(circle at 80% 80%,rgba(255,255,255,0.1) 0%,transparent 50%);
+      pointer-events:none; z-index:-1;
+    }
+    .header { text-align:center; padding:2rem 1rem; margin-bottom:1rem; }
+    .header h1 { font-size:2.5rem; font-weight:700; color:white; text-shadow:0 2px 20px rgba(0,0,0,0.3); margin-bottom:0.5rem; }
+    .header p { color:rgba(255,255,255,0.8); font-size:1.1rem; font-weight:400; }
+    .controls {
+      display:flex; justify-content:center; gap:1rem; margin-bottom:2rem; padding:0 1rem; flex-wrap:wrap;
+    }
+    .control-group { display:flex; gap:0.5rem; align-items:center; }
+    .sort-btn, .filter-btn, .view-btn {
+      padding:0.75rem 1.5rem; border:none; border-radius:50px;
+      background:var(--glass-bg); backdrop-filter:blur(10px); border:1px solid var(--glass-border);
+      color:white; font-weight:500; cursor:pointer; transition:var(--transition); position:relative; overflow:hidden;
+    }
+    .sort-btn:hover, .filter-btn:hover, .view-btn:hover {
+      background:rgba(255,255,255,0.25); transform:translateY(-2px); box-shadow:var(--shadow-hover);
+    }
+    .sort-btn.active, .filter-btn.active, .view-btn.active {
+      background:rgba(255,255,255,0.9); color:var(--text-primary);
+    }
+    .search-input {
+      padding:0.75rem 1.5rem; border:none; border-radius:50px;
+      background:var(--glass-bg); backdrop-filter:blur(10px); border:1px solid var(--glass-border);
+      color:white; font-size:1rem; width:250px;
+    }
+    .search-input::placeholder { color:rgba(255,255,255,0.7); }
+    .search-input:focus { outline:none; background:rgba(255,255,255,0.25); }
+    #root {
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(380px,1fr));
+      gap:2rem; padding:0 2rem 2rem; max-width:1400px; margin:0 auto;
+    }
+    .comp-card {
+      position:relative; border-radius:var(--border-radius);
+      background:var(--glass-bg); backdrop-filter:blur(15px); border:1px solid var(--glass-border);
+      box-shadow:var(--shadow-soft); cursor:pointer; transition:var(--transition);
+      overflow:hidden; height:140px; perspective:1000px;
+      animation:fadeInUp 0.6s ease-out;
+    }
+    .comp-card:hover { transform:translateY(-4px); box-shadow:var(--shadow-hover); }
+    .comp-card.expanded { height:480px; }
+    .card-front, .card-back {
+      position:absolute; width:100%; height:100%; backface-visibility:hidden; border-radius:var(--border-radius);
+      transition:transform 0.6s cubic-bezier(0.4,0,0.2,1);
+    }
+    .card-front { background:rgba(255,255,255,0.95); z-index:2; transform:rotateY(0deg);}
+    .card-back { background:rgba(255,255,255,0.98); transform:rotateY(-180deg); z-index:1;}
+    .comp-card.expanded .card-front { transform:rotateY(180deg);}
+    .comp-card.expanded .card-back { transform:rotateY(0deg);}
+    .card-header { display:flex; align-items:center; padding:1.5rem; height:100%; gap:1rem;}
+    .property-image { width:80px; height:80px; border-radius:12px; object-fit:cover;
+      background:linear-gradient(135deg,#f3f4f6,#e5e7eb); box-shadow:0 4px 15px rgba(0,0,0,0.1); transition:var(--transition);}
+    .comp-card:hover .property-image { transform:scale(1.05);}
+    .property-info { flex:1; min-width:0;}
+    .property-title { font-size:1.3rem; font-weight:700; color:var(--text-primary); margin-bottom:0.5rem; line-height:1.3;}
+    .property-address { color:var(--text-secondary); font-size:0.95rem; margin-bottom:0.75rem; display:-webkit-box; -webkit-line-clamp:2;
+      -webkit-box-orient:vertical; overflow:hidden;}
+    .property-type { display:inline-block; padding:0.25rem 0.75rem; background:var(--primary-gradient); color:white; border-radius:20px; font-size:0.8rem; font-weight:500;}
+    .metrics-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; text-align:center;}
+    .metric-item { display:flex; flex-direction:column; align-items:center; gap:0.25rem;}
+    .metric-value { font-size:1.2rem; font-weight:700; color:var(--text-primary);}
+    .metric-label { font-size:0.7rem; color:var(--text-light); text-transform:uppercase; letter-spacing:0.5px; font-weight:500;}
+    .card-details { padding:1.5rem; height:100%; overflow-y:auto;}
+    .details-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; padding-bottom:1rem; border-bottom:1px solid rgba(0,0,0,0.1);}
+    .details-title { font-size:1.1rem; font-weight:600; color:var(--text-primary);}
+    .close-btn { width:32px; height:32px; border:none; border-radius:50%; background:rgba(0,0,0,0.1); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:var(--transition);}
+    .close-btn:hover { background:rgba(0,0,0,0.2); transform:scale(1.1);}
+    .details-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:1.5rem; margin-bottom:1.5rem;}
+    .detail-item { display:flex; flex-direction:column; gap:0.5rem;}
+    .detail-label { font-size:0.8rem; color:var(--text-light); text-transform:uppercase; letter-spacing:0.5px; font-weight:500;}
+    .detail-value { font-size:1rem; color:var(--text-primary); font-weight:600;}
+    .detail-value.empty { color:var(--text-light); font-style:italic; font-weight:400;}
+    .card-actions { display:flex; gap:1rem; margin-top:auto; padding-top:1rem; border-top:1px solid rgba(0,0,0,0.1);}
+    .action-btn { flex:1; padding:0.75rem 1rem; border:none; border-radius:8px; font-weight:600; cursor:pointer; transition:var(--transition); position:relative; overflow:hidden;}
+    .action-btn.primary { background:var(--primary-gradient); color:white;}
+    .action-btn.secondary { background:rgba(0,0,0,0.05); color:var(--text-primary);}
+    .action-btn:hover { transform:translateY(-2px); box-shadow:var(--shadow-soft);}
+    .status-badge { position:absolute; top:1rem; right:1rem; padding:0.25rem 0.75rem; border-radius:20px; font-size:0.7rem; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;}
+    .status-badge.recent { background:var(--success-gradient); color:white;}
+    .status-badge.high-cap { background:var(--warning-gradient); color:white;}
+    .loading-state, .empty-state { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:4rem 2rem; color:rgba(255,255,255,0.8); text-align:center;}
+    .loading-spinner { width:40px; height:40px; border:3px solid rgba(255,255,255,0.3); border-radius:50%; border-top-color:white; animation:spin 1s ease-in-out infinite; margin-bottom:1rem;}
+    @keyframes spin { to { transform:rotate(360deg);} }
+    .empty-state h3 { font-size:1.5rem; margin-bottom:0.5rem; opacity:0.9;}
+    .empty-state p { opacity:0.7; font-size:1rem;}
+    @media (max-width:768px) {
+      #root { grid-template-columns:1fr; gap:1rem; padding:0 1rem 1rem;}
+      .header h1 { font-size:2rem;}
+      .controls { flex-direction:column; gap:0.5rem;}
+      .search-input { width:100%;}
+      .comp-card { height:160px;}
+      .comp-card.expanded { height:500px;}
+      .metrics-grid { grid-template-columns:repeat(2,1fr);}
+      .details-grid { grid-template-columns:1fr;}
+    }
+    @keyframes fadeInUp {
+      from { opacity:0; transform:translateY(20px);}
+      to { opacity:1; transform:translateY(0);}
+    }
+    .comp-card { animation:fadeInUp 0.6s ease-out;}
+    .comp-card:nth-child(odd) { animation-delay:0.1s;}
+    .comp-card:nth-child(even) { animation-delay:0.2s;}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Commercial Real Estate Comps</h1>
+    <p>Discover and analyze commercial property sales data</p>
+  </div>
+  <div class="controls">
+    <div class="control-group">
+      <input type="text" class="search-input" placeholder="Search properties..." id="searchInput">
+    </div>
+    <div class="control-group">
+      <button class="sort-btn" data-sort="price">Sort by Price</button>
+      <button class="sort-btn" data-sort="cap-rate">Sort by Cap Rate</button>
+      <button class="sort-btn" data-sort="size">Sort by Size</button>
+      <button class="sort-btn" data-sort="date">Sort by Date</button>
+    </div>
+  </div>
+  <div id="root"></div>
+  <div id="showMoreContainer" style="text-align:center;margin-bottom:2rem;"></div>
+  <script>
+    function formatCurrency(value) {
+      if (!value && value !== 0) return '$0';
+      return new Intl.NumberFormat('en-US', {style:'currency',currency:'USD',minimumFractionDigits:0,maximumFractionDigits:0}).format(value);
+    }
+    function formatNumber(value) {
+      if (!value && value !== 0) return '0';
+      return new Intl.NumberFormat('en-US').format(value);
+    }
+    function formatDate(timestamp) {
+      if (!timestamp) return '';
+      const date = new Date(timestamp * 1000);
+      return date.toLocaleDateString('en-US', {year:'numeric',month:'short',day:'numeric'});
+    }
+    function getStatusBadge(record) {
+      const now = Date.now()/1000;
+      const saleDate = record.Sale_Date || 0;
+      const daysSinceSale = (now - saleDate) / (24*60*60);
+      if (daysSinceSale <= 90) return {text:'Recent',class:'recent'};
+      if (record.Cap_Rate && record.Cap_Rate > 0.08) return {text:'High Cap',class:'high-cap'};
+      return null;
+    }
+    function createCompCardHTML(record, index) {
+      const status = getStatusBadge(record);
+      const statusBadge = status ? `<div class="status-badge ${status.class}">${status.text}</div>` : '';
+      const size = record.Size || 0;
+      const pricePerSF = (size > 0) ? (record.Sale_Price / size) : 0;
+      const capRate = record.Cap_Rate || 0;
+      return `
+      <div class="comp-card" style="animation-delay:${index*0.1}s">
+        ${statusBadge}
+        <div class="card-front">
+          <div class="card-header">
+            <img class="property-image" 
+                 src="${record.Property_Image || 'https://via.placeholder.com/80x80/E5E7EB/6B7280?text=No+Image'}" 
+                 alt="Property Image">
+            <div class="property-info">
+              <h3 class="property-title">${record.Property_Name || 'Property Name'}</h3>
+              <p class="property-address">
+                ${[record.Property_Address, record.Property_City, record.Zip].filter(Boolean).join(', ')}
+              </p>
+              <span class="property-type">${record.Property_Type || 'Commercial'}</span>
+            </div>
+            <div class="metrics-grid">
+              <div class="metric-item">
+                <div class="metric-value">${formatCurrency(record.Sale_Price)}</div>
+                <div class="metric-label">Sale Price</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-value">${(capRate * 100).toFixed(2)}%</div>
+                <div class="metric-label">Cap Rate</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-value">${formatCurrency(pricePerSF)}</div>
+                <div class="metric-label">$/SF</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-back">
+          <div class="card-details">
+            <div class="details-header">
+              <div class="details-title">Property Details</div>
+              <button class="close-btn" data-action="close">×</button>
+            </div>
+            <div class="details-grid">
+              <div class="detail-item">
+                <div class="detail-label">Property Type</div>
+                <div class="detail-value">${record.Property_Type || 'Not specified'}</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Size (SF)</div>
+                <div class="detail-value">${formatNumber(record.Size) || 'Not specified'}</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Land Area (SF)</div>
+                <div class="detail-value">${formatNumber(record.Land_Area_SF) || 'Not specified'}</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Secondary Type</div>
+                <div class="detail-value">${record.Secondary_Type || 'Not specified'}</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">County</div>
+                <div class="detail-value">${record.Property_County || 'Not specified'}</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Sale Date</div>
+                <div class="detail-value">${formatDate(record.Sale_Date) || 'Not specified'}</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Sale Condition</div>
+                <div class="detail-value">${record.Sale_Condition || 'Not specified'}</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Listing Broker</div>
+                <div class="detail-value">${record.Listing_Broker || 'Not specified'}</div>
+              </div>
+            </div>
+            ${record.Transaction_Notes ? `
+              <div class="detail-item" style="margin-bottom: 1.5rem;">
+                <div class="detail-label">Transaction Notes</div>
+                <div class="detail-value">${record.Transaction_Notes}</div>
+              </div>
+            ` : ''}
+            <div class="card-actions">
+              <button class="action-btn primary" data-action="viewDetails" data-id="${record.PropertyID}">
+                View Full Details
+              </button>
+              <button class="action-btn secondary" data-action="saveFavorite" data-id="${record.PropertyID}">
+                Save to Favorites
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      `;
+    }
+    let allRecords = [], filteredRecords = [], currentSort = null;
+    let pageSize = 40, pageStart = 0;
+    function filterRecords(searchTerm) {
+      if (!searchTerm) { filteredRecords = [...allRecords]; return; }
+      const term = searchTerm.toLowerCase();
+      filteredRecords = allRecords.filter(record => 
+        (record.Property_Name || '').toLowerCase().includes(term) ||
+        (record.Property_Address || '').toLowerCase().includes(term) ||
+        (record.Property_City || '').toLowerCase().includes(term) ||
+        (record.Property_Type || '').toLowerCase().includes(term) ||
+        (record.Property_County || '').toLowerCase().includes(term)
+      );
+    }
+    function sortRecords(sortType) {
+      filteredRecords.sort((a, b) => {
+        switch (sortType) {
+          case 'price': return (b.Sale_Price||0) - (a.Sale_Price||0);
+          case 'cap-rate': return (b.Cap_Rate||0) - (a.Cap_Rate||0);
+          case 'size': return (b.Size||0) - (a.Size||0);
+          case 'date': return (b.Sale_Date||0) - (a.Sale_Date||0);
+          default: return 0;
+        }
+      });
+    }
+    function renderGallery(records, {start=0, count=pageSize}={}) {
+      const root = document.getElementById('root');
+      const showMoreContainer = document.getElementById('showMoreContainer');
+      root.innerHTML = '';
+      showMoreContainer.innerHTML = '';
+      if (!records || !Array.isArray(records) || records.length === 0) {
+        root.innerHTML = `
+          <div class="empty-state">
+            <h3>No properties found</h3>
+            <p>Try adjusting your search or filters</p>
+          </div>
+        `;
+        return;
+      }
+      const end = Math.min(start+count, records.length);
+      let html = '';
+      for (let i=start; i<end; ++i) {
+        html += createCompCardHTML(records[i], i);
+      }
+      root.innerHTML = html;
+      if (end < records.length) {
+        showMoreContainer.innerHTML = `<button id="showMoreBtn" class="sort-btn">Show More (${records.length-end} remaining)</button>`;
+        document.getElementById('showMoreBtn').onclick = function() {
+          pageStart = end;
+          renderGallery(records, {start: pageStart, count: pageSize});
+        };
+      } else {
+        pageStart = 0;
+      }
+    }
+    document.getElementById('root').addEventListener('click', function(e) {
+      const card = e.target.closest('.comp-card');
+      if (!card) return;
+      if (e.target.dataset.action === 'close') {
+        card.classList.remove('expanded');
+        return;
+      }
+      if (e.target.dataset.action === 'viewDetails') {
+        viewDetails(e.target.dataset.id);
+        e.stopPropagation();
+        return;
+      }
+      if (e.target.dataset.action === 'saveFavorite') {
+        saveToFavorites(e.target.dataset.id);
+        e.stopPropagation();
+        return;
+      }
+      card.classList.toggle('expanded');
+    });
+    function viewDetails(propertyId) {
+      alert('Viewing details for property: ' + propertyId);
+    }
+    function saveToFavorites(propertyId) {
+      alert('Saved to favorites: ' + propertyId);
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('searchInput').addEventListener('input', function(e) {
+        pageStart = 0;
+        filterRecords(e.target.value);
+        if (currentSort) sortRecords(currentSort);
+        renderGallery(filteredRecords);
+      });
+      document.querySelectorAll('.sort-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          currentSort = this.dataset.sort;
+          if (currentSort) sortRecords(currentSort);
+          renderGallery(filteredRecords);
+        });
+      });
+    });
+    const GRIST_COLUMNS = [
+      'Property_Image', 'PropertyID', 'Property_Name', 'Property_Address', 'Property_City', 'Zip',
+      'Sale_Price', 'Sale_Date', 'Cap_Rate', 'Sale_Condition', 'Size', 'Land_Area_SF',
+      'Property_Type', 'Secondary_Type', 'Market_Time', 'Property_County', 'Transaction_Notes',
+      'Listing_Broker', 'Listing_Brokerage', 'Buyers_Broker', 'Buyers_Brokerage',
+      'Buyer_Contact', 'Seller_Contact', 'Buyer_Company', 'Buyer_Address',
+      'Seller_Company', 'Seller_Address', 'Latitude', 'Longitude'
+    ];
+    if (typeof grist !== 'undefined') {
+      grist.ready({requiredAccess:'full',columns:GRIST_COLUMNS});
+      grist.onRecords(function(records) {
+        allRecords = records;
+        filteredRecords = [...records];
+        pageStart = 0;
+        if (currentSort) sortRecords(currentSort);
+        renderGallery(filteredRecords);
+      });
+    } else {
+      const sampleData = [
+        {
+          PropertyID:'1',
+          Property_Image:'',
+          Property_Name:"Harbor Freight Plaza",
+          Property_Address:"2175 W 7th Ave",
+          Property_City:"Eugene",
+          Zip:"97402",
+          Sale_Price:2500000,
+          Cap_Rate:0.0913,
+          Size:8500,
+          Land_Area_SF:45000,
+          Property_Type:"Retail",
+          Secondary_Type:"Strip Center",
+          Property_County:"Lane",
+          Sale_Date:1718169600,
+          Sale_Condition:"Normal Sale",
+          Transaction_Notes:"Excellent location with strong anchor tenant.",
+          Listing_Broker:"John Smith"
+        },
+        {
+          PropertyID:'2',
+          Property_Image:'',
+          Property_Name:"Big Y Shopping Center",
+          Property_Address:"2110 W 6th Ave",
+          Property_City:"Eugene",
+          Zip:"97402",
+          Sale_Price:1800000,
+          Cap_Rate:0.1013,
+          Size:6200,
+          Land_Area_SF:32000,
+          Property_Type:"Retail",
+          Secondary_Type:"Shopping Center",
+          Property_County:"Lane",
+          Sale_Date:1715577600,
+          Sale_Condition:"Normal Sale",
+          Transaction_Notes:"Recently renovated with new tenants.",
+          Listing_Broker:"Sarah Johnson"
+        }
+      ];
+      allRecords = sampleData;
+      filteredRecords = [...sampleData];
+      renderGallery(filteredRecords);
+    }
+  </script>
+</body>
+</html>
