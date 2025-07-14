@@ -338,7 +338,7 @@
                 const selectedPropertyIndex = ELS.propertySelect.value !== '' ? parseInt(ELS.propertySelect.value, 10) : -1;
                 const selectedProperty = selectedPropertyIndex >= 0 ? g_relatedProperties[selectedPropertyIndex] : null;
 
-                const firstName = getFirstName(g_currentOwnerRecord.Owner_Full_Name);
+                const firstName = getFirstName(g_currentOwnerRecord.Name);
                 let propertyIdentifierValue = '';
                 let propertyCityValue = '';
                 
