@@ -278,7 +278,7 @@
 
             let g_currentOwnerRecord = null;
             let g_relatedProperties = [];
-            const PHONE_COLUMN_KEYS = ['Phone', 'Phone_2', 'Phone_3', 'Phone_4', 'Contact_1', 'Contact_2', 'Contact_3', 'Contact_4'];
+            const PHONE_COLUMN_KEYS = ['Phone', 'Phone_2', 'Phone_3', 'Phone_4'];
 
             const getFirstName = (fullName) => (fullName && typeof fullName === 'string') ? fullName.split(' ')[0] : '[First Name]';
             const sanitizePhone = (phone) => (phone && typeof phone === 'string') ? phone.replace(/\D/g, '') : '';
