@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive SMS Template Sender</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+
+    <style>
+        /* --- FINAL MERGED CSS: COMPACT LAYOUT + INTERACTIVE BUTTONS --- */
+        :root {
+            --brand-color: #3498db;
+            --brand-color-dark: #2980b9;
+            --border-color: #e0e6ed;
+            --text-light: #6b7280;
+            --text-dark: #2c3e50;
+            --bg-light: #f8f9fa;
+            --bg-widget: #ffffff;
+            --btn-bg: #f8f9fa;
+            --btn-bg-hover: #f1f3f5;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 16px;
+            font-size: 14px;
+            box-sizing: border-box;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #widget-container {
+            background-color: var(--bg-widget);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            padding: 20px;
+            height: calc(100% - 40px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-shrink: 0;
+        }
+
+        .header h2 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .header .icon {
+            width: 24px;
+            height: 24px;
+        }
+        
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            flex-grow: 1;
+            min-height: 0;
+        }
+        
+        .left-column, .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            min-width: 0;
+        }
+        
+        .form-group label, .section-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-light);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--bg-widget);
+            font-size: 0.9rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: var(--brand-color);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        /* --- INTERACTIVE BUTTON STYLES (FROM GROK) --- */
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .swap-btn {
+            padding: 6px 12px;
+            background: var(--btn-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px; /* Pill shape */
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .swap-btn:hover {
+            border-color: #bdc3c7;
+            background-color: var(--btn-bg-hover);
+        }
+        .swap-btn.active {
+            background: var(--brand-color);
+            color: #fff;
+            border-color: var(--brand-color-dark);
+            font-weight: 600;
+        }
+
+        .preview-section {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            min-height: 0;
+        }
+        .preview-box {
+            background-color: #f8f9fa;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 12px 16px;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            flex-grow: 1;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .action-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .action-row .form-group {
+            flex-grow: 1;
+            margin-bottom: 0;
+        }
+
+        .send-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background-color: var(--brand-color);
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+        .send-btn:hover { background-color: var(--brand-color-dark); }
+        .send-btn.disabled { background-color: #a1a1aa; cursor: not-allowed; }
+        .send-btn svg { width: 18px; height: 18px; }
+        
+        .info-box {
+            text-align: center;
+            padding: 40px 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- --- HTML BODY CONTENT --- -->
+    <div id="widget-container">
+        <div id="no-record" class="info-box">
+            <p>Please select a row in the Owners table to begin.</p>
+        </div>
+
+        <div id="main-content" style="display: none;">
+            <div class="header">
+                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="icon">
+                  <path d="M3.5 2A1.5 1.5 0 002 3.5V12.5A1.5 1.5 0 003.5 14h10.25a.75.75 0 010 1.5H3.5A3 3 0 01.5 12.5V3.5A3 3 0 013.5.5h13A3 3 0 0119.5 3.5v8a3 3 0 01-3 3H9.25a.75.75 0 010-1.5H16.5A1.5 1.5 0 0018 11.5v-8A1.5 1.5 0 0016.5 2H3.5z" /><path d="M7.83 8.97a.75.75 0 01-1.06 1.06l-2.5-2.5a.75.75 0 010-1.06l2.5-2.5a.75.75 0 011.06 1.06L6.39 6.5H13.5a.75.75 0 010 1.5H6.39l1.44 1.47z" />
+                </svg>
+                <h2>Interactive SMS Templates</h2>
+            </div>
+      
+            <div class="main-grid">
+                <div class="left-column">
+                    <div class="form-group">
+                        <label for="template-select">Template</label>
+                        <select id="template-select"></select>
+                    </div>
+                    <div id="property-selector-placeholder" class="form-group" style="display: none;">
+                        <label for="property-select">Property</label>
+                        <select id="property-select"></select>
+                    </div>
+                     <div class="form-group">
+                        <label>Property Focus</label>
+                        <div id="property-focus-group" class="button-group">
+                            <button class="swap-btn active" data-value="retail investment properties">Retail Investment</button>
+                            <button class="swap-btn" data-value="Multi-tenant retail properties">Multi-Tenant</button>
+                            <button class="swap-btn" data-value="Single Tenant Net Lease">Single Tenant</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Property Identifier</label>
+                        <div id="property-identifier-group" class="button-group">
+                            <button class="swap-btn active" data-value="Property_Name">Name</button>
+                            <button class="swap-btn" data-value="Tenants">Tenants</button>
+                            <button class="swap-btn" data-value="Property_Type">Type</button>
+                            <button class="swap-btn" data-value="Address_Concatenate">Address</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="right-column">
+                    <div class="preview-section">
+                        <label class="section-label">Preview</label>
+                        <div id="preview-box" class="preview-box"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-row">
+                 <div class="form-group">
+                    <label for="phone-select">Send to</label>
+                    <select id="phone-select"></select>
+                </div>
+                <a id="send-sms-link" class="send-btn disabled" href="#" target="_blank">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="currentColor"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2 .01 7z"/></svg>
+                    Send
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("SMS Widget script loaded. Grist API will be initialized shortly.");
+
+            const TEMPLATES = {
+                standard: { name: "Standard Introduction", text: "Hi {{firstName}}, this is Sam Gfroerer with M&M. I just tried giving you a quick call — I specialize in {{propertyFocus}} and wanted to connect regarding your {{propertyIdentifier}} in {{propertyCity}}. Let me know if there's a good time to chat, or feel free to text back. Looking forward to connecting!" },
+                followUp: { name: "Brief Follow-up", text: "Hi {{firstName}}, Sam from M&M here. Just called about your {{propertyIdentifier}} in {{propertyCity}}. I help investors with {{propertyFocus}} - would love to connect when you have a moment. Text or call back when convenient!" },
+                valueProp: { name: "Value Proposition", text: "Hi {{firstName}}, this is Sam with M&M. I specialize in maximizing returns on {{propertyFocus}} like your {{propertyIdentifier}} in {{propertyCity}}. Just tried calling - would appreciate a few minutes to discuss how I can help. Feel free to text back!" }
+            };
+
+            const ELS = {
+                templateSelect: document.getElementById('template-select'),
+                propertySelect: document.getElementById('property-select'),
+                propertySelectorPlaceholder: document.getElementById('property-selector-placeholder'),
+                propertyFocusGroup: document.getElementById('property-focus-group'),
+                propertyIdentifierGroup: document.getElementById('property-identifier-group'),
+                phoneSelect: document.getElementById('phone-select'),
+                previewBox: document.getElementById('preview-box'),
+                sendSmsLink: document.getElementById('send-sms-link'),
+                noRecordDiv: document.getElementById('no-record'),
+                mainContentDiv: document.getElementById('main-content'),
+            };
+
+            let g_currentOwnerRecord = null;
+            let g_relatedProperties = [];
+            const PHONE_COLUMN_KEYS = ['Phone', 'Phone_2', 'Phone_3', 'Phone_4', 'Contact_1', 'Contact_2', 'Contact_3', 'Contact_4'];
+
+            const getFirstName = (fullName) => (fullName && typeof fullName === 'string') ? fullName.split(' ')[0] : '[First Name]';
+            const sanitizePhone = (phone) => (phone && typeof phone === 'string') ? phone.replace(/\D/g, '') : '';
+            const columnarToRowFormat = (data) => {
+                if (!data || !data.id || !Array.isArray(data.id)) return [];
+                const keys = Object.keys(data);
+                return data.id.map((id, i) => {
+                    const row = { id, fields: {} };
+                    for (const key of keys) if (key !== 'id') row.fields[key] = data[key][i];
+                    return row;
+                });
+            };
+
+            async function fetchAndFilterProperties(ownerId) {
+                try {
+                    const columnarData = await grist.docApi.fetchTable('Properties_');
+                    const allProperties = columnarToRowFormat(columnarData);
+                    g_relatedProperties = allProperties.filter(prop => {
+                        const ownerRefList = prop.fields.Name;
+                        return ownerRefList && Array.isArray(ownerRefList) && ownerRefList.includes(ownerId);
+                    });
+                } catch (err) {
+                    console.error("Error fetching/filtering properties:", err);
+                    g_relatedProperties = [];
+                }
+            }
+
+            function renderAll() {
+                if (!g_currentOwnerRecord) {
+                    ELS.mainContentDiv.style.display = 'none';
+                    ELS.noRecordDiv.style.display = 'block';
+                    return;
+                }
+                ELS.mainContentDiv.style.display = 'block';
+                ELS.noRecordDiv.style.display = 'none';
+
+                ELS.phoneSelect.innerHTML = PHONE_COLUMN_KEYS
+                    .map(key => ({ key, value: g_currentOwnerRecord[key] }))
+                    .filter(item => item.value)
+                    .map(item => `<option value="${item.value}">${item.key.replace(/_/g, ' ')}: ${item.value}</option>`)
+                    .join('') || '<option value="" disabled>No phone numbers found</option>';
+
+                if (g_relatedProperties.length > 0) {
+                    ELS.propertySelectorPlaceholder.style.display = 'block';
+                    ELS.propertySelect.innerHTML = g_relatedProperties.map((prop, index) => {
+                        const displayName = prop.fields.Address_Concatenate || prop.fields.Property_Name || `Property ID ${prop.id}`;
+                        return `<option value="${index}">${displayName}</option>`;
+                    }).join('');
+                } else {
+                    ELS.propertySelectorPlaceholder.style.display = 'none';
+                }
+
+                const selectedTemplateKey = ELS.templateSelect.value;
+                const selectedPropertyFocus = ELS.propertyFocusGroup.querySelector('.active').dataset.value;
+                const selectedPropertyIdentifierKey = ELS.propertyIdentifierGroup.querySelector('.active').dataset.value;
+                const selectedPhoneNumber = ELS.phoneSelect.value;
+                const selectedPropertyIndex = ELS.propertySelect.value !== '' ? parseInt(ELS.propertySelect.value, 10) : -1;
+                const selectedProperty = selectedPropertyIndex >= 0 ? g_relatedProperties[selectedPropertyIndex] : null;
+
+                const firstName = getFirstName(g_currentOwnerRecord.Owner_Full_Name);
+                let propertyIdentifierValue = '';
+                let propertyCityValue = '';
+                
+                if (selectedProperty) {
+                    propertyIdentifierValue = selectedProperty.fields[selectedPropertyIdentifierKey] || '';
+                    propertyCityValue = selectedProperty.fields.City || '';
+                    if (Array.isArray(propertyIdentifierValue)) propertyIdentifierValue = propertyIdentifierValue[1] || '';
+                    if (Array.isArray(propertyCityValue)) propertyCityValue = propertyCityValue[1] || '';
+                }
+
+                let message = TEMPLATES[selectedTemplateKey].text;
+                message = message.replace(/{{firstName}}/g, firstName);
+                message = message.replace(/{{propertyFocus}}/g, selectedPropertyFocus);
+                message = message.replace(/{{propertyIdentifier}}/g, propertyIdentifierValue);
+                message = message.replace(/{{propertyCity}}/g, propertyCityValue);
+                ELS.previewBox.textContent = message;
+
+                const sanitizedPhone = sanitizePhone(selectedPhoneNumber);
+                if (sanitizedPhone && selectedProperty) {
+                    ELS.sendSmsLink.href = `sms:${sanitizedPhone}?&body=${encodeURIComponent(message)}`;
+                    ELS.sendSmsLink.classList.remove('disabled');
+                    ELS.sendSmsLink.title = `Send SMS to ${selectedPhoneNumber}`;
+                } else {
+                    ELS.sendSmsLink.href = '#';
+                    ELS.sendSmsLink.classList.add('disabled');
+                    ELS.sendSmsLink.title = !sanitizedPhone ? 'No valid phone number selected' : 'A property must be selected';
+                }
+            }
+            
+            function handleButtonClick(event) {
+                const button = event.target.closest('.swap-btn');
+                if (!button) return;
+                
+                const group = button.parentElement;
+                group.querySelector('.active')?.classList.remove('active');
+                button.classList.add('active');
+                renderAll();
+            }
+
+            ELS.templateSelect.innerHTML = Object.keys(TEMPLATES).map(key => `<option value="${key}">${TEMPLATES[key].name}</option>`).join('');
+
+            [ELS.templateSelect, ELS.propertySelect, ELS.phoneSelect].forEach(el => el.addEventListener('change', renderAll));
+            ELS.propertyFocusGroup.addEventListener('click', handleButtonClick);
+            ELS.propertyIdentifierGroup.addEventListener('click', handleButtonClick);
+            
+            grist.ready({ requiredAccess: 'full' });
+            grist.onRecord(async (record) => {
+                if (record) {
+                    g_currentOwnerRecord = record;
+                    await fetchAndFilterProperties(record.id);
+                } else {
+                    g_currentOwnerRecord = null;
+                    g_relatedProperties = [];
+                }
+                renderAll();
+            });
+        });
+    </script>
+</body>
+</html>
