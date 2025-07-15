@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sherwin-Williams Property | Commercial Investment Opportunity</title>
+    <meta name="description" content="Commercial property for sale: Sherwin-Williams paint store at 19405 SW Tualatin Valley Hwy, Beaverton, OR. Investment grade tenant, NNN lease.">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'sw-blue': '#004a99',
+                        'sw-red': '#d9232a',
+                        'primary': '#007BFF',
+                        'primary-hover': '#0056b3',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+                        headings: ['Georgia', 'serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* Custom styles */
+        .gallery-image {
+            height: 250px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        .gallery-image:hover {
+            transform: scale(1.05);
+        }
+        .modal {
+            transition: opacity 0.3s ease;
+        }
+        .property-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .property-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .nav-link {
+            position: relative;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: white;
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        .active-link::after {
+            width: 100%;
+        }
+        .detail-item {
+            border-left: 3px solid #004a99;
+            padding-left: 10px;
+            margin-bottom: 10px;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body class="font-sans bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-md">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex flex-col items-center">
+                <h1 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-4">Sherwin-Williams Property Investment</h1>
+                <img src="https://images.crexi.com/assets/1680318/cddf6f67dfa346e18e97bef44f5aaca3_1306x734.jpg" 
+                      alt="Sherwin Williams Store Front" 
+                      class="rounded-lg shadow-lg w-full max-w-4xl">
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="bg-sw-blue text-white sticky top-0 z-50 shadow-lg">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-3">
+                <a href="#" class="text-xl font-bold">Property Sale</a>
+                
+                <!-- Mobile menu button -->
+                <button id="mobile-menu-button" class="md:hidden text-white focus:outline-none">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+                
+                <!-- Desktop menu -->
+                <div class="hidden md:flex space-x-6">
+                    <a href="#home" class="nav-link active-link py-2">Home</a>
+                    <a href="#property-details" class="nav-link py-2">Property Details</a>
+                    <a href="#financials" class="nav-link py-2">Financials</a>
+                    <a href="#gallery" class="nav-link py-2">Gallery</a>
+                    <a href="#location" class="nav-link py-2">Location</a>
+                    <a href="#comparables" class="nav-link py-2">Market Comparables</a>
+                </div>
+            </div>
+            
+            <!-- Mobile menu -->
+            <div id="mobile-menu" class="hidden md:hidden pb-4">
+                <a href="#home" class="block py-2 px-4 hover:bg-blue-700 rounded">Home</a>
+                <a href="#property-details" class="block py-2 px-4 hover:bg-blue-700 rounded">Property Details</a>
+                <a href="#financials" class="block py-2 px-4 hover:bg-blue-700 rounded">Financials</a>
+                <a href="#gallery" class="block py-2 px-4 hover:bg-blue-700 rounded">Gallery</a>
+                <a href="#location" class="block py-2 px-4 hover:bg-blue-700 rounded">Location</a>
+                <a href="#comparables" class="block py-2 px-4 hover:bg-blue-700 rounded">Market Comparables</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-8">
+        <!-- Home Section -->
+        <section id="home" class="mb-16">
+            <div class="bg-white rounded-xl shadow-md p-6 md:p-8">
+                <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-6 border-b-2 border-sw-red pb-2">
+                    From Lupe's Escape to Sherwin-Williams: A Transformation Story
+                </h2>
+                <div class="prose max-w-none">
+                    <p class="text-gray-700 mb-4">
+                        This offering presents an excellent opportunity to acquire a well-located commercial property that has undergone a significant transformation. Originally home to Lupe's Escape, a popular local eatery, the property has now been repurposed as a Sherwin-Williams paint store, leased to one of the world's leading paint and coatings companies.
+                    </p>
+                    <p class="text-gray-700">
+                        A prime investment with a strong tenant in a growing area, this property promises stable returns and long-term value.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Property Details Section -->
+        <section id="property-details" class="mb-16">
+            <div class="bg-white rounded-xl shadow-md p-6 md:p-8">
+                <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-6 border-b-2 border-sw-red pb-2">
+                    Property Highlights & Details
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <!-- Site Information -->
+                    <div class="bg-gray-50 rounded-lg p-6 shadow-sm property-card">
+                        <h3 class="text-xl font-bold text-sw-blue mb-4 flex items-center">
+                            <i class="fas fa-info-circle mr-2"></i> Site Information
+                        </h3>
+                        <ul class="space-y-3">
+                            <li class="flex">
+                                <span class="font-semibold text-gray-700 w-32">Address:</span>
+                                <span class="text-gray-600">19405 SW Tualatin Valley Hwy, Beaverton, OR 97003</span>
+                            </li>
+                            <li class="flex">
+                                <span class="font-semibold text-gray-700 w-32">Tenant:</span>
+                                <span class="text-gray-600">Sherwin-Williams (BBB Rating from S&P)</span>
+                            </li>
+                            <li class="flex">
+                                <span class="font-semibold text-gray-700 w-32">Building Size:</span>
+                                <span class="text-gray-600">3,500 SF</span>
+                            </li>
+                            <li class="flex">
+                                <span class="font-semibold text-gray-700 w-32">Parcel Size:</span>
+                                <span class="text-gray-600">±0.47 Acres (±20,473 SF)</span>
+                            </li>
+                            <li class="flex">
+                                <span class="font-semibold text-gray-700 w-32">Parking Spaces:</span>
+                                <span class="text-gray-600">14 (Ratio: 4/1000 SF)</span>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Investment Highlights -->
+                    <div class="bg-gray-50 rounded-lg p-6 shadow-sm property-card">
+                        <h3 class="text-xl font-bold text-sw-blue mb-4 flex items-center">
+                            <i class="fas fa-chart-line mr-2"></i> Investment Highlights
+                        </h3>
+                        <ul class="space-y-3">
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                <span class="text-gray-600">Investment Grade Tenant with BBB Rating from S&P</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                <span class="text-gray-600">NNN Lease with Minimal Landlord Responsibilities</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                <span class="text-gray-600">Approximately 7 Years on the Lease Remaining</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                <span class="text-gray-600">Three (3), Five (5) Year Options to Extend</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                <span class="text-gray-600">±33,690 Average Daily Traffic Volume (ADT)</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                <span class="text-gray-600">Located in an Area of Dense Residential Housing and New Suburban Subdivisions</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Rent Increase Schedule -->
+                <div class="bg-gray-50 rounded-lg p-6 shadow-sm property-card">
+                    <h3 class="text-xl font-bold text-sw-blue mb-4 flex items-center">
+                        <i class="fas fa-money-bill-wave mr-2"></i> Rent Increase Schedule
+                    </h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Term</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Rent/Year</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Increase</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-700">Current Term</td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">$136,500 per year</td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">-</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-700">Next Rent Increase (6/1/2027)</td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">$153,579.96</td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">12.51%</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-700">Option #1 (6/1/2032)</td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">$176,715.00</td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">15.06%</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-700">Option #2 (6/1/2037)</td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">$198,800.04</td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">12.50%</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-700">Option #3 (6/1/2042)</td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">$223,650.00</td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">14.06%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Financials Section -->
+        <section id="financials" class="mb-16">
+            <div class="bg-white rounded-xl shadow-md p-6 md:p-8">
+                <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-6 border-b-2 border-sw-red pb-2">
+                    Financial Summary
+                </h2>
+                
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <caption class="text-left text-lg font-semibold text-gray-700 mb-2">Lease Term Financial Overview</caption>
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Term</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Start Date</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">End Date</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Rent/Year</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Rent/Month</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Rent/SF</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Rent Increase</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Yield</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-700">Current Term</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">5/31/2022</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">5/31/2027</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">$136,500.00</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">$11,375.00</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">$39.00</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">-</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">5.14%</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-700">Rent Increase 6/1/2027</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">6/1/2027</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">5/31/2032</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">$153,579.96</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">$12,798.33</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">$43.88</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">12.51%</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">5.78%</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-700">Option #1 6/1/2032</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">6/1/2032</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">5/31/2037</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">$176,715.00</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">$14,726.25</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">$50.49</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">15.06%</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">6.65%</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-700">Option #2 6/1/2037</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">6/1/2037</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">5/31/2042</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">$198,800.04</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">$16,566.67</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">$56.80</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">12.50%</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">7.48%</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-700">Option #3 6/1/2042</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">6/1/2042</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">5/31/2047</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">$223,650.00</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">$18,637.50</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">$63.90</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">14.06%</td>
+                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">8.41%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Downloads Section -->
+                <div class="mt-8">
+                    <h3 class="text-xl font-bold text-sw-blue mb-4 flex items-center">
+                        <i class="fas fa-file-download mr-2"></i> Additional Resources & Downloads
+                    </h3>
+                    <p class="text-gray-700 mb-4">
+                        For more detailed information, due diligence materials, and financial reports, please review the following documents or contact us for a full offering memorandum.
+                    </p>
+                    <div class="flex flex-wrap gap-4">
+                        <a href="https://shoppingcenter-report.neocities.org/On-Markets/Sherwin-Williams/Washington%20County%20Public%20Access%20_%20Property%20Detail.pdf"
+                            class="flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg transition-colors duration-300">
+                            <i class="fas fa-file-pdf text-red-500 mr-2"></i> Property Taxes
+                        </a>
+                        <a href="https://shoppingcenter-report.neocities.org/On-Markets/Sherwin-Williams/SW%20-%20Store%20Trends%20Report.pdf"
+                            class="flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg transition-colors duration-300">
+                            <i class="fas fa-file-pdf text-red-500 mr-2"></i> Store Trends Report
+                        </a>
+                        <a href="https://shoppingcenter-report.neocities.org/On-Markets/Sherwin-Williams/RetailStat%20Financial%20-%20Financial%20Snapshot.pdf"
+                            class="flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg transition-colors duration-300">
+                            <i class="fas fa-file-pdf text-red-500 mr-2"></i> Financial Snapshot
+                        </a>
+                        <a href="https://shhoppingcenter-report.neocities.org/On-Markets/Sherwin-Williams/Sherwin_Williams%20-%20TV%20Hwy.pdf"
+                            class="flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg transition-colors duration-300">
+                            <i class="fas fa-file-archive text-red-500 mr-2"></i> Full Package
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gallery Section -->
+        <section id="gallery" class="mb-16">
+            <div class="bg-white rounded-xl shadow-md p-6 md:p-8">
+                <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-6 border-b-2 border-sw-red pb-2">
+                    Property Gallery
+                </h2>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer" onclick="openModal('https://images.crexi.com/assets/1680318/c201bc6905ff44b59801912062a61548_1306x734.jpg')">
+                        <img src="https://images.crexi.com/assets/1680318/c201bc6905ff44b59801912062a61548_1306x734.jpg"
+                              alt="Sherwin Williams Store Front - Main View"
+                              class="gallery-image w-full">
+                        <div class="p-4 bg-white">
+                            <p class="text-gray-700">Store Front - Main View</p>
+                        </div>
+                    </div>
+                    <div class="rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer" onclick="openModal('https://shoppingcenter-report.neocities.org/On-Markets/Sherwin-Williams/Screenshot%202025-06-17%20115726.png')">
+                        <img src="https://shoppingcenter-report.neocities.org/On-Markets/Sherwin-Williams/Screenshot%202025-06-17%20115726.png"
+                              alt="Historical Aerial View of Property Location"
+                              class="gallery-image w-full">
+                        <div class="p-4 bg-white">
+                            <p class="text-gray-700">Historical Aerial View</p>
+                        </div>
+                    </div>
+                    <div class="rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer" onclick="openModal('https://shoppingcenter-report.neocities.org/On-Markets/Sherwin-Williams/Screenshot%202025-06-17%20115944.png')">
+                        <img src="https://shoppingcenter-report.neocities.org/On-Markets/Sherwin-Williams/Screenshot%202025-06-17%20115944.png"
+                              alt="Current Aerial View of Property and Surrounding Area"
+                              class="gallery-image w-full">
+                        <div class="p-4 bg-white">
+                            <p class="text-gray-700">Current Aerial View</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Location Section -->
+        <section id="location" class="mb-16">
+            <div class="bg-white rounded-xl shadow-md p-6 md:p-8">
+                <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-6 border-b-2 border-sw-red pb-2">
+                    Location Overview
+                </h2>
+                
+                <div class="prose max-w-none mb-8">
+                    <p class="text-gray-700 mb-4">
+                        The property is strategically situated along Tualatin Valley Hwy (Hwy 8), a major thoroughfare in Beaverton, Oregon, benefiting from excellent visibility and strong area demographics. With over 326,105 residents within a five-mile radius, the area is densely populated and continues to experience significant growth.
+                    </p>
+                    <p class="text-gray-700">
+                        Nearby developments such as Reed's Crossing, Butternut Creek, and South Cooper Mountain further enhance the property's appeal by bringing in new residents and increasing commercial activity in the vicinity. The location offers easy access and is surrounded by a mix of retail, residential, and service-based businesses, making it a hub for local consumers.
+                    </p>
+                </div>
+                
+                <!-- Google Map Embed -->
+                <div class="rounded-xl overflow-hidden shadow-lg">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2797.669584485542!2d-122.87903868444155!3d45.47895097910118!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x54950df683696f5b%3A0xf6397e5a07c0b8b8!2s19405%20SW%20Tualatin%20Valley%20Hwy%2C%20Beaverton%2C%20OR%2097003!5e0!3m2!1sen!2sus!4v1626359141029!5m2!1sen!2sus"
+                             width="100%"
+                             height="450"
+                             style="border:0;"
+                             allowfullscreen=""
+                             loading="lazy"
+                             class="rounded-lg"></iframe>
+                </div>
+                
+                <!-- Traffic & Demographics -->
+                <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-blue-50 rounded-lg p-6 shadow-sm">
+                        <h3 class="text-xl font-bold text-sw-blue mb-4 flex items-center">
+                            <i class="fas fa-car mr-2"></i> Traffic Data
+                        </h3>
+                        <ul class="space-y-3">
+                            <li class="flex">
+                                <span class="font-semibold text-gray-700 w-40">Average Daily Traffic:</span>
+                                <span class="text-gray-600">±33,690 vehicles</span>
+                            </li>
+                            <li class="flex">
+                                <span class="font-semibold text-gray-700 w-40">Peak Hours:</span>
+                                <span class="text-gray-600">7-9 AM & 4-6 PM</span>
+                            </li>
+                            <li class="flex">
+                                <span class="font-semibold text-gray-700 w-40">Visibility:</span>
+                                <span class="text-gray-600">Excellent from highway</span>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-blue-50 rounded-lg p-6 shadow-sm">
+                        <h3 class="text-xl font-bold text-sw-blue mb-4 flex items-center">
+                            <i class="fas fa-users mr-2"></i> Demographics
+                        </h3>
+                        <ul class="space-y-3">
+                            <li class="flex">
+                                <span class="font-semibold text-gray-700 w-40">5-Mile Population:</span>
+                                <span class="text-gray-600">326,105</span>
+                            </li>
+                            <li class="flex">
+                                <span class="font-semibold text-gray-700 w-40">Median Income:</span>
+                                <span class="text-gray-600">$85,400</span>
+                            </li>
+                            <li class="flex">
+                                <span class="font-semibold text-gray-700 w-40">Household Growth:</span>
+                                <span class="text-gray-600">+12% projected</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Market Comparables Section -->
+        <section id="comparables" class="mb-16">
+            <div class="bg-white rounded-xl shadow-md p-6 md:p-8">
+                <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-6 border-b-2 border-sw-red pb-2">
+                    Market Comparables Analysis
+                </h2>
+                
+                <div class="mb-8">
+                    <p class="text-gray-700 mb-4">
+                        Below is a comprehensive analysis of recent comparable property sales in the region, including both Sherwin-Williams locations and other similar retail properties. This data helps establish market benchmarks for pricing, cap rates, and investment metrics.
+                    </p>
+                </div>
+                
+                <!-- Tabs for different tenant types -->
+                <div class="mb-6">
+                    <div class="flex border-b border-gray-200">
+                        <button class="tab-button py-2 px-4 border-b-2 border-sw-blue font-medium text-sw-blue" onclick="openTab('tab1', this)">
+                            Sherwin-Williams
+                        </button>
+                        <button class="tab-button py-2 px-4 border-b-2 border-transparent font-medium text-gray-600 hover:text-gray-800" onclick="openTab('tab2', this)">
+                            Starbucks
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Tab content -->
+                <div id="tab1" class="tab-content active">
+                    <div id="sherwin-comps" class="space-y-6">
+                        <!-- Sherwin-Williams comparables will be inserted here by JavaScript -->
+                    </div>
+                </div>
+                
+                <div id="tab2" class="tab-content">
+                    <div id="starbucks-comps" class="space-y-6">
+                        <!-- Starbucks comparables will be inserted here by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Contact CTA Section -->
+    <section class="bg-sw-blue text-white py-12">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-2xl md:text-3xl font-bold mb-4">Interested in This Investment Opportunity?</h2>
+            <p class="text-xl mb-8 max-w-2xl mx-auto">Contact us for more information or to schedule a property tour.</p>
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <a href="mailto:info@example.com" class="bg-white text-sw-blue hover:bg-gray-100 font-bold py-3 px-6 rounded-lg transition-colors duration-300 flex items-center justify-center">
+                    <i class="fas fa-envelope mr-2"></i> Email Us
+                </a>
+                <a href="tel:+15551234567" class="bg-sw-red hover:bg-red-700 font-bold py-3 px-6 rounded-lg transition-colors duration-300 flex items-center justify-center">
+                    <i class="fas fa-phone mr-2"></i> Call Now
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <p class="text-gray-400">&copy; <span id="currentYear"></span> Commercial Property Investment. All rights reserved.</p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Image Modal -->
+    <div id="imageModal" class="modal fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90 hidden">
+        <span class="absolute top-4 right-6 text-white text-4xl cursor-pointer" onclick="closeModal()">&times;</span>
+        <img id="modalImage" class="max-w-full max-h-screen p-4" src="" alt="">
+    </div>
+
+    <script>
+        // Mobile menu toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+        
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                
+                if (targetElement) {
+                    // Close mobile menu if open
+                    if (!mobileMenu.classList.contains('hidden')) {
+                        mobileMenu.classList.add('hidden');
+                    }
+                    
+                    // Scroll to target
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                    
+                    // Update active link in navigation
+                    document.querySelectorAll('.nav-link').forEach(link => {
+                        link.classList.remove('active-link');
+                    });
+                    this.classList.add('active-link');
+                }
+            });
+        });
+        
+        // Image modal functionality
+        function openModal(imageUrl) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            
+            modalImg.src = imageUrl;
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeModal() {
+            const modal = document.getElementById('imageModal');
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Close modal when clicking outside the image
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('imageModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+        
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+        
+        // Tab functionality
+        function openTab(tabId, element) {
+            // Hide all tab content
+            const tabContents = document.getElementsByClassName('tab-content');
+            for (let i = 0; i < tabContents.length; i++) {
+                tabContents[i].classList.remove('active');
+            }
+            
+            // Remove active class from all tab buttons
+            const tabButtons = document.getElementsByClassName('tab-button');
+            for (let i = 0; i < tabButtons.length; i++) {
+                tabButtons[i].classList.remove('border-sw-blue', 'text-sw-blue');
+                tabButtons[i].classList.add('border-transparent', 'text-gray-600');
+            }
+            
+            // Show the selected tab content
+            document.getElementById(tabId).classList.add('active');
+            
+            // Add active class to the clicked tab button
+            element.classList.add('border-sw-blue', 'text-sw-blue');
+            element.classList.remove('border-transparent', 'text-gray-600');
+        }
+        
+        // Set current year in footer
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+        
+        // Market comparables data and rendering
+        const rawData = `| IMG | Tenant | Price | $/SF | Cap | Date | Address | Building Size | Year Built | Days On Market | Notes | | <https://ahprd1cdn.csgpimgs.com/i2/vOvQWAP3h8fV3IsKCCDSeJciLNHnGyh1mCNuCe5C5DQ/117/image.jpg> | Sherwin-Williams | $3,800,000 | $1,085.71 | 5.61% | Apr 11, 2025 | 17810 Canyon Rd E, Tacoma, WA 98446 | 3,500 SF | 2024 | 267 | The property was generating a net operating income of $213,180 and a cap rate of 5.61%. The tenant, Sherwin Williams, signed a 10 year deal in 2024 with multiple extension options. The buyer was part of a 1031 tax deferred exchange. | | <https://ahprd1cdn.csgpimgs.com/i2/JaWvR0LlC1CczRUFAkx8hiuoXI7tIZVc-YW5Wkp6oj0/117/image.jpg> | Sherwin-Williams | $2,026,500 | $533.29 | 5.20% | Feb 13, 2025 | 9920 NE 117th Ave, Vancouver, WA 98662 | 3,800 SF | 2021 | 139 | On February 13th, 2025 MAJ Development sold the 3,800-square-foot retail building to a private individual for $2,026,500 or about $533 per square foot. The property was fully occupied at time of sale, yielding a net operating income of $105,378 and a cap rate of 5.20%. | | <https://ahprd1cdn.csgpimgs.com/i2/Lp-2wuukBLmnnfekJLI0iWrJJvj5YIEi8tMbntpRxVU/117/image.jpg> | Sherwin-Williams | $2,880,000 | $823 | 5.25% | Dec 20, 2024 | 8930 SW Old Tualatin Sherwood Rd, Tualatin, OR 97062 | 3,500 SF | 2019 | | | | <https://ahprd1cdn.csgpimgs.com/i2/6L2dHy3AIlT4VJWXlqMurM0BCekG2FGTVsbXCwjsI9c/117/image.jpg> | Sherwin-Williams | $4,200,000 | $1,200.00 | 5.46% | Sep 16, 2024 | 2602 Milton Way, Milton, WA 98354 | 3,500 SF | 2024 | | Milton Way Associates LLC successfully sold a 3,500 SF general retail building to a private individual for $4,200,000, reflecting a price of $1,200 per square foot. The property was sold at its initial asking price of $4,200,000, and was 100% occupied at the time of sale. This transaction represented a build-to-suit opportunity, with the property remaining on the market for just 74 days with an in-place cap rate of 5.46% and an estimated NOI of $229,320 | | <https://ahprd1cdn.csgpimgs.com/i2/3lXmjLrWUjr5v-tWEBpUYlMb2Y0tzlPGhNjTo-x_HBI/117/image.jpg> | Sherwin-Williams | $1,050,000 | $218.11 | 6.31% | Sep 10, 2024 | 3936 W Clearwater Ave, Kennewick, WA 99336 | 4,814 SF | 1987 | | A private investor sold this 4,814 square foot retail property to a private investor for $1,050,000 or $218.11 per square foot. The property was fully occupied at time of sale. The seller was motivated to divest the property as they were moving out of market. The buyer was motivated to invest in the property as the tenant was below market rent with a short term lease so there was a possibility to renegotiate. This transaction had a triple net investment tenant, generating a NOI of $66,255 and a cap rate of 6.31% | | <https://ahprd1cdn.csgpimgs.com/i2/usOwjLuaygM4oelzYGiEommQj1Hc4ttAL4OGdpgD4Ok/116/image.jpg> | Sherwin-Williams | $3,350,000 | $837.50 | 5.25% | Jan 9, 2024 | 1500 SE East Devils Lake Rd, Lincoln City, OR 97367 | 4,000 SF | 2023 | 172 | Seth Singerman sold this 4,000 square foot retail building to Carla Fillippone for $3,350,000 or $837.50 per square foot. All information in the comparable has been verified by the seller and buyer broker. | | <https://ahprd1cdn.csgpimgs.com/i2/Fc7EBw-SS_LTvORCAdxpooFQT_iGQNXnLcl1lhORAio/117/image.jpg> | Sherwin-Williams | $1,525,000 | $381.25 | 6.29% | Sep 15, 2023 | 5211 100th St SW, Lakewood, WA 98499 | 4,000 SF | 2015 | | | | [](https://ahprd1cdn.csgpimgs.com/i2/_R9-kRZbEtGmFby5ZDzrRy65-64GhjH8ZBtoe1HNXHc/117/image.jpg)<https://ahprd1cdn.csgpimgs.com/i2/_R9-kRZbEtGmFby5ZDzrRy65-64GhjH8ZBtoe1HNXHc/117/image.jpg> | Starbucks | $2,933,000 | $1,356.61 | 5.25% | May 19, 2025 | 903 Douglas Munroe Blvd, Cle Elum, WA 98922 | 2,162 SF | 2024 | | A private individual sold this 2,162 square foot retail building to the 2004 Diane E Pierson Revocable Trust for $2,933,000, or $1,356.61 per square foot. The property was a triple net lease to Starbucks at the time of sale. The property was on the market for five (5) months, with an initial asking price of $2,933,000. The property delivered in 2024. Starbucks began a 10 year NNN lease on 4/1/2024. The lease features 10% rental increases every five (5) years and four 5-year renewal options. The in-place net operating income for 2025 was reported to be $153,983, yielding an actual cap rate of 5.25%. | | [](https://ahprd1cdn.csgpimgs.com/i2/P8uveba9Epu3piwAHl2TfUIrxczO4_1GyC8UKQPr8aU/117/image.jpg)<https://ahprd1cdn.csgpimgs.com/i2/P8uveba9Epu3piwAHl2TfUIrxczO4_1GyC8UKQPr8aU/117/image.jpg> | Starbucks | $2,260,000 | $462.36 | 6% | Jan 3, 2025 | 500 Valley Mall Dr, Wenatchee, WA 98802 | 4,888 SF | 2000 | | A private individual sold this 4,888 square foot retail building to a private individual for $2,260,000 or $462.36 per square foot. 1031 Exchange | | [](https://ahprd1cdn.csgpimgs.com/i2/vJRdqBgV3GvSohAJA_iQqwBEz4kLeYf_NpvGl8Pc2RA/117/image.png><https://ahprd1cdn.csgpimgs.com/i2/vJRdqBgV3GvSohAJA_iQqwBEz4kLeYf_NpvGl8Pc2RA/117/image.png> | Starbucks | $3,187,500 | $1,242.69 | 4.86% | Dec 16, 2024 | 1895 Franklin Blvd, Eugene, OR 97403 | 2,565 SF | 2000, Renov 2016 | | A private individual sold this 2,565 square foot to another private individual for an undisclosed price. The property was fully leased to Starbucks on a triple net lease deal. The net operating income for 2024 was reported to be $155,182, yielding a 4.86% cap rate. The property was on the market for 103 days with the initial asking price of $3,450,000. The information in this comparable has been verified by listing broker. | | [](https://ahprd1cdn.csgpimgs.com/i2/iIUAUTDo8jZgNFRVM4n2GkXCARTSiB9Q8i2rDS_zA-I/116/image.jpg><https://ahprd1cdn.csgpimgs.com/i2/iIUAUTDo8jZgNFRVM4n2GkXCARTSiB9Q8i2rDS_zA-I/116/image.jpg> | Starbucks | $1,620,000 | $803.17 | 4.94% | Oct 23, 2020 | 1270 N Bayshore Dr, Coos Bay, OR 97420 ･ Coos Bay Village | 2,017 SF | 2020 | | | | [](https://ahprd1cdn.csgpimgs.com/i2/iIUAUTDo8jZgNFRVM4n2GkXCARTSiB9Q8i2rDS_zA-I/116/image.jpg><https://ahprd1cdn.csgpimgs.com/i2/iIUAUTDo8jZgNFRVM4n2GkXCARTSiB9Q8i2rDS_zA-I/116/image.jpg> | Starbucks | $1,500,000 | $743.68 | 5.34% | Nov 21, 2024 | 1270 N Bayshore Dr, Coos Bay, OR 97420 ･ Coos Bay Village | 2,017 SF | 2020 | | Gregory Drobot sold this 2,017 SF building to Stephanie Teazis for $1,500,000 or $743.68 per SF. The property was on the market for 4 months, with an initial asking price of $1,500,000. The in-place net operating income was reported to be $80,100, yielding an actual cap rate of 5.34%. | | [](https://ahprd1cdn.csgpimgs.com/i2/yZrdlm1eC73eaTGhZ_dkAekca7AgAMc8qESwBB2O_Xk/117/image.jpg><https://ahprd1cdn.csgpimgs.com/i2/yZrdlm1eC73eaTGhZ_dkAekca7AgAMc8qESwBB2O_Xk/117/image.jpg> | Starbucks | $1,700,000 | $971.43 | 5.25% | Nov 12, 2024 | 4700 Avery Ln SE, Lacey, WA 98503 | 1,750 SF | 2008 | | | | [](https://ahprd1cdn.csgpimgs.com/m2/nAfkjsUOwtOBB9SmSvDdFcrDOMPpd7oAQi7I7VYR-z204dXS0raCbcpy62FjqGyST4CZA8wzvc0UiB13P5ehNWQAz6pfkpsQAF_heKTL-NY/H180W270/image.jpg><https://ahprd1cdn.csgpimgs.com/m2/nAfkjsUOwtOBB9SmSvDdFcrDOMPpd7oAQi7I7VYR-z204dXS0raCbcpy62FjqGyST4CZA8wzvc0UiB13P5ehNWQAz6pfkpsQAF_heKTL-NY/H180W270/image.jpg> | Starbucks | $2,065,000 | $214.57 | 4.80% | Sep 18, 2019 | 2408 NW 9th St, Corvallis, OR 97330 | 9,624 SF | 1978, Renov 2019 | | Per correspondence with seller and public record, the 3,330 square foot retail building located at 2408 NW 9th St. Corvallis, OR 97330 sold in an investment sale for $2,065,000 on 9/18/19. Sale conditions include investment triple net. The property had a 4.8% cap rate at the time of sale and Starbucks is in the 1st year of a 10 year lease in the building. | | [](https://ahprd1cdn.csgpimgs.com/m2/nAfkjsUOwtOBB9SmSvDdFcrDOMPpd7oAQi7I7VYR-z204dXS0raCbcpy62FjqGyST4CZA8wzvc0UiB13P5ehNWQAz6pfkpsQAF_heKTL-NY/H180W270/image.jpg><https://ahprd1cdn.csgpimgs.com/m2/nAfkjsUOwtOBB9SmSvDdFcrDOMPpd7oAQi7I7VYR-z204dXS0raCbcpy62FjqGyST4CZA8wzvc0UiB13P5ehNWQAz6pfkpsQAF_heKTL-NY/H180W270/image.jpg> | Starbucks | $2,080,000 | $216.13 | 4.77% | Oct 31, 2024 | 2408 NW 9th St, Corvallis, OR 97330 | 9,624 SF | 1978, Renov 2019 | | | | [](https://ahprd1cdn.csgpimgs.com/i2/vPiPyDlp_nuqgin2yd6UbI4ww9QEXGzTPl1k0exK5qY/117/image.jpg><https://ahprd1cdn.csgpimgs.com/i2/vPiPyDlp_nuqgin2yd6UbI4ww9QEXGzTPl1k0exK5qY/117/image.jpg> | Starbucks | $1,700,000 | $850.00 | 5.89% | Jul 8, 2024 | 2372 W Main St, Medford, OR 97501  ･ Jackson Creek Center | 2,000 SF | 2020, Renovated 2021 | | 1031 exchange was a sale condition that effectd the price of the sale. The in-place net operating income was reported to be $100,000 yielding an actual cap rate of 5.89%. | | [](https://ahprd1cdn.csgpimgs.com/i2/7KcL7_yUNwMtah_6xHL49lG-8Bu9CTSXNub52PIzMY4/117/image.jpg><https://ahprd1cdn.csgpimgs.com/i2/7KcL7_yUNwMtah_6xHL49lG-8Bu9CTSXNub52PIzMY4/117/image.jpg> | Starbucks | $3,000,000 | $1,248.96 | 5.39% | Jun 27, 2024 | 9862 16th Ave SW, Seattle, WA 98106 | 2,402 SF | 2017 | | Multiple offers were secured for this new construction Starbucks with an eight year lease in place, allowing the property to go under contract for $60,000 above the asking price. | | [](https://ahprd1cdn.csgpimgs.com/i2/E4URprk3U8aQztG7v6zXryROZV0nUOtqehVLrIlKWSM/117/image.jpg><https://ahprd1cdn.csgpimgs.com/i2/E4URprk3U8aQztG7v6zXryROZV0nUOtqehVLrIlKWSM/117/image.jpg> | Starbucks | $2,015,000 | $305.30 | 5.31% | Jun 14, 2024 | 1250 Basin St SW, Ephrata, WA 98823 | 6,600 SF | 2022 | | A private entity sold this 6,600 SF retail building to another private entity for $2,015,000. The property was on the market for 159 days, with an initial asking price of $2,040,000. According to Marcus & Millichap press release, this property has eight and one-half years left on the lease term. The buyer exchanged from a management-intensive asset and increased their cash flow by 30%. | | [](https://ahprd1cdn.csgpimgs.com/i2/XPIvWCy35_cBpKUFG2xUA8swb4UckBFV-AyfSbxSx2I/117/image.jpg><https://ahprd1cdn.csgpimgs.com/i2/XPIvWCy35_cBpKUFG2xUA8swb4UckBFV-AyfSbxSx2I/117/image.jpg> | Starbucks | $2,590,000 | $1,210.28 | 5.41% | Apr 10, 2024 | 31330 S Highway 213, Molalla, OR 97038 | 2,140 SF | 2023 | | A private investeor sold this 2,140 SF retail building to a private investor for $2,590,000, or $1210.28 per SF. The property is 100% occupied wtht a triple net lease to Starbucks. The property was on market for five month, with an initial asking price of $2,620,000. The newly delivered Starbucks opened in November 2023 and has a ten year lease with 10% escalations every five years. The net operating income for 2024 was report to be $140,170, yielding an actual cap rate of 5.41%. | | [](https://ahprd1cdn.csgpimgs.com/i2/VbwpUQwSUhv-pHKnq2SiatQaFCccwMJjWxEmLh6pacE/117/image.png><https://ahprd1cdn.csgpimgs.com/i2/VbwpUQwSUhv-pHKnq2SiatQaFCccwMJjWxEmLh6pacE/117/image.png> | Starbucks | $3,100,000 | $457.02 | 5.99% | Dec 13, 2023 | 1925 N Wenatchee Ave, Wenatchee, WA 98801 | 6,783 SF | 2005 | | A private investor sold a 6,783 square foot retail building to private investors for $3,100,000 or $457 per square foot. The property was 100% occupied at the time of sale. The property was on the market from 10/4/2023 to 12/13/2023, with an initial asking price of $3,150,000. The reported 2023 NOI for the property was $185,7785, yielding a 5.99% cap rate. | | [](https://ahprd1cdn.csgpimgs.com/i2/MSzZxqILYoaXNa1FnAjwOZ5yt4DDvY94fLJX_x0F_Qg/117/image.jpg><https://ahprd1cdn.csgpimgs.com/i2/MSzZxqILYoaXNa1FnAjwOZ5yt4DDvY94fLJX_x0F_Qg/117/image.jpg> | Starbucks | $3,730,000 | $645.66 | 5.50% | Aug 11, 2023 | 3401 SE 192nd Ave, Vancouver, WA 98683  ･ Riverstone Marketplace | 5,777 SF | 2007 | | Killian Pacific sold this 5,777 SF general retail building to Bruce Kayser for $3,730,000, or $645.66 per SF. The property is zoned CC, and was fully leased at the time of sale. The class B building was constructed in 2007 and is situated on 0.91 acres of land. The property was on the market for around 2 months, with an initial asking price of $3,730,000. The in place net operating income for 2022 was reported to be $205,267, yielding an actual cap rate of 5.5%. |`;
+
+        // Function to parse the raw data string into a structured array of objects
+        function parseData(dataString) {
+            // Split into rows and clean up
+            const rows = dataString.trim().split('| |').map(row => row.trim());
+            
+            // Extract headers (first row)
+            const headers = rows[0].split('|').map(h => h.trim()).filter(h => h !== '');
+            
+            // Process property rows
+            const properties = [];
+            
+            for (let i = 1; i < rows.length; i++) {
+                const cells = rows[i].split('|').map(c => c.trim());
+                const property = {};
+                
+                // Extract image URL if available
+                const imgMatch = cells[0].match(/https?:\/\/[^\s<>\])]+/);
+                if (imgMatch) {
+                    property.IMG = imgMatch[0];
+                }
+                
+                // Map remaining cells to headers
+                for (let j = 1; j < headers.length && j < cells.length; j++) {
+                    property[headers[j]] = cells[j] || '';
+                }
+                
+                properties.push(property);
+            }
+            
+            return properties;
+        }
+
+        const properties = parseData(rawData);
+
+        // Group properties by tenant
+        const groupedProperties = properties.reduce((acc, property) => {
+            const tenant = property.Tenant;
+            if (!acc[tenant]) {
+                acc[tenant] = [];
+            }
+            acc[tenant].push(property);
+            return acc;
+        }, {});
+
+        // Function to render property details
+        function renderProperty(property) {
+            // Helper to safely get value and handle empty strings
+            const getDetail = (label, key) => property[key] && property[key].trim() !== '' ? `
+                <div class="detail-item">
+                    <span class="font-medium text-gray-700">${label}:</span>
+                    <span class="text-gray-600">${property[key]}</span>
+                </div>
+            ` : '';
+
+            return `
+            <div class="bg-white rounded-xl shadow-md overflow-hidden property-card mb-6">
+                <div class="md:flex">
+                    ${property.IMG ? `
+                        <div class="md:w-1/3">
+                            <img src="${property.IMG}" alt="${property.Tenant || 'Property'} Image"
+                                  class="w-full h-48 md:h-full object-cover cursor-pointer"
+                                  onclick="openModal('${property.IMG}')"
+                                 onerror="this.onerror=null;this.src='https://placehold.co/600x400/E0E7FF/4338CA?text=Image+Not+Found';">
+                        </div>
+                    ` : `
+                        <div class="md:w-1/3 bg-gray-200 flex items-center justify-center">
+                            <p class="text-gray-500">No Image Available</p>
+                        </div>
+                    `}
+                    <div class="p-6 md:w-2/3">
+                        <div class="flex justify-between items-start">
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">
+                                ${property.Tenant || 'Commercial Property'}
+                            </h3>
+                            ${property.Cap ? `
+                                <span class="bg-blue-100 text-blue-800 text-sm font-semibold px-3 py-1 rounded-full">
+                                    Cap: ${property.Cap}
+                                </span>
+                            ` : ''}
+                        </div>
+                                                
+                        ${property.Price ? `
+                            <p class="text-lg text-gray-700 font-semibold mb-3">${property.Price}</p>
+                        ` : ''}
+                                                
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                            ${getDetail('Address', 'Address')}
+                            ${getDetail('Building Size', 'Building Size')}
+                            ${getDetail('Year Built', 'Year Built')}
+                            ${getDetail('Price/SF', '$/SF')}
+                            ${getDetail('Sale Date', 'Date')}
+                            ${getDetail('Days On Market', 'Days On Market')}
+                        </div>
+                                                
+                        ${property.Notes ? `
+                            <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-md">
+                                <p class="text-sm font-medium text-blue-800">Notes:</p>
+                                <p class="text-sm text-blue-700 mt-1">${property.Notes}</p>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+            `;
+        }
+
+        // Render the grouped properties when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            const sherwinCompsContainer = document.getElementById('sherwin-comps');
+            const starbucksCompsContainer = document.getElementById('starbucks-comps');
+            
+            try {
+                // Render Sherwin-Williams comparables
+                if (groupedProperties['Sherwin-Williams'] && groupedProperties['Sherwin-Williams'].length > 0) {
+                    sherwinCompsContainer.innerHTML = groupedProperties['Sherwin-Williams']
+                        .map(property => renderProperty(property))
+                        .join('');
+                } else {
+                    sherwinCompsContainer.innerHTML = '<p class="text-gray-600">No Sherwin-Williams comparables available</p>';
+                }
+                
+                // Render Starbucks comparables
+                if (groupedProperties['Starbucks'] && groupedProperties['Starbucks'].length > 0) {
+                    starbucksCompsContainer.innerHTML = groupedProperties['Starbucks']
+                        .map(property => renderProperty(property))
+                        .join('');
+                } else {
+                    starbucksCompsContainer.innerHTML = '<p class="text-gray-600">No Starbucks comparables available</p>';
+                }
+            } catch (error) {
+                console.error('Error rendering comparables:', error);
+                sherwinCompsContainer.innerHTML = '<p class="text-red-500">Error loading comparables data</p>';
+                starbucksCompsContainer.innerHTML = '<p class="text-red-500">Error loading comparables data</p>';
+            }
+        });
+    </script>
+</body>
+</html>
