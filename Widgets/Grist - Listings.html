@@ -38,12 +38,12 @@
         .filter-floatbar {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 0.75rem;
             background: rgba(255,255,255,0.55);
             backdrop-filter: blur(5px);
             border-radius: 0.75rem;
             box-shadow: 0 4px 16px rgba(0,0,0,0.06);
-            padding: 1rem;
+            padding: 0.75rem;
             position: sticky;
             top: 1rem;
             z-index: 30;
@@ -63,7 +63,7 @@
             border-radius: 0.5rem;
             border: 1px solid #e2e8f0;
             background: #fff;
-            color: #1f2937;
+            color: #cee1fa;
             transition: all 0.2s;
         }
         .filter-select:focus {
@@ -72,23 +72,37 @@
             box-shadow: 0 0 0 1px #93c5fd;
         }
         .filter-reset-btn, .filter-order-btn {
-            padding: 0.5rem 1.25rem;
-            font-size: 0.95rem;
-            font-weight: 500;
+            padding: 0.5rem;
+            font-size: 1.2rem;
             border-radius: 0.5rem;
-            background: #334155;
+            background: #cee1fa;
             color: #fff;
             border: none;
             transition: background 0.2s;
-        }
-        .filter-reset-btn:hover, .filter-order-btn:hover {
-            background: #1f2937;
-        }
-        .filter-order-btn {
+            width: 38px;
+            height: 38px;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            justify-content: center;
+            line-height: 1;
         }
+        .filter-reset-btn:hover, .filter-order-btn:hover {
+            background: #89b7f3;
+        }
+        .filter-order-btn {
+          padding: 0.5rem;
+          font-size: 1rem;
+          border-radius: 0.5rem;
+          background: #cee1fa;
+          color: #fff;
+          border: none;
+          transition: background 0.2s;
+          width: 38px;
+          height: 38px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+      }
         #sort-dropdown-menu {
             position: absolute;
             left: 0;
@@ -111,31 +125,50 @@
             display: block;
         }
         /* --- Search Bar Styles (leftmost) --- */
+        /* Update the search container to use flex for alignment */
         .search-container {
             position: relative;
-            width: 210px;
-            min-width: 170px;
+            width: 180px;
+            min-width: 150px;
             flex: none;
-            margin-right: 0.5rem;
+            display: flex;
+            align-items: center; /* This centers the input vertically */
+            height: 38px; /* Match height of other components */
         }
+
+        /* Update the search bar to remove any margin/padding that might affect alignment */
         .search-bar {
             width: 100%;
-            padding: 8px 12px;
+            height: 38px; /* Explicit height matching other components */
+            padding: 0 0.75rem;
             font-size: 0.95rem;
-            border: 1px solid #d1d5db;
+            border: 1px solid #e2e8f0;
             border-radius: 0.5rem;
-            outline: none;
             background: #fff;
-            box-sizing: border-box;
-            transition: border-color 0.2s, box-shadow 0.2s;
+            color: #cee1fa;
+            transition: all 0.2s;
+            margin: 0; /* Remove any default margins */
+            line-height: normal; /* Prevent line height from affecting vertical alignment */
         }
-        .search-bar:focus {
-            border-color: #007bff;
-            box-shadow: 0 0 0 2px rgba(0,123,255,.11);
+
+        /* Ensure the status message doesn't affect the layout */
+        .status-message {
+            position: absolute;
+            bottom: -18px; /* Position below the search bar */
+            left: 0;
+            font-size: 12px;
+            color: #6b7280;
+            margin: 0;
+            padding: 0;
         }
+
+        /* Update suggestions container positioning */
         .suggestions {
-            list-style: none;
-            margin: 2px 0 0;
+            position: absolute;
+            top: 100%; /* Position below the search container */
+            left: 0;
+            right: 0;
+            margin-top: 2px;
             padding: 0; 
             border: 1px solid #d1d5db;
             border-radius: 0.5rem;
@@ -194,24 +227,23 @@
             </div>
             <div class="filter-group">
                 <button id="sort-dropdown-btn" type="button" class="filter-select flex justify-between items-center">
-                    <span id="sort-selected-label">Last Updated</span>
+                    <span id="sort-selected-label">Newest (Last Updated)</span>
                     <i data-lucide="chevron-down" class="lucide h-4 w-4"></i>
                 </button>
                 <div id="sort-dropdown-menu">
                     <ul>
-                        <li><button type="button" class="sort-option w-full px-4 py-2 text-left" data-sort="modified">Last Updated</button></li>
-                        <li><button type="button" class="sort-option w-full px-4 py-2 text-left" data-sort="created">Created</button></li>
+                        <li><button type="button" class="sort-option w-full px-4 py-2 text-left" data-sort="modified">Newest (Last Updated)</button></li>
+                        <li><button type="button" class="sort-option w-full px-4 py-2 text-left" data-sort="created">Newest (Created)</button></li>
                         <li><button type="button" class="sort-option w-full px-4 py-2 text-left" data-sort="date">Date Listed</button></li>
                         <li><button type="button" class="sort-option w-full px-4 py-2 text-left" data-sort="price">Price</button></li>
                     </ul>
                 </div>
             </div>
-            <button id="order-toggle-btn" type="button" class="filter-order-btn" title="Toggle Ascending/Descending">
-                <i id="order-toggle-icon" data-lucide="arrow-down" class="lucide h-4 w-4"></i>
-                <span id="order-toggle-label">Descending</span>
+            <button id="order-toggle-btn" type="button" class="filter-order-btn" title="Toggle Sort Order">
+                <span id="order-toggle-icon">⬇️</span>
             </button>
             <button id="reset-filters-button" type="button" class="filter-reset-btn">
-                Reset
+                🔄
             </button>
         </form>
         <div id="status-message" class="text-center text-slate-500">Loading widget...</div>
@@ -328,8 +360,8 @@
             order: 'desc', // 'asc' or 'desc'
         };
         const sortLabels = {
-            modified: 'Last Updated',
-            created: 'Created',
+            modified: 'Newest (Last Updated)',
+            created: 'Newest (Created)',
             date: 'Date Listed',
             price: 'Price',
         };
@@ -668,9 +700,8 @@
         });
         orderToggleBtn.addEventListener('click', () => {
             sortState.order = sortState.order === 'desc' ? 'asc' : 'desc';
-            orderToggleLabel.textContent = sortState.order === 'desc' ? 'Descending' : 'Ascending';
-            orderToggleIcon.setAttribute('data-lucide', sortState.order === 'desc' ? 'arrow-down' : 'arrow-up');
-            lucide.createIcons();
+            const toggleIcon = document.getElementById('order-toggle-icon');
+            toggleIcon.textContent = sortState.order === 'desc' ? '⬇️' : '⬆️';
             applyFiltersAndRender();
         });
         typeFilterSelect.addEventListener('change', applyFiltersAndRender);
