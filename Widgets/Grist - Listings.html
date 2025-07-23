@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Property Listings Widget</title>
+    <title>Property Listings Widget with Search</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -110,24 +110,83 @@
         #sort-dropdown-menu.show {
             display: block;
         }
+        /* --- Search Bar Styles (leftmost) --- */
+        .search-container {
+            position: relative;
+            width: 210px;
+            min-width: 170px;
+            flex: none;
+            margin-right: 0.5rem;
+        }
+        .search-bar {
+            width: 100%;
+            padding: 8px 12px;
+            font-size: 0.95rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            outline: none;
+            background: #fff;
+            box-sizing: border-box;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .search-bar:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0,123,255,.11);
+        }
+        .suggestions {
+            list-style: none;
+            margin: 2px 0 0;
+            padding: 0; 
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            background: #fff;
+            position: absolute;
+            width: 100%;
+            max-height: 170px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .suggestions li {
+            padding: 8px 12px;
+            font-size: 0.95rem;
+            cursor: pointer;
+        }
+        .suggestions li:hover {
+            background: #f0f0f0;
+        }
+        .status-message {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 2px;
+            text-align: left;
+            height: 16px;
+            line-height: 16px;
+        }
         @media (max-width: 640px) {
             .filter-floatbar {
                 flex-direction: column;
                 gap: 0.75rem;
                 padding: 0.75rem;
             }
-            .filter-select {
+            .search-container {
                 width: 100%;
-            }
-            .filter-reset-btn, .filter-order-btn {
-                width: 100%;
+                margin-right: 0;
+                margin-bottom: 0.5rem;
             }
         }
     </style>
 </head>
 <body class="bg-gradient-to-b from-sky-100 to-white min-h-screen">
     <div class="container mx-auto px-4 py-8">
-        <form id="filter-bar" class="filter-floatbar">
+        <form id="filter-bar" class="filter-floatbar" autocomplete="off">
+            <!-- Search (leftmost in bar) -->
+            <div class="search-container">
+                <input type="text" class="search-bar" id="property-search-bar" placeholder="Search..." autocomplete="off" disabled>
+                <ul class="suggestions" id="property-search-suggestions"></ul>
+                <div class="status-message" id="property-search-status"></div>
+            </div>
             <div class="filter-group">
                 <select id="type-filter" class="filter-select">
                     <option value="all">All Types</option>
@@ -238,6 +297,13 @@
     </template>
     <script type="module">
         let allRecords = [];
+        let filteredRecords = [];
+        let searchMatches = [];
+        let searchActive = false;
+        // Search settings
+        let searchColumnName = "Property_Name";
+        let isReady = false;
+
         const propertyGrid = document.getElementById('property-grid');
         const cardTemplate = document.getElementById('property-card-template');
         const statusMessage = document.getElementById('status-message');
@@ -252,6 +318,11 @@
         const orderToggleBtn = document.getElementById('order-toggle-btn');
         const orderToggleIcon = document.getElementById('order-toggle-icon');
         const orderToggleLabel = document.getElementById('order-toggle-label');
+        // Search DOM
+        const searchInput = document.getElementById('property-search-bar');
+        const suggestionsContainer = document.getElementById('property-search-suggestions');
+        const searchStatus = document.getElementById('property-search-status');
+
         let sortState = {
             sortBy: 'modified', // 'modified', 'created', 'date', 'price'
             order: 'desc', // 'asc' or 'desc'
@@ -476,14 +547,101 @@
             return sorted;
         }
         function applyFiltersAndRender() {
+            // If a search is active, filter by search results first
+            let baseRecords = searchActive ? searchMatches : allRecords;
             const typeFilterValue = typeFilterSelect.value;
-            let filteredRecords = [...allRecords];
+            let filtered = [...baseRecords];
             if (typeFilterValue !== 'all') {
-                filteredRecords = filteredRecords.filter(r => r.Property_Type === typeFilterValue);
+                filtered = filtered.filter(r => r.Property_Type === typeFilterValue);
             }
-            filteredRecords = sortRecords(filteredRecords);
-            renderProperties(filteredRecords);
+            filtered = sortRecords(filtered);
+            filteredRecords = filtered; // for search highlight etc.
+            renderProperties(filtered);
         }
+
+        // --- Search Bar Functionality ---
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+        function updateSuggestions(matches) {
+            suggestionsContainer.innerHTML = '';
+            if (!searchInput.value.trim()) {
+                suggestionsContainer.style.display = 'none';
+                searchStatus.textContent = '';
+                return;
+            }
+            if (matches.length > 0) {
+                suggestionsContainer.style.display = 'block';
+                searchStatus.textContent = '';
+                matches.slice(0, 8).forEach(r => {
+                    const li = document.createElement('li');
+                    li.textContent = r[searchColumnName];
+                    li.onclick = () => {
+                        searchInput.value = r[searchColumnName];
+                        suggestionsContainer.style.display = 'none';
+                        // Filter grid to only this property
+                        searchActive = true;
+                        searchMatches = [r];
+                        applyFiltersAndRender();
+                    };
+                    suggestionsContainer.appendChild(li);
+                });
+            } else {
+                suggestionsContainer.style.display = 'none';
+                searchStatus.textContent = 'No matches found.';
+            }
+        }
+        const handleSearch = debounce(() => {
+            if (!isReady) return;
+            const query = searchInput.value.trim().toLowerCase();
+            if (!query) {
+                searchActive = false;
+                searchMatches = [];
+                updateSuggestions([]);
+                applyFiltersAndRender();
+                return;
+            }
+            const matches = allRecords.filter(r => {
+                if (!r.hasOwnProperty(searchColumnName)) return false;
+                const val = r[searchColumnName];
+                return val && typeof val === 'string' && val.toLowerCase().includes(query);
+            });
+            searchActive = true;
+            searchMatches = matches;
+            updateSuggestions(matches);
+            applyFiltersAndRender();
+        }, 250);
+
+        searchInput.addEventListener('input', handleSearch);
+
+        // Clicking outside suggestions hides the dropdown
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.search-container')) {
+                suggestionsContainer.style.display = 'none';
+            }
+        });
+
+        // Reset search and filters
+        resetButton.addEventListener('click', () => {
+            typeFilterSelect.value = 'all';
+            sortState.sortBy = 'modified';
+            sortState.order = 'desc';
+            sortSelectedLabel.textContent = sortLabels['modified'];
+            orderToggleLabel.textContent = 'Descending';
+            orderToggleIcon.setAttribute('data-lucide', 'arrow-down');
+            searchInput.value = '';
+            searchActive = false;
+            searchMatches = [];
+            searchStatus.textContent = '';
+            suggestionsContainer.style.display = 'none';
+            lucide.createIcons();
+            applyFiltersAndRender();
+        });
+
         // Dropdown logic
         sortDropdownBtn.addEventListener('click', (e) => {
             e.preventDefault();
@@ -516,23 +674,29 @@
             applyFiltersAndRender();
         });
         typeFilterSelect.addEventListener('change', applyFiltersAndRender);
-        resetButton.addEventListener('click', () => {
-            typeFilterSelect.value = 'all';
-            sortState.sortBy = 'modified';
-            sortState.order = 'desc';
-            sortSelectedLabel.textContent = sortLabels['modified'];
-            orderToggleLabel.textContent = 'Descending';
-            orderToggleIcon.setAttribute('data-lucide', 'arrow-down');
-            lucide.createIcons();
-            applyFiltersAndRender();
-        });
+
         document.getElementById('modal-close-button').addEventListener('click', hideModal);
         document.getElementById('modal-backdrop').addEventListener('click', hideModal);
+
+        // --- Grist API and Bootstrapping ---
         grist.ready({ requiredAccess: 'read table' });
         grist.onRecords((records) => {
             allRecords = records;
+            isReady = true;
             populateTypeFilter(records);
+            searchInput.disabled = false;
+            // Set placeholder based on column
+            if (searchColumnName && searchColumnName !== 'Property_Name') {
+                searchInput.placeholder = `Search ${searchColumnName}...`;
+            }
             applyFiltersAndRender();
+        });
+        // Optional: support grist widget option for search column
+        grist.onOptions((options) => {
+            if (options && options.searchColumn) {
+                searchColumnName = options.searchColumn;
+                searchInput.placeholder = `Search ${searchColumnName}...`;
+            }
         });
     </script>
 </body>
