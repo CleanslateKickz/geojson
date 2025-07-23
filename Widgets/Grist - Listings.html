@@ -227,13 +227,13 @@
             </div>
             <div class="filter-group">
                 <button id="sort-dropdown-btn" type="button" class="filter-select flex justify-between items-center">
-                    <span id="sort-selected-label">Newest (Last Updated)</span>
+                    <span id="sort-selected-label">Last Updated</span>
                     <i data-lucide="chevron-down" class="lucide h-4 w-4"></i>
                 </button>
                 <div id="sort-dropdown-menu">
                     <ul>
-                        <li><button type="button" class="sort-option w-full px-4 py-2 text-left" data-sort="modified">Newest (Last Updated)</button></li>
-                        <li><button type="button" class="sort-option w-full px-4 py-2 text-left" data-sort="created">Newest (Created)</button></li>
+                        <li><button type="button" class="sort-option w-full px-4 py-2 text-left" data-sort="modified">Last Updated</button></li>
+                        <li><button type="button" class="sort-option w-full px-4 py-2 text-left" data-sort="created">Created</button></li>
                         <li><button type="button" class="sort-option w-full px-4 py-2 text-left" data-sort="date">Date Listed</button></li>
                         <li><button type="button" class="sort-option w-full px-4 py-2 text-left" data-sort="price">Price</button></li>
                     </ul>
@@ -360,8 +360,8 @@
             order: 'desc', // 'asc' or 'desc'
         };
         const sortLabels = {
-            modified: 'Newest (Last Updated)',
-            created: 'Newest (Created)',
+            modified: 'Last Updated',
+            created: 'Created',
             date: 'Date Listed',
             price: 'Price',
         };
