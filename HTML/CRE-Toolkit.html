@@ -382,6 +382,24 @@
             </div>
         </div>
         <div id="toast" class="toast">Copied!</div>
+            <!-- Google Maps Link Generator Widget -->
+            <div class="map-widget-card">
+              <h2><i class="fas fa-link"></i>Google Maps Embed Link Generator</h2>
+              <div class="input-group" style="margin-bottom:10px;">
+                <input type="text" id="gm-address" placeholder="Address (e.g. 14480 SW Jenkins Rd, Beaverton, OR 97076)">
+              </div>
+              <div class="coordinates">
+                <div class="coordinate-item">
+                  <input class="coordinate-value" id="gm-lat" placeholder="Latitude" style="background:transparent;border:none;min-width:80px;">
+                </div>
+                <div class="coordinate-item">
+                  <input class="coordinate-value" id="gm-lng" placeholder="Longitude" style="background:transparent;border:none;min-width:80px;">
+                </div>
+              </div>
+              <button class="convert-btn" style="margin-top:14px;" onclick="generateGMapEmbed()">Generate Embed Link</button>
+              <div class="result" id="gm-embed-link" style="margin-top:1em;word-break:break-all; cursor:pointer;" onclick="copyGMEmbedLink()" title="Click to copy embed link"></div>
+              <div id="gm-embed-preview" style="margin-top:10px;"></div>
+            </div>
     </div>
     <!-- TAB 2: Seller's Historical Analysis -->
     <div id="seller-analysis" class="tab-content">
@@ -712,6 +730,37 @@ function copyCoordinate(type) {
 document.getElementById('addressInput').addEventListener('keypress', (e) => {
   if (e.key === 'Enter') searchAddress();
 });
+// --- Google Maps Embed Link Generator ---
+function generateGMapEmbed() {
+  const addr = document.getElementById('gm-address').value.trim();
+  const lat = document.getElementById('gm-lat').value.trim();
+  const lng = document.getElementById('gm-lng').value.trim();
+  let embedDiv = document.getElementById('gm-embed-link');
+  let previewDiv = document.getElementById('gm-embed-preview');
+  let valid = true;
+  if (!addr || !lat || !lng || isNaN(Number(lat)) || isNaN(Number(lng))) {
+    embedDiv.innerHTML = "Enter valid address and coordinates.";
+    embedDiv.style.color = "red";
+    previewDiv.innerHTML = "";
+    return;
+  }
+  // URL encode address for embedding
+  const encodedAddr = encodeURIComponent(addr);
+  // Generate PB string for Google Maps embed (this is a best-effort generic construction)
+  // Example: https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2790.472614949362!2d-122.83166268441363!3d45.4838739790981!2m3!...
+  // We'll use zoom=16, no custom place id, standard embed
+  // The !2d is longitude, !3d is latitude
+  let link = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1000!2d${Number(lng)}!3d${Number(lat)}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2s${encodedAddr}!5e1!3m2!1sen!2sus!4v${Date.now()}`;
+  embedDiv.innerHTML = link;
+  embedDiv.style.color = '';
+  previewDiv.innerHTML = `<iframe src="${link}" width="100%" height="230" style="border:0;border-radius:8px;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`;
+}
+function copyGMEmbedLink() {
+  const link = document.getElementById('gm-embed-link').textContent;
+  if (link && link.startsWith('https://www.google.com/maps/embed?pb=')) {
+    navigator.clipboard.writeText(link).then(() => showToast("Embed link copied!"));
+  }
+}
 
 /* --- CRE Toolkit JS --- */
 const SUCCESS_GREEN = '#28a745';
