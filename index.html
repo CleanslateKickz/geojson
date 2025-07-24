@@ -5,224 +5,147 @@
   <title>CleanslateKickz GeoJSON & Real Estate Tools</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="Images/map.ico" type="image/x-icon">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
     body { background: #f9fafb; font-family: 'Inter', Arial, sans-serif; margin: 0; color: #222; }
-    .container { max-width: 1280px; margin: 0 auto; padding: 2.5rem 1.5rem; }
-    .search-bar {
-      max-width: 600px;
-      margin: 2rem auto 3rem;
-      text-align: center;
-    }
-    .search-bar input {
-      width: 100%;
-      padding: 0.75rem 1.25rem;
-      border: 1px solid #d1d5db;
-      border-radius: 9999px;
-      font-size: 1rem;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-      transition: all 0.2s ease;
-    }
-    .search-bar input:focus {
-      outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-    }
-    h1 {
-      text-align: center;
-      font-size: 2.5rem;
-      font-weight: 700;
-      color: #1e40af;
-      margin-bottom: 1.3rem;
-      letter-spacing: -0.5px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.75rem;
-    }
-    .sub { color: #555; font-size: 1.1rem; margin-bottom: 2em; text-align: center; }
-    .section-title {
-      font-size: 2rem;
-      color: #222;
-      font-weight: 600;
-      margin: 2.5em 0 1.2em 0;
-      display: flex;
-      align-items: center;
-      gap: 0.75em;
-      border-bottom: 1px solid #e5e7eb;
-      padding-bottom: 0.5rem;
-      justify-content: center;
-    }
-    .gallery {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-      gap: 2rem;
-      margin: 2.5rem 0 1rem 0;
-    }
-    .card {
-      position: relative;
-      border-radius: 18px;
-      overflow: hidden;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.07);
-      background: #fff;
-      min-height: 220px;
-      display: flex;
-      flex-direction: column;
-      transition: transform 0.25s cubic-bezier(.4,2,.6,1), box-shadow 0.25s cubic-bezier(.4,2,.6,1);
-    }
-    .card:hover {
-      transform: translateY(-8px) scale(1.025);
-      box-shadow: 0 8px 32px rgba(59,130,246,0.18), 0 2px 8px rgba(0,0,0,0.07);
-    }
-    .card-image {
-      width: 100%;
-      height: 170px;
-      object-fit: cover;
-      display: block;
-      transition: transform 0.32s cubic-bezier(.4,2,.6,1);
-      background: #e5e7eb;
-    }
-    .card:hover .card-image {
-      transform: scale(1.05);
-    }
-    .card-overlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(to top, rgba(30,41,59,0.66) 62%, rgba(0,0,0,0.05) 100%);
-      z-index: 1;
-      pointer-events: none;
-    }
-    .card-content {
-      position: absolute;
-      left: 0; right: 0; bottom: 0;
-      z-index: 2;
-      color: #fff;
-      padding: 1.3rem 1.5rem 1.1rem 1.5rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5em;
-      pointer-events: auto;
-    }
-    .card-title {
-      font-size: 1.32rem;
-      font-weight: 600;
-      line-height: 1.3;
-      margin-bottom: 0.18em;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.23);
-    }
-    .card-desc {
-      font-size: 1.04rem;
-      color: #e5e7eb;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 0.4em;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.23);
-    }
-    .card-link {
-      display: inline-block;
-      background: #3b82f6;
-      color: #fff;
-      padding: 0.54em 1.4em;
-      border-radius: 9999px;
-      text-decoration: none;
-      font-size: 1.07rem;
-      font-weight: 600;
-      transition: background 0.18s, transform 0.17s;
-      margin-top: 0.15em;
-      box-shadow: 0 2px 8px rgba(59,130,246,0.07);
-    }
-    .card-link:hover {
-      background: #2563eb;
-      transform: translateY(-1px) scale(1.03);
-    }
-    .loading { color: #A0AEC0; text-align: center; margin-top: 2em; font-size: 1.1em;}
-    .footer { text-align: center; margin: 4em 0 2em; color: #6b7280; font-size: 0.96em; border-top: 1px solid #e5e7eb; padding-top: 1rem;}
+    .container { max-width: 1200px; margin: 0 auto; padding: 2.5rem 1.5rem; }
+    h1 { text-align: center; font-size: 2.7rem; font-weight: 700; color: #1e40af; margin-bottom: 0.7em; letter-spacing: -0.5px; display: flex; align-items: center; justify-content: center; gap: 0.75rem; }
+    .sub { color: #555; font-size: 1.15rem; margin-bottom: 2em; text-align: center; }
+    .section-title { font-size: 1.3rem; color: #222; font-weight: 600; margin: 2.5em 0 1.2em 0; display: flex; align-items: center; gap: 0.75em; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.5rem; justify-content: center; }
+    .gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; margin: 2rem 0 1rem 0; }
+    .card { position: relative; border-radius: 18px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.07); background: #fff; min-height: 190px; display: flex; flex-direction: column; transition: transform 0.25s cubic-bezier(.4,2,.6,1), box-shadow 0.25s cubic-bezier(.4,2,.6,1);}
+    .card:hover { transform: translateY(-8px) scale(1.025); box-shadow: 0 8px 32px rgba(59,130,246,0.18), 0 2px 8px rgba(0,0,0,0.07);}
+    .card-image { width: 100%; height: 150px; object-fit: cover; display: block; background: #e5e7eb;}
+    .card-content { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; color: #fff; padding: 1.1rem 1.3rem 1rem 1.3rem; display: flex; flex-direction: column; gap: 0.5em;}
+    .card-title { font-size: 1.14rem; font-weight: 600; line-height: 1.3; margin-bottom: 0.18em; text-shadow: 0 1px 2px rgba(0,0,0,0.23);}
+    .card-desc { font-size: 0.94rem; color: #e5e7eb; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4em; text-shadow: 0 1px 2px rgba(0,0,0,0.23);}
+    .card-link { display: inline-block; background: #3b82f6; color: #fff; padding: 0.48em 1.25em; border-radius: 9999px; text-decoration: none; font-size: 0.99rem; font-weight: 600; transition: background 0.18s, transform 0.17s; margin-top: 0.15em;}
+    .card-link:hover { background: #2563eb; transform: translateY(-1px) scale(1.03);}
+    .footer { text-align: center; margin: 3em 0 2em; color: #6b7280; font-size: 0.96em; border-top: 1px solid #e5e7eb; padding-top: 1rem;}
     .footer a { color: #3b82f6; text-decoration: none; transition: color 0.2s;}
     .footer a:hover { color: #2563eb; }
-    @media (max-width: 1024px) {
-      h1 { font-size: 2rem; }
-      .section-title { font-size: 1.42rem; }
-      .gallery { gap: 1.3rem; }
-    }
-    @media (max-width: 700px) {
-      .container{padding:1.1rem 0.3rem;}
-      h1{font-size:1.4rem;}
-      .section-title{font-size:1.1rem;}
-      .gallery{grid-template-columns:1fr;gap:1.1rem;}
-      .card-image{height:120px;}
-    }
+    @media (max-width: 1024px) { h1 { font-size: 2rem; } .section-title { font-size: 1.05rem; } .gallery { gap: 1.3rem; } }
+    @media (max-width: 700px) { .container{padding:1.1rem 0.3rem;} h1{font-size:1.2rem;} .section-title{font-size:1rem;} .gallery{grid-template-columns:1fr;gap:1.1rem;} .card-image{height:90px;} }
+    .search-bar { max-width: 590px; margin: 2rem auto 2rem; text-align: center; }
+    .search-bar input { width: 100%; padding: 0.65rem 1rem; border: 1px solid #d1d5db; border-radius: 9999px; font-size: 1rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: all 0.2s ease;}
+    .search-bar input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.2);}
+    .geojson-list { margin: 1.2em 0 0.5em 0; padding: 0; list-style-type: none; }
+    .geojson-list li { margin-bottom: 0.3em;}
+    .geojson-list a { color: #2563eb; text-decoration: underline; font-weight: 500; }
+    .geojson-list a:hover { text-decoration: none; color: #1e40af;}
+    .file-list { margin: 0.2em 0 0.5em 0; padding: 0; list-style-type: none; }
+    .file-list li { margin-bottom: 0.2em;}
+    .file-list a { color: #2563eb; text-decoration: underline; font-weight: 500; }
+    .file-list a:hover { text-decoration: none; color: #1e40af;}
   </style>
 </head>
 <body>
   <div class="container">
     <h1><i class="fas fa-map-marked-alt"></i> CleanslateKickz GeoJSON & Real Estate Tools</h1>
-    <div class="sub">Your hub for interactive maps, widgets, and real estate dashboards.</div>
+    <div class="sub">Your hub for interactive maps, widgets, and real estate dashboards.<br>Explore by category or use search below.</div>
     <div class="search-bar">
       <input type="text" placeholder="Search projects and tools..." id="projectSearch">
     </div>
-    <div class="section-title"><i class="fas fa-globe"></i> Tools & Utilities</div>
-    <div id="tools-utilities" class="gallery"><div class="loading">Loading tools...</div></div>
-    <div class="section-title"><i class="fas fa-folder"></i> Additional HTML Projects</div>
-    <div id="additional-projects" class="gallery"><div class="loading">Loading projects...</div></div>
+    <!-- TOOLS & UTILITIES (HTML) -->
+    <div class="section-title"><i class="fas fa-wrench"></i> Tools & Utilities (HTML)</div>
+    <div id="tools-utilities" class="gallery"></div>
+    <!-- WIDGETS -->
     <div class="section-title"><i class="fas fa-puzzle-piece"></i> Widgets</div>
-    <div id="widgets" class="gallery"><div class="loading">Loading widgets...</div></div>
-    <div class="section-title"><i class="fas fa-newspaper"></i> RetailStat Newsletters</div>
-    <div class="gallery">
-      <div class="card">
-        <img class="card-image" src="https://via.placeholder.com/320x180?text=Newsletters+Archive" alt="RetailStat Newsletters"/>
-        <div class="card-overlay"></div>
-        <div class="card-content">
-          <div class="card-title">Newsletters Archive</div>
-          <div class="card-desc">Monthly and bi-monthly news</div>
-          <a class="card-link" href="retailstat/index.html">Open RetailStat Archive</a>
-        </div>
-      </div>
-      <div class="card">
-        <img class="card-image" src="https://via.placeholder.com/320x180?text=Latest+Newsletter" alt="Latest Newsletter"/>
-        <div class="card-overlay"></div>
-        <div class="card-content">
-          <div class="card-title">Latest Newsletter</div>
-          <div class="card-desc">Jump to the newest upload</div>
-          <a class="card-link" href="retailstat/June-17-2025.html">Open Latest Newsletter</a>
-        </div>
-      </div>
-    </div>
+    <div id="widgets" class="gallery"></div>
+    <!-- ADDITIONAL PROJECTS -->
+    <div class="section-title"><i class="fas fa-folder-open"></i> Additional HTML Projects</div>
+    <div id="additional-projects" class="gallery"></div>
+    <!-- GEOJSON FILES -->
     <div class="section-title"><i class="fas fa-database"></i> GeoJSON Files & Data</div>
-    <div class="gallery">
-      <div class="card">
-        <img class="card-image" src="https://via.placeholder.com/320x180?text=GeoJSON+Directory" alt="GeoJSON Directory"/>
-        <div class="card-overlay"></div>
-        <div class="card-content">
-          <div class="card-title">GeoJSON Directory</div>
-          <div class="card-desc">Browse GeoJSON files on GitHub</div>
-          <a class="card-link" href="https://github.com/CleanslateKickz/geojson/tree/main/geojson" target="_blank">Browse on GitHub</a>
-        </div>
-      </div>
-    </div>
+    <ul class="geojson-list">
+      <li><a href="geojson/April-11.geojson" target="_blank">April-11.geojson</a></li>
+      <li><a href="geojson/April.geojson" target="_blank">April.geojson</a></li>
+      <li><a href="geojson/June-Mid-wImages.geojson" target="_blank">June-Mid-wImages.geojson</a></li>
+      <li><a href="geojson/June.geojson" target="_blank">June.geojson</a></li>
+      <li><a href="geojson/May-2025.geojson" target="_blank">May-2025.geojson</a></li>
+      <li><a href="geojson/May-Mid.geojson" target="_blank">May-Mid.geojson</a></li>
+      <li><a href="geojson/US-Counties.geojson" target="_blank">US-Counties.geojson</a></li>
+      <li><a href="geojson/US-States-County.geojson" target="_blank">US-States-County.geojson</a></li>
+      <li><a href="geojson/US-States.geojson" target="_blank">US-States.geojson</a></li>
+    </ul>
+    <!-- RETAILSTAT NEWSLETTERS -->
+    <div class="section-title"><i class="fas fa-newspaper"></i> RetailStat Newsletters</div>
+    <ul class="file-list">
+      <li><a href="retailstat/June-17-2025.html" target="_blank">June 17, 2025 Newsletter</a></li>
+      <li><a href="retailstat/July-1-2025.html" target="_blank">July 1, 2025 Newsletter</a></li>
+      <li><a href="retailstat/July-8-2025.html" target="_blank">July 8, 2025 Newsletter</a></li>
+      <li><a href="retailstat/index.html" target="_blank">RetailStat Archive</a></li>
+      <li><a href="retailstat/M&A Activity Update - June 17.pdf" target="_blank">M&A Activity Update (PDF)</a></li>
+      <li><a href="retailstat/Retail Outlook - 2H25 Update.pdf" target="_blank">Retail Outlook 2H25 (PDF)</a></li>
+      <li><a href="retailstat/RetailStat Q2 Restaurant Sales Data.pdf" target="_blank">Q2 Restaurant Sales Data (PDF)</a></li>
+    </ul>
+    <!-- TENANTS DIRECTORY -->
+    <div class="section-title"><i class="fas fa-building"></i> Tenants Directory</div>
+    <ul class="file-list">
+      <li><a href="Tenants/index.html" target="_blank">Tenants Home</a></li>
+      <li><a href="HTML/Tenant-Locations/Tim Hortons.html" target="_blank">Tim Hortons Locations</a></li>
+    </ul>
+    <!-- IMAGES GALLERY -->
+    <div class="section-title"><i class="fas fa-images"></i> Image Gallery</div>
+    <ul class="file-list">
+      <li><a href="images.html" target="_blank">Browse All Images</a></li>
+    </ul>
   </div>
   <div class="footer">
     &copy; 2025 <a href="https://github.com/CleanslateKickz" target="_blank">CleanslateKickz</a>
     &mdash; <a href="https://github.com/CleanslateKickz/geojson" target="_blank"><i class="fab fa-github"></i> Repo</a>
   </div>
   <script>
-    // Mapping for images, alt, desc, button for HTML/Widgets (customize as needed)
+    // Image map for visual cards (for HTML/Widgets)
     const htmlImageMap = {
-      // Example:
-      // "Big-Beautiful-Bill": {img:"Images/Big-Beautiful-Bill.png", alt:"Big Beautiful Bill", desc:"Project description", btn:"Open Project"},
-      // Add more custom mappings here if you want to override the auto-detect
+      "Big-Beautiful-Bill": {img:"Images/Big-Beautiful-Bill.png", alt:"Big Beautiful Bill", desc:"Billboard visualization tool", btn:"Open"},
+      "CRE-Toolkit": {img:"Images/CRE-Toolkit.png", alt:"CRE Toolkit", desc:"Commercial Real Estate Toolkit", btn:"Open"},
+      "Day Care Property Investment Analysis": {img:"Images/Day Care Property Investment Analysis.png", alt:"Day Care Property Investment", desc:"Day Care Investment Calculator", btn:"Open"},
+      "Grove-Plaza": {img:"Images/Grove-Plaza.png", alt:"Grove Plaza", desc:"Map & stats dashboard", btn:"Open"},
+      "Sherwin-Williams": {img:"Images/Sherwin-Williams.png", alt:"Sherwin-Williams", desc:"Sherwin Williams Market Explorer", btn:"Open"},
+      "SW-Comps": {img:"Images/SW-Comps.png", alt:"SW Comps", desc:"Sherwin Williams Comparable Sales", btn:"Open"},
+      "The AI Resilience Formula": {img:"Images/The AI Resilience Formula.png", alt:"AI Resilience Formula", desc:"AI resilience analysis", btn:"Open"},
+      "US-County-Statistics": {img:"Images/US-County-Statistics.png", alt:"US County Statistics", desc:"County stats dashboard", btn:"Open"},
+      "Base Layers": {img:"Images/Base Layers.png", alt:"Base Layers", desc:"Map base layers", btn:"Open"},
+      "On-Markets-Mobile": {img:"Images/On-Markets-Mobile.png", alt:"On Markets Mobile", desc:"Mobile dashboard", btn:"Open"},
+      "Oregon vs. Washington": {img:"Images/Oregon vs. Washington.png", alt:"OR vs WA", desc:"OR/WA Market Comparison", btn:"Open"},
+      "Sherwin-Deepsite": {img:"Images/Sherwin-Deepsite.png", alt:"Sherwin Deepsite", desc:"Sherwin Deepsite Tool", btn:"Open"},
+      "Claude-OR-1031": {img:"Images/Claude-OR-1031.png", alt:"Claude OR 1031", desc:"1031 Exchange Analysis", btn:"Open"},
+      "GPT-1031-(1)": {img:"Images/GPT-1031-(1).png", alt:"GPT 1031 1", desc:"GPT-1031 Exchange Tool", btn:"Open"},
+      "GPT-1031-(2)": {img:"Images/GPT-1031-(2).png", alt:"GPT 1031 2", desc:"GPT-1031 Exchange Tool", btn:"Open"},
+      "OR-Contractors": {img:"Images/OR-Contractors.png", alt:"OR Contractors", desc:"OR Contractors Directory", btn:"Open"},
+      "CommercialToolkit": {img:"Images/CommercialToolkit.png", alt:"Commercial Toolkit", desc:"Commercial Real Estate Utility", btn:"Open"},
+      "CRE-Resources": {img:"Images/CRE-Resources.png", alt:"CRE Resources", desc:"CRE Resource Directory", btn:"Open"},
+      "Modern CRM Research": {img:"Images/Modern CRM Research.png", alt:"Modern CRM Research", desc:"CRM dashboard", btn:"Open"},
+      "Tim Hortons": {img:"Images/Tim Hortons.png", alt:"Tim Hortons", desc:"Tenants: Tim Hortons", btn:"Open"},
+      "PrivateEye Search Tool": {img:"Images/PrivateEye Search Tool.png", alt:"PrivateEye Search Tool", desc:"Ownership search tool", btn:"Open"},
+      "Sale-Comps-Grist": {img:"Images/Sale-Comps-Grist.png", alt:"Sale Comps Grist", desc:"Sales comparables", btn:"Open"},
+      "OwnerProperties": {img:"Images/OwnerProperties.png", alt:"Owner Properties", desc:"Ownership dashboard", btn:"Open"},
+      "Centers": {img:"Images/Directory.png", alt:"Centers", desc:"Centers directory", btn:"Open"},
+      "Calculator": {img:"Images/Calculator1.png", alt:"Calculator", desc:"Investment Calculator", btn:"Open"},
+      "TenantMap": {img:"Images/map.png", alt:"Tenant Map", desc:"Map of tenants", btn:"Open"},
+      "TenantMapCities": {img:"Images/map.png", alt:"Tenant Map Cities", desc:"City-level tenant map", btn:"Open"},
+      "Grist - Listings": {img:"Images/Grist - Listings.png", alt:"Grist Listings", desc:"Grist property listings", btn:"Open"}
     };
     const widgetsImageMap = {
-      // Custom mappings for widgets, if needed
+      "PivotTable": {img:"Images/list.png", alt:"Pivot Table", desc:"Pivot Table Widget", btn:"Open"},
+      "MapWidget": {img:"Images/map.png", alt:"Map Widget", desc:"National Map Widget", btn:"Open"},
+      "PrivateEye-Embed": {img:"Images/PrivateEye-embed.png", alt:"PrivateEye Embed", desc:"Embed Ownership Tool", btn:"Open"},
+      "Centers-Embed": {img:"Images/Directory.png", alt:"Centers Embed", desc:"Embed Centers Directory", btn:"Open"},
+      "Grist - Listings Embed": {img:"Images/Grist - Listings.png", alt:"Grist Listings Embed", desc:"Embed Grist Listings", btn:"Open"},
+      "batch-emailing": {img:"Images/Calculator1.png", alt:"Batch Emailing", desc:"Batch Email Widget", btn:"Open"},
+      "drop-down-widget": {img:"Images/list.png", alt:"Dropdown Widget", desc:"Dropdown select widget", btn:"Open"},
+      "multi-table-editor": {img:"Images/list.png", alt:"Multi Table Editor", desc:"Multi-table editor widget", btn:"Open"},
+      "stock-monitor": {img:"Images/Retail Outlook 2H25 Update.png", alt:"Stock Monitor", desc:"Stock monitor widget", btn:"Open"},
+      "Messages": {img:"Images/Images Gallery.png", alt:"Messages Widget", desc:"SMS/Message widget", btn:"Open"},
+      "National-Map": {img:"Images/map.png", alt:"National Map", desc:"National county map", btn:"Open"}
     };
 
     // Fallback image
-    const FALLBACK_IMG = "https://via.placeholder.com/320x180?text=Project";
-    // Try .png, then .jpg, then fallback
+    const FALLBACK_IMG = "https://via.placeholder.com/320x160?text=Project";
     function getAutoImg(base) {
       const png = `Images/${base}.png`;
-      const jpg = `Images/${base}.jpg`;
-      // We'll use PNG by default, and rely on <img onerror> for fallback.
       return png;
     }
     function getImgObj(map, filePath, fallbackBtn) {
@@ -230,16 +153,15 @@
       if (map[filePath]) return map[filePath];
       const base = filePath.split(/[\\/]/).pop();
       if (map[base]) return map[base];
-      // Auto-detect image (PNG, fallback to placeholder via onerror)
       return {
         img: getAutoImg(base),
-        alt: base.replace(/-/g," "),
+        alt: base.replace(/[-_]/g," "),
         desc: "",
         btn: fallbackBtn
       };
     }
 
-    // Fetch top-level HTML files and subfolder HTML files separately
+    // Fetch top-level HTML files and subfolder HTML files
     async function fetchTopAndSubfolderHtml(apiPath, subfolder) {
       const url = `https://api.github.com/repos/CleanslateKickz/geojson/contents/${apiPath}`;
       try {
@@ -251,7 +173,6 @@
           if (item.type === "file" && /\.html?$/i.test(item.name)) {
             topLevel.push({ name: item.name, path: `${subfolder}/${item.name}` });
           } else if (item.type === "dir") {
-            // Recursively fetch files in subfolder
             const subfiles = await fetchAllHtmlInSubfolders(`${apiPath}/${item.name}`, `${subfolder}/${item.name}`);
             subfolderFiles = subfolderFiles.concat(subfiles);
           }
@@ -259,7 +180,6 @@
         return {topLevel, subfolderFiles};
       } catch (e) { return {topLevel:[], subfolderFiles:[]}; }
     }
-    // Recursively fetch all HTML files in subfolders (not top-level)
     async function fetchAllHtmlInSubfolders(apiPath, subfolder) {
       const url = `https://api.github.com/repos/CleanslateKickz/geojson/contents/${apiPath}`;
       try {
@@ -311,8 +231,7 @@
         gallery.innerHTML += `
           <div class="card">
             <img class="card-image" src="${imgObj.img}" alt="${imgObj.alt}"
-                 onerror="this.onerror=null;this.src='https://via.placeholder.com/320x180?text=Project';">
-            <div class="card-overlay"></div>
+                 onerror="this.onerror=null;this.src='${FALLBACK_IMG}';">
             <div class="card-content">
               <div class="card-title">${imgObj.alt || f.name.replace(/\.html?$/,'')}</div>
               <div class="card-desc">${imgObj.desc || ""}</div>
@@ -332,7 +251,7 @@
       showCards(widgets, "widgets", widgetsImageMap, "Open Widget");
     })();
 
-    // Search functionality
+    // Search filter
     document.getElementById('projectSearch').addEventListener('input', function(e) {
       const searchTerm = e.target.value.toLowerCase();
       const cards = document.querySelectorAll('.card');
