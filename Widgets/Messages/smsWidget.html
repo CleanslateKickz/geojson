@@ -45,6 +45,11 @@
             margin-bottom: 20px;
             flex-shrink: 0;
         }
+        #tab-bar .swap-btn {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
         .header h2 {
             margin: 0;
             font-size: 1.25rem;
@@ -197,6 +202,10 @@
 </head>
 <body>
     <div id="widget-container">
+        <div id="tab-bar" style="display: flex; gap: 8px; margin-bottom: 16px;">
+          <button id="tab-sms" class="swap-btn active">SMS</button>
+          <button id="tab-privateeye" class="swap-btn">PrivateEye</button>
+        </div>
         <div id="no-record" class="info-box">
             <p>Please select a row in the Owners table to begin.</p>
         </div>
@@ -258,6 +267,13 @@
                 <button id="copy-btn" class="copy-btn">Copy to clipboard</button>
                 <span id="copy-msg" class="copy-msg" style="display:none;">Copied!</span>
             </div>
+        </div>
+        <div id="privateeye-wrapper" style="display: none; flex: 1;">
+          <iframe
+            id="privateeye-frame"
+            src="PrivateEye.html"
+            style="width: 100%; height: 100%; border: none; border-radius: 8px;"
+          ></iframe>
         </div>
     </div>
     <script>
@@ -428,6 +444,23 @@
                 }
                 renderAll();
             });
+        });
+        const tabSMS = document.getElementById('tab-sms');
+        const tabPrivateEye = document.getElementById('tab-privateeye');
+        const privateEyeWrapper = document.getElementById('privateeye-wrapper');
+        
+        tabSMS.addEventListener('click', () => {
+            tabSMS.classList.add('active');
+            tabPrivateEye.classList.remove('active');
+            ELS.mainContentDiv.style.display = 'block';
+            privateEyeWrapper.style.display = 'none';
+        });
+        
+        tabPrivateEye.addEventListener('click', () => {
+            tabSMS.classList.remove('active');
+            tabPrivateEye.classList.add('active');
+            ELS.mainContentDiv.style.display = 'none';
+            privateEyeWrapper.style.display = 'flex';
         });
     </script>
 </body>
