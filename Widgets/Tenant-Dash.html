@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Single Tenant Dashboard</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Required Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- Base Styles --- */
+        html, body { height: 100%; margin: 0; padding: 0; box-sizing: border-box; overflow: hidden; }
+        body { font-family: 'Nunito', sans-serif; background-color: #f9fafb; display: flex; flex-direction: column; }
+
+        /* --- Tabs --- */
+        .tab-container { display: flex; border-bottom: 2px solid #ddd; background-color: #fff; padding: 0 20px; flex-shrink: 0; flex-wrap: wrap; }
+        .tab-button { padding: 10px 18px; border: none; background-color: #f4f6f8; color: #666; cursor: pointer; border-top-left-radius: 6px; border-top-right-radius: 6px; font-size: 0.9em; font-weight: 600; transition: background-color 0.3s, color: 0.3s; margin-right: 4px; border: 1px solid #eee; border-bottom: none; margin-top: 5px; position: relative; bottom: -2px; white-space: nowrap; }
+        .tab-button.active { background-color: #fff; color: #333; border-bottom: 2px solid white; }
+        .tab-button:hover { background-color: #e9ecef; }
+
+        /* --- Content Area --- */
+        .tab-content-wrapper { flex-grow: 1; overflow-y: auto; padding: 20px; background-color: #f9fafb; min-height: 0; position: relative; }
+        .tab-content { display: none; height: 100%; box-sizing: border-box; }
+        .tab-content.active { display: flex; flex-direction: column; height: 100%; }
+
+        /* --- Chart & Map Containers --- */
+        .chart-container { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05); display: flex; flex-direction: column; justify-content: flex-start; overflow: hidden; flex-grow: 1; min-height: 300px; }
+        #mapContainer { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05); display: flex; flex-direction: column; justify-content: flex-start; overflow: hidden; flex-shrink: 0; min-height: 350px; }
+        #cityChartContainer { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05); display: flex; flex-direction: column; justify-content: flex-start; overflow: hidden; margin-top: 20px; flex-shrink: 0; min-height: 300px; }
+
+        /* Space Distribution (SF) Container */
+        #spaceChartContainer { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05); display: flex; flex-direction: column; justify-content: flex-start; overflow: hidden; margin-top: 20px; flex-shrink: 0; min-height: 300px; }
+
+        /* Property Type Distribution Container */
+        #propertyTypeContainer { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05); display: flex; flex-direction: column; justify-content: flex-start; overflow: hidden; margin-top: 20px; flex-shrink: 0; min-height: 300px; }
+
+        .chart-title { color: #333; margin-bottom: 15px; font-size: 1.3em; font-weight: 700; text-align: center; flex-shrink: 0; }
+        .canvas-wrapper { flex-grow: 1; position: relative; min-height: 200px; display: flex; align-items: center; justify-content: center; }
+        canvas { display: none; max-width: 100%; max-height: 100%; }
+        canvas.visible { display: block; }
+
+        /* --- Map Specific --- */
+        #map { height: 100%; width: 100%; border-radius: 10px; flex-grow: 1; visibility: hidden; }
+        #map.visible { visibility: visible; }
+
+        /* --- No Data Message --- */
+        .no-data-message { text-align: center; color: #888; font-style: italic; padding: 40px 20px; display: none; flex-grow: 1; align-items: center; justify-content: center; min-height: 100px; }
+
+        /* --- Owners List Specific --- */
+        #ownerListContainer { background: white; border-radius: 15px; padding: 15px 25px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05); overflow: hidden; display: none; flex-direction: column; flex-grow: 1; min-height: 0; }
+        #ownerListContainer.visible { display: flex; }
+        .owner-list-header { display: flex; padding: 10px 0; margin-bottom: 10px; border-bottom: 2px solid #eee; font-weight: 700; color: #555; font-size: 0.9em; flex-shrink: 0; }
+        #ownerListContent { flex-grow: 1; overflow-y: auto; display: none; }
+        #ownerListContent.visible { display: block; }
+        .owner-list-item { display: flex; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.95em; }
+        .owner-list-item:last-child { border-bottom: none; }
+        /* ** ADJUSTED FLEX VALUES FOR 3 COLUMNS ** */
+        .owner-col-name { flex: 2 1 200px; padding-right: 15px; font-weight: 600; color: #333; word-break: break-word; } /* More space for name */
+        .owner-col-contact { flex: 1.5 1 150px; padding-right: 15px; color: #555; word-break: break-word; } /* Reasonable space for contact */
+        .owner-col-lastattempt { flex: 1 1 120px; color: #777; } /* Space for date */
+    </style>
+    </head>
+    <body>
+        <!-- Tab Buttons -->
+        <div class="tab-container">
+            <button class="tab-button active" data-tab="classifyTab">Classification</button>
+            <button class="tab-button" data-tab="mapTab">Map & Cities</button>
+            <button class="tab-button" data-tab="ownersTab">Never</button>
+        </div>
+
+        <!-- Tab Content Area -->
+        <div class="tab-content-wrapper">
+            <!-- Classification Tab -->
+            <div id="classifyTab" class="tab-content active">
+                <div class="chart-container">
+                    <h3 class="chart-title" id="classifyTitle">Ownership Classification</h3>
+                    <div class="canvas-wrapper">
+                        <canvas id="classifyChart"></canvas>
+                        <div class="no-data-message" id="classify-no-data">Select a tenant to view classification data.</div>
+                    </div>
+                </div>
+                <!-- Property Type Distribution -->
+                <div id="propertyTypeContainer">
+                    <h3 class="chart-title" id="propertyTypeTitle">Property Type Distribution</h3>
+                    <div class="canvas-wrapper">
+                        <canvas id="propertyTypeChart"></canvas>
+                        <div class="no-data-message" id="propertyType-no-data">Select a tenant to view property type data.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Map & Cities Tab -->
+            <div id="mapTab" class="tab-content">
+                <div id="mapContainer">
+                    <h3 class="chart-title" id="mapTitle">Location Map</h3>
+                    <div id="map"></div>
+                    <div class="no-data-message" id="map-no-data">Select a tenant to view locations on map.</div>
+                </div>
+                <div id="cityChartContainer">
+                    <h3 class="chart-title" id="cityTitle">Locations by City (Top 10)</h3>
+                    <div class="canvas-wrapper">
+                        <canvas id="cityChart"></canvas>
+                        <div class="no-data-message" id="city-no-data">Select a tenant to view city data.</div>
+                    </div>
+                </div>
+                <!-- Space Distribution (SF) -->
+                <div id="spaceChartContainer">
+                    <h3 class="chart-title" id="spaceTitle">Space Distribution (SF)</h3>
+                    <div class="canvas-wrapper">
+                        <canvas id="spaceChart"></canvas>
+                        <div class="no-data-message" id="space-no-data">Select a tenant to view space data.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Owners Tab -->
+           <!-- Owners Tab -->
+                    <div id="ownersTab" class="tab-content">
+                        <div id="ownerListContainer">
+                            <h3 class="chart-title" id="ownersTitle">Never Contacted Owners</h3>
+                            <!-- ** UPDATED HEADER TEXT ** -->
+                            <div class="owner-list-header">
+                                <div class="owner-col-name">Owner Name</div>
+                                <div class="owner-col-contact">Contact Info</div>
+                                <div class="owner-col-lastattempt">Date</div> <!-- Changed Header -->
+                            </div>
+                            <div id="ownerListContent"></div>
+                             <div class="no-data-message" id="owners-no-data">Select a tenant to view owner data.</div>
+                        </div>
+            </div>
+        </div>
+
+        <script>
+            console.log("Widget script started.");
+
+            let classifyChart, cityChart, map, spaceChart, propertyTypeChart;
+            let currentMapMarkers = [];
+            let currentTenantName = null;
+
+            // --- Color Definitions ---
+            const classificationColors = {
+                "Not Interested/DNC": "#FF5252", // red
+                "IPA": "#9C27B0",                // violet
+                "Eric": "#FF9800",               // orange
+                "Broker/Eh": "#9E9E9E",          // grey
+                "Never": "#2196F3",              // blue
+                "Call Relationship": "#FFEB3B",  // yellow
+                "Contact": "#4CAF50",            // green
+                "Call Again": "#92d694",         // light green
+                "Unknown": "#B0BEC5"             // blue-grey for null/undefined/other
+            };
+            const generalChartColors = ['#42a5f5', '#66bb6a', '#ffa726', '#ab47bc', '#ef5350', '#26c6da'];
+
+            // --- Helper Functions ---
+            function showHideContent(contentElementId, noDataElementId, hasData) {
+                const contentEl = document.getElementById(contentElementId);
+                const noDataEl = document.getElementById(noDataElementId);
+                if (!noDataEl) { console.warn(`No-data element not found: \${noDataElementId}`); return; }
+
+                let containerEl = null;
+                let contentType = 'unknown';
+
+                if (contentElementId === 'ownerListContent') {
+                    contentType = 'list';
+                    containerEl = document.getElementById('ownerListContainer');
+                } else if (contentEl && contentEl.tagName === 'CANVAS') {
+                    contentType = 'canvas';
+                    containerEl = contentEl.closest('.canvas-wrapper');
+                } else if (contentElementId === 'map') {
+                    contentType = 'map';
+                    containerEl = document.getElementById('mapContainer');
+                } else if (contentElementId === 'spaceChart') {
+                    contentType = 'chart';
+                    containerEl = document.getElementById('spaceChartContainer');
+                }  else if (contentElementId === 'propertyTypeChart') {
+                    contentType = 'chart';
+                    containerEl = document.getElementById('propertyTypeContainer');
+                }
+
+                // --- Logic ---
+                if (contentType === 'canvas' && containerEl) {
+                    containerEl.style.display = 'flex'; // Keep wrapper visible
+                    noDataEl.style.display = hasData ? 'none' : 'flex';
+                    contentEl.classList.toggle('visible', hasData); // Toggle canvas visibility
+                } else if (contentType === 'map' && containerEl) {
+                    containerEl.style.display = 'flex';
+                    noDataEl.style.display = hasData ? 'none' : 'flex';
+                    if (contentEl) contentEl.classList.toggle('visible', hasData);
+                } else if (contentType === 'list' && containerEl) {
+                    containerEl.classList.add('visible'); // Make container visible
+                    noDataEl.style.display = hasData ? 'none' : 'flex';
+                    const listContent = document.getElementById('ownerListContent');
+                    if (listContent) listContent.classList.toggle('visible', hasData); // Toggle content visibility
+                } else if (contentType === 'chart' && containerEl) {
+                    containerEl.style.display = 'flex';
+                    noDataEl.style.display = hasData ? 'none' : 'flex';
+                    contentEl.classList.toggle('visible', hasData);
+                } else {
+                    // Fallback for initial state or errors
+                    if (noDataEl) noDataEl.style.display = 'flex';
+                    if (contentEl && contentEl.tagName === 'CANVAS') contentEl.classList.remove('visible');
+                    if (contentEl && contentEl.id === 'map') contentEl.classList.remove('visible');
+                    if (contentElementId === 'ownerListContent') {
+                        const ownerContainer = document.getElementById('ownerListContainer');
+                        if (ownerContainer) ownerContainer.classList.add('visible'); // Show container for no-data message
+                        if (contentEl) contentEl.classList.remove('visible');
+                    }
+                }
+            }
+
+            function formatGristDate(timestamp, defaultValue = 'N/A') {
+                if (typeof timestamp !== 'number' || timestamp <= 0) {
+                    return defaultValue;
+                }
+                // Grist timestamps are seconds since epoch, JS Date needs milliseconds
+                try {
+                    const date = new Date(timestamp * 1000);
+                    // Basic formatting M/D/YYYY
+                    return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+                } catch (e) {
+                    console.error("Error formatting date timestamp:", timestamp, e);
+                    return defaultValue;
+                }
+            }
+
+            function getFieldValue(record, fieldName, defaultValue = 'Unknown') {
+                if (!record) return defaultValue;
+                const source = record.fields || record;
+                if (source && typeof source === 'object' && fieldName in source) {
+                    let value = source[fieldName];
+
+                    // Handle Grist special types if necessary (e.g., Date represented as ['D', timestamp])
+                    if (Array.isArray(value) && value.length === 2) {
+                        if (value[0] === 'R') { // Reference
+                            value = value[1];
+                        } else if (value[0] === 'D') { // Date or DateTime
+                            value = value[1]; // Extract the timestamp
+                        }
+                        // Add other types like 'L' for Reference List if needed
+                    }
+
+                    // Check for null/undefined/empty string after potential extraction
+                    if (value === null || value === undefined || value === '') {
+                        return defaultValue;
+                    }
+                    return value;
+                }
+                return defaultValue;
+            }
+
+            const countValues = (records, field) => {
+                if (!records || records.length === 0) return {};
+                return records.reduce((acc, record) => {
+                    const value = getFieldValue(record, field);
+                    acc[value] = (acc[value] || 0) + 1;
+                    return acc;
+                }, {});
+            };
+
+            function updateTitles(tenantName) {
+                const defaultClassify = "Ownership Classification";
+                const defaultMap = "Location Map";
+                const defaultCity = "Locations by City (Top 10)";
+                const defaultOwners = "Never Contacted Owners";
+                const defaultSpace = "Space Distribution (SF)";
+                const defaultPropertyType = "Property Type Distribution";
+
+                document.getElementById('classifyTitle').textContent = tenantName ? `${defaultClassify} for ${tenantName}` : defaultClassify;
+                document.getElementById('mapTitle').textContent = tenantName ? `${defaultMap} for ${tenantName}` : defaultMap;
+                document.getElementById('cityTitle').textContent = tenantName ? `${defaultCity} for ${tenantName}` : defaultCity;
+                document.getElementById('ownersTitle').textContent = tenantName ? `${defaultOwners} for ${tenantName}` : defaultOwners;
+                document.getElementById('spaceTitle').textContent = tenantName ? `${defaultSpace} for ${tenantName}` : defaultSpace;
+                document.getElementById('propertyTypeTitle').textContent = tenantName ? `${defaultPropertyType} for ${tenantName}` : defaultPropertyType;
+            }
+
+            // --- Chart/Map/List Update Functions ---
+            const updateClassifyChart = (records) => {
+                console.log("Attempting to update Classify Chart...");
+                const canvas = document.getElementById('classifyChart'); if (!canvas) { console.error("classifyChart canvas not found"); return; }
+                const ctx = canvas.getContext('2d'); if (!ctx) { console.error("Failed to get 2D context for classifyChart"); return; }
+                const hasRecords = records && records.length > 0;
+
+                if (classifyChart) { classifyChart.destroy(); classifyChart = null; }
+
+                if (!hasRecords) {
+                    showHideContent('classifyChart', 'classify-no-data', false);
+                    document.getElementById('classify-no-data').textContent = 'Select a tenant to view classification data.';
+                    return;
+                }
+
+                const counts = countValues(records, 'Classify_Color');
+                const chartLabels = Object.keys(counts);
+                const hasData = chartLabels.length > 0;
+                showHideContent('classifyChart', 'classify-no-data', hasData);
+
+                if (!hasData) {
+                    document.getElementById('classify-no-data').textContent = 'No classification data found for this tenant.';
+                    return;
+                }
+
+                const backgroundColors = chartLabels.map(label => classificationColors[label] || classificationColors['Unknown']);
+                const chartData = chartLabels.map(label => counts[label]);
+
+                try {
+                    classifyChart = new Chart(ctx, {
+                        type: 'pie', data: { labels: chartLabels, datasets: [{ data: chartData, backgroundColor: backgroundColors, borderWidth: 1 }] },
+                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { padding: 15 } }, tooltip: { enabled: true } } }
+                    });
+                    console.log("Classify chart updated.");
+                } catch (error) { console.error("Error creating classifyChart:", error); showHideContent('classifyChart', 'classify-no-data', false); document
+                
+                    .getElementById('classify-no-data').textContent = 'Error displaying classification chart.'; }
+            };
+
+            const updateCityChart = (records) => {
+                console.log("Attempting to update City Chart...");
+                const canvas = document.getElementById('cityChart'); if (!canvas) { console.error("cityChart canvas not found"); return; }
+                const ctx = canvas.getContext('2d'); if (!ctx) { console.error("Failed to get 2D context for cityChart"); return; }
+                const hasRecords = records && records.length > 0;
+
+                if (cityChart) { cityChart.destroy(); cityChart = null; }
+
+                if (!hasRecords) {
+                    showHideContent('cityChart', 'city-no-data', false);
+                    document.getElementById('city-no-data').textContent = 'Select a tenant to view city data.';
+                    return;
+                }
+
+                const counts = countValues(records, 'City');
+                const sorted = Object.entries(counts).filter(([city]) => city !== 'Unknown').sort((a, b) => b[1] - a[1]).slice(0, 10);
+                const hasData = sorted.length > 0;
+                showHideContent('cityChart', 'city-no-data', hasData);
+
+                if (!hasData) {
+                    document.getElementById('city-no-data').textContent = 'No city data found for this tenant.';
+                    return;
+                }
+
+                try {
+                    cityChart = new Chart(ctx, {
+                        type: 'bar', data: { labels: sorted.map(item => item[0]), datasets: [{ label: 'Locations', data: sorted.map(item => item[1]), backgroundColor: generalChartColors[0], borderWidth: 1 }] },
+                        options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true }, y: { grid: { display: false } } } }
+                    });
+                    console.log("City chart updated.");
+                } catch (error) { console.error("Error creating cityChart:", error); showHideContent('cityChart', 'city-no-data', false); document.getElementById('city-no-data').textContent = 'Error displaying city chart.'; }
+            };
+
+            const updateMap = (records) => {
+                console.log("Attempting to update Map...");
+                const mapElement = document.getElementById('map'); if (!mapElement) { console.error("Map element 'map' not found"); return; }
+                const mapContainer = document.getElementById('mapContainer');
+                const hasRecords = records && records.length > 0;
+
+                const validCoords = hasRecords ? records.map(r => ({
+                    lat: getFieldValue(r, 'Latitude', null),
+                    lon: getFieldValue(r, 'Longitude', null),
+                    tenantName: getFieldValue(r, 'Tenant_Name', 'N/A'),
+                    address: getFieldValue(r, 'Address', 'No Address'),
+                    classifyColor: getFieldValue(r, 'Classify_Color', 'Unknown')
+                })).filter(coord => coord.lat != null && coord.lon != null && !isNaN(coord.lat) && !isNaN(coord.lon)) : [];
+
+                const hasValidGeoData = validCoords.length > 0;
+                showHideContent('map', 'map-no-data', hasValidGeoData);
+
+                const defaultCenter = [43.8, -120.55]; const defaultZoom = 7;
+
+                if (!map && mapElement.offsetParent !== null) {
+                    try {
+                        console.log("Initializing Leaflet map...");
+                        map = L.map('map').setView(defaultCenter, defaultZoom);
+                        L.tileLayer('http://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}', { attribution: '', maxZoom: 18 }).addTo(map);
+                        console.log("Map initialized.");
+                    } catch (e) {
+                        console.error("Failed to initialize map:", e); map = null;
+                        document.getElementById('map-no-data').textContent = 'Error loading map.';
+                        showHideContent('map', 'map-no-data', false); return;
+                    }
+                } else if (!map) {
+                    console.log("Map container not ready or map exists/failed, deferring map operations.");
+                    if (!hasRecords) document.getElementById('map-no-data').textContent = 'Select a tenant to view locations on map.';
+                    else if (!hasValidGeoData) document.getElementById('map-no-data').textContent = 'No valid location data for this tenant.';
+                    return;
+                }
+
+                currentMapMarkers.forEach(marker => marker.remove()); currentMapMarkers = [];
+
+                const mapTabContent = document.getElementById('mapTab');
+                        if (map && mapTabContent && mapTabContent.classList.contains('active')) {
+                             setTimeout(() => { if(map && mapElement.offsetParent !== null) { map.invalidateSize(); } }, 50);
+                        }
+
+                if (!hasValidGeoData) {
+                    console.log("No valid geo data for this tenant, resetting map view.");
+                    map.setView(defaultCenter, defaultZoom);
+                    document.getElementById('map-no-data').textContent = 'No valid location data for this tenant.';
+                    return;
+                }
+
+                const bounds = L.latLngBounds();
+                validCoords.forEach(coord => {
+                    try {
+                        const markerColor = classificationColors[coord.classifyColor] || classificationColors['Unknown'];
+                        const marker = L.circleMarker([coord.lat, coord.lon], { radius: 7, fillColor: markerColor, color: "#555", weight: 1, opacity: 1, fillOpacity: 0.8 })
+                        .bindPopup(`<b>${coord.tenantName}</b><br>${coord.address}<br><i>Classification: ${coord.classifyColor}</i>`).addTo(map);
+                        currentMapMarkers.push(marker); bounds.extend([coord.lat, coord.lon]);
+                    } catch (markerError) { console.error("Error adding marker:", markerError, " Data:", coord); }
+                });
+
+                if (validCoords.length === 1) {
+                    map.setView([validCoords[0].lat, validCoords[0].lon], 14);
+                } else if (bounds.isValid()) {
+                    map.fitBounds(bounds, { padding: [40, 40], maxZoom: 16 });
+                } else {
+                    map.setView(defaultCenter, defaultZoom);
+                }
+                console.log("Map updated.");
+            };
+
+            const updateOwnersList = (records) => {
+                console.log("Attempting to update Never Contacted Owners List...");
+                const listContentElement = document.getElementById('ownerListContent');
+                const listContainer = document.getElementById('ownerListContainer');
+                const noDataEl = document.getElementById('owners-no-data');
+
+                if (!listContentElement || !listContainer || !noDataEl) { console.warn("Owner list elements not found."); return; }
+
+                listContentElement.innerHTML = ''; listContentElement.classList.remove('visible'); listContainer.classList.remove('visible');
+
+                const hasRecords = records && records.length > 0;
+                if (!hasRecords) {
+                    noDataEl.textContent = 'Select a tenant to view owner data.';
+                    showHideContent('ownerListContent', 'owners-no-data', false); return;
+                }
+
+                const neverRecords = records.filter(r => getFieldValue(r, 'Classify_Color') === 'Never');
+                console.log(`Found \${neverRecords.length} records with 'Never' classification for this tenant.`);
+
+                if (neverRecords.length === 0) {
+                    noDataEl.textContent = 'No properties marked "Never" for this tenant.';
+                    showHideContent('ownerListContent', 'owners-no-data', false); return;
+                }
+
+                const ownersData = {};
+                neverRecords.forEach((record, index) => {
+                    const ownerName = getFieldValue(record, 'Owner', null);
+                    const ownerPhone = getFieldValue(record, 'ownerPhone', '');
+                    const lastPropContactValue = getFieldValue(record, 'LastContact', null);
+
+                    if (index < 5) { // Log first few records
+                        console.log(`Record ${record.id || index}: Owner='${ownerName}', Phone='${ownerPhone}', Raw LastContact='${lastPropContactValue}', Type='${typeof lastPropContactValue}'`);
+                    }
+
+                    if (!ownerName || ownerName === 'Unknown') {
+                        console.log(`Skipping record \${record.id || index} due to missing or 'Unknown' Owner.`);
+                        return;
+                    }
+
+                    if (!ownersData[ownerName]) {
+                        ownersData[ownerName] = {
+                            phone: ownerPhone,
+                            lastPropContactRaw: lastPropContactValue
+                        };
+                    } else {
+                        if (!ownersData[ownerName].phone && ownerPhone) { ownersData[ownerName].phone = ownerPhone; }
+                        if (ownersData[ownerName].lastPropContactRaw === null && lastPropContactValue !== null) {
+                            ownersData[ownerName].lastPropContactRaw = lastPropContactValue;
+                        }
+                    }
+                });
+
+                const validOwnerEntries = Object.keys(ownersData).length > 0;
+
+                if (!validOwnerEntries) {
+                    console.log("No valid owner data could be derived from 'Never' records (check Owner validity).");
+                    noDataEl.textContent = 'Could not process owner data from "Never" records for this tenant.';
+                    showHideContent('ownerListContent', 'owners-no-data', false); return;
+                }
+
+                showHideContent('ownerListContent', 'owners-no-data', true);
+
+                const sortedOwnerNames = Object.keys(ownersData).sort();
+                sortedOwnerNames.forEach(ownerName => {
+                    const owner = ownersData[ownerName];
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'owner-list-item';
+
+                    let displayDate = 'N/A';
+                    if (owner.lastPropContactRaw !== null) {
+                        if (typeof owner.lastPropContactRaw === 'number') {
+                            displayDate = formatGristDate(owner.lastPropContactRaw, String(owner.lastPropContactRaw));
+                        } else {
+                            displayDate = String(owner.lastPropContactRaw);
+                        }
+                    }
+
+                    itemDiv.innerHTML = `
+                                <div class="owner-col-name">${ownerName}</div>
+                                <div class="owner-col-contact">${owner.phone || 'N/A'}</div>
+                                <div class="owner-col-lastattempt">${displayDate}</div>
+                            `;
+                    listContentElement.appendChild(itemDiv);
+                });
+                console.log("'Never Contacted' Owner list updated.");
+            };
+
+            const updateSpaceChart = (records) => {
+                console.log("Attempting to update Space Chart...");
+                const canvas = document.getElementById('spaceChart'); if (!canvas) { console.error("spaceChart canvas not found"); return; }
+                const ctx = canvas.getContext('2d'); if (!ctx) { console.error("Failed to get 2D context for spaceChart"); return; }
+                const hasRecords = records && records.length > 0;
+
+                if (spaceChart) { spaceChart.destroy(); spaceChart = null; }
+
+                if (!hasRecords) {
+                    showHideContent('spaceChart', 'space-no-data', false);
+                    document.getElementById('space-no-data').textContent = 'Select a tenant to view space data.';
+                    return;
+                }
+
+                // Group spaces into ranges
+                const ranges = {
+                    '0-2.5k': 0,
+                    '2.5k-5k': 0,
+                    '5k-10k': 0,
+                    '10k-20k': 0,
+                    '20k+': 0
+                };
+
+                records.forEach(record => {
+                    const space = getFieldValue(record, 'SF_Occupied', null);
+                    if (space !== null && space !== undefined) {
+                        if (space <= 2500) ranges['0-2.5k']++;
+                        else if (space <= 5000) ranges['2.5k-5k']++;
+                        else if (space <= 10000) ranges['5k-10k']++;
+                        else if (space <= 20000) ranges['10k-20k']++;
+                        else ranges['20k+']++;
+                    }
+                });
+
+                const chartLabels = Object.keys(ranges);
+                const chartData = Object.values(ranges);
+                const hasData = chartLabels.length > 0;
+                showHideContent('spaceChart', 'space-no-data', hasData);
+
+                if (!hasData) {
+                    document.getElementById('space-no-data').textContent = 'No space data found for this tenant.';
+                    return;
+                }
+
+                try {
+                    spaceChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: { labels: chartLabels, datasets: [{ label: 'Number of Locations', data: chartData, backgroundColor: generalChartColors[4], borderWidth: 1 }] },
+                        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } }
+                    });
+                    console.log("Space chart updated.");
+                } catch (error) { console.error("Error creating spaceChart:", error); showHideContent('spaceChart', 'space-no-data', false); document.getElementById('space-no-data').textContent = 'Error displaying space chart.'; }
+            };
+
+            const updatePropertyTypeChart = (records) => {
+                console.log("Attempting to update Property Type Chart...");
+                const canvas = document.getElementById('propertyTypeChart'); if (!canvas) { console.error("propertyTypeChart canvas not found"); return; }
+                const ctx = canvas.getContext('2d'); if (!ctx) { console.error("Failed to get 2D context for propertyTypeChart"); return; }
+                const hasRecords = records && records.length > 0;
+
+                if (propertyTypeChart) { propertyTypeChart.destroy(); propertyTypeChart = null; }
+
+                if (!hasRecords) {
+                    showHideContent('propertyTypeChart', 'propertyType-no-data', false);
+                    document.getElementById('propertyType-no-data').textContent = 'Select a tenant to view property type data.';
+                    return;
+                }
+
+                const counts = countValues(records, 'Property_Type');
+                const chartLabels = Object.keys(counts);
+                const hasData = chartLabels.length > 0;
+                showHideContent('propertyTypeChart', 'propertyType-no-data', hasData);
+
+                if (!hasData) {
+                    document.getElementById('propertyType-no-data').textContent = 'No property type data found for this tenant.';
+                    return;
+                }
+
+                try {
+                    propertyTypeChart = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: { labels: chartLabels, datasets: [{ data: Object.values(counts), backgroundColor: generalChartColors, borderWidth: 1 }] },
+                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+                    });
+                    console.log("Property Type chart updated.");
+                } catch (error) { console.error("Error creating propertyTypeChart:", error); showHideContent('propertyTypeChart', 'propertyType-no-data', false); document.getElementById('propertyType-no-data').textContent = 'Error displaying property type chart.'; }
+            };
+
+            // --- Tab Initialization Logic ---
+            function initializeTabs() {
+                console.log("Initializing tabs...");
+                const tabButtons = document.querySelectorAll('.tab-button');
+                const tabContents = document.querySelectorAll('.tab-content');
+                if (tabButtons.length === 0) { console.error("No tab buttons found!"); return; }
+
+                tabButtons.forEach(button => {
+                    button.addEventListener('click', (event) => {
+                        event.preventDefault();
+                        const tabId = button.dataset.tab;
+                        console.log(`Tab clicked: \${tabId}`);
+
+                        if (button.classList.contains('active')) {
+                            console.log(`Tab \${tabId} is already active.`);
+                            return;
+                        }
+
+                        tabButtons.forEach(btn => btn.classList.remove('active'));
+                        button.classList.add('active');
+                        tabContents.forEach(content => content.classList.remove('active'));
+                        const activeContent = document.getElementById(tabId);
+
+                        if (activeContent) {
+                            activeContent.classList.add('active');
+                            console.log(`Tab \${tabId} content activated.`);
+
+                            setTimeout(() => {
+                                if (tabId === 'mapTab') {
+                                    console.log("Handling map/city tab activation.");
+                                    if (map) {
+                                        const mapElement = document.getElementById('map');
+                                        if (mapElement && mapElement.offsetParent !== null) {
+                                            console.log("Invalidating map size...");
+                                            map.invalidateSize();
+                                        } else { console.log("Map element not ready for invalidation."); }
+                                    } else { console.log("Map not initialized yet, updateMap might handle it."); }
+                                    if (cityChart) {
+                                        const cityCanvas = document.getElementById('cityChart');
+                                        if (cityCanvas && cityCanvas.offsetParent !== null) {
+                                            console.log("Resizing city chart...");
+                                            cityChart.resize();
+                                        } else { console.log("City chart canvas not ready for resize."); }
+                                    }
+                                    if (spaceChart) {
+                                        const spaceCanvas = document.getElementById('spaceChart');
+                                        if (spaceCanvas && spaceCanvas.offsetParent !== null) {
+                                            console.log("Resizing space chart...");
+                                            spaceChart.resize();
+                                        } else { console.log("Space chart canvas not ready for resize."); }
+                                    }
+                                } else if (tabId === 'classifyTab') {
+                                    console.log("Handling classify tab activation.");
+                                    if (classifyChart) {
+                                        const classifyCanvas = document.getElementById('classifyChart');
+                                        if (classifyCanvas && classifyCanvas.offsetParent !== null) {
+                                            console.log("Resizing classify chart...");
+                                            classifyChart.resize();
+                                        } else { console.log("Classify chart canvas not ready for resize."); }
+                                    }
+
+                                    if (propertyTypeChart) {
+                                        const propertyTypeCanvas = document.getElementById('propertyTypeChart');
+                                        if (propertyTypeCanvas && propertyTypeCanvas.offsetParent !== null) {
+                                            console.log("Resizing property type chart...");
+                                            propertyTypeChart.resize();
+                                        } else { console.log("Property Type chart canvas not ready for resize."); }
+                                    }
+                                }
+                            }, 50);
+                        } else { console.warn(`Content for tab \${tabId} not found.`); }
+                    });
+                });
+
+                const defaultActiveButton = document.querySelector('.tab-button.active');
+                if(defaultActiveButton) {
+                    const defaultTabId = defaultActiveButton.dataset.tab;
+                    const defaultActiveContent = document.getElementById(defaultTabId);
+                    if(defaultActiveContent) { defaultActiveContent.classList.add('active'); }
+                } else {
+                    const firstButton = document.querySelector('.tab-button');
+                    const firstContent = document.querySelector('.tab-content');
+                    if(firstButton && firstContent) {
+                        firstButton.classList.add('active');
+                        firstContent.classList.add('active');
+                    }
+                }
+                console.log("Tabs initialized.");
+            }
+
+            // --- Grist Integration ---
+            grist.ready({
+                columns: [
+                    'Tenant_Name', 'Classify_Color', 'City', 'Address', 'Latitude', 'Longitude',
+                    'Owner', 'ownerPhone',
+                    'Property_Address', // Optional: Remove if not needed elsewhere
+                    'LastContact', // Column for property contact date
+                    'SF_Occupied', 'Property_Type' // Required for Space and Property Type charts
+                ],
+            });
+
+            // Listen for selected records
+            grist.onRecords(selectedRecords => {
+                console.log(`grist.onRecords received:`, selectedRecords ? selectedRecords.length : 0, 'records');
+                currentTenantName = null;
+                if (selectedRecords && selectedRecords.length > 0) {
+                    currentTenantName = getFieldValue(selectedRecords[0], 'Tenant_Name', 'Selected Tenant');
+                }
+                updateTitles(currentTenantName);
+                updateClassifyChart(selectedRecords);
+                updateCityChart(selectedRecords);
+                updateMap(selectedRecords);
+                updateOwnersList(selectedRecords);
+                updateSpaceChart(selectedRecords);
+                updatePropertyTypeChart(selectedRecords);
+
+                setTimeout(() => {
+                    const activeTab = document.querySelector('.tab-content.active');
+                    if (activeTab) {
+                        const activeCanvases = activeTab.querySelectorAll('canvas.visible');
+                        activeCanvases.forEach(canvas => {
+                            try {
+                                const chartInstance = Chart.getChart(canvas.id);
+                                if (chartInstance) {
+                                    console.log(`Resizing active chart: \${canvas.id}`);
+                                    chartInstance.resize();
+                                }
+                            } catch(e) {
+                                console.warn(`Could not get chart instance for resize: \${canvas.id}`, e);
+                            }
+                        });
+                    }
+                }, 100);
+            });
+
+            // --- Initial Setup ---
+            document.addEventListener('DOMContentLoaded', () => {
+                console.log("DOM fully loaded. Initializing tabs and setting initial empty states.");
+                initializeTabs();
+                updateTitles(null);
+                showHideContent('classifyChart', 'classify-no-data', false);
+                showHideContent('cityChart', 'city-no-data', false);
+                showHideContent('map', 'map-no-data', false);
+                showHideContent('ownerListContent', 'owners-no-data', false);
+                showHideContent('spaceChart', 'space-no-data', false);
+                showHideContent('propertyTypeChart', 'propertyType-no-data', false);
+                document.getElementById('classify-no-data').textContent = 'Select a tenant to view classification data.';
+                document.getElementById('city-no-data').textContent = 'Select a tenant to view city data.';
+                document.getElementById('map-no-data').textContent = 'Select a tenant to view locations on map.';
+                document.getElementById('owners-no-data').textContent = 'Select a tenant to view owner data.';
+                document.getElementById('space-no-data').textContent = 'Select a tenant to view space data.';
+                document.getElementById('propertyType-no-data').textContent = 'Select a tenant to view property type data.';
+                console.log("Initial setup complete. Waiting for Grist selection.");
+            });
+
+        </script>
+    </body>
+</html>
