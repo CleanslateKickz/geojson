@@ -45,11 +45,6 @@
             margin-bottom: 20px;
             flex-shrink: 0;
         }
-        #tab-bar .swap-btn {
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-        }
         .header h2 {
             margin: 0;
             font-size: 1.25rem;
@@ -202,10 +197,6 @@
 </head>
 <body>
     <div id="widget-container">
-        <div id="tab-bar" style="display: flex; gap: 8px; margin-bottom: 16px;">
-          <button id="tab-sms" class="swap-btn active">SMS</button>
-          <button id="tab-privateeye" class="swap-btn">PrivateEye</button>
-        </div>
         <div id="no-record" class="info-box">
             <p>Please select a row in the Owners table to begin.</p>
         </div>
@@ -268,23 +259,8 @@
                 <span id="copy-msg" class="copy-msg" style="display:none;">Copied!</span>
             </div>
         </div>
-        <div id="privateeye-wrapper" style="display: none; flex: 1;">
-          <div id="iframe-status" style="padding: 20px; text-align: center; color: #666;">
-            Loading PrivateEye...
-          </div>
-          <iframe
-            id="privateeye-frame"
-            src=""
-            style="width: 100%; height: 100%; border: none; border-radius: 8px; display: none;"
-            onload="handleIframeLoad()"
-            onerror="handleIframeError()"
-          ></iframe>
-        </div>
     </div>
     <script>
-        // Global elements object to be accessible to all functions
-        let ELS = {};
-        
         document.addEventListener('DOMContentLoaded', () => {
             const TEMPLATES = {
                 standard: { name: "Standard Introduction", text: "Hi {{firstName}}, this is Sam Gfroerer with M&M. I just tried giving you a quick call — I specialize in {{propertyFocus}} and wanted to connect regarding your {{propertyIdentifier}} in {{propertyCity}}. Let me know if there's a good time to chat, or feel free to text back. Looking forward to connecting!" },
@@ -292,8 +268,7 @@
                 valueProp: { name: "Value Proposition", text: "Hi {{firstName}}, this is Sam with M&M. I specialize in maximizing returns on {{propertyFocus}} like your {{propertyIdentifier}} in {{propertyCity}}. Let's connect soon." }
             };
 
-            // Initialize ELS object with all elements
-            ELS = {
+            const ELS = {
                 templateSelect: document.getElementById('template-select'),
                 propertySelect: document.getElementById('property-select'),
                 propertySelectorPlaceholder: document.getElementById('property-selector-placeholder'),
@@ -336,7 +311,6 @@
                         return ownerRefList && Array.isArray(ownerRefList) && ownerRefList.includes(ownerId);
                     });
                 } catch (err) {
-                    console.error('Error fetching properties:', err);
                     g_relatedProperties = [];
                 }
             }
@@ -454,112 +428,6 @@
                 }
                 renderAll();
             });
-        });
-
-        // Tab switching functionality - now using global ELS
-        const tabSMS = document.getElementById('tab-sms');
-        const tabPrivateEye = document.getElementById('tab-privateeye');
-        const privateEyeWrapper = document.getElementById('privateeye-wrapper');
-        const noRecordDiv = document.getElementById('no-record');
-        
-        tabSMS.addEventListener('click', () => {
-            tabSMS.classList.add('active');
-            tabPrivateEye.classList.remove('active');
-            
-            // Show SMS content
-            if (ELS.mainContentDiv) {
-                ELS.mainContentDiv.style.display = 'block';
-            }
-            noRecordDiv.style.display = 'block';
-            privateEyeWrapper.style.display = 'none';
-            
-            console.log('SMS tab activated');
-        });
-        
-        // Global iframe handling functions
-        window.handleIframeLoad = function() {
-            console.log('PrivateEye iframe loaded successfully');
-            const iframe = document.getElementById('privateeye-frame');
-            const status = document.getElementById('iframe-status');
-            iframe.style.display = 'block';
-            status.style.display = 'none';
-        };
-        
-        window.handleIframeError = function() {
-            console.error('Failed to load PrivateEye iframe');
-            const status = document.getElementById('iframe-status');
-            status.innerHTML = 'Failed to load PrivateEye. Check the file path.';
-            status.style.color = '#e74c3c';
-        };
-        
-        tabPrivateEye.addEventListener('click', () => {
-            tabSMS.classList.remove('active');
-            tabPrivateEye.classList.add('active');
-            
-            // Hide SMS content and show PrivateEye
-            if (ELS.mainContentDiv) {
-                ELS.mainContentDiv.style.display = 'none';
-            }
-            noRecordDiv.style.display = 'none';
-            privateEyeWrapper.style.display = 'flex';
-            
-            console.log('PrivateEye tab activated');
-            
-            // Try different paths to find the PrivateEye.html file
-            const iframe = document.getElementById('privateeye-frame');
-            const status = document.getElementById('iframe-status');
-            
-            // Reset status
-            status.innerHTML = 'Loading PrivateEye...';
-            status.style.color = '#666';
-            status.style.display = 'block';
-            iframe.style.display = 'none';
-            
-            // Array of possible paths to try
-            const possiblePaths = [
-                '../PrivateEye.html',           // Up one directory
-                './PrivateEye.html',            // Same directory  
-                'PrivateEye.html',              // Same directory (no prefix)
-                '/Widgets/PrivateEye.html',     // Absolute path
-                '../../../PrivateEye.html',     // Up three directories (if deeply nested)
-                '../../PrivateEye.html'         // Up two directories
-            ];
-            
-            let currentPathIndex = 0;
-            
-            function tryNextPath() {
-                if (currentPathIndex < possiblePaths.length) {
-                    const path = possiblePaths[currentPathIndex];
-                    console.log(`Trying path ${currentPathIndex + 1}/${possiblePaths.length}: ${path}`);
-                    status.innerHTML = `Trying path: ${path}`;
-                    
-                    iframe.onload = function() {
-                        console.log(`Success! PrivateEye loaded from: ${path}`);
-                        handleIframeLoad();
-                    };
-                    
-                    iframe.onerror = function() {
-                        console.log(`Failed to load from: ${path}`);
-                        currentPathIndex++;
-                        setTimeout(tryNextPath, 500); // Small delay before trying next path
-                    };
-                    
-                    iframe.src = path;
-                } else {
-                    console.error('All paths failed. PrivateEye.html not found.');
-                    status.innerHTML = `
-                        <div>Could not find PrivateEye.html</div>
-                        <div style="font-size: 12px; margin-top: 10px;">Tried paths:</div>
-                        <div style="font-size: 11px; text-align: left; margin-top: 5px;">
-                            ${possiblePaths.map(path => `• ${path}`).join('<br>')}
-                        </div>
-                    `;
-                    status.style.color = '#e74c3c';
-                }
-            }
-            
-            // Start trying paths
-            tryNextPath();
         });
     </script>
 </body>
