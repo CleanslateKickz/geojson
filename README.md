@@ -18,18 +18,275 @@ A modern, clean interface for hosting and organizing GeoJSON files for Leaflet m
 ## 📁 Repository Structure
 
 ```
-geojson-repository/
-├── index.html              # Main landing page
-├── css/
-│   └── styles.css         # Styling definitions
-├── js/
-│   └── main.js           # JavaScript functionality
-├── geojson/              # GeoJSON file storage
-│   ├── administrative/   # Administrative boundaries
-│   ├── transportation/   # Transportation networks
-│   ├── natural/         # Natural features
-│   └── poi/             # Points of interest
-└── README.md
+css/
+    └── styles.css
+geojson/
+    ├── April-11.geojson
+    ├── April.geojson
+    ├── June-Mid-wImages.geojson
+    ├── June.geojson
+    ├── May-2025.geojson
+    ├── May-Mid.geojson
+    ├── US-Counties.geojson
+    ├── US-States-County.geojson
+    └── US-States.geojson
+HTML/
+    ├── 1031-Exchange/
+        ├── Claude-OR-1031.html
+        ├── GPT-1031-(1).html
+        ├── GPT-1031-(2).html
+        └── OR-Contractors.html
+    ├── Deepsite/
+        ├── CommercialToolkit.html
+        ├── CRE-Resources.html
+        └── Sherwin-Deepsite.html
+    ├── MessageTemplates/
+        ├── assets/
+            ├── index-BtgRP3PP.css
+            └── index-ETSBtB0Y.js
+        ├── 404.html
+        └── index.html
+    ├── Modern CRM Research/
+        ├── app.js
+        ├── data.js
+        ├── genspark.HTML
+        ├── index.html
+        ├── script.js
+        ├── style.css
+        └── test.md
+    ├── national/
+        ├── county-data.js
+        ├── index.html
+        ├── standalone-map.js
+        ├── style.css
+        └── test.md
+    ├── OpenDialer/
+        ├── assets/
+            ├── index-0YFk6OAs.js
+            └── index-Dby4IgRH.css
+        ├── 404.html
+        ├── favicon.ico
+        ├── image.png
+        ├── index.html
+        ├── placeholder.svg
+        ├── README.md
+        └── robots.txt
+    ├── property-email-generator/
+        ├── static/
+            ├── css/
+                ├── main.bfeb39fd.css
+                └── main.bfeb39fd.css.map
+            └── js/
+                ├── 453.70287ec5.chunk.js
+                ├── 453.70287ec5.chunk.js.map
+                ├── main.5bf8211f.js
+                ├── main.5bf8211f.js.LICENSE.txt
+                └── main.5bf8211f.js.map
+        ├── 404.html
+        ├── asset-manifest.json
+        ├── favicon.ico
+        ├── index.html
+        ├── logo192.png
+        ├── logo512.png
+        ├── manifest.json
+        ├── README.md
+        └── robots.txt
+    ├── Tenant-Locations/
+        ├── Images/
+            ├── Cities.png
+            ├── Location-Intelligence-banner.jpg
+            ├── States-Territories.png
+            └── store-locations.png
+        ├── ReadME.md
+        └── Tim Hortons.html
+    ├── Tenants/
+        ├── assets/
+            ├── index-BFOFyhe1.css
+            └── index-R8C2fhDY.js
+        ├── favicon.ico
+        ├── index.html
+        ├── placeholder.svg
+        └── robots.txt
+    ├── Tool-Box/
+        └── PrivateEye Search Tool.html
+    ├── Base Layers.html
+    ├── Big-Beautiful-Bill.html
+    ├── CRE-Toolkit.html
+    ├── Day Care Property Investment Analysis.html
+    ├── Grove-Plaza.html
+    ├── On-Markets-Mobile.html
+    ├── Oregon vs. Washington.html
+    ├── property_buyout_strategies.md
+    ├── Sherwin-Williams.html
+    ├── SW-Comps.html
+    ├── The AI Resilience Formula.html
+    └── US-County-Statistics.html
+Images/
+    ├── ArcGIS URL Formatter.png
+    ├── Base Layers.png
+    ├── Big-Beautiful-Bill.png
+    ├── Calculator.png
+    ├── Calculator1.png
+    ├── Carls.Jr.png
+    ├── Centers.png
+    ├── Claude-OR-1031.png
+    ├── CommercialToolkit.png
+    ├── CRE-Resources.png
+    ├── CRE-Toolkit.png
+    ├── Day Care Property Investment Analysis.png
+    ├── Denny's.png
+    ├── Directory.png
+    ├── Exp-Lease.png
+    ├── for-sale-retail.png
+    ├── genspark.png
+    ├── GPT-1031-(1).png
+    ├── GPT-1031-(2).png
+    ├── Grist - Listings.png
+    ├── Grove-Plaza.png
+    ├── Images Gallery.png
+    ├── Jiffy Lube.png
+    ├── LadyInvestor.png
+    ├── list.png
+    ├── ManInvestor.png
+    ├── map.ico
+    ├── map.png
+    ├── marker-shadow.png
+    ├── Merger&Acquisition.png
+    ├── Modern CRM Research-index.png
+    ├── O'Reilly_Auto_Parts (2).png
+    ├── olderLady.png
+    ├── olderMan.png
+    ├── On-Markets-Mobile.png
+    ├── OR-Contractors.png
+    ├── Oregon vs. Washington.png
+    ├── oreilly-auto-parts-seeklogo.png
+    ├── Owner-Profile.png
+    ├── OwnerProperties-Window.png
+    ├── OwnerProperties.png
+    ├── Planet-Fitness-Logo.png
+    ├── PrivateEye-embed.png
+    ├── PrivateEye.png
+    ├── Property Lookup Map.png
+    ├── ReonomyCompareMap.png
+    ├── Retail Outlook 2H25 Update.png
+    ├── retailstat-index.png
+    ├── Sale-Comps-Grist.png
+    ├── saleComps.png
+    ├── Search.png
+    ├── Sherwin-Deepsite.png
+    ├── Sherwin-Williams.png
+    ├── Shopping Centers.png
+    ├── smsWidget.png
+    ├── Starbucks.png
+    ├── SW-Comps.png
+    ├── Tenant-Dash.png
+    ├── TenantMap.png
+    ├── TenantMapCities.png
+    ├── The AI Resilience Formula.png
+    ├── The Human Bean-Picsart-BackgroundRemover.png
+    ├── Tim Hortons.png
+    ├── TraderJoe's.png
+    └── US-County-Statistics.png
+js/
+    ├── github-api.js
+    └── main.js
+retailstat/
+    ├── Placer-AI/
+        └── Mall-Anchor.html
+    ├── index.html
+    ├── July-1-2025.html
+    ├── July-8-2025.html
+    ├── June-17-2025.html
+    ├── M&A Activity Update - June 17.pdf
+    ├── Retail Outlook - 2H25 Update.pdf
+    └── RetailStat Q2 Restaurant Sales Data.pdf
+Tenants/
+    ├── assets/
+        ├── index-BFOFyhe1.css
+        └── index-R8C2fhDY.js
+    ├── 404.html
+    ├── favicon.ico
+    ├── index.html
+    ├── placeholder.svg
+    ├── readme.md
+    └── robots.txt
+Widgets/
+    ├── batch-emailing/
+        ├── batch-emailing.js
+        ├── index.html
+        └── README.md
+    ├── drop-down-widget/
+        ├── index.html
+        ├── package.json
+        ├── README.md
+        └── script.js
+    ├── Embed/
+        ├── Centers-Embed.html
+        ├── Grist - Listings Embed.html
+        └── PrivateEye-Embed.html
+    ├── Map/
+        ├── MapWidget.html
+        └── package.json
+    ├── Messages/
+        ├── images/
+            ├── example.png
+            └── user_config.png
+        ├── image-resize.min.js
+        ├── index.html
+        ├── package.json
+        ├── README.md
+        ├── script.js
+        ├── smsWidget.html
+        └── styles.css
+    ├── multi-table-editor/
+        ├── index.html
+        └── README.md
+    ├── National-Map/
+        ├── county-data.js
+        ├── index.html
+        ├── standalone-map.js
+        └── style.css
+    ├── pivottable/
+        ├── TCD-widget/
+            ├── colorManager.js
+            ├── columnSizeManager.js
+            ├── index.html
+            ├── index.js
+            ├── package.json
+            ├── PivotLabels.js
+            ├── README.md
+            └── styles.css
+        ├── index.html
+        ├── index.js
+        ├── package.json
+        ├── PivotLabels.js
+        ├── Readme.md
+        └── styles.css
+    ├── stock-monitor/
+        ├── index.html
+        └── index.js
+    ├── ArcGIS URL Formatter.html
+    ├── Calculator.html
+    ├── Centers.html
+    ├── DynamicSizeTenant.html
+    ├── Exp-Lease.html
+    ├── Grist - Listings.html
+    ├── grist-web-proxy.html
+    ├── Owner-Profile.html
+    ├── OwnerProperties-Window.html
+    ├── OwnerProperties.html
+    ├── PrivateEye.html
+    ├── ReonomyCompareMap.html
+    ├── Sale-Comps-Grist.html
+    ├── saleComps.html
+    ├── Search.html
+    ├── Tenant-Dash.html
+    ├── TenantMap.html
+    └── TenantMapCities.html
+images.html
+index.html
+manifest.json
+README.md
 ```
 
 ## 🚀 Getting Started
