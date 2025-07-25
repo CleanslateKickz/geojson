@@ -840,7 +840,7 @@
             Object.entries(privateEyeEls.inputs).forEach(([key, input]) => {
                 input.addEventListener('blur', () => {
                     const value = input.value;
-                    if (value.trim() === '') {
+                    if (!value.trim()) {
                         input.classList.remove('ring-red-500', 'ring-green-500');
                         return;
                     }
@@ -862,7 +862,6 @@
                 privateEyeContent.style.display = 'none';
                 activeTab = 'sms';
                 renderSMS();
-                console.log('SMS tab activated');
             });
 
             tabPrivateEye.addEventListener('click', () => {
@@ -872,7 +871,6 @@
                 privateEyeContent.style.display = 'flex';
                 activeTab = 'privateeye';
                 renderPrivateEye();
-                console.log('PrivateEye tab activated');
             });
 
             function renderPrivateEye() {
@@ -926,8 +924,6 @@
             // --- Initial Setup ---
             setPanelState(isPanelOpen);
             renderHistory();
-           –
-
             updatePrivateEyeConnectionStatus('Initializing...');
         });
     </script>
