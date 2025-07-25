@@ -273,10 +273,15 @@
             id="privateeye-frame"
             src="../PrivateEye.html"
             style="width: 100%; height: 100%; border: none; border-radius: 8px;"
+            onload="console.log('PrivateEye iframe loaded successfully')"
+            onerror="console.error('Failed to load PrivateEye iframe')"
           ></iframe>
         </div>
     </div>
     <script>
+        // Global elements object to be accessible to all functions
+        let ELS = {};
+        
         document.addEventListener('DOMContentLoaded', () => {
             const TEMPLATES = {
                 standard: { name: "Standard Introduction", text: "Hi {{firstName}}, this is Sam Gfroerer with M&M. I just tried giving you a quick call — I specialize in {{propertyFocus}} and wanted to connect regarding your {{propertyIdentifier}} in {{propertyCity}}. Let me know if there's a good time to chat, or feel free to text back. Looking forward to connecting!" },
@@ -284,7 +289,8 @@
                 valueProp: { name: "Value Proposition", text: "Hi {{firstName}}, this is Sam with M&M. I specialize in maximizing returns on {{propertyFocus}} like your {{propertyIdentifier}} in {{propertyCity}}. Let's connect soon." }
             };
 
-            const ELS = {
+            // Initialize ELS object with all elements
+            ELS = {
                 templateSelect: document.getElementById('template-select'),
                 propertySelect: document.getElementById('property-select'),
                 propertySelectorPlaceholder: document.getElementById('property-selector-placeholder'),
@@ -327,6 +333,7 @@
                         return ownerRefList && Array.isArray(ownerRefList) && ownerRefList.includes(ownerId);
                     });
                 } catch (err) {
+                    console.error('Error fetching properties:', err);
                     g_relatedProperties = [];
                 }
             }
@@ -445,22 +452,46 @@
                 renderAll();
             });
         });
+
+        // Tab switching functionality - now using global ELS
         const tabSMS = document.getElementById('tab-sms');
         const tabPrivateEye = document.getElementById('tab-privateeye');
         const privateEyeWrapper = document.getElementById('privateeye-wrapper');
+        const noRecordDiv = document.getElementById('no-record');
         
         tabSMS.addEventListener('click', () => {
             tabSMS.classList.add('active');
             tabPrivateEye.classList.remove('active');
-            ELS.mainContentDiv.style.display = 'block';
+            
+            // Show SMS content
+            if (ELS.mainContentDiv) {
+                ELS.mainContentDiv.style.display = 'block';
+            }
+            noRecordDiv.style.display = 'block';
             privateEyeWrapper.style.display = 'none';
+            
+            console.log('SMS tab activated');
         });
         
         tabPrivateEye.addEventListener('click', () => {
             tabSMS.classList.remove('active');
             tabPrivateEye.classList.add('active');
-            ELS.mainContentDiv.style.display = 'none';
+            
+            // Hide SMS content and show PrivateEye
+            if (ELS.mainContentDiv) {
+                ELS.mainContentDiv.style.display = 'none';
+            }
+            noRecordDiv.style.display = 'none';
             privateEyeWrapper.style.display = 'flex';
+            
+            console.log('PrivateEye tab activated');
+            
+            // Try to reload the iframe if it failed to load initially
+            const iframe = document.getElementById('privateeye-frame');
+            if (iframe && !iframe.contentDocument) {
+                console.log('Attempting to reload PrivateEye iframe...');
+                iframe.src = iframe.src; // Force reload
+            }
         });
     </script>
 </body>
