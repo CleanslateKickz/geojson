@@ -6,7 +6,7 @@
     <title>Combined SMS and PrivateEye Widget</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com/3.3.3"></script>
     <style>
         :root {
             --brand-color: #3498db;
@@ -102,7 +102,27 @@
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
-        select, input[type="text"], input[type="tel"] {
+        select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--bg-widget);
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        select:focus {
+            outline: none;
+            border-color: var(--brand-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        input[type="text"], input[type="tel"] {
             width: 100%;
             padding: 8px 10px;
             border: 1px solid var(--border-color);
@@ -111,10 +131,19 @@
             font-size: 0.9rem;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
-        select:focus, input[type="text"]:focus, input[type="tel"]:focus {
+        #privateeye-content input {
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+        }
+        #privateeye-content input:focus {
             outline: none;
             border-color: var(--brand-color);
-            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        #privateeye-content input.ring-red-500 {
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.3);
+        }
+        #privateeye-content input.ring-green-500 {
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.3);
         }
         .button-group {
             display: flex;
@@ -239,6 +268,7 @@
         <div id="no-record" class="info-box">
             <p>Please select a row in the Owners table to begin.</p>
         </div>
+        <div id="sms-loading" style="display: none; text-align: center; padding: 20px;">Loading properties...</div>
         <!-- SMS Widget Content -->
         <div id="sms-content" style="display: none;">
             <div class="sms-header">
@@ -420,6 +450,7 @@
                 copyRow: document.getElementById('sms-copy-row'),
                 copyBtn: document.getElementById('sms-copy-btn'),
                 copyMsg: document.getElementById('sms-copy-msg'),
+                loading: document.getElementById('sms-loading')
             };
 
             function columnarToRowFormat(data) {
@@ -433,17 +464,24 @@
             }
 
             async function fetchAndFilterProperties(ownerId) {
+                smsEls.mainContentDiv.style.display = 'none';
+                smsEls.noRecordDiv.style.display = 'none';
+                smsEls.loading.style.display = 'block';
                 try {
                     const columnarData = await grist.docApi.fetchTable('Properties_');
+                    console.log('Properties_ data:', columnarData);
                     const allProperties = columnarToRowFormat(columnarData);
                     relatedProperties = allProperties.filter(prop => {
                         const ownerRefList = prop.fields.Name;
                         return ownerRefList && Array.isArray(ownerRefList) && ownerRefList.includes(ownerId);
                     });
+                    console.log('Filtered properties:', relatedProperties);
                 } catch (err) {
-                    console.error('Error fetching properties:', err);
+                    console.error('Error fetching Properties_:', err);
                     relatedProperties = [];
                 }
+                smsEls.loading.style.display = 'none';
+                renderSMS();
             }
 
             const getFirstName = (fullName) => (fullName && typeof fullName === 'string') ? fullName.split(' ')[0] : '[First Name]';
@@ -454,10 +492,12 @@
                     smsEls.mainContentDiv.style.display = 'none';
                     smsEls.noRecordDiv.style.display = 'block';
                     smsEls.copyRow.style.display = 'none';
+                    smsEls.loading.style.display = 'none';
                     return;
                 }
                 smsEls.mainContentDiv.style.display = 'block';
                 smsEls.noRecordDiv.style.display = 'none';
+                smsEls.loading.style.display = 'none';
 
                 smsEls.phoneSelect.innerHTML = PHONE_COLUMN_KEYS
                     .map(key => ({ key, value: currentOwnerRecord[key] }))
@@ -489,15 +529,22 @@
                 if (selectedProperty) {
                     propertyIdentifierValue = selectedProperty.fields[selectedPropertyIdentifierKey] || '';
                     propertyCityValue = selectedProperty.fields.City || '';
-                    if (Array.isArray(propertyIdentifierValue)) propertyIdentifierValue = propertyIdentifierValue[1] || '';
-                    if (Array.isArray(propertyCityValue)) propertyCityValue = propertyCityValue[1] || '';
+                    if (Array.isArray(propertyIdentifierValue)) {
+                        console.warn(`Property ${selectedPropertyIdentifierKey} is an array:`, propertyIdentifierValue);
+                        propertyIdentifierValue = propertyIdentifierValue[0] || '';
+                    }
+                    if (Array.isArray(propertyCityValue)) {
+                        propertyCityValue = propertyCityValue[0] || '';
+                    }
                 }
 
                 let message = SMS_TEMPLATES[selectedTemplateKey].text;
+                console.log('Template before replacement:', message);
                 message = message.replace(/{{firstName}}/g, firstName);
                 message = message.replace(/{{propertyFocus}}/g, selectedPropertyFocus);
                 message = message.replace(/{{propertyIdentifier}}/g, propertyIdentifierValue);
                 message = message.replace(/{{propertyCity}}/g, propertyCityValue);
+                console.log('Template after replacement:', message);
                 smsEls.previewBox.textContent = message;
 
                 const sanitizedPhone = sanitizePhone(selectedPhoneNumber);
@@ -522,6 +569,7 @@
                 const group = button.parentElement;
                 group.querySelector('.active')?.classList.remove('active');
                 button.classList.add('active');
+                console.log('Property Identifier changed to:', button.dataset.value);
                 renderSMS();
             }
 
@@ -851,7 +899,7 @@
                     { name: 'Phone_3', type: 'Text' },
                     { name: 'Phone_4', type: 'Text' }
                 ],
-                selection: true
+                allowSelectBy: ['Properties_']
             });
 
             grist.onRecord(async (record, mappings) => {
@@ -878,6 +926,8 @@
             // --- Initial Setup ---
             setPanelState(isPanelOpen);
             renderHistory();
+           –
+
             updatePrivateEyeConnectionStatus('Initializing...');
         });
     </script>
