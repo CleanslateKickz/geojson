@@ -16,8 +16,8 @@
             --primary: #2c3e50;
             --secondary: #3498db;
             --accent: #e74c3c;
-            --light: #333;
-            --dark: #ecf0f1;
+            --light: #ecf0f1;
+            --dark: #333;
             --success: #27ae60;
             --background: #f4f6f8;
             --preview-bg: #ffffff;
@@ -27,8 +27,8 @@
         [data-theme="light"] {
             --primary: #34495e;
             --secondary: #2980b9;
-            --light: #ecf0f1;
-            --dark: #333;
+            --light: #333;
+            --dark: #ecf0f1;
             --background: #ffffff;
             --preview-bg: #ffffff;
             --preview-text: #333;
@@ -131,14 +131,14 @@
             border-radius: 8px;
             border: 2px solid #ccc;
             background: rgba(255,255,255,0.1);
-            color: var(--dark);
+            color: var(--dark); /* Light color for dark mode input text */
             font-size: 1rem;
             transition: all 0.3s;
         }
 
         [data-theme="light"] input {
             background: rgba(0,0,0,0.05);
-            color: var(--light);
+            color: var(--light); /* Dark color for light mode input text */
         }
 
         input:focus {
@@ -282,6 +282,11 @@
             padding: 15px;
             border-radius: 0 8px 8px 0;
             margin: 20px 0;
+            color: #333; /* Readable text color for dark mode */
+        }
+
+        [data-theme="light"] .info-box {
+            color: #444; /* Readable text color for light mode */
         }
 
         .info-box h3 {
