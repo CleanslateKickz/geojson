@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker Compose Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #34495e;
+            --success: #27ae60;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            color: var(--light);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+            margin-bottom: 30px;
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        header p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            color: #ddd;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .input-section, .preview-section {
+            background: rgba(44, 62, 80, 0.9);
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--secondary);
+            color: var(--light);
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 5px;
+            border: 2px solid #555;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        input:focus {
+            border-color: var(--secondary);
+            outline: none;
+            background: rgba(255,255,255,0.15);
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            background: var(--secondary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            margin-top: 10px;
+        }
+        
+        .btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-download {
+            background: var(--success);
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+        }
+        
+        .btn-download:hover {
+            background: #219653;
+        }
+        
+        .preview-container {
+            background: rgba(30, 40, 56, 0.8);
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        pre {
+            white-space: pre-wrap;
+            color: #f8f8f2;
+            line-height: 1.4;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .validation {
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-weight: 500;
+        }
+        
+        .valid {
+            background: rgba(39, 174, 96, 0.2);
+            color: #27ae60;
+        }
+        
+        .invalid {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+        }
+        
+        .info-box {
+            background: rgba(41, 128, 185, 0.2);
+            border-left: 4px solid var(--secondary);
+            padding: 15px;
+            border-radius: 0 5px 5px 0;
+            margin: 20px 0;
+        }
+        
+        .info-box h3 {
+            margin-bottom: 10px;
+            color: var(--secondary);
+        }
+        
+        .info-box ul {
+            padding-left: 20px;
+        }
+        
+        .info-box li {
+            margin-bottom: 8px;
+        }
+        
+        .port-info {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+            gap: 10px;
+        }
+        
+        .port-info span {
+            font-weight: 600;
+            color: var(--secondary);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #ccc;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            header h1 {
+                font-size: 2rem;
+            }
+        }
+        
+        /* Scrollbar styling */
+        .preview-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .preview-container::-webkit-scrollbar-track {
+            background: rgba(30, 40, 56, 0.5);
+            border-radius: 4px;
+        }
+        
+        .preview-container::-webkit-scrollbar-thumb {
+            background: var(--secondary);
+            border-radius: 4px;
+        }
+        
+        .preview-container::-webkit-scrollbar-thumb:hover {
+            background: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📦 Docker Compose Generator</h1>
+            <p>Generate Docker Compose and configuration files for your static web server with one click</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="input-section">
+                <h2 class="section-title">Configuration</h2>
+                
+                <div class="input-group">
+                    <label for="containerName">Container Name</label>
+                    <input type="text" id="containerName" placeholder="Enter container name (e.g., my-website)" value="my-react-app">
+                    <div id="validationResult" class="validation"></div>
+                </div>
+                
+                <div class="info-box">
+                    <h3>Container Name Rules</h3>
+                    <ul>
+                        <li>Allowed characters: letters (a-z, A-Z), numbers (0-9), underscores (_), dots (.), and hyphens (-)</li>
+                        <li>Must start and end with an alphanumeric character</li>
+                        <li>Cannot contain spaces or special characters</li>
+                    </ul>
+                </div>
+                
+                <div class="port-info">
+                    <p>Next available port: <span id="portNumber">8085</span></p>
+                </div>
+                
+                <button id="generateBtn" class="btn">Generate Files</button>
+            </div>
+            
+            <div class="preview-section">
+                <h2 class="section-title">Generated Files</h2>
+                
+                <div class="preview-container">
+                    <h3>docker-compose.yml</h3>
+                    <pre id="composePreview">services:
+  website:
+    image: joseluisq/static-web-server:latest
+    container_name: "my-react-app"
+    ports:
+      - 8085:80
+    restart: unless-stopped
+    environment:
+      # Note: those envs are customizable but also optional
+      - SERVER_ROOT=/var/public
+      - SERVER_CONFIG_FILE=/etc/sws.toml
+    volumes:
+      - ./public:/var/public
+      - ./sws.toml:/etc/sws.toml</pre>
+                </div>
+                
+                <div class="preview-container">
+                    <h3>sws.toml</h3>
+                    <pre id="tomlPreview">[general]
+# The default directory your React app will be served from
+root = "./public"
+
+# Logging: set to "info" for debugging during development, or "error" for production
+log-level = "error"
+
+# Enable gzip and brotli compression
+compression = true
+compression-level = "default"
+compression-static = true
+
+# Enables caching headers for better performance
+cache-control-headers = true
+
+# Optional: show directory listings (can be false for React apps)
+directory-listing = false
+
+# Optional: fallback to index.html for React apps using client-side routing
+page-fallback = "./index.html"</pre>
+                </div>
+                
+                <button id="downloadBtn" class="btn btn-download" disabled>Download All Files (ZIP)</button>
+            </div>
+        </div>
+        
+        <div class="info-box">
+            <h3>What's Included in the Download</h3>
+            <ul>
+                <li><strong>docker-compose.yml</strong> - Docker Compose configuration file</li>
+                <li><strong>sws.toml</strong> - Static Web Server configuration</li>
+                <li><strong>public/</strong> - Empty directory for your static files (e.g., React build output)</li>
+            </ul>
+        </div>
+        
+        <footer>
+            <p>Generated files are ready to use. Simply run <code>docker-compose up -d</code> to start your container.</p>
+        </footer>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM elements
+            const containerNameInput = document.getElementById('containerName');
+            const validationResult = document.getElementById('validationResult');
+            const generateBtn = document.getElementById('generateBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const composePreview = document.getElementById('composePreview');
+            const tomlPreview = document.getElementById('tomlPreview');
+            const portNumber = document.getElementById('portNumber');
+            
+            // Container name validation regex
+            const containerNameRegex = /^[a-zA-Z0-9][a-zA-Z0-9_.-]*[a-zA-Z0-9]$/;
+            
+            // Port management
+            let currentPort = 8085;
+            
+            // Initialize with sample data
+            updatePreview();
+            
+            // Validate container name on input
+            containerNameInput.addEventListener('input', function() {
+                validateContainerName();
+            });
+            
+            // Generate files on button click
+            generateBtn.addEventListener('click', function() {
+                if (validateContainerName()) {
+                    // Get next available port
+                    currentPort = getNextPort();
+                    portNumber.textContent = currentPort;
+                    
+                    // Update previews
+                    updatePreview();
+                    
+                    // Enable download button
+                    downloadBtn.disabled = false;
+                }
+            });
+            
+            // Download files as ZIP
+            downloadBtn.addEventListener('click', function() {
+                if (validateContainerName()) {
+                    downloadFiles();
+                }
+            });
+            
+            // Validate container name
+            function validateContainerName() {
+                const name = containerNameInput.value.trim();
+                
+                if (name === '') {
+                    validationResult.textContent = 'Container name cannot be empty';
+                    validationResult.className = 'validation invalid';
+                    return false;
+                }
+                
+                if (!containerNameRegex.test(name)) {
+                    validationResult.textContent = 'Invalid container name. Use only a-z, A-Z, 0-9, _, ., -';
+                    validationResult.className = 'validation invalid';
+                    return false;
+                }
+                
+                validationResult.textContent = 'Container name is valid';
+                validationResult.className = 'validation valid';
+                return true;
+            }
+            
+            // Get next available port
+            function getNextPort() {
+                // In a real app, we would check used ports
+                // For this demo, we'll just increment
+                return currentPort + 1;
+            }
+            
+            // Update file previews
+            function updatePreview() {
+                const containerName = containerNameInput.value.trim();
+                
+                // Update docker-compose preview
+                composePreview.textContent = `services:
+  website:
+    image: joseluisq/static-web-server:latest
+    container_name: "${containerName}"
+    ports:
+      - ${currentPort}:80
+    restart: unless-stopped
+    environment:
+      # Note: those envs are customizable but also optional
+      - SERVER_ROOT=/var/public
+      - SERVER_CONFIG_FILE=/etc/sws.toml
+    volumes:
+      - ./public:/var/public
+      - ./sws.toml:/etc/sws.toml`;
+                
+                // TOML config remains the same
+                tomlPreview.textContent = `[general]
+# The default directory your React app will be served from
+root = "./public"
+
+# Logging: set to "info" for debugging during development, or "error" for production
+log-level = "error"
+
+# Enable gzip and brotli compression
+compression = true
+compression-level = "default"
+compression-static = true
+
+# Enables caching headers for better performance
+cache-control-headers = true
+
+# Optional: show directory listings (can be false for React apps)
+directory-listing = false
+
+# Optional: fallback to index.html for React apps using client-side routing
+page-fallback = "./index.html"`;
+            }
+            
+            // Download files as ZIP
+            function downloadFiles() {
+                const containerName = containerNameInput.value.trim();
+                const zip = new JSZip();
+                
+                // Add docker-compose.yml
+                zip.file("docker-compose.yml", composePreview.textContent);
+                
+                // Add config file (sws.toml)
+                zip.file("sws.toml", tomlPreview.textContent);
+                
+                // Add empty public directory
+                zip.folder("public");
+                
+                // Generate ZIP file
+                zip.generateAsync({type:"blob"}).then(function(content) {
+                    // Save the ZIP file
+                    saveAs(content, `${containerName}-docker-files.zip`);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
