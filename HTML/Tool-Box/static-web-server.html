@@ -25,7 +25,21 @@
             --dark: #34495e;
             --success: #27ae60;
         }
+
+        body.light-theme {
+            background: #ecf0f1;
+            color: #2c3e50;
+        }
         
+        body.light-theme .input-section,
+        body.light-theme .preview-section {
+            background: #fff;
+            color: #2c3e50;
+        }
+        
+        body.light-theme pre {
+            color: #2c3e50;
+        }
         * {
             margin: 0;
             padding: 0;
@@ -439,6 +453,38 @@
                 // For this demo, we'll just increment
                 return currentPort + 1;
             }
+
+            // Tab switching logic
+            document.querySelectorAll('.tabs button').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active-tab'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+            
+                    btn.classList.add('active-tab');
+                    const tabId = btn.dataset.tab;
+                    document.getElementById(tabId + 'Tab').style.display = 'block';
+                });
+            });
+
+            document.getElementById('themeToggle').addEventListener('click', () => {
+                document.body.classList.toggle('light-theme');
+            });
+
+            document.getElementById('copyDockerCmd').addEventListener('click', () => {
+            const input = document.getElementById('dockerCmd');
+            input.select();
+            input.setSelectionRange(0, 99999);
+            document.execCommand('copy');
+        
+            function showToast(message) {
+                const toast = document.getElementById('toast');
+                toast.textContent = message;
+                toast.style.display = 'block';
+                setTimeout(() => {
+                    toast.style.display = 'none';
+                }, 2000);
+            }
+        });
             
             // Update file previews
             function updatePreview() {
