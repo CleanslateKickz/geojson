@@ -715,7 +715,7 @@ page-fallback = "./index.html"`;
                 const containerName = containerNameInput.value.trim();
                 const zip = new JSZip();
                 zip.file("docker-compose.yml", composePreview.textContent);
-                zip.file("sws.toml", tomlPreview.textContent);
+                zip.file("config.toml", tomlPreview.textContent);
                 zip.folder("public");
                 zip.generateAsync({type:"blob"}).then(function(content) {
                     saveAs(content, `${containerName}-docker-files.zip`);
