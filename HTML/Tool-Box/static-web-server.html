@@ -4,18 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Static Web Server</title>
-    <!-- JSZip and FileSaver -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-        
-        <!-- Prism.js (Syntax Highlighting) -->
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-toml.min.js"></script>
-        
-        <!-- Font Awesome (for icons) -->
-        <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-toml.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-dark.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
     <style>
         :root {
             --primary: #2c3e50;
@@ -24,76 +19,90 @@
             --light: #ecf0f1;
             --dark: #34495e;
             --success: #27ae60;
+            --background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
         }
 
-        body.light-theme {
-            background: #ecf0f1;
-            color: #2c3e50;
+        [data-theme="light"] {
+            --primary: #34495e;
+            --secondary: #2980b9;
+            --light: #1a1a1a;
+            --dark: #ecf0f1;
+            --background: linear-gradient(135deg, #f5f7fa, #c3cfe2, #f5f7fa);
         }
-        
-        body.light-theme .input-section,
-        body.light-theme .preview-section {
-            background: #fff;
-            color: #2c3e50;
-        }
-        
-        body.light-theme pre {
-            color: #2c3e50;
-        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
+
         body {
-            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            background: var(--background);
             color: var(--light);
             min-height: 100vh;
             padding: 20px;
+            transition: background 0.3s ease;
         }
-        
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
         }
-        
+
         header {
             text-align: center;
             padding: 30px 0;
             margin-bottom: 30px;
+            position: relative;
         }
-        
+
         header h1 {
             font-size: 2.5rem;
             margin-bottom: 10px;
             text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
-        
+
         header p {
             font-size: 1.2rem;
             max-width: 800px;
             margin: 0 auto;
             color: #ddd;
         }
-        
+
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: var(--light);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
         .main-content {
             display: flex;
             flex-wrap: wrap;
             gap: 30px;
             margin-bottom: 40px;
         }
-        
+
         .input-section, .preview-section {
             background: rgba(44, 62, 80, 0.9);
-            border-radius: 10px;
+            border-radius: 12px;
             padding: 25px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             flex: 1;
             min-width: 300px;
         }
-        
+
+        [data-theme="light"] .input-section, 
+        [data-theme="light"] .preview-section {
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--light);
+        }
+
         .section-title {
             font-size: 1.5rem;
             margin-bottom: 20px;
@@ -101,41 +110,46 @@
             border-bottom: 2px solid var(--secondary);
             color: var(--light);
         }
-        
+
         .input-group {
             margin-bottom: 20px;
         }
-        
+
         label {
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
         }
-        
+
         input {
             width: 100%;
             padding: 12px 15px;
-            border-radius: 5px;
+            border-radius: 8px;
             border: 2px solid #555;
             background: rgba(255,255,255,0.1);
             color: white;
             font-size: 1rem;
             transition: all 0.3s;
         }
-        
+
+        [data-theme="light"] input {
+            background: rgba(0,0,0,0.05);
+            color: var(--light);
+        }
+
         input:focus {
             border-color: var(--secondary);
             outline: none;
             background: rgba(255,255,255,0.15);
         }
-        
+
         .btn {
             display: inline-block;
             padding: 12px 25px;
             background: var(--secondary);
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
@@ -143,129 +157,232 @@
             text-align: center;
             margin-top: 10px;
         }
-        
+
+        .btn i {
+            margin-right: 8px;
+        }
+
         .btn:hover {
             background: #2980b9;
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
-        
+
         .btn:active {
             transform: translateY(0);
         }
-        
+
+        .btn-random-port {
+            background: var(--accent);
+            margin-left: 10px;
+        }
+
+        .btn-random-port:hover {
+            background: #c0392b;
+        }
+
         .btn-download {
             background: var(--success);
             width: 100%;
             padding: 15px;
             font-size: 1.1rem;
         }
-        
+
         .btn-download:hover {
             background: #219653;
         }
-        
+
+        .tabs {
+            display: flex;
+            list-style: none;
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--secondary);
+        }
+
+        .tabs li {
+            padding: 10px 20px;
+            cursor: pointer;
+            color: #ddd;
+            transition: all 0.3s;
+        }
+
+        .tabs li.active {
+            background: var(--secondary);
+            color: white;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .tabs li:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
         .preview-container {
             background: rgba(30, 40, 56, 0.8);
-            border-radius: 5px;
+            border-radius: 8px;
             padding: 15px;
             margin-bottom: 20px;
             max-height: 300px;
             overflow-y: auto;
+            transition: box-shadow 0.3s;
         }
-        
+
+        .preview-container:hover {
+            box-shadow: 0 0 10px #3498db88;
+        }
+
+        [data-theme="light"] .preview-container {
+            background: rgba(255, 255, 255, 0.8);
+        }
+
         pre {
-            white-space: pre-wrap;
-            color: #f8f8f2;
-            line-height: 1.4;
-            font-family: 'Fira Code', monospace;
-            font-size: 0.9rem;
+            margin: 0;
         }
-        
+
         .validation {
             padding: 10px;
-            border-radius: 5px;
+            border-radius: 8px;
             margin-top: 10px;
             font-weight: 500;
         }
-        
+
         .valid {
             background: rgba(39, 174, 96, 0.2);
             color: #27ae60;
         }
-        
+
         .invalid {
             background: rgba(231, 76, 60, 0.2);
             color: #e74c3c;
         }
-        
-        .info-box {
-            background: rgba(41, 128, 185, 0.2);
-            border-left: 4px solid var(--secondary);
-            padding: 15px;
-            border-radius: 0 5px 5px 0;
-            margin: 20px 0;
-        }
-        
-        .info-box h3 {
-            margin-bottom: 10px;
-            color: var(--secondary);
-        }
-        
-        .info-box ul {
-            padding-left: 20px;
-        }
-        
-        .info-box li {
-            margin-bottom: 8px;
-        }
-        
+
         .port-info {
             display: flex;
             align-items: center;
             margin-top: 10px;
             gap: 10px;
         }
-        
+
         .port-info span {
             font-weight: 600;
             color: var(--secondary);
+            padding: 5px 10px;
+            border-radius: 8px;
+            transition: all 0.4s;
         }
-        
+
+        .port-info span.updated {
+            animation: pulse 0.4s ease-in-out;
+        }
+
+        .info-box {
+            background: rgba(41, 128, 185, 0.2);
+            border-left: 4px solid var(--secondary);
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+            margin: 20px 0;
+        }
+
+        .info-box h3 {
+            margin-bottom: 10px;
+            color: var(--secondary);
+        }
+
+        .info-box ul {
+            padding-left: 20px;
+        }
+
+        .info-box li {
+            margin-bottom: 8px;
+        }
+
+        .command-box {
+            background: rgba(30, 40, 56, 0.8);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        [data-theme="light"] .command-box {
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .command-box code {
+            flex-grow: 1;
+            color: var(--light);
+            font-family: 'Fira Code', monospace;
+        }
+
+        .command-box button {
+            background: none;
+            border: none;
+            color: var(--secondary);
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--success);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
         footer {
             text-align: center;
             padding: 20px;
             color: #ccc;
             font-size: 0.9rem;
         }
-        
+
         @media (max-width: 768px) {
             .main-content {
                 flex-direction: column;
             }
-            
+
             header h1 {
                 font-size: 2rem;
             }
+
+            .theme-toggle {
+                top: 10px;
+                right: 10px;
+            }
         }
-        
-        /* Scrollbar styling */
+
         .preview-container::-webkit-scrollbar {
             width: 8px;
         }
-        
+
         .preview-container::-webkit-scrollbar-track {
             background: rgba(30, 40, 56, 0.5);
             border-radius: 4px;
         }
-        
+
         .preview-container::-webkit-scrollbar-thumb {
             background: var(--secondary);
             border-radius: 4px;
         }
-        
+
         .preview-container::-webkit-scrollbar-thumb:hover {
             background: #2980b9;
+        }
+
+        @keyframes pulse {
+            0% { background-color: #2ecc71; color: white; }
+            100% { background-color: transparent; color: var(--secondary); }
         }
     </style>
 </head>
@@ -273,21 +390,14 @@
     <div class="container">
         <header>
             <h1>📦 Docker Compose Generator</h1>
-            <div style="margin-top: 10px; display: flex; justify-content: center; gap: 20px; align-items: center;">
-              <button id="themeToggle" class="btn" style="padding: 6px 12px; font-size: 0.9rem;">
-                🌓 Toggle Theme
-              </button>
-              <a href="https://github.com/CleanslateKickz/geojson/HTML/Tool-Box/static-web-server.html" target="_blank" style="color: var(--light); text-decoration: none;">
-                <i class="fab fa-github"></i> Fork on GitHub
-              </a>
-            </div>
             <p>Generate Docker Compose and configuration files for your static web server with one click</p>
+            <button id="themeToggle" class="theme-toggle" title="Toggle Theme">🌓</button>
         </header>
-        
+
         <div class="main-content">
             <div class="input-section">
                 <h2 class="section-title">Configuration</h2>
-                
+
                 <div class="input-group">
                     <label for="containerName">Container Name</label>
                     <input type="text" id="containerName" placeholder="Enter container name (e.g., my-website)" value="my-react-app">
@@ -295,56 +405,83 @@
                 </div>
 
                 <div class="input-group">
-                    <label for="portInput">Port Number</label>
-                    <div style="display: flex; gap: 10px; align-items: center;">
-                        <input type="number" id="portInput" min="1024" max="65535" value="8085">
-                        <button type="button" id="newPortBtn" class="btn" style="white-space: nowrap;">Suggest Another Port</button>
+                    <label for="portNumber">Port</label>
+                    <div class="port-info">
+                        <input type="number" id="portNumber" value="8085" min="1024" max="65535">
+                        <button id="randomPortBtn" class="btn btn-random-port"><i class="fa fa-random"></i> Random Port</button>
                     </div>
+                    <div id="portValidation" class="validation"></div>
                 </div>
-                
+
                 <div class="info-box">
-                    <h3>Container Name Rules</h3>
+                    <h3>Configuration Rules</h3>
                     <ul>
-                        <li>Allowed characters: letters (a-z, A-Z), numbers (0-9), underscores (_), dots (.), and hyphens (-)</li>
-                        <li>Must start and end with an alphanumeric character</li>
-                        <li>Cannot contain spaces or special characters</li>
+                        <li>Container Name: letters (a-z, A-Z), numbers (0-9), underscores (_), dots (.), and hyphens (-)</li>
+                        <li>Container Name must start and end with an alphanumeric character</li>
+                        <li>Port: Must be between 1024 and 65535</li>
                     </ul>
                 </div>
-                
-                <div class="port-info">
-                    <p>Next available port: <span id="portNumber">8085</span></p>
-                </div>
-                
-                <button id="generateBtn" class="btn">Generate Files</button>
-            </div>
-            
-            <h2 class="section-title">Generated Files</h2>
 
-            <!-- Tab Buttons -->
-            <div class="tabs" style="display: flex; gap: 10px; margin-bottom: 10px;">
-              <button class="btn active-tab" data-tab="compose">docker-compose.yml</button>
-              <button class="btn" data-tab="toml">sws.toml</button>
+                <button id="generateBtn" class="btn"><i class="fa fa-cogs"></i> Generate Files</button>
             </div>
-            
-            <!-- Preview Panels -->
-            <div class="preview-container tab-content" id="composeTab">
-              <pre><code class="language-yaml" id="composePreview"></code></pre>
+
+            <div class="preview-section">
+                <h2 class="section-title">Generated Files</h2>
+
+                <ul class="tabs">
+                    <li class="active" data-tab="compose">docker-compose.yml</li>
+                    <li data-tab="toml">sws.toml</li>
+                </ul>
+
+                <div class="preview-container" id="composePreviewContainer">
+                    <pre><code class="language-yaml" id="composePreview">services:
+  website:
+    image: joseluisq/static-web-server:latest
+    container_name: "my-react-app"
+    ports:
+      - 8085:80
+    restart: unless-stopped
+    environment:
+      # Note: those envs are customizable but also optional
+      - SERVER_ROOT=/var/public
+      - SERVER_CONFIG_FILE=/etc/sws.toml
+    volumes:
+      - ./public:/var/public
+      - ./sws.toml:/etc/sws.toml</code></pre>
+                </div>
+
+                <div class="preview-container" id="tomlPreviewContainer" style="display: none;">
+                    <pre><code class="language-toml" id="tomlPreview">[general]
+# The default directory your React app will be served from
+root = "./public"
+
+# Logging: set to "info" for debugging during development, or "error" for production
+log-level = "error"
+
+# Enable gzip and brotli compression
+compression = true
+compression-level = "default"
+compression-static = true
+
+# Enables caching headers for better performance
+cache-control-headers = true
+
+# Optional: show directory listings (can be false for React apps)
+directory-listing = false
+
+# Optional: fallback to index.html for React apps using client-side routing
+page-fallback = "./index.html"</code></pre>
+                </div>
+
+                <div class="command-box">
+                    <code id="dockerCommand">docker-compose up -d</code>
+                    <button id="copyCommandBtn" title="Copy to Clipboard"><i class="fa fa-copy"></i></button>
+                </div>
+
+                <button id="downloadBtn" class="btn btn-download" disabled><i class="fa fa-download"></i> Download All Files (ZIP)</button>
             </div>
-            
-            <div class="preview-container tab-content" id="tomlTab" style="display: none;">
-              <pre><code class="language-toml" id="tomlPreview"></code></pre>
-            </div>
-            
-            <!-- Docker Command + Copy -->
-            <div class="docker-command" style="margin: 20px 0; display: flex; align-items: center; gap: 10px;">
-              <input id="dockerCmd" type="text" readonly value="docker-compose up -d" style="flex: 1; padding: 10px; border-radius: 5px; border: none; font-family: monospace;" />
-              <button class="btn" id="copyDockerCmd"><i class="fas fa-copy"></i></button>
-            </div>
-            
-            <button id="downloadBtn" class="btn btn-download" disabled>
-              <i class="fas fa-download"></i> Download All Files (ZIP)
-            </button>
-        
+        </div>
+
         <div class="info-box">
             <h3>What's Included in the Download</h3>
             <ul>
@@ -353,150 +490,151 @@
                 <li><strong>public/</strong> - Empty directory for your static files (e.g., React build output)</li>
             </ul>
         </div>
-        
+
+        <div id="toast" class="toast">✅ Files downloaded successfully!</div>
+
         <footer>
             <p>Generated files are ready to use. Simply run <code>docker-compose up -d</code> to start your container.</p>
         </footer>
     </div>
-    
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // DOM elements
             const containerNameInput = document.getElementById('containerName');
+            const portInput = document.getElementById('portNumber');
             const validationResult = document.getElementById('validationResult');
+            const portValidation = document.getElementById('portValidation');
             const generateBtn = document.getElementById('generateBtn');
             const downloadBtn = document.getElementById('downloadBtn');
+            const randomPortBtn = document.getElementById('randomPortBtn');
             const composePreview = document.getElementById('composePreview');
             const tomlPreview = document.getElementById('tomlPreview');
-            const portNumber = document.getElementById('portNumber');
-            const portInput = document.getElementById('portInput');
-            const newPortBtn = document.getElementById('newPortBtn');
-            
+            const composePreviewContainer = document.getElementById('composePreviewContainer');
+            const tomlPreviewContainer = document.getElementById('tomlPreviewContainer');
+            const themeToggle = document.getElementById('themeToggle');
+            const tabs = document.querySelectorAll('.tabs li');
+            const toast = document.getElementById('toast');
+            const copyCommandBtn = document.getElementById('copyCommandBtn');
+
             // Container name validation regex
             const containerNameRegex = /^[a-zA-Z0-9][a-zA-Z0-9_.-]*[a-zA-Z0-9]$/;
-            
-            // Port management
-            let currentPort = parseInt(portInput.value);
-            
-            // Auto-suggest new port
-            newPortBtn.addEventListener('click', () => {
-                currentPort = getRandomPort();
-                portInput.value = currentPort;
-                portNumber.textContent = currentPort;
-                updatePreview();
+            const portRegex = /^\d+$/;
+
+            // Initialize
+            updatePreview();
+            validateContainerName();
+            validatePort();
+
+            // Theme toggle
+            themeToggle.addEventListener('click', function() {
+                document.body.dataset.theme = document.body.dataset.theme === 'light' ? 'dark' : 'light';
+                themeToggle.textContent = document.body.dataset.theme === 'light' ? '🌙' : '🌓';
             });
-            
-            // Port input change
-            portInput.addEventListener('input', () => {
-                currentPort = parseInt(portInput.value) || 8085;
-                portNumber.textContent = currentPort;
-                updatePreview();
+
+            // Tab switching
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    composePreviewContainer.style.display = tab.dataset.tab === 'compose' ? 'block' : 'none';
+                    tomlPreviewContainer.style.display = tab.dataset.tab === 'toml' ? 'block' : 'none';
+                });
             });
-            
-            // Updated port getter
-            function getRandomPort() {
-                // Return a random port between 8000 and 8999
-                return Math.floor(Math.random() * 1000) + 8000;
-            }
-            
+
             // Validate container name on input
             containerNameInput.addEventListener('input', function() {
                 validateContainerName();
+                updatePreview();
             });
-            
+
+            // Validate port on input
+            portInput.addEventListener('input', function() {
+                validatePort();
+                updatePreview();
+            });
+
+            // Generate random port
+            randomPortBtn.addEventListener('click', function() {
+                const newPort = getRandomPort();
+                portInput.value = newPort;
+                portInput.classList.add('updated');
+                setTimeout(() => portInput.classList.remove('updated'), 400);
+                validatePort();
+                updatePreview();
+            });
+
             // Generate files on button click
             generateBtn.addEventListener('click', function() {
-                if (validateContainerName()) {
-                    // Get next available port
-                    currentPort = getNextPort();
-                    portNumber.textContent = currentPort;
-                    
-                    // Update previews
+                if (validateContainerName() && validatePort()) {
                     updatePreview();
-                    
-                    // Enable download button
                     downloadBtn.disabled = false;
+                    Prism.highlightAll();
                 }
             });
-            
+
             // Download files as ZIP
             downloadBtn.addEventListener('click', function() {
-                if (validateContainerName()) {
+                if (validateContainerName() && validatePort()) {
                     downloadFiles();
+                    showToast();
                 }
             });
-            
+
+            // Copy docker command
+            copyCommandBtn.addEventListener('click', function() {
+                navigator.clipboard.writeText(document.getElementById('dockerCommand').textContent);
+                showToast('✅ Command copied to clipboard!');
+            });
+
             // Validate container name
             function validateContainerName() {
                 const name = containerNameInput.value.trim();
-                
                 if (name === '') {
                     validationResult.textContent = 'Container name cannot be empty';
                     validationResult.className = 'validation invalid';
                     return false;
                 }
-                
                 if (!containerNameRegex.test(name)) {
                     validationResult.textContent = 'Invalid container name. Use only a-z, A-Z, 0-9, _, ., -';
                     validationResult.className = 'validation invalid';
                     return false;
                 }
-                
                 validationResult.textContent = 'Container name is valid';
                 validationResult.className = 'validation valid';
                 return true;
             }
-            
-            // Get next available port
-            function getNextPort() {
-                // In a real app, we would check used ports
-                // For this demo, we'll just increment
-                return currentPort + 1;
+
+            // Validate port
+            function validatePort() {
+                const port = parseInt(portInput.value);
+                if (!portRegex.test(portInput.value) || port < 1024 || port > 65535) {
+                    portValidation.textContent = 'Port must be between 1024 and 65535';
+                    portValidation.className = 'validation invalid';
+                    return false;
+                }
+                portValidation.textContent = 'Port is valid';
+                portValidation.className = 'validation valid';
+                return true;
             }
 
-            // Tab switching logic
-            document.querySelectorAll('.tabs button').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active-tab'));
-                    document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
-            
-                    btn.classList.add('active-tab');
-                    const tabId = btn.dataset.tab;
-                    document.getElementById(tabId + 'Tab').style.display = 'block';
-                });
-            });
-
-            document.getElementById('themeToggle').addEventListener('click', () => {
-                document.body.classList.toggle('light-theme');
-            });
-
-            document.getElementById('copyDockerCmd').addEventListener('click', () => {
-            const input = document.getElementById('dockerCmd');
-            input.select();
-            input.setSelectionRange(0, 99999);
-            document.execCommand('copy');
-        
-            function showToast(message) {
-                const toast = document.getElementById('toast');
-                toast.textContent = message;
-                toast.style.display = 'block';
-                setTimeout(() => {
-                    toast.style.display = 'none';
-                }, 2000);
+            // Get random port
+            function getRandomPort() {
+                return Math.floor(Math.random() * (65535 - 1024 + 1)) + 1024;
             }
-        });
-            
+
             // Update file previews
             function updatePreview() {
                 const containerName = containerNameInput.value.trim();
-                
+                const port = portInput.value;
+
                 // Update docker-compose preview
                 composePreview.textContent = `services:
   website:
     image: joseluisq/static-web-server:latest
     container_name: "${containerName}"
     ports:
-      - ${currentPort}:80
+      - ${port}:80
     restart: unless-stopped
     environment:
       # Note: those envs are customizable but also optional
@@ -505,7 +643,7 @@
     volumes:
       - ./public:/var/public
       - ./sws.toml:/etc/sws.toml`;
-                
+
                 // TOML config remains the same
                 tomlPreview.textContent = `[general]
 # The default directory your React app will be served from
@@ -527,33 +665,29 @@ directory-listing = false
 
 # Optional: fallback to index.html for React apps using client-side routing
 page-fallback = "./index.html"`;
+
+                Prism.highlightAll();
             }
-            
+
             // Download files as ZIP
             function downloadFiles() {
                 const containerName = containerNameInput.value.trim();
                 const zip = new JSZip();
-                
-                // Add docker-compose.yml
                 zip.file("docker-compose.yml", composePreview.textContent);
-                
-                // Add config file (sws.toml)
                 zip.file("sws.toml", tomlPreview.textContent);
-                
-                // Add empty public directory
                 zip.folder("public");
-                
-                // Generate ZIP file
                 zip.generateAsync({type:"blob"}).then(function(content) {
-                    // Save the ZIP file
                     saveAs(content, `${containerName}-docker-files.zip`);
                 });
             }
+
+            // Show toast notification
+            function showToast(message = '✅ Files downloaded successfully!') {
+                toast.textContent = message;
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 2000);
+            }
         });
     </script>
-    <!-- Toast Container -->
-    <div id="toast" style="position: fixed; bottom: 30px; right: 30px; background: #27ae60; color: white; padding: 12px 20px; border-radius: 8px; font-weight: 500; box-shadow: 0 2px 10px rgba(0,0,0,0.3); display: none; z-index: 1000;">
-      ✅ Files downloaded successfully!
-    </div>
 </body>
 </html>
