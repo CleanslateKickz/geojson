@@ -196,6 +196,23 @@
             background: #219653;
         }
 
+        .btn-localhost {
+            background: var(--success);
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+            margin-top: 10px;
+        }
+
+        .btn-localhost:hover {
+            background: #219653;
+        }
+
+        .btn-localhost:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+
         .tabs {
             display: flex;
             list-style: none;
@@ -282,11 +299,11 @@
             padding: 15px;
             border-radius: 0 8px 8px 0;
             margin: 20px 0;
-            color: #333; /* Readable text color for dark mode */
+            color: #333;
         }
 
         [data-theme="light"] .info-box {
-            color: #444; /* Readable text color for light mode */
+            color: #444;
         }
 
         .info-box h3 {
@@ -415,7 +432,7 @@
                 <div class="input-group">
                     <label for="portNumber">Port</label>
                     <div class="port-info">
-                        <input type="number" id="portNumber" value="8085" min="1024" max="65535">
+                        <input type="number" id="portNumber" value="8085" min="1024" max=65535">
                         <button id="randomPortBtn" class="btn btn-random-port"><i class="fa fa-random"></i> Random Port</button>
                     </div>
                     <div id="portValidation" class="validation"></div>
@@ -438,7 +455,7 @@
 
                 <ul class="tabs">
                     <li class="active" data-tab="compose">docker-compose.yml</li>
-                    <li data-tab="toml">sws.toml</li>
+                    <li data-tab="toml">config.toml</li>
                 </ul>
 
                 <div class="preview-container" id="composePreviewContainer">
@@ -487,6 +504,7 @@ page-fallback = "./index.html"</code></pre>
                 </div>
 
                 <button id="downloadBtn" class="btn btn-download" disabled><i class="fa fa-download"></i> Download All Files (ZIP)</button>
+                <button id="localhostBtn" class="btn btn-localhost" disabled><i class="fa fa-globe"></i> Open Localhost</button>
             </div>
         </div>
 
@@ -524,6 +542,7 @@ page-fallback = "./index.html"</code></pre>
             const tabs = document.querySelectorAll('.tabs li');
             const toast = document.getElementById('toast');
             const copyCommandBtn = document.getElementById('copyCommandBtn');
+            const localhostBtn = document.getElementById('localhostBtn');
 
             // Container name validation regex
             const containerNameRegex = /^[a-zA-Z0-9][a-zA-Z0-9_.-]*[a-zA-Z0-9]$/;
@@ -577,6 +596,7 @@ page-fallback = "./index.html"</code></pre>
                 if (validateContainerName() && validatePort()) {
                     updatePreview();
                     downloadBtn.disabled = false;
+                    localhostBtn.disabled = false; // Enable localhost button after generation
                     Prism.highlightAll();
                 }
             });
@@ -586,6 +606,18 @@ page-fallback = "./index.html"</code></pre>
                 if (validateContainerName() && validatePort()) {
                     downloadFiles();
                     showToast();
+                    localhostBtn.disabled = false; // Enable localhost button after download
+                }
+            });
+
+            // Open localhost URL
+            localhostBtn.addEventListener('click', function() {
+                if (!localhostBtn.disabled) {
+                    const port = portInput.value;
+                    if (validatePort()) {
+                        const url = `http://localhost:${port}`;
+                        window.open(url, '_blank');
+                    }
                 }
             });
 
@@ -619,6 +651,7 @@ page-fallback = "./index.html"</code></pre>
                 if (!portRegex.test(portInput.value) || port < 1024 || port > 65535) {
                     portValidation.textContent = 'Port must be between 1024 and 65535';
                     portValidation.className = 'validation invalid';
+                    localhostBtn.disabled = true; // Disable localhost button if port is invalid
                     return false;
                 }
                 portValidation.textContent = 'Port is valid';
