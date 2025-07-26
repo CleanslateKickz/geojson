@@ -261,6 +261,14 @@
                     <input type="text" id="containerName" placeholder="Enter container name (e.g., my-website)" value="my-react-app">
                     <div id="validationResult" class="validation"></div>
                 </div>
+
+                <div class="input-group">
+                    <label for="portInput">Port Number</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="number" id="portInput" min="1024" max="65535" value="8085">
+                        <button type="button" id="newPortBtn" class="btn" style="white-space: nowrap;">Suggest Another Port</button>
+                    </div>
+                </div>
                 
                 <div class="info-box">
                     <h3>Container Name Rules</h3>
@@ -351,15 +359,35 @@ page-fallback = "./index.html"</pre>
             const composePreview = document.getElementById('composePreview');
             const tomlPreview = document.getElementById('tomlPreview');
             const portNumber = document.getElementById('portNumber');
+            const portInput = document.getElementById('portInput');
+            const newPortBtn = document.getElementById('newPortBtn');
             
             // Container name validation regex
             const containerNameRegex = /^[a-zA-Z0-9][a-zA-Z0-9_.-]*[a-zA-Z0-9]$/;
             
             // Port management
-            let currentPort = 8085;
+            let currentPort = parseInt(portInput.value);
             
-            // Initialize with sample data
-            updatePreview();
+            // Auto-suggest new port
+            newPortBtn.addEventListener('click', () => {
+                currentPort = getRandomPort();
+                portInput.value = currentPort;
+                portNumber.textContent = currentPort;
+                updatePreview();
+            });
+            
+            // Port input change
+            portInput.addEventListener('input', () => {
+                currentPort = parseInt(portInput.value) || 8085;
+                portNumber.textContent = currentPort;
+                updatePreview();
+            });
+            
+            // Updated port getter
+            function getRandomPort() {
+                // Return a random port between 8000 and 8999
+                return Math.floor(Math.random() * 1000) + 8000;
+            }
             
             // Validate container name on input
             containerNameInput.addEventListener('input', function() {
