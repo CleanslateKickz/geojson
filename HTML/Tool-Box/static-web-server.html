@@ -4,8 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Static Web Server</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <!-- JSZip and FileSaver -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+        
+        <!-- Prism.js (Syntax Highlighting) -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-toml.min.js"></script>
+        
+        <!-- Font Awesome (for icons) -->
+        <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <style>
         :root {
             --primary: #2c3e50;
@@ -249,6 +259,14 @@
     <div class="container">
         <header>
             <h1>📦 Docker Compose Generator</h1>
+            <div style="margin-top: 10px; display: flex; justify-content: center; gap: 20px; align-items: center;">
+              <button id="themeToggle" class="btn" style="padding: 6px 12px; font-size: 0.9rem;">
+                🌓 Toggle Theme
+              </button>
+              <a href="https://github.com/CleanslateKickz/geojson/HTML/Tool-Box/static-web-server.html" target="_blank" style="color: var(--light); text-decoration: none;">
+                <i class="fab fa-github"></i> Fork on GitHub
+              </a>
+            </div>
             <p>Generate Docker Compose and configuration files for your static web server with one click</p>
         </header>
         
@@ -286,54 +304,32 @@
                 <button id="generateBtn" class="btn">Generate Files</button>
             </div>
             
-            <div class="preview-section">
-                <h2 class="section-title">Generated Files</h2>
-                
-                <div class="preview-container">
-                    <h3>docker-compose.yml</h3>
-                    <pre id="composePreview">services:
-  website:
-    image: joseluisq/static-web-server:latest
-    container_name: "my-react-app"
-    ports:
-      - 8085:80
-    restart: unless-stopped
-    environment:
-      # Note: those envs are customizable but also optional
-      - SERVER_ROOT=/var/public
-      - SERVER_CONFIG_FILE=/etc/sws.toml
-    volumes:
-      - ./public:/var/public
-      - ./sws.toml:/etc/sws.toml</pre>
-                </div>
-                
-                <div class="preview-container">
-                    <h3>sws.toml</h3>
-                    <pre id="tomlPreview">[general]
-# The default directory your React app will be served from
-root = "./public"
+            <h2 class="section-title">Generated Files</h2>
 
-# Logging: set to "info" for debugging during development, or "error" for production
-log-level = "error"
-
-# Enable gzip and brotli compression
-compression = true
-compression-level = "default"
-compression-static = true
-
-# Enables caching headers for better performance
-cache-control-headers = true
-
-# Optional: show directory listings (can be false for React apps)
-directory-listing = false
-
-# Optional: fallback to index.html for React apps using client-side routing
-page-fallback = "./index.html"</pre>
-                </div>
-                
-                <button id="downloadBtn" class="btn btn-download" disabled>Download All Files (ZIP)</button>
+            <!-- Tab Buttons -->
+            <div class="tabs" style="display: flex; gap: 10px; margin-bottom: 10px;">
+              <button class="btn active-tab" data-tab="compose">docker-compose.yml</button>
+              <button class="btn" data-tab="toml">sws.toml</button>
             </div>
-        </div>
+            
+            <!-- Preview Panels -->
+            <div class="preview-container tab-content" id="composeTab">
+              <pre><code class="language-yaml" id="composePreview"></code></pre>
+            </div>
+            
+            <div class="preview-container tab-content" id="tomlTab" style="display: none;">
+              <pre><code class="language-toml" id="tomlPreview"></code></pre>
+            </div>
+            
+            <!-- Docker Command + Copy -->
+            <div class="docker-command" style="margin: 20px 0; display: flex; align-items: center; gap: 10px;">
+              <input id="dockerCmd" type="text" readonly value="docker-compose up -d" style="flex: 1; padding: 10px; border-radius: 5px; border: none; font-family: monospace;" />
+              <button class="btn" id="copyDockerCmd"><i class="fas fa-copy"></i></button>
+            </div>
+            
+            <button id="downloadBtn" class="btn btn-download" disabled>
+              <i class="fas fa-download"></i> Download All Files (ZIP)
+            </button>
         
         <div class="info-box">
             <h3>What's Included in the Download</h3>
@@ -509,5 +505,9 @@ page-fallback = "./index.html"`;
             }
         });
     </script>
+    <!-- Toast Container -->
+    <div id="toast" style="position: fixed; bottom: 30px; right: 30px; background: #27ae60; color: white; padding: 12px 20px; border-radius: 8px; font-weight: 500; box-shadow: 0 2px 10px rgba(0,0,0,0.3); display: none; z-index: 1000;">
+      ✅ Files downloaded successfully!
+    </div>
 </body>
 </html>
