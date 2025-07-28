@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Phone Widget</title>
+  
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+  
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #fff;
+      padding: 8px;
+      box-sizing: border-box;
+    }
+
+    .phone-cards-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .phone-card {
+      background-color: #f8f9fa;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.2s ease;
+    }
+
+    .phone-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .phone-number {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .phone-link {
+      font-size: 16px;
+      font-weight: 500;
+      color: #374151;
+      text-decoration: none;
+    }
+
+    .phone-note {
+      color: #6b7280;
+      font-size: 12px;
+    }
+
+    /* Ensure markdown-generated paragraphs have no extra margin */
+    .phone-note p {
+      margin: 0;
+    }
+
+    .phone-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .phone-action-btn {
+      background-color: #fff;
+      border: 1px solid #e1e5e9;
+      border-radius: 4px;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .phone-action-btn:hover {
+      background-color: #e9ecef;
+    }
+
+    .phone-action-btn a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .action-icon {
+      width: 18px;
+      height: 18px;
+      object-fit: contain;
+    }
+
+    .wrong-phone {
+      background-color: #fee2e2;
+      border-color: #fecaca;
+      padding: 12px;
+      justify-content: center;
+    }
+
+    .wrong-phone-label {
+      color: #b91c1c;
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .no-data-msg {
+      color: #6b7280;
+      font-style: italic;
+      text-align: center;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div id="phone-container" class="phone-cards-container">
+    <div class="no-data-msg">Please select a record in the Owners table.</div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+      const ELS = {
+        container: document.getElementById('phone-container'),
+      };
+
+      // Define the phone fields and their corresponding note fields
+      const PHONE_FIELDS = [
+        { phone: 'Phone', notes: 'Phone_1_Notes' },
+        { phone: 'Phone_2', notes: 'Phone_2_Notes' },
+        { phone: 'Phone_3', notes: 'Phone_3_Notes' },
+        { phone: 'Phone_4', notes: 'Phone_4_Notes' },
+        { phone: 'Wrong_Phone', notes: null }
+      ];
+
+      // Helper to format a phone number string to (XXX) XXX-XXXX
+      function formatPhoneNumber(phoneStr) {
+        if (!phoneStr) return '';
+        const cleaned = ('' + phoneStr).replace(/\D/g, '');
+        const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+        if (match) {
+          return `(${match[1]}) ${match[2]}-${match[3]}`;
+        }
+        return phoneStr;
+      }
+
+      // Renders a single phone number card
+      function renderPhoneCard(phoneVal, notesVal, isWrongPhone) {
+        const formattedPhoneDigits = String(phoneVal).replace(/[^0-9]/g, '');
+
+        if (isWrongPhone) {
+          return `
+            <div class="phone-card wrong-phone">
+              <div class="wrong-phone-label">${formatPhoneNumber(phoneVal)}</div>
+            </div>
+          `;
+        }
+
+        // Use marked.parseInline to avoid wrapping notes in <p> tags
+        const notesDisplay = notesVal ? `<div class="phone-note">${marked.parseInline(notesVal)}</div>` : '';
+
+        return `
+          <div class="phone-card">
+            <div class="phone-number">
+              <a href="tel:+1${formattedPhoneDigits}" class="phone-link">${formatPhoneNumber(phoneVal)}</a>
+              ${notesDisplay}
+            </div>
+            <div class="phone-actions">
+              <button class="phone-action-btn" title="Call with Webex">
+                <a href="sip:+1${formattedPhoneDigits}">
+                  <img src="https://img.icons8.com/fluent/512/webex.png" alt="Webex" class="action-icon">
+                </a>
+              </button>
+              <button class="phone-action-btn" title="Call with Phone Link">
+                <a href="tel:+1${formattedPhoneDigits}">
+                  <img src="https://static.wikia.nocookie.net/logopedia/images/b/b2/Microsoft_Phone_Link_%282022%29.svg" alt="Phone Link" class="action-icon">
+                </a>
+              </button>
+            </div>
+          </div>`;
+      }
+
+      // Main function to render all phone numbers for the selected record
+      function renderAll(record) {
+        if (!record) {
+          ELS.container.innerHTML = `<div class="no-data-msg">Please select a record in the Owners table.</div>`;
+          return;
+        }
+
+        let content = '';
+        let hasPhones = false;
+
+        PHONE_FIELDS.forEach(field => {
+          const phoneVal = record[field.phone];
+          // Check if the phone number exists and is not just whitespace
+          if (phoneVal && String(phoneVal).trim()) {
+            const notesVal = field.notes ? record[field.notes] : null;
+            const isWrong = field.phone === 'Wrong_Phone';
+            content += renderPhoneCard(phoneVal, notesVal, isWrong);
+            hasPhones = true;
+          }
+        });
+
+        if (!hasPhones) {
+          ELS.container.innerHTML = `<div class="no-data-msg">No phone numbers found for this record.</div>`;
+        } else {
+          ELS.container.innerHTML = content;
+        }
+      }
+
+      // Initialize Grist and set up the listener
+      grist.ready();
+      grist.onRecord(renderAll);
+    });
+  </script>
+</body>
+</html>
