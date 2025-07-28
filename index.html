@@ -12,80 +12,87 @@
     }
 
     body { 
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #ffffff;
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
       margin: 0; 
       color: #1a202c;
-      min-height: 100vh;
+      line-height: 1.6;
     }
 
-    .hero-section {
-      background: linear-gradient(135deg, rgba(102, 126, 234, 0.95) 0%, rgba(118, 75, 162, 0.95) 100%);
-      color: white;
-      padding: 4rem 0 3rem;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .hero-section::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-      pointer-events: none;
+    .header-section {
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      border-bottom: 1px solid #e2e8f0;
+      padding: 2rem 0 1.5rem;
     }
 
     .container { 
-      max-width: 1400px; 
+      max-width: 1600px; 
       margin: 0 auto; 
-      padding: 0 2rem;
-      position: relative;
-      z-index: 1;
+      padding: 0 1rem;
     }
 
     .main-content {
-      background: #ffffff;
-      margin-top: -2rem;
-      border-radius: 2rem 2rem 0 0;
-      padding: 3rem 2rem 2rem;
-      box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.1);
-      position: relative;
-      z-index: 2;
+      padding: 1.5rem 0;
+    }
+
+    .header-content {
+      text-align: center;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: #2d3748;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+    }
+
+    .sub { 
+      color: #64748b; 
+      font-size: 1.1rem; 
+      margin-bottom: 1.5rem;
+      font-weight: 400;
+    }
+
+    .controls-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      gap: 1rem;
+      flex-wrap: wrap;
     }
 
     .search-section {
-      max-width: 700px;
-      margin: 0 auto 4rem;
-      text-align: center;
+      flex: 1;
+      max-width: 500px;
     }
 
     .search-bar {
       position: relative;
-      display: inline-block;
       width: 100%;
     }
 
     .search-bar input {
       width: 100%;
-      padding: 1.2rem 1.5rem 1.2rem 3.5rem;
+      padding: 0.75rem 1rem 0.75rem 2.5rem;
       border: 2px solid #e2e8f0;
-      border-radius: 2rem;
-      font-size: 1.1rem;
+      border-radius: 0.5rem;
+      font-size: 1rem;
       background: #ffffff;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      transition: all 0.3s ease;
+      transition: all 0.2s ease;
       font-weight: 500;
     }
 
     .search-bar input:focus {
       outline: none;
-      border-color: #667eea;
-      box-shadow: 0 4px 25px rgba(102, 126, 234, 0.2), 0 0 0 4px rgba(102, 126, 234, 0.1);
-      transform: translateY(-2px);
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
 
     .search-bar::before {
@@ -93,382 +100,361 @@
       font-family: 'Font Awesome 6 Free';
       font-weight: 900;
       position: absolute;
-      left: 1.5rem;
+      left: 0.75rem;
       top: 50%;
       transform: translateY(-50%);
       color: #94a3b8;
-      font-size: 1.1rem;
+      font-size: 0.9rem;
       z-index: 1;
     }
 
-    h1 {
-      font-size: 3.5rem;
-      font-weight: 800;
-      margin-bottom: 1rem;
-      letter-spacing: -1px;
+    .view-controls {
       display: flex;
+      gap: 0.5rem;
       align-items: center;
-      justify-content: center;
-      gap: 1rem;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
-    .sub { 
-      color: rgba(255, 255, 255, 0.9); 
-      font-size: 1.3rem; 
-      margin-bottom: 0;
-      font-weight: 400;
-      max-width: 600px;
-      margin: 0 auto;
-      line-height: 1.6;
+    .view-controls label {
+      font-size: 0.9rem;
+      color: #64748b;
+      font-weight: 500;
+      margin-right: 0.5rem;
+    }
+
+    .view-toggle {
+      display: flex;
+      background: #f1f5f9;
+      border-radius: 0.5rem;
+      padding: 0.25rem;
+      border: 1px solid #e2e8f0;
+    }
+
+    .view-toggle button {
+      padding: 0.5rem 0.75rem;
+      border: none;
+      background: transparent;
+      color: #64748b;
+      font-size: 0.9rem;
+      font-weight: 500;
+      border-radius: 0.25rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-width: 40px;
+    }
+
+    .view-toggle button.active {
+      background: #3b82f6;
+      color: white;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    .view-toggle button:hover:not(.active) {
+      background: #e2e8f0;
+      color: #374151;
     }
 
     .section-title {
-      font-size: 2.2rem;
-      color: #2d3748;
-      font-weight: 700;
-      margin: 4rem 0 2rem 0;
+      font-size: 1.5rem;
+      color: #1e293b;
+      font-weight: 600;
+      margin: 3rem 0 1rem 0;
       display: flex;
       align-items: center;
-      gap: 1rem;
-      position: relative;
-      padding-bottom: 1rem;
-    }
-
-    .section-title::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 60px;
-      height: 4px;
-      background: linear-gradient(90deg, #667eea, #764ba2);
-      border-radius: 2px;
+      gap: 0.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #e2e8f0;
     }
 
     .gallery {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-      gap: 2.5rem;
-      margin: 2rem 0 3rem 0;
+      gap: 1.5rem;
+      margin: 1.5rem 0;
+    }
+
+    .gallery.cols-2 {
+      grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    }
+
+    .gallery.cols-3 {
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    }
+
+    .gallery.cols-4 {
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     }
 
     .card {
-      position: relative;
-      border-radius: 1.5rem;
+      background: #ffffff;
+      border-radius: 0.75rem;
       overflow: hidden;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-      background: #fff;
-      min-height: 400px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+      border: 1px solid #e2e8f0;
+      transition: all 0.2s ease;
       display: flex;
       flex-direction: column;
-      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      border: 1px solid rgba(226, 232, 240, 0.8);
     }
 
     .card:hover {
-      transform: translateY(-12px) scale(1.02);
-      box-shadow: 0 20px 60px rgba(102, 126, 234, 0.25), 0 8px 32px rgba(0,0,0,0.15);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+      border-color: #cbd5e1;
     }
 
     .card-image {
       width: 100%;
-      height: 280px;
+      height: 200px;
       object-fit: cover;
       display: block;
-      transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-    }
-
-    .card:hover .card-image {
-      transform: scale(1.08);
-    }
-
-    .card-overlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(
-        to top, 
-        rgba(26, 32, 44, 0.85) 0%, 
-        rgba(26, 32, 44, 0.4) 50%,
-        rgba(0,0,0,0.1) 100%
-      );
-      z-index: 1;
-      pointer-events: none;
-      opacity: 0.9;
+      background: #f8fafc;
     }
 
     .card-content {
-      position: absolute;
-      left: 0; 
-      right: 0; 
-      bottom: 0;
-      z-index: 2;
-      color: #fff;
-      padding: 2rem 2rem 1.8rem 2rem;
+      padding: 1rem;
+      flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 0.8rem;
-      pointer-events: auto;
-    }
-
-    .card-title {
-      font-size: 1.6rem;
-      font-weight: 700;
-      line-height: 1.3;
-      margin-bottom: 0.5rem;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-      letter-spacing: -0.5px;
     }
 
     .card-desc {
-      font-size: 1.1rem;
-      color: rgba(255, 255, 255, 0.9);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+      font-size: 0.9rem;
+      color: #64748b;
       margin-bottom: 1rem;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-      line-height: 1.5;
+      flex: 1;
     }
 
     .card-link {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 0.5rem;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: #fff;
-      padding: 0.9rem 1.8rem;
-      border-radius: 2rem;
+      background: #3b82f6;
+      color: #ffffff;
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
       text-decoration: none;
-      font-size: 1.1rem;
-      font-weight: 600;
-      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      margin-top: 0.5rem;
-      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-      border: 2px solid transparent;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .card-link::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-      transition: left 0.5s;
-    }
-
-    .card-link:hover::before {
-      left: 100%;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      border: none;
+      cursor: pointer;
     }
 
     .card-link:hover {
-      background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
-      transform: translateY(-2px) scale(1.05);
-      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-      border-color: rgba(255, 255, 255, 0.2);
+      background: #2563eb;
+      transform: translateY(-1px);
     }
 
     .card-link::after {
       content: '\f35d';
       font-family: 'Font Awesome 6 Free';
       font-weight: 900;
-      margin-left: 0.5rem;
-      transition: transform 0.3s ease;
-    }
-
-    .card-link:hover::after {
-      transform: translateX(3px);
+      font-size: 0.8rem;
     }
 
     .loading { 
-      color: #718096; 
+      color: #64748b; 
       text-align: center; 
-      margin-top: 3rem; 
-      font-size: 1.2rem;
+      margin: 2rem 0; 
+      font-size: 1rem;
       font-weight: 500;
     }
 
     .footer { 
       text-align: center; 
-      margin: 5rem 0 3rem; 
-      color: #718096; 
-      font-size: 1rem; 
-      border-top: 2px solid #e2e8f0; 
+      margin: 3rem 0 2rem; 
+      color: #64748b; 
+      font-size: 0.9rem; 
+      border-top: 1px solid #e2e8f0; 
       padding-top: 2rem;
-      background: #f8fafc;
-      border-radius: 1rem 1rem 0 0;
     }
 
     .footer a { 
-      color: #667eea; 
+      color: #3b82f6; 
       text-decoration: none; 
-      transition: all 0.2s;
-      font-weight: 600;
+      transition: color 0.2s;
+      font-weight: 500;
     }
 
     .footer a:hover { 
-      color: #5a67d8;
-      text-decoration: underline;
+      color: #2563eb;
     }
 
-    /* Newsletter and GeoJSON sections with special styling */
-    .special-section .gallery {
-      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    }
-
-    .special-section .card {
-      min-height: 350px;
-    }
-
+    /* Special sections styling */
     .special-section .card-image {
-      height: 240px;
+      height: 160px;
     }
 
     /* Responsive Design */
     @media (max-width: 1200px) {
-      .gallery {
-        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-        gap: 2rem;
+      .gallery.cols-4 {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      }
+      .gallery.cols-3 {
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
       }
     }
 
     @media (max-width: 768px) {
-      .container { padding: 0 1rem; }
-      .main-content { padding: 2rem 1rem 1rem; margin-top: -1rem; }
+      .container { 
+        padding: 0 0.75rem; 
+      }
       
       h1 { 
-        font-size: 2.5rem; 
+        font-size: 2rem; 
         flex-direction: column;
         gap: 0.5rem;
       }
       
-      .sub { font-size: 1.1rem; }
+      .controls-section {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .search-section {
+        max-width: none;
+      }
+      
+      .view-controls {
+        justify-content: center;
+      }
       
       .section-title { 
-        font-size: 1.8rem; 
-        margin: 3rem 0 1.5rem 0;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
+        font-size: 1.3rem; 
+        margin: 2rem 0 1rem 0;
       }
       
-      .gallery { 
+      .gallery.cols-2,
+      .gallery.cols-3,
+      .gallery.cols-4 { 
         grid-template-columns: 1fr; 
-        gap: 1.5rem; 
+        gap: 1rem; 
       }
       
-      .card { min-height: 350px; }
-      .card-image { height: 220px; }
-      .card-content { padding: 1.5rem; }
-      .card-title { font-size: 1.4rem; }
-      .card-desc { font-size: 1rem; }
+      .card-image { 
+        height: 180px; 
+      }
       
-      .search-bar input { 
-        padding: 1rem 1.2rem 1rem 3rem; 
-        font-size: 1rem;
+      .card-content { 
+        padding: 0.75rem; 
       }
     }
 
     @media (max-width: 480px) {
-      .hero-section { padding: 3rem 0 2rem; }
-      h1 { font-size: 2rem; }
-      .card { min-height: 300px; }
-      .card-image { height: 180px; }
-      .gallery { gap: 1rem; }
+      .header-section { 
+        padding: 1.5rem 0 1rem; 
+      }
+      
+      h1 { 
+        font-size: 1.75rem; 
+      }
+      
+      .sub {
+        font-size: 1rem;
+      }
+      
+      .card-image { 
+        height: 160px; 
+      }
+      
+      .view-toggle button {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.8rem;
+        min-width: 35px;
+      }
     }
 
     /* Loading animation */
-    .loading {
-      position: relative;
-    }
-
     .loading::after {
       content: '';
       display: inline-block;
-      width: 20px;
-      height: 20px;
+      width: 16px;
+      height: 16px;
       border: 2px solid #e2e8f0;
       border-radius: 50%;
-      border-top-color: #667eea;
+      border-top-color: #3b82f6;
       animation: spin 1s ease-in-out infinite;
-      margin-left: 10px;
+      margin-left: 8px;
     }
 
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
 
-    /* Smooth scroll behavior */
-    html {
-      scroll-behavior: smooth;
-    }
-
     /* Focus styles for accessibility */
-    .card-link:focus {
-      outline: 3px solid rgba(102, 126, 234, 0.5);
+    .card-link:focus,
+    .view-toggle button:focus {
+      outline: 2px solid #3b82f6;
       outline-offset: 2px;
     }
 
     .search-bar input:focus {
       outline: none;
     }
+
+    /* Smooth transitions */
+    .gallery {
+      transition: all 0.3s ease;
+    }
   </style>
 </head>
 <body>
-  <div class="hero-section">
+  <div class="header-section">
     <div class="container">
-      <h1><i class="fas fa-map-marked-alt"></i> CleanslateKickz GeoJSON & Real Estate Tools</h1>
-      <div class="sub">Your comprehensive hub for interactive maps, powerful widgets, and cutting-edge real estate dashboards.</div>
+      <div class="header-content">
+        <h1><i class="fas fa-map-marked-alt"></i> CleanslateKickz GeoJSON & Real Estate Tools</h1>
+        <div class="sub">Your comprehensive hub for interactive maps, powerful widgets, and cutting-edge real estate dashboards.</div>
+      </div>
     </div>
   </div>
 
   <div class="container">
     <div class="main-content">
-      <div class="search-section">
-        <div class="search-bar">
-          <input type="text" placeholder="Search projects, tools, and widgets..." id="projectSearch">
+      <div class="controls-section">
+        <div class="search-section">
+          <div class="search-bar">
+            <input type="text" placeholder="Search projects, tools, and widgets..." id="projectSearch">
+          </div>
+        </div>
+        <div class="view-controls">
+          <label>View:</label>
+          <div class="view-toggle">
+            <button data-cols="2">2</button>
+            <button data-cols="3" class="active">3</button>
+            <button data-cols="4">4</button>
+          </div>
         </div>
       </div>
 
       <div class="section-title"><i class="fas fa-tools"></i> Tools & Utilities</div>
-      <div id="tools-utilities" class="gallery">
+      <div id="tools-utilities" class="gallery cols-3">
         <div class="loading">Loading tools</div>
       </div>
 
       <div class="section-title"><i class="fas fa-code"></i> Additional HTML Projects</div>
-      <div id="additional-projects" class="gallery">
+      <div id="additional-projects" class="gallery cols-3">
         <div class="loading">Loading projects</div>
       </div>
 
       <div class="section-title"><i class="fas fa-puzzle-piece"></i> Interactive Widgets</div>
-      <div id="widgets" class="gallery">
+      <div id="widgets" class="gallery cols-3">
         <div class="loading">Loading widgets</div>
       </div>
 
       <div class="section-title"><i class="fas fa-newspaper"></i> RetailStat Newsletters</div>
       <div class="special-section">
-        <div class="gallery">
+        <div class="gallery cols-3">
           <div class="card">
-            <img class="card-image" src="https://via.placeholder.com/400x240/667eea/ffffff?text=Newsletter+Archive" alt="RetailStat Newsletters"/>
-            <div class="card-overlay"></div>
+            <img class="card-image" src="https://via.placeholder.com/400x160/f1f5f9/64748b?text=Newsletter+Archive" alt="RetailStat Newsletters"/>
             <div class="card-content">
-              <div class="card-title">Newsletter Archive</div>
-              <div class="card-desc"><i class="fas fa-archive"></i> Complete collection of monthly and bi-monthly publications</div>
-              <a class="card-link" href="retailstat/index.html">Explore Archive</a>
+              <div class="card-desc">Complete collection of monthly and bi-monthly publications</div>
+              <a class="card-link" href="retailstat/index.html">Newsletter Archive</a>
             </div>
           </div>
           <div class="card">
-            <img class="card-image" src="https://via.placeholder.com/400x240/764ba2/ffffff?text=Latest+Edition" alt="Latest Newsletter"/>
-            <div class="card-overlay"></div>
+            <img class="card-image" src="https://via.placeholder.com/400x160/f1f5f9/64748b?text=Latest+Edition" alt="Latest Newsletter"/>
             <div class="card-content">
-              <div class="card-title">Latest Edition</div>
-              <div class="card-desc"><i class="fas fa-clock"></i> Jump directly to our newest publication</div>
-              <a class="card-link" href="retailstat/June-17-2025.html">Read Latest</a>
+              <div class="card-desc">Jump directly to our newest publication</div>
+              <a class="card-link" href="retailstat/June-17-2025.html">June 17, 2025</a>
             </div>
           </div>
         </div>
@@ -476,14 +462,12 @@
 
       <div class="section-title"><i class="fas fa-database"></i> GeoJSON Files & Data</div>
       <div class="special-section">
-        <div class="gallery">
+        <div class="gallery cols-3">
           <div class="card">
-            <img class="card-image" src="https://via.placeholder.com/400x240/4f46e5/ffffff?text=GeoJSON+Repository" alt="GeoJSON Directory"/>
-            <div class="card-overlay"></div>
+            <img class="card-image" src="https://via.placeholder.com/400x160/f1f5f9/64748b?text=GeoJSON+Repository" alt="GeoJSON Directory"/>
             <div class="card-content">
-              <div class="card-title">GeoJSON Repository</div>
-              <div class="card-desc"><i class="fab fa-github"></i> Browse our comprehensive collection of GeoJSON files</div>
-              <a class="card-link" href="https://github.com/CleanslateKickz/geojson/tree/main/geojson" target="_blank">Browse Repository</a>
+              <div class="card-desc">Browse our comprehensive collection of GeoJSON files</div>
+              <a class="card-link" href="https://github.com/CleanslateKickz/geojson/tree/main/geojson" target="_blank">GeoJSON Repository</a>
             </div>
           </div>
         </div>
@@ -500,7 +484,7 @@
     // Mapping for images, alt, desc, button for HTML/Widgets (customize as needed)
     const htmlImageMap = {
       // Example:
-      // "Big-Beautiful-Bill": {img:"Images/Big-Beautiful-Bill.png", alt:"Big Beautiful Bill", desc:"Project description", btn:"Open Project"},
+      // "Big-Beautiful-Bill": {img:"Images/Big-Beautiful-Bill.png", alt:"Big Beautiful Bill", desc:"Project description", btn:"Big-Beautiful-Bill.html"},
       // Add more custom mappings here if you want to override the auto-detect
     };
 
@@ -508,28 +492,34 @@
       // Custom mappings for widgets, if needed
     };
 
-    // Fallback image with better placeholder
-    const FALLBACK_IMG = "https://via.placeholder.com/400x280/e2e8f0/94a3b8?text=Project+Preview";
+    // Fallback image with clean placeholder
+    const FALLBACK_IMG = "https://via.placeholder.com/400x200/f8fafc/64748b?text=Project";
 
     // Try .png, then .jpg, then fallback
     function getAutoImg(base) {
       const png = `Images/${base}.png`;
       const jpg = `Images/${base}.jpg`;
-      // We'll use PNG by default, and rely on <img onerror> for fallback.
       return png;
     }
 
     function getImgObj(map, filePath, fallbackBtn) {
+      const originalPath = filePath;
       filePath = filePath.replace(/\.html?$/i, "");
+      
       if (map[filePath]) return map[filePath];
+      
       const base = filePath.split(/[\\/]/).pop();
       if (map[base]) return map[base];
-      // Auto-detect image (PNG, fallback to placeholder via onerror)
+      
+      // Extract filename for button text
+      const fileName = originalPath.split(/[\\/]/).pop().replace(/\.html?$/i, "");
+      const displayName = fileName.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+      
       return {
         img: getAutoImg(base),
-        alt: base.replace(/-/g," ").replace(/\b\w/g, l => l.toUpperCase()),
+        alt: displayName,
         desc: "",
-        btn: fallbackBtn
+        btn: fileName // Use actual filename instead of generic text
       };
     }
 
@@ -545,7 +535,6 @@
           if (item.type === "file" && /\.html?$/i.test(item.name)) {
             topLevel.push({ name: item.name, path: `${subfolder}/${item.name}` });
           } else if (item.type === "dir") {
-            // Recursively fetch files in subfolder
             const subfiles = await fetchAllHtmlInSubfolders(`${apiPath}/${item.name}`, `${subfolder}/${item.name}`);
             subfolderFiles = subfolderFiles.concat(subfiles);
           }
@@ -597,7 +586,7 @@
       }
     }
 
-    // Render gallery cards with improved error handling
+    // Render gallery cards with improved structure
     function showCards(files, galleryId, map, fallbackBtn) {
       const gallery = document.getElementById(galleryId);
       
@@ -615,35 +604,57 @@
           if (parts.length > 1) mapKey = parts.slice(0,-1).join("/") + "/" + parts[parts.length-1].replace(/\.html?$/,"");
         }
         
-        const imgObj = getImgObj(map, mapKey, fallbackBtn);
+        const imgObj = getImgObj(map, f.path, fallbackBtn);
         const cardElement = document.createElement('div');
         cardElement.className = 'card';
         cardElement.innerHTML = `
           <img class="card-image" src="${imgObj.img}" alt="${imgObj.alt}"
                onerror="this.onerror=null;this.src='${FALLBACK_IMG}';">
-          <div class="card-overlay"></div>
           <div class="card-content">
-            <div class="card-title">${imgObj.alt || f.name.replace(/\.html?$/,'').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</div>
             <div class="card-desc">${imgObj.desc || ""}</div>
-            <a class="card-link" href="${f.path}" target="_blank">${imgObj.btn || fallbackBtn}</a>
+            <a class="card-link" href="${f.path}" target="_blank">${imgObj.btn || f.name.replace(/\.html?$/i, "")}</a>
           </div>
         `;
         gallery.appendChild(cardElement);
       });
     }
 
-    // Main dynamic loading logic with better error handling
+    // Column view toggle functionality
+    function initViewToggle() {
+      const toggleButtons = document.querySelectorAll('.view-toggle button');
+      const galleries = document.querySelectorAll('.gallery');
+      
+      toggleButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          // Remove active class from all buttons
+          toggleButtons.forEach(btn => btn.classList.remove('active'));
+          // Add active class to clicked button
+          button.classList.add('active');
+          
+          const cols = button.dataset.cols;
+          
+          // Update all galleries
+          galleries.forEach(gallery => {
+            gallery.className = `gallery cols-${cols}`;
+          });
+        });
+      });
+    }
+
+    // Main dynamic loading logic
     (async function(){
       try {
         const {topLevel, subfolderFiles} = await fetchTopAndSubfolderHtml('HTML', 'HTML');
-        showCards(topLevel, "tools-utilities", htmlImageMap, "Open Tool");
-        showCards(subfolderFiles, "additional-projects", htmlImageMap, "Open Project");
+        showCards(topLevel, "tools-utilities", htmlImageMap, "");
+        showCards(subfolderFiles, "additional-projects", htmlImageMap, "");
         
         const widgets = await fetchTopLevelWidgetHtmlFiles();
-        showCards(widgets, "widgets", widgetsImageMap, "Launch Widget");
+        showCards(widgets, "widgets", widgetsImageMap, "");
+        
+        // Initialize view toggle after content is loaded
+        initViewToggle();
       } catch (error) {
         console.error('Error loading content:', error);
-        // Show error message in galleries
         ['tools-utilities', 'additional-projects', 'widgets'].forEach(id => {
           const gallery = document.getElementById(id);
           gallery.innerHTML = `<div class="loading">Unable to load content. Please try again later.</div>`;
@@ -661,31 +672,14 @@
         let visibleCount = 0;
         
         cards.forEach(card => {
-          const title = card.querySelector('.card-title') ? card.querySelector('.card-title').textContent.toLowerCase() : "";
+          const linkText = card.querySelector('.card-link') ? card.querySelector('.card-link').textContent.toLowerCase() : "";
           const desc = card.querySelector('.card-desc') ? card.querySelector('.card-desc').textContent.toLowerCase() : "";
-          const isVisible = !searchTerm || title.includes(searchTerm) || desc.includes(searchTerm);
+          const isVisible = !searchTerm || linkText.includes(searchTerm) || desc.includes(searchTerm);
           
           card.style.display = isVisible ? '' : 'none';
           if (isVisible) visibleCount++;
         });
-
-        // Update galleries if no results found
-        if (searchTerm && visibleCount === 0) {
-          // Could add "no results" message here if desired
-        }
       }, 300);
-    });
-
-    // Add smooth scrolling for better UX
-    document.addEventListener('DOMContentLoaded', function() {
-      // Add loading animation completion
-      setTimeout(() => {
-        document.querySelectorAll('.loading').forEach(el => {
-          if (el.textContent.includes('Loading')) {
-            el.style.opacity = '0.7';
-          }
-        });
-      }, 1000);
     });
   </script>
 </body>
