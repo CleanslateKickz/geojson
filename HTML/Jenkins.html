@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Investment Opportunity: 14480 SW Jenkins Rd</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f3f4f6;
+      margin: 0;
+      padding: 0;
+      color: #111827;
+    }
+    header {
+      background-color: #1f2937;
+      color: white;
+      padding: 2rem;
+      text-align: center;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
+    }
+    main {
+      padding: 2rem;
+      max-width: 1200px;
+      margin: auto;
+    }
+    section {
+      background: white;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      border-bottom: 2px solid #3b82f6;
+      padding-bottom: 0.5rem;
+    }
+    ul li {
+      margin-bottom: 0.5rem;
+    }
+    iframe.map {
+      width: 100%;
+      height: 400px;
+      border: none;
+      border-radius: 0.5rem;
+    }
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+    .gallery img {
+      width: 100%;
+      border-radius: 0.5rem;
+      height: 200px;
+      object-fit: cover;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 0.75rem;
+      border: 1px solid #e5e7eb;
+      text-align: right;
+    }
+    th {
+      background-color: #3b82f6;
+      color: white;
+      text-align: left;
+    }
+    canvas {
+      margin-top: 1.5rem;
+    }
+    .price-select, .summary {
+      margin-top: 1rem;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: space-between;
+    }
+    .summary div {
+      background-color: #f9fafb;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      flex: 1;
+      min-width: 150px;
+      text-align: center;
+    }
+    .summary span {
+      display: block;
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>14480 SW Jenkins Rd, Beaverton, OR</h1>
+    <p>Income Property with Long-Term Day Care Tenant + Cell Tower</p>
+  </header>
+  <main>
+    <section>
+      <h2>Opportunity Summary</h2>
+      <ul>
+        <li>Offered at $2,850,000 | NNN Lease</li>
+        <li>Day Care tenant lease runs through July 31, 2032 with 3% annual bumps</li>
+        <li>Monthly Rent: $9,514 (in 2032)</li>
+        <li>Bonus Income from Cell Tower Tenant: $46,867.44/year</li>
+        <li>Total Rent Income Before Occupancy: ~$1.7M by July 2032</li>
+      </ul>
+    </section>
+    <section>
+      <h2>Photos</h2>
+      <div class="gallery">
+        <img src="https://www.arcgis.com/sharing/rest/content/items/8f83c3a7cab044d69cac37ccaf0fbeb2/resources/Exterior__1657560617631.jpg" alt="Exterior">
+        <img src="https://www.arcgis.com/sharing/rest/content/items/8f83c3a7cab044d69cac37ccaf0fbeb2/resources/PXL_20220704_201319596__1657560646296.jpg" alt="Side">
+        <img src="https://ahprd1cdn.csgpimgs.com/i2/9FD-wPQasZ7n1yvP-i1mKQ50_vPjRi_lBwNVUndWBWA/116/image.jpg" alt="Aerial">
+      </div>
+    </section>
+    <section>
+      <h2>Location</h2>
+      <p>Only child care property next to Nike's World Headquarters, in a high-demand area surrounded by affluent families and strong employment drivers.</p>
+      <iframe class="map" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2790.472614949362!2d-122.83166268441363!3d45.4838739790981!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x5495740e0f9e0c6f%3A0x8a8f2e6b4b2e4e4e!2s14480%20SW%20Jenkins%20Rd%2C%20Beaverton%2C%20OR%2097076!5e1!3m2!1sen!2sus!4v1720458245!5m2!1sen!2sus"></iframe>
+    </section>
+    <section>
+      <h2>Cash Flow Schedule (2025-2032)</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Year</th>
+            <th>Day Care Rent</th>
+            <th>Cell Tower Rent</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody id="cashFlowTable">
+          <!-- JS will populate this -->
+        </tbody>
+      </table>
+      <canvas id="cashFlowChart"></canvas>
+    </section>
+    <section>
+      <h2>Purchase Scenario & Returns</h2>
+      <div class="price-select">
+        <label for="purchasePrice">Select Purchase Price: </label>
+        <select id="purchasePrice" onchange="updateCashFlow()">
+          <option value="2850000">$2,850,000</option>
+          <option value="2750000">$2,750,000</option>
+          <option value="2650000">$2,650,000</option>
+          <option value="2500000">$2,500,000</option>
+        </select>
+      </div>
+      <div class="summary">
+        <div>Purchase Price<span id="ppVal">$2,850,000</span></div>
+        <div>Year 1 NOI<span id="noiVal">$142,483</span></div>
+        <div>Cash-on-Cash Return<span id="cocVal">5.0%</span></div>
+        <div>Total Rent Collected (8 yrs)<span id="rentTotal">$1,695,335</span></div>
+      </div>
+      <canvas id="cumulativeChart"></canvas>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const daycare = [95616, 98484, 101439, 104482, 107617, 110845, 114171, 66599];
+    const tower = Array(7).fill(46867.44).concat(27339.34);
+    const years = ["2025", "2026", "2027", "2028", "2029", "2030", "2031", "2032"];
+
+    const totalRents = daycare.map((v, i) => v + tower[i]);
+
+    const cashFlowTable = document.getElementById("cashFlowTable");
+    cashFlowTable.innerHTML = years.map((y, i) => `<tr><td>${y}</td><td>$${daycare[i].toLocaleString()}</td><td>$${tower[i].toLocaleString()}</td><td>$${totalRents[i].toLocaleString()}</td></tr>`).join('');
+
+    const ctxFlow = document.getElementById("cashFlowChart").getContext("2d");
+    new Chart(ctxFlow, {
+      type: 'bar',
+      data: {
+        labels: years,
+        datasets: [
+          { label: 'Day Care Rent', data: daycare, backgroundColor: '#3b82f6' },
+          { label: 'Cell Tower Rent', data: tower, backgroundColor: '#10b981' },
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { position: 'top' }, title: { display: true, text: 'Projected Cash Flow' } },
+        scales: { y: { beginAtZero: true } }
+      }
+    });
+
+    const ctxCumulative = document.getElementById("cumulativeChart").getContext("2d");
+    const cumRent = totalRents.reduce((acc, curr, i) => {
+      acc.push((acc[i - 1] || 0) + curr);
+      return acc;
+    }, []);
+
+    let cumulativeChart = new Chart(ctxCumulative, {
+      type: 'line',
+      data: {
+        labels: years,
+        datasets: [{
+          label: 'Cumulative Rent Collected',
+          data: cumRent,
+          backgroundColor: 'rgba(59, 130, 246, 0.2)',
+          borderColor: '#3b82f6',
+          fill: true,
+          tension: 0.2
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { title: { display: true, text: 'Cumulative Cash Flow' } },
+        scales: { y: { beginAtZero: true } }
+      }
+    });
+
+    function updateCashFlow() {
+      const price = parseInt(document.getElementById("purchasePrice").value);
+      document.getElementById("ppVal").textContent = `$${price.toLocaleString()}`;
+      const noi = totalRents[0];
+      document.getElementById("noiVal").textContent = `$${noi.toLocaleString()}`;
+      document.getElementById("cocVal").textContent = `${((noi / price) * 100).toFixed(1)}%`;
+      document.getElementById("rentTotal").textContent = `$${cumRent[cumRent.length - 1].toLocaleString()}`;
+    }
+
+    updateCashFlow();
+  </script>
+</body>
+</html>
