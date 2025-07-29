@@ -1,0 +1,608 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head><script>window.huggingface={variables:{"SPACE_CREATOR_USER_ID":"67ebfb9c8a04fac663b8235d"}};</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LoanGuard - Default Prediction App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .prediction-card {
+            box-shadow: 0 10px 30px -10px rgba(46, 52, 135, 0.3);
+        }
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #667eea;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .risk-meter-high {
+            animation: pulse 2s infinite;
+        }
+    </style>
+    </head>
+    <body class="min-h-screen bg-gray-50">
+        <header class="gradient-bg text-white">
+            <div class="container mx-auto px-4 py-8">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-shield-alt text-2xl"></i>
+                        <h1 class="text-2xl font-bold">LoanGuard</h1>
+                    </div>
+                    <nav>
+                        <ul class="flex space-x-6">
+                            <li><a href="#" class="hover:text-blue-200">Home</a></li>
+                            <li><a href="#" class="hover:text-blue-200">About</a></li>
+                            <li><a href="#" class="hover:text-blue-200">Insights</a></li>
+                            <li><a href="#" class="hover:text-blue-200">Contact</a></li>
+                        </ul>
+                    </nav>
+                </div>
+                <div class="mt-12 text-center">
+                    <h2 class="text-4xl font-bold mb-4">Smart Loan Default Prediction</h2>
+                    <p class="text-xl max-w-2xl mx-auto">Our AI-powered system helps lenders assess risk and make informed decisions about loan approvals.</p>
+                </div>
+            </div>
+        </header>
+
+        <main class="container mx-auto px-4 py-12 -mt-16">
+            <div class="bg-white rounded-xl shadow-2xl overflow-hidden prediction-card">
+                <div class="md:flex">
+                    <!-- Input Form Section -->
+                    <div class="md:w-1/2 p-8">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6">Loan Applicant Details</h3>
+
+                        <form id="loanForm" class="space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Loan Amount -->
+                                <div>
+                                    <label for="loanAmount" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                                        Loan Amount (USD)
+                                        <div class="tooltip ml-2 relative inline-block">
+                                            <i class="fas fa-info-circle text-gray-400 hover:text-gray-600"></i>
+                                            <span class="tooltip-text absolute z-10 invisible opacity-0 w-48 bg-gray-900 text-white text-xs rounded py-2 px-3 bottom-full left-1/2 transform -translate-x-1/2 mb-2 transition-all">
+                                                The total amount of money the borrower is requesting.
+                                            </span>
+                                        </div>
+                                    </label>
+                                    <div class="mt-1 relative rounded-md shadow-sm">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <span class="text-gray-500 sm:text-sm">$</span>
+                                        </div>
+                                        <input type="number" id="loanAmount" name="loanAmount" class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md py-2 border" placeholder="5,000">
+                                        <div class="absolute inset-y-0 right-0 flex items-center">
+                                            <span class="text-gray-500 sm:text-sm pr-3">.00</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Annual Income -->
+                                <div>
+                                    <label for="annualIncome" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                                        Annual Income (USD)
+                                    </label>
+                                    <div class="mt-1 relative rounded-md shadow-sm">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <span class="text-gray-500 sm:text-sm">$</span>
+                                        </div>
+                                        <input type="number" id="annualIncome" name="annualIncome" class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md py-2 border" placeholder="60,000">
+                                        <div class="absolute inset-y-0 right-0 flex items-center">
+                                            <span class="text-gray-500 sm:text-sm pr-3">.00</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Interest Rate -->
+                                <div>
+                                    <label for="interestRate" class="block text-sm font-medium text-gray-700 mb-1">Interest Rate (%)</label>
+                                    <input type="range" id="interestRate" name="interestRate" min="5" max="30" step="0.1" value="10" class="w-full mt-2">
+                                    <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                        <span>5%</span>
+                                        <span id="interestRateValue">10%</span>
+                                        <span>30%</span>
+                                    </div>
+                                </div>
+
+                                <!-- Term -->
+                                <div>
+                                    <label for="term" class="block text-sm font-medium text-gray-700 mb-1">Loan Term</label>
+                                    <select id="term" name="term" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                                        <option value="36">36 months</option>
+                                        <option value="60" selected>60 months</option>
+                                    </select>
+                                </div>
+
+                                <!-- Home Ownership -->
+                                <div>
+                                    <label for="homeOwnership" class="block text-sm font-medium text-gray-700 mb-1">Home Ownership</label>
+                                    <select id="homeOwnership" name="homeOwnership" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                                        <option value="RENT">Rent</option>
+                                        <option value="MORTGAGE" selected>Mortgage</option>
+                                        <option value="OWN">Own</option>
+                                        <option value="OTHER">Other</option>
+                                    </select>
+                                </div>
+
+                                <!-- Verification Status -->
+                                <div>
+                                    <label for="verificationStatus" class="block text-sm font-medium text-gray-700 mb-1">Verification Status</label>
+                                    <select id="verificationStatus" name="verificationStatus" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                                        <option value="Verified">Verified</option>
+                                        <option value="Not Verified" selected>Not Verified</option>
+                                        <option value="Source Verified">Source Verified</option>
+                                    </select>
+                                </div>
+
+                                <!-- Debit to Income -->
+                                <div class="md:col-span-2">
+                                    <label for="dti" class="block text-sm font-medium text-gray-700 mb-1">Debt-to-Income Ratio (%)</label>
+                                    <input type="range" id="dti" name="dti" min="0" max="50" step="0.1" value="15" class="w-full mt-2">
+                                    <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                        <span>0%</span>
+                                        <span id="dtiValue">15%</span>
+                                        <span>50%</span>
+                                    </div>
+                                </div>
+
+                                <!-- Total Current Balance -->
+                                <div>
+                                    <label for="totalBalance" class="block text-sm font-medium text-gray-700 mb-1">Total Current Balance (USD)</label>
+                                    <input type="number" id="totalBalance" name="totalBalance" class="focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-2 border" placeholder="10,000">
+                                </div>
+
+                                <!-- Days Since Last Payment -->
+                                <div>
+                                    <label for="daysSinceLastPay" class="block text-sm font-medium text-gray-700 mb-1">Days Since Last Payment</label>
+                                    <select id="daysSinceLastPay" name="daysSinceLastPay" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                                        <option value="7" selected>0-7 days</option>
+                                        <option value="14">8-14 days</option>
+                                        <option value="21">15-21 days</option>
+                                        <option value="28">22-28 days</option>
+                                        <option value="35">29-35 days</option>
+                                        <option value="60">36-60 days</option>
+                                        <option value="90">61-90 days</option>
+                                        <option value="120">91-120 days</option>
+                                        <option value="150">121+ days</option>
+                                    </select>
+                                </div>
+
+                                <!-- Application Type -->
+                                <div>
+                                    <label for="applicationType" class="block text-sm font-medium text-gray-700 mb-1">Application Type</label>
+                                    <select id="applicationType" name="applicationType" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                                        <option value="Individual" selected>Individual</option>
+                                        <option value="Joint">Joint</option>
+                                    </select>
+                                </div>
+
+                                <!-- Loan Title -->
+                                <div>
+                                    <label for="loanTitle" class="block text-sm font-medium text-gray-700 mb-1">Loan Purpose</label>
+                                    <select id="loanTitle" name="loanTitle" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                                        <option value="Debt consolidation" selected>Debt consolidation</option>
+                                        <option value="Credit card refinancing">Credit card refinancing</option>
+                                        <option value="Home improvement">Home improvement</option>
+                                        <option value="Business">Business</option>
+                                        <option value="Major purchase">Major purchase</option>
+                                        <option value="Medical expenses">Medical expenses</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="pt-4">
+                                <button type="button" id="predictBtn" class="w-full gradient-bg text-white py-3 px-4 rounded-md font-medium hover:opacity-90 transition duration-300 flex items-center justify-center">
+                                    <i class="fas fa-chart-line mr-2"></i> Predict Default Risk
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Results Section -->
+                    <div class="md:w-1/2 bg-gradient-to-br from-gray-50 to-gray-100 p-8 flex flex-col">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6">Risk Assessment</h3>
+
+                        <div id="resultSection" class="flex-grow flex flex-col justify-center items-center hidden">
+                            <div id="riskScore" class="relative w-48 h-48 rounded-full shadow-lg flex items-center justify-center mb-8">
+                                <svg class="absolute top-0 left-0 w-full h-full" viewBox="0 0 120 120">
+                                    <circle cx="60" cy="60" r="54" fill="none" stroke="#e6e6e6" stroke-width="12" />
+                                    <circle id="riskMeter" cx="60" cy="60" r="54" fill="none" stroke="#667eea" stroke-width="12" stroke-dasharray="339.292" stroke-dashoffset="339.292" stroke-linecap="round" transform="rotate(-90 60 60)" />
+                                </svg>
+                                <div class="text-center z-10">
+                                    <span id="riskPercentage" class="text-4xl font-bold">0</span>
+                                    <span class="text-xl font-bold">%</span>
+                                </div>
+                            </div>
+
+                            <div id="riskDescription" class="text-center mb-8">
+                                <h4 id="riskCategory" class="text-2xl font-bold mb-2">Not Assessed</h4>
+                                <p id="riskText" class="text-gray-600 max-w-md">Submit loan details to assess default risk probability.</p>
+                            </div>
+
+                            <div id="riskFactors" class="w-full max-w-md">
+                                <div class="mb-2">
+                                    <div class="flex justify-between text-sm text-gray-600 mb-1">
+                                        <span>Loan Amount</span>
+                                        <span id="factorAmount" class="font-medium">-</span>
+                                    </div>
+                                    <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                                        <div id="amountBar" class="h-full bg-blue-500" style="width: 0%"></div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-2">
+                                    <div class="flex justify-between text-sm text-gray-600 mb-1">
+                                        <span>Income vs Debt</span>
+                                        <span id="factorIncome" class="font-medium">-</span>
+                                    </div>
+                                    <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                                        <div id="incomeBar" class="h-full bg-blue-500" style="width: 0%"></div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-2">
+                                    <div class="flex justify-between text-sm text-gray-600 mb-1">
+                                        <span>Payment Delay</span>
+                                        <span id="factorHistory" class="font-medium">-</span>
+                                    </div>
+                                    <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                                        <div id="historyBar" class="h-full bg-blue-500" style="width: 0%"></div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-2">
+                                    <div class="flex justify-between text-sm text-gray-600 mb-1">
+                                        <span>Credit Profile</span>
+                                        <span id="factorCredit" class="font-medium">-</span>
+                                    </div>
+                                    <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                                        <div id="creditBar" class="h-full bg-blue-500" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="recommendation" class="mt-8 p-4 rounded-lg bg-white shadow-sm w-full max-w-md hidden">
+                                <h5 class="font-bold text-gray-700 mb-2">Recommendation</h5>
+                                <p id="recommendationText" class="text-sm text-gray-600">Provide loan details for recommendations.</p>
+                            </div>
+                        </div>
+
+                        <div id="emptyState" class="flex-grow flex flex-col items-center justify-center text-center">
+                            <div class="bg-blue-100 p-4 rounded-full mb-4">
+                                <i class="fas fa-chart-pie text-blue-500 text-3xl"></i>
+                            </div>
+                            <h4 class="text-xl font-medium text-gray-700 mb-2">No Risk Assessment Yet</h4>
+                            <p class="text-gray-500 max-w-xs">Fill out the loan details and click "Predict Default Risk" to see the analysis.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Insights Section -->
+            <div class="mt-16">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6">Key Risk Factors Analysis</h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-blue-500">
+                        <div class="flex items-center mb-4">
+                            <div class="bg-blue-100 p-3 rounded-full mr-4">
+                                <i class="fas fa-dollar-sign text-blue-500"></i>
+                            </div>
+                            <h4 class="font-bold text-gray-800">Debt-to-Income Ratio</h4>
+                        </div>
+                        <p class="text-gray-600 text-sm">Applicants with a DTI above 40% are 3x more likely to default. Our model weights this factor heavily in its assessment.</p>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-purple-500">
+                        <div class="flex items-center mb-4">
+                            <div class="bg-purple-100 p-3 rounded-full mr-4">
+                                <i class="fas fa-clock text-purple-500"></i>
+                            </div>
+                            <h4 class="font-bold text-gray-800">Payment Recency</h4>
+                        </div>
+                        <p class="text-gray-600 text-sm">Borrowers with payments delayed by more than 30 days show a 65% higher default rate than those who pay on time.</p>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-green-500">
+                        <div class="flex items-center mb-4">
+                            <div class="bg-green-100 p-3 rounded-full mr-4">
+                                <i class="fas fa-percentage text-green-500"></i>
+                            </div>
+                            <h4 class="font-bold text-gray-800">Loan Interest Rate</h4>
+                        </div>
+                        <p class="text-gray-600 text-sm">Each percentage point increase in APR correlates with a 1.8% rise in default probability above 15% rates.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="gradient-bg text-white py-12">
+            <div class="container mx-auto px-4">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="mb-6 md:mb-0">
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-shield-alt text-2xl"></i>
+                            <h3 class="text-xl font-bold">LoanGuard</h3>
+                        </div>
+                        <p class="mt-2 text-blue-100 max-w-md">Advanced loan default prediction system to help lenders make informed decisions and reduce risk.</p>
+                    </div>
+
+                    <div class="flex space-x-6">
+                        <a href="#" class="text-blue-200 hover:text-white"><i class="fab fa-twitter text-xl"></i></a>
+                        <a href="#" class="text-blue-200 hover:text-white"><i class="fab fa-linkedin-in text-xl"></i></a>
+                        <a href="#" class="text-blue-200 hover:text-white"><i class="fab fa-github text-xl"></i></a>
+                        <a href="#" class="text-blue-200 hover:text-white"><i class="fas fa-envelope text-xl"></i></a>
+                    </div>
+                </div>
+
+                <div class="border-t border-blue-300 mt-8 pt-8 text-center text-blue-100 text-sm">
+                    <p>© 2025 LoanGuard. All rights reserved. | Not financial advice. For educational purposes only.</p>
+                </div>
+            </div>
+        </footer>
+
+        <script>
+            // Update slider values display
+            document.getElementById('interestRate').addEventListener('input', function() {
+                document.getElementById('interestRateValue').textContent = this.value + '%';
+            });
+
+            document.getElementById('dti').addEventListener('input', function() {
+                document.getElementById('dtiValue').textContent = this.value + '%';
+            });
+
+            // Prediction logic
+            document.getElementById('predictBtn').addEventListener('click', function() {
+                // Get form values
+                const loanAmount = parseFloat(document.getElementById('loanAmount').value) || 0;
+                const annualIncome = parseFloat(document.getElementById('annualIncome').value) || 1; // Avoid division by zero
+                const interestRate = parseFloat(document.getElementById('interestRate').value);
+                const term = parseInt(document.getElementById('term').value);
+                const homeOwnership = document.getElementById('homeOwnership').value;
+                const verificationStatus = document.getElementById('verificationStatus').value;
+                const dti = parseFloat(document.getElementById('dti').value);
+                const daysSinceLastPay = parseInt(document.getElementById('daysSinceLastPay').value);
+                const applicationType = document.getElementById('applicationType').value;
+                const loanTitle = document.getElementById('loanTitle').value;
+                const totalBalance = parseFloat(document.getElementById('totalBalance').value) || 0;
+
+                // Validate required fields
+                if (loanAmount <= 0 || isNaN(loanAmount)) {
+                    alert('Please enter a valid loan amount.');
+                    return;
+                }
+
+                // Calculate risk score (simplified model)
+                let riskScore = 0;
+
+                // 1. Debt-to-income impact (0-40 points)
+                riskScore += Math.min(dti * 0.8, 40);
+
+                // 2. Loan amount vs income (0-20 points)
+                const loanToIncomeRatio = (loanAmount / annualIncome) * 100;
+                riskScore += Math.min(loanToIncomeRatio * 0.2, 20);
+
+                // 3. Interest rate impact (0-15 points)
+                riskScore += Math.max(0, interestRate - 5) * 0.6;
+
+                // 4. Home ownership adjustment (-10 to +10 points)
+                switch(homeOwnership) {
+                    case 'RENT': riskScore += 6; break;
+                    case 'MORTGAGE': riskScore -= 2; break;
+                    case 'OWN': riskScore -= 8; break;
+                    default: riskScore += 0;
+                }
+
+                // 5. Verification status adjustment (-5 to +5 points)
+                switch(verificationStatus) {
+                    case 'Verified': riskScore -= 5; break;
+                    case 'Not Verified': riskScore += 5; break;
+                    case 'Source Verified': riskScore -= 2; break;
+                }
+
+                // 6. Application type adjustment (-3 to 0 points)
+                if (applicationType === 'Individual') {
+                    riskScore += 1;
+                } else {
+                    riskScore -= 3;
+                }
+
+                // 7. Loan purpose adjustment (-5 to +5 points)
+                const purposeRisk = {
+                    'Debt consolidation': 4,
+                    'Credit card refinancing': 5,
+                    'Home improvement': -2,
+                    'Business': 5,
+                    'Major purchase': 1,
+                    'Medical expenses': 3,
+                    'Other': 0
+                };
+                riskScore += purposeRisk[loanTitle] || 0;
+
+                // 8. Days since last payment (0-20 points)
+                // More recent = lower risk (0 points)
+                // Older payments = higher risk (capped at 20 points)
+                if (daysSinceLastPay <= 7) {
+                    riskScore += 0;
+                } else if (daysSinceLastPay <= 14) {
+                    riskScore += 2;
+                } else if (daysSinceLastPay <= 21) {
+                    riskScore += 4;
+                } else if (daysSinceLastPay <= 28) {
+                    riskScore += 6;
+                } else if (daysSinceLastPay <= 35) {
+                    riskScore += 8;
+                } else if (daysSinceLastPay <= 60) {
+                    riskScore += 12;
+                } else if (daysSinceLastPay <= 90) {
+                    riskScore += 16;
+                } else {
+                    riskScore += 20;
+                }
+
+                // 9. Term adjustment (0-5 points)
+                if (term === 60) riskScore += 3;
+
+                // Cap the risk score between 0-100
+                riskScore = Math.max(0, Math.min(100, riskScore));
+
+                // Display results
+                displayResults(riskScore, {
+                    loanAmount,
+                    annualIncome,
+                    dti,
+                    daysSinceLastPay
+                });
+            });
+
+            function displayResults(riskScore, factors) {
+                // Show results section and hide empty state
+                document.getElementById('resultSection').classList.remove('hidden');
+                document.getElementById('emptyState').classList.add('hidden');
+
+                // Animate risk meter
+                const circumference = 339.292;
+                const offset = circumference - (circumference * (riskScore / 100));
+                document.getElementById('riskMeter').style.strokeDashoffset = offset;
+
+                // Update percentage display
+                const riskPercentage = document.getElementById('riskPercentage');
+                let current = 0;
+                const duration = 1000; // Animation duration in ms
+                const increment = riskScore / (duration / 16); // 60fps
+
+                const updateCount = () => {
+                    current = Math.min(riskScore, current + increment);
+                    riskPercentage.textContent = Math.round(current);
+
+                    if (current < riskScore) {
+                        requestAnimationFrame(updateCount);
+                    }
+                };
+
+                updateCount();
+
+                // Set risk category and description
+                const riskDescription = document.getElementById('riskDescription');
+                const riskCategory = document.getElementById('riskCategory');
+                const riskText = document.getElementById('riskText');
+
+                let category = '', description = '', color = '';
+
+                if (riskScore < 20) {
+                    category = 'Low Risk';
+                    description = 'This applicant presents a very low risk of default according to our analysis.';
+                    color = 'green';
+                    document.getElementById('riskScore').classList.remove('risk-meter-high');
+                } else if (riskScore < 45) {
+                    category = 'Moderate Risk';
+                    description = 'This application carries some risk factors that may warrant further review.';
+                    color = 'blue';
+                    document.getElementById('riskScore').classList.remove('risk-meter-high');
+                } else if (riskScore < 70) {
+                    category = 'High Risk';
+                    description = 'Several risk factors suggest this applicant may struggle with repayment.';
+                    color = 'red';
+                    document.getElementById('riskScore').classList.add('risk-meter-high');
+                } else {
+                    category = 'Very High Risk';
+                    description = 'Our assessment indicates a significant probability of default. Caution advised.';
+                    color = 'red';
+                    document.getElementById('riskScore').classList.add('risk-meter-high');
+                }
+
+                riskCategory.textContent = category;
+                riskText.textContent = description;
+
+                // Apply color to meter
+                document.querySelector('#riskMeter').style.stroke = color === 'green' ? '#38a169' :
+                color === 'blue' ? '#3182ce' :
+                '#e53e3e';
+
+                // Update factor bars
+                updateFactor('amountBar', 'factorAmount',
+                             (factors.loanAmount / (factors.annualIncome * 5) * 100), // Loan amount shouldn't exceed 500% of annual income
+                             `${Math.round(factors.loanAmount / factors.annualIncome * 100)}% of income`);
+
+                updateFactor('incomeBar', 'factorIncome',
+                             factors.dti,
+                             `${factors.dti}% DTI ratio`);
+
+                // Convert days since last payment to a percentage (more days = higher risk)
+                const paymentDelayRisk = Math.min(100, (factors.daysSinceLastPay * 100) / 90);
+                const daysLabel = factors.daysSinceLastPay <= 1 ? "Less than a day" :
+                factors.daysSinceLastPay === 7 ? "Less than 1 week" :
+                factors.daysSinceLastPay === 14 ? "1-2 weeks" :
+                factors.daysSinceLastPay === 21 ? "2-3 weeks" :
+                factors.daysSinceLastPay === 28 ? "3-4 weeks" :
+                factors.daysSinceLastPay === 35 ? "4-5 weeks" :
+                factors.daysSinceLastPay === 60 ? "5-8 weeks" :
+                factors.daysSinceLastPay === 90 ? "9-12 weeks" :
+                "More than 12 weeks";
+
+                updateFactor('historyBar', 'factorHistory',
+                             paymentDelayRisk,
+                             daysLabel + " since last pay");
+
+                updateFactor('creditBar', 'factorCredit',
+                             document.getElementById('verificationStatus').value === 'Not Verified' ? 80 : 40,
+                             document.getElementById('verificationStatus').value + ' credit');
+
+                // Show recommendation
+                const recommendationText = document.getElementById('recommendationText');
+                let recommendation = '';
+
+                if (riskScore < 20) {
+                    recommendation = 'Approve application. This borrower meets all favorable criteria with minimal risk.';
+                    document.getElementById('recommendation').style.backgroundColor = '#f0fff4';
+                    recommendationText.style.color = '#38a169';
+                } else if (riskScore < 45) {
+                    recommendation = 'Consider approval with standard terms. Monitor performance during early repayment periods.';
+                    document.getElementById('recommendation').style.backgroundColor = '#ebf8ff';
+                    recommendationText.style.color = '#3182ce';
+                } else if (riskScore < 70) {
+                    recommendation = 'Recommend caution—either decline application or require significant collateral, higher interest, or shorter term.';
+                    document.getElementById('recommendation').style.backgroundColor = '#fff5f5';
+                    recommendationText.style.color = '#e53e3e';
+                } else {
+                    recommendation = 'Strongly recommend declining this application due to multiple high-risk factors identified.';
+                    document.getElementById('recommendation').style.backgroundColor = '#fff5f5';
+                    recommendationText.style.color = '#e53e3e';
+                }
+
+                recommendationText.textContent = recommendation;
+                document.getElementById('recommendation').classList.remove('hidden');
+            }
+
+            function updateFactor(barId, factorId, percent, text) {
+                const bar = document.getElementById(barId);
+                bar.style.width = `${Math.min(100, percent)}%`;
+                document.getElementById(factorId).textContent = text;
+
+                // Color based on risk
+                if (percent > 70) {
+                    bar.style.backgroundColor = '#e53e3e'; // red-600
+                } else if (percent > 40) {
+                    bar.style.backgroundColor = '#dd6b20'; // orange-600
+                } else {
+                    bar.style.backgroundColor = '#38a169'; // green-600 for better and blue-500 for neutral
+                }
+            }
+        </script>
+        <p style="border-radius: 8px; text-align: center; font-size: 12px; color: #fff; margin-top: 16px;position: fixed; left: 8px; bottom: 8px; z-index: 10; background: rgba(0, 0, 0, 0.8); padding: 4px 8px;">Made with <img src="https://enzostvs-deepsite.hf.space/logo.svg" alt="DeepSite Logo" style="width: 16px; height: 16px; vertical-align: middle;display:inline-block;margin-right:3px;filter:brightness(0) invert(1);"><a href="https://enzostvs-deepsite.hf.space" style="color: #fff;text-decoration: underline;" target="_blank" >DeepSite</a> - <a href="https://enzostvs-deepsite.hf.space?remix=Fudji/loaners-space" style="color: #fff;text-decoration: underline;" target="_blank" >🧬 Remix</a></p></body>
+</html>
