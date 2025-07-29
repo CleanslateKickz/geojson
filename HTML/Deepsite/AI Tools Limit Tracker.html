@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Tools Limit Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6366f1',
+                        secondary: '#8b5cf6',
+                        dark: '#1e293b',
+                        light: '#f8fafc'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .progress-bar {
+            height: 8px;
+            border-radius: 4px;
+            background-color: #e2e8f0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .filter-btn.active {
+            background-color: #6366f1;
+            color: white;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+    </head>
+    <body class="min-h-screen">
+        <div class="container mx-auto px-4 py-8">
+            <!-- Header -->
+            <header class="mb-10 text-center">
+                <h1 class="text-4xl font-bold text-dark mb-2">AI Tools Limit Tracker</h1>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">Monitor your free tier usage across all AI platforms in one beautiful dashboard</p>
+            </header>
+
+            <!-- Stats Overview -->
+            <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="bg-indigo-50 p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-indigo-100 text-indigo-600 mr-4">
+                                <i class="fas fa-tools text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Tools Tracked</p>
+                                <h3 class="text-2xl font-bold text-dark" id="total-tools">12</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-purple-50 p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-purple-100 text-purple-600 mr-4">
+                                <i class="fas fa-clock text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Daily Limits</p>
+                                <h3 class="text-2xl font-bold text-dark" id="daily-limits">8</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
+                                <i class="fas fa-calendar-alt text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Monthly Limits</p>
+                                <h3 class="text-2xl font-bold text-dark" id="monthly-limits">10</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-green-100 text-green-600 mr-4">
+                                <i class="fas fa-check-circle text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Within Limits</p>
+                                <h3 class="text-2xl font-bold text-dark" id="within-limits">9</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters and Search -->
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                <div class="flex space-x-2 overflow-x-auto pb-2 w-full md:w-auto">
+                    <button class="filter-btn active px-4 py-2 rounded-full text-sm font-medium transition-all" data-filter="all">All Tools</button>
+                    <button class="filter-btn px-4 py-2 rounded-full bg-gray-100 text-gray-700 text-sm font-medium transition-all" data-filter="daily">Daily Limits</button>
+                    <button class="filter-btn px-4 py-2 rounded-full bg-gray-100 text-gray-700 text-sm font-medium transition-all" data-filter="monthly">Monthly Limits</button>
+                    <button class="filter-btn px-4 py-2 rounded-full bg-gray-100 text-gray-700 text-sm font-medium transition-all" data-filter="near-limit">Near Limit</button>
+                    <button class="filter-btn px-4 py-2 rounded-full bg-gray-100 text-gray-700 text-sm font-medium transition-all" data-filter="exceeded">Exceeded</button>
+                </div>
+
+                <div class="relative w-full md:w-64">
+                    <input type="text" placeholder="Search tools..." class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                </div>
+            </div>
+
+            <!-- Tools Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" id="tools-grid">
+                <!-- Tool cards will be inserted here by JavaScript -->
+            </div>
+
+            <!-- Add New Tool Button -->
+            <div class="fixed bottom-6 right-6">
+                <button id="add-tool-btn" class="bg-primary hover:bg-indigo-700 text-white p-4 rounded-full shadow-lg transition-all transform hover:scale-110">
+                    <i class="fas fa-plus text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Add Tool Modal -->
+            <div id="add-tool-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+                <div class="bg-white rounded-xl p-6 w-full max-w-md">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold text-dark">Add New AI Tool</h3>
+                        <button id="close-modal" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
+                    <form id="tool-form" class="space-y-4">
+                        <div>
+                            <label for="tool-name" class="block text-sm font-medium text-gray-700 mb-1">Tool Name</label>
+                            <input type="text" id="tool-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+
+                        <div>
+                            <label for="tool-image" class="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+                            <input type="text" id="tool-image" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" placeholder="https://example.com/image.png">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="limit-type" class="block text-sm font-medium text-gray-700 mb-1">Limit Type</label>
+                                <select id="limit-type" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
+                                    <option value="daily">Daily</option>
+                                    <option value="monthly">Monthly</option>
+                                    <option value="none">No Limit</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="limit-value" class="block text-sm font-medium text-gray-700 mb-1">Limit Value</label>
+                                <input type="number" id="limit-value" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" placeholder="100">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="current-usage" class="block text-sm font-medium text-gray-700 mb-1">Current Usage</label>
+                            <input type="number" id="current-usage" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" placeholder="25">
+                        </div>
+
+                        <div class="pt-2">
+                            <button type="submit" class="w-full bg-primary hover:bg-indigo-700 text-white py-2 px-4 rounded-md transition-all">Add Tool</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Tool Modal -->
+        <div id="edit-tool-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-xl p-6 w-full max-w-md">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-dark">Edit AI Tool</h3>
+                    <button id="close-edit-modal" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <form id="edit-tool-form" class="space-y-4">
+                    <input type="hidden" id="edit-tool-id">
+                    <div>
+                        <label for="edit-tool-name" class="block text-sm font-medium text-gray-700 mb-1">Tool Name</label>
+                        <input type="text" id="edit-tool-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
+                    </div>
+
+                    <div>
+                        <label for="edit-tool-image" class="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+                        <input type="text" id="edit-tool-image" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" placeholder="https://example.com/image.png">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="edit-limit-type" class="block text-sm font-medium text-gray-700 mb-1">Limit Type</label>
+                            <select id="edit-limit-type" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
+                                <option value="daily">Daily</option>
+                                <option value="monthly">Monthly</option>
+                                <option value="none">No Limit</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="edit-limit-value" class="block text-sm font-medium text-gray-700 mb-1">Limit Value</label>
+                            <input type="number" id="edit-limit-value" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" placeholder="100">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="edit-current-usage" class="block text-sm font-medium text-gray-700 mb-1">Current Usage</label>
+                        <input type="number" id="edit-current-usage" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" placeholder="25">
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="submit" class="w-full bg-primary hover:bg-indigo-700 text-white py-2 px-4 rounded-md transition-all">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            // Load tools from localStorage or use sample data
+            let tools = JSON.parse(localStorage.getItem('aiTools')) || [
+                {
+                    id: 1,
+                    name: "OpenAI API",
+                    image: "https://upload.wikimedia.org/wikipedia/commons/4/4d/OpenAI_Logo.svg",
+                    limitType: "monthly",
+                    limitValue: 200,
+                    currentUsage: 45,
+                    lastReset: "2023-06-01"
+                },
+                {
+                    id: 2,
+                    name: "Midjourney",
+                    image: "https://styles.redditmedia.com/t5_3jod2/styles/communityIcon_5y2x8m0j2q5a1.png",
+                    limitType: "monthly",
+                    limitValue: 25,
+                    currentUsage: 18,
+                    lastReset: "2023-06-01"
+                },
+                {
+                    id: 3,
+                    name: "Stable Diffusion",
+                    image: "https://upload.wikimedia.org/wikipedia/commons/1/1e/Stable_Diffusion_logo.png",
+                    limitType: "none",
+                    limitValue: 0,
+                    currentUsage: 0,
+                    lastReset: ""
+                },
+                {
+                    id: 4,
+                    name: "Anthropic Claude",
+                    image: "https://assets-global.website-files.com/621c8a7e9f0e4d4e2aee17e4/62b1f1a1c9e1a15b1e4b7c5f_Anthropic%20Logo.png",
+                    limitType: "daily",
+                    limitValue: 100,
+                    currentUsage: 85,
+                    lastReset: "2023-06-15"
+                },
+                {
+                    id: 5,
+                    name: "Hugging Face",
+                    image: "https://huggingface.co/front/assets/huggingface_logo.svg",
+                    limitType: "daily",
+                    limitValue: 50,
+                    currentUsage: 12,
+                    lastReset: "2023-06-15"
+                },
+                {
+                    id: 6,
+                    name: "ElevenLabs",
+                    image: "https://elevenlabs.io/static/images/logo.svg",
+                    limitType: "monthly",
+                    limitValue: 30,
+                    currentUsage: 28,
+                    lastReset: "2023-06-01"
+                },
+                {
+                    id: 7,
+                    name: "Runway ML",
+                    image: "https://runwayml.com/wp-content/uploads/2022/06/Runway_Logo_Full_Black.png",
+                    limitType: "monthly",
+                    limitValue: 15,
+                    currentUsage: 15,
+                    lastReset: "2023-06-01"
+                },
+                {
+                    id: 8,
+                    name: "Leonardo AI",
+                    image: "https://leonardo.ai/logo192.png",
+                    limitType: "daily",
+                    limitValue: 150,
+                    currentUsage: 149,
+                    lastReset: "2023-06-15"
+                },
+                {
+                    id: 9,
+                    name: "DeepL",
+                    image: "https://www.deepl.com/img/logo/DeepL_Logo_darkBlue_v2.svg",
+                    limitType: "monthly",
+                    limitValue: 500,
+                    currentUsage: 320,
+                    lastReset: "2023-06-01"
+                },
+                {
+                    id: 10,
+                    name: "Notion AI",
+                    image: "https://upload.wikimedia.org/wikipedia/commons/4/45/Notion_app_logo.png",
+                    limitType: "monthly",
+                    limitValue: 20,
+                    currentUsage: 5,
+                    lastReset: "2023-06-01"
+                },
+                {
+                    id: 11,
+                    name: "ChatGPT Plus",
+                    image: "https://upload.wikimedia.org/wikipedia/commons/0/04/ChatGPT_logo.svg",
+                    limitType: "none",
+                    limitValue: 0,
+                    currentUsage: 0,
+                    lastReset: ""
+                },
+                {
+                    id: 12,
+                    name: "Bard",
+                    image: "https://www.gstatic.com/lamda/images/landing_1f6b6386b6294a2d4809d7e981a6e377ff57c2d1.png",
+                    limitType: "daily",
+                    limitValue: 60,
+                    currentUsage: 42,
+                    lastReset: "2023-06-15"
+                }
+            ];
+
+            // DOM elements
+            const toolsGrid = document.getElementById('tools-grid');
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            const searchInput = document.querySelector('input[type="text"]');
+            const addToolBtn = document.getElementById('add-tool-btn');
+            const addToolModal = document.getElementById('add-tool-modal');
+            const closeModalBtn = document.getElementById('close-modal');
+            const toolForm = document.getElementById('tool-form');
+            const editToolModal = document.getElementById('edit-tool-modal');
+            const closeEditModalBtn = document.getElementById('close-edit-modal');
+            const editToolForm = document.getElementById('edit-tool-form');
+
+            // Stats elements
+            const totalToolsEl = document.getElementById('total-tools');
+            const dailyLimitsEl = document.getElementById('daily-limits');
+            const monthlyLimitsEl = document.getElementById('monthly-limits');
+            const withinLimitsEl = document.getElementById('within-limits');
+
+            // Current filter
+            let currentFilter = 'all';
+            let searchQuery = '';
+
+            // Delete a tool
+            function deleteTool(toolId) {
+                if (confirm('Are you sure you want to delete this tool?')) {
+                    tools = tools.filter(tool => tool.id !== toolId);
+                    localStorage.setItem('aiTools', JSON.stringify(tools));
+                    renderTools();
+                    updateStats();
+                }
+            }
+
+            // Initialize the app
+            function init() {
+                // Initialize AOS
+                AOS.init({
+                    duration: 400,
+                    easing: 'ease-out-quad',
+                    once: true,
+                    offset: 20
+                });
+
+                renderTools();
+                updateStats();
+                setupEventListeners();
+            }
+
+            // Set up event listeners
+            function setupEventListeners() {
+                // Filter buttons
+                filterButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        filterButtons.forEach(btn => btn.classList.remove('active', 'bg-primary', 'text-white'));
+                        button.classList.add('active', 'bg-primary', 'text-white');
+                        currentFilter = button.dataset.filter;
+                        renderTools();
+                    });
+                });
+
+                // Search input
+                searchInput.addEventListener('input', (e) => {
+                    searchQuery = e.target.value.toLowerCase();
+                    renderTools();
+                });
+
+                // Add tool button
+                addToolBtn.addEventListener('click', () => {
+                    addToolModal.classList.remove('hidden');
+                });
+
+                // Close modal button
+                closeModalBtn.addEventListener('click', () => {
+                    addToolModal.classList.add('hidden');
+                });
+
+                // Form submission
+                toolForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    addNewTool();
+                });
+
+                // Close edit modal button
+                closeEditModalBtn.addEventListener('click', () => {
+                    editToolModal.classList.add('hidden');
+                });
+
+                // Edit form submission
+                editToolForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    saveToolChanges();
+                });
+            }
+
+            // Render tools based on current filter and search
+            function renderTools() {
+                toolsGrid.innerHTML = '';
+
+                const filteredTools = tools.filter(tool => {
+                    // Apply search filter
+                    const matchesSearch = tool.name.toLowerCase().includes(searchQuery);
+
+                    // Apply type filter
+                    let matchesFilter = true;
+                    if (currentFilter === 'daily') {
+                        matchesFilter = tool.limitType === 'daily';
+                    } else if (currentFilter === 'monthly') {
+                        matchesFilter = tool.limitType === 'monthly';
+                    } else if (currentFilter === 'near-limit') {
+                        matchesFilter = tool.limitType !== 'none' &&
+                            tool.currentUsage / tool.limitValue >= 0.8 &&
+                            tool.currentUsage / tool.limitValue < 1;
+                    } else if (currentFilter === 'exceeded') {
+                        matchesFilter = tool.limitType !== 'none' &&
+                            tool.currentUsage >= tool.limitValue;
+                    }
+
+                    return matchesSearch && matchesFilter;
+                });
+
+                if (filteredTools.length === 0) {
+                    toolsGrid.innerHTML = `
+                    <div class="col-span-full text-center py-10">
+                        <i class="fas fa-search text-4xl text-gray-300 mb-4"></i>
+                        <h3 class="text-xl font-medium text-gray-500">No tools found</h3>
+                        <p class="text-gray-400">Try adjusting your search or filter</p>
+            </div>
+                `;
+                    return;
+                }
+
+                filteredTools.forEach(tool => {
+                    const toolCard = createToolCard(tool);
+                    toolsGrid.appendChild(toolCard);
+                });
+            }
+
+            // Create a tool card element
+            function createToolCard(tool) {
+                const usagePercentage = tool.limitType !== 'none' ?
+                      Math.min(100, (tool.currentUsage / tool.limitValue) * 100) : 0;
+
+                let statusColor = 'bg-gray-200';
+                let statusText = 'No Limit';
+                let statusIcon = 'fa-infinity';
+
+                if (tool.limitType !== 'none') {
+                    if (tool.currentUsage >= tool.limitValue) {
+                        statusColor = 'bg-red-500';
+                        statusText = 'Limit Exceeded';
+                        statusIcon = 'fa-exclamation-circle';
+                    } else if (usagePercentage >= 80) {
+                        statusColor = 'bg-yellow-500';
+                        statusText = 'Near Limit';
+                        statusIcon = 'fa-exclamation-triangle';
+                    } else {
+                        statusColor = 'bg-green-500';
+                        statusText = 'Within Limit';
+                        statusIcon = 'fa-check-circle';
+                    }
+                }
+
+                const card = document.createElement('div');
+                card.className = `tool-card bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-md hover:-translate-y-1 hover:border-primary/20`;
+                card.setAttribute('data-aos', 'fade-up');
+                card.innerHTML = `
+                <div class="p-4">
+                    <div class="flex items-start gap-3 mb-3">
+                        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center overflow-hidden shrink-0">
+                            ${tool.image ?
+                    `<img src="${tool.image}" alt="${tool.name}" class="w-full h-full object-contain">` :
+                `<i class="fas fa-robot text-xl text-gray-400"></i>`}
+            </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-semibold text-gray-800 truncate">${tool.name}</h3>
+                            <div class="flex items-center gap-1.5 mt-1">
+                                <span class="w-2 h-2 rounded-full ${statusColor}"></span>
+                                <span class="text-xs font-medium text-gray-500">${statusText}</span>
+            </div>
+            </div>
+            </div>
+
+                    ${tool.limitType !== 'none' ? `
+                        <div class="mb-3">
+                            <div class="flex justify-between text-xs text-gray-500 mb-1.5">
+                                <span>${tool.limitType === 'daily' ? 'Daily' : 'Monthly'}</span>
+                                <span class="font-medium">${tool.currentUsage} / ${tool.limitValue}</span>
+            </div>
+                            <div class="w-full h-1.5 rounded-full bg-gray-100 overflow-hidden">
+                                <div class="h-full rounded-full ${statusColor}" style="width: ${usagePercentage}%"></div>
+            </div>
+            </div>
+
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="inline-flex items-center gap-1 text-gray-500">
+                                <i class="fas ${statusIcon} text-[0.65rem]"></i>
+                                ${Math.round(usagePercentage)}% used
+            </span>
+                            <span class="text-gray-400">
+                                ${tool.limitType === 'daily' ? 'Resets daily' : 'Resets monthly'}
+            </span>
+            </div>
+                    ` : `
+                        <div class="text-center py-2">
+                            <div class="inline-flex items-center gap-1 text-gray-400 text-sm">
+                                <i class="fas fa-infinity"></i>
+                                <span>No limits</span>
+            </div>
+            </div>
+                    `}
+            </div>
+
+                <div class="px-4 py-2.5 bg-gray-50 border-t border-gray-100/80 flex justify-between">
+                    <button class="text-xs text-primary hover:text-indigo-600 font-medium flex items-center gap-1" onclick="openEditModal(${tool.id})">
+                        <i class="fas fa-pen text-[0.65rem]"></i>
+                        <span>Edit</span>
+            </button>
+                    <button class="text-xs text-gray-500 hover:text-gray-600 flex items-center gap-1" onclick="deleteTool(${tool.id})">
+                        <i class="fas fa-trash text-[0.65rem]"></i>
+                        <span>Remove</span>
+            </button>
+            </div>
+            `;
+
+                return card;
+            }
+
+            // Update statistics
+            function updateStats() {
+                totalToolsEl.textContent = tools.length;
+
+                const dailyTools = tools.filter(tool => tool.limitType === 'daily').length;
+                const monthlyTools = tools.filter(tool => tool.limitType === 'monthly').length;
+
+                dailyLimitsEl.textContent = dailyTools;
+                monthlyLimitsEl.textContent = monthlyTools;
+
+                const withinLimits = tools.filter(tool => {
+                    if (tool.limitType === 'none') return true;
+                    return tool.currentUsage < tool.limitValue * 0.8;
+                }).length;
+
+                withinLimitsEl.textContent = withinLimits;
+            }
+
+            // Add a new tool
+            function addNewTool() {
+                const name = document.getElementById('tool-name').value;
+                const image = document.getElementById('tool-image').value;
+                const limitType = document.getElementById('limit-type').value;
+                const limitValue = limitType !== 'none' ? parseInt(document.getElementById('limit-value').value) : 0;
+                const currentUsage = limitType !== 'none' ? parseInt(document.getElementById('current-usage').value) : 0;
+
+                if (!name) {
+                    alert('Please enter a tool name');
+                    return;
+                }
+
+                if (limitType !== 'none' && (isNaN(limitValue) || isNaN(currentUsage))) {
+                    alert('Please enter valid numbers for limit and usage');
+                    return;
+                }
+
+                const newTool = {
+                    id: tools.length + 1,
+                    name,
+                    image,
+                    limitType,
+                    limitValue,
+                    currentUsage,
+                    lastReset: limitType === 'daily' ? new Date().toISOString().split('T')[0] :
+                    limitType === 'monthly' ? new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0] : ''
+                };
+
+                tools.push(newTool);
+                localStorage.setItem('aiTools', JSON.stringify(tools));
+                renderTools();
+                updateStats();
+
+                // Reset form and close modal
+                toolForm.reset();
+                addToolModal.classList.add('hidden');
+            }
+
+            // Open edit modal with tool data
+            function openEditModal(toolId) {
+                const tool = tools.find(t => t.id === toolId);
+                if (!tool) return;
+
+                document.getElementById('edit-tool-id').value = tool.id;
+                document.getElementById('edit-tool-name').value = tool.name;
+                document.getElementById('edit-tool-image').value = tool.image || '';
+                document.getElementById('edit-limit-type').value = tool.limitType;
+                document.getElementById('edit-limit-value').value = tool.limitValue;
+                document.getElementById('edit-current-usage').value = tool.currentUsage;
+
+                editToolModal.classList.remove('hidden');
+            }
+
+            // Save changes to tool
+            function saveToolChanges() {
+                const toolId = parseInt(document.getElementById('edit-tool-id').value);
+                const tool = tools.find(t => t.id === toolId);
+                if (!tool) return;
+
+                tool.name = document.getElementById('edit-tool-name').value;
+                tool.image = document.getElementById('edit-tool-image').value;
+                tool.limitType = document.getElementById('edit-limit-type').value;
+                tool.limitValue = tool.limitType !== 'none' ?
+                    parseInt(document.getElementById('edit-limit-value').value) : 0;
+                tool.currentUsage = tool.limitType !== 'none' ?
+                    parseInt(document.getElementById('edit-current-usage').value) : 0;
+
+                localStorage.setItem('aiTools', JSON.stringify(tools));
+                renderTools();
+                updateStats();
+                editToolModal.classList.add('hidden');
+            }
+
+            // Initialize the app
+            init();
+        </script>
+    </body>
+</html>
