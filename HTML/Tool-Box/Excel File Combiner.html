@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel File Combiner</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        .container {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .file-input {
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        button:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+        #fileList {
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #ecf0f1;
+            border-radius: 4px;
+        }
+        #combinedTable {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        #combinedTable th, #combinedTable td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        #combinedTable th {
+            background-color: #3498db;
+            color: white;
+        }
+        #combinedTable tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .instructions {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+    </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Excel File Combiner</h1>
+
+            <div class="instructions">
+                <h3>Instructions:</h3>
+                <ol>
+                    <li>Enter a Tenant Name (optional)</li>
+                    <li>Select multiple Excel files (XLSX, XLS, CSV) with the same header row</li>
+                    <li>Click "Combine Files" to merge them into a single table</li>
+                    <li>Use "Copy to Clipboard" to copy the combined data</li>
+                </ol>
+                <p><strong>Note:</strong> The app will automatically process "Zip" columns by removing anything after a dash (e.g., "84041-1636" becomes "84041").</p>
+            </div>
+
+            <div class="form-group">
+                <label for="tenantName">Tenant Name:</label>
+                <input type="text" id="tenantName" placeholder="Enter tenant name (optional)">
+            </div>
+
+            <div class="file-input">
+                <input type="file" id="fileUpload" accept=".xlsx, .xls, .csv" multiple>
+                <button id="combineBtn" disabled>Combine Files</button>
+                <button id="copyBtn" disabled>Copy to Clipboard</button>
+                <button id="clearBtn" disabled>Clear All</button>
+            </div>
+
+            <div id="fileList"></div>
+            <div id="status" class="status"></div>
+
+            <div id="tableContainer" style="overflow-x: auto;">
+                <table id="combinedTable"></table>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const fileUpload = document.getElementById('fileUpload');
+                const combineBtn = document.getElementById('combineBtn');
+                const copyBtn = document.getElementById('copyBtn');
+                const clearBtn = document.getElementById('clearBtn');
+                const fileList = document.getElementById('fileList');
+                const statusDiv = document.getElementById('status');
+                const combinedTable = document.getElementById('combinedTable');
+                const tenantNameInput = document.getElementById('tenantName');
+
+                let files = [];
+                let combinedData = [];
+                let headers = [];
+                let zipColumnIndex = -1;
+
+                // Handle file selection
+                fileUpload.addEventListener('change', function(e) {
+                    files = Array.from(e.target.files);
+                    if (files.length > 0) {
+                        combineBtn.disabled = false;
+                        clearBtn.disabled = false;
+                        updateFileList();
+                    } else {
+                        combineBtn.disabled = true;
+                        clearBtn.disabled = true;
+                    }
+                });
+
+                // Update the list of selected files
+                function updateFileList() {
+                    fileList.innerHTML = '<strong>Selected Files:</strong><br>' +
+                        files.map(file => file.name).join('<br>');
+                }
+
+                // Combine files button click
+                combineBtn.addEventListener('click', function() {
+                    if (files.length === 0) {
+                        showStatus('No files selected', 'error');
+                        return;
+                    }
+
+                    showStatus('Processing files...');
+                    combinedData = [];
+                    headers = [];
+                    zipColumnIndex = -1;
+
+                    // Process each file
+                    let processedCount = 0;
+                    files.forEach((file, index) => {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            try {
+                                const data = new Uint8Array(e.target.result);
+                                const workbook = XLSX.read(data, { type: 'array' });
+                                const firstSheetName = workbook.SheetNames[0];
+                                const worksheet = workbook.Sheets[firstSheetName];
+                                const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+                                // First file - get headers
+                                if (index === 0) {
+                                    headers = jsonData[0];
+
+                                    // Find Zip column index (case insensitive)
+                                    zipColumnIndex = headers.findIndex(header =>
+                                                                       String(header).toLowerCase().trim() === 'zip');
+
+                                    // Add Tenant Name column if provided
+                                    const tenantName = tenantNameInput.value.trim();
+                                    if (tenantName) {
+                                        headers.push('Tenant Name');
+                                    }
+
+                                    // Process and add data rows (skip header)
+                                    const processedRows = processDataRows(jsonData.slice(1), tenantName);
+                                    combinedData = combinedData.concat(processedRows);
+                                } else {
+                                    // Check if headers match (excluding potential Tenant Name column)
+                                    const currentHeaders = jsonData[0];
+                                    const headersToCompare = tenantNameInput.value.trim() ?
+                                          headers.slice(0, -1) : headers;
+
+                                    if (JSON.stringify(currentHeaders) !== JSON.stringify(headersToCompare)) {
+                                        showStatus(`Error: Headers in ${file.name} don't match the first file`, 'error');
+                                        return;
+                                    }
+
+                                    // Process and add data rows (skip header)
+                                    const tenantName = tenantNameInput.value.trim();
+                                    const processedRows = processDataRows(jsonData.slice(1), tenantName);
+                                    combinedData = combinedData.concat(processedRows);
+                                }
+
+                                processedCount++;
+
+                                // When all files are processed
+                                if (processedCount === files.length) {
+                                    displayCombinedData();
+                                    showStatus(`Successfully combined ${files.length} files with ${combinedData.length} rows`, 'success');
+                                    copyBtn.disabled = false;
+                                }
+                            } catch (error) {
+                                showStatus(`Error processing ${file.name}: ${error.message}`, 'error');
+                            }
+                        };
+                        reader.onerror = function() {
+                            showStatus(`Error reading ${file.name}`, 'error');
+                        };
+                        reader.readAsArrayBuffer(file);
+                    });
+                });
+
+                // Process data rows - adds tenant name and processes zip codes
+                function processDataRows(rows, tenantName) {
+                    return rows.map(row => {
+                        // Process Zip column if it exists
+                        if (zipColumnIndex >= 0 && zipColumnIndex < row.length) {
+                            const zipValue = String(row[zipColumnIndex]);
+                            // Remove anything after dash in zip code
+                            row[zipColumnIndex] = zipValue.split('-')[0];
+                        }
+
+                        // Add tenant name if provided
+                        if (tenantName) {
+                            row.push(tenantName);
+                        }
+
+                        return row;
+                    });
+                }
+
+                // Display combined data in table
+                function displayCombinedData() {
+                    if (combinedData.length === 0) {
+                        combinedTable.innerHTML = '';
+                        return;
+                    }
+
+                    // Create table header
+                    let tableHTML = '<thead><tr>';
+                    headers.forEach(header => {
+                        tableHTML += `<th>${header}</th>`;
+                    });
+                    tableHTML += '</tr></thead><tbody>';
+
+                    // Create table rows
+                    combinedData.forEach(row => {
+                        tableHTML += '<tr>';
+                        headers.forEach((header, colIndex) => {
+                            const cellValue = row[colIndex] !== undefined ? row[colIndex] : '';
+                            tableHTML += `<td>${cellValue}</td>`;
+                        });
+                        tableHTML += '</tr>';
+                    });
+
+                    tableHTML += '</tbody>';
+                    combinedTable.innerHTML = tableHTML;
+                }
+
+                // Copy to clipboard button
+                copyBtn.addEventListener('click', function() {
+                    if (combinedData.length === 0) {
+                        showStatus('No data to copy', 'error');
+                        return;
+                    }
+
+                    // Convert data to tab-separated values
+                    let tsvData = headers.join('\t') + '\n';
+                    combinedData.forEach(row => {
+                        tsvData += headers.map((header, colIndex) => {
+                            return row[colIndex] !== undefined ? row[colIndex] : '';
+                        }).join('\t') + '\n';
+                    });
+
+                    // Copy to clipboard
+                    navigator.clipboard.writeText(tsvData)
+                        .then(() => {
+                        showStatus('Data copied to clipboard!', 'success');
+                    })
+                        .catch(err => {
+                        showStatus('Failed to copy data: ' + err, 'error');
+                    });
+                });
+
+                // Clear button
+                clearBtn.addEventListener('click', function() {
+                    files = [];
+                    combinedData = [];
+                    headers = [];
+                    zipColumnIndex = -1;
+                    fileUpload.value = '';
+                    tenantNameInput.value = '';
+                    fileList.innerHTML = '';
+                    combinedTable.innerHTML = '';
+                    statusDiv.textContent = '';
+                    statusDiv.className = 'status';
+                    combineBtn.disabled = true;
+                    copyBtn.disabled = true;
+                    clearBtn.disabled = true;
+                });
+
+                // Show status message
+                function showStatus(message, type = '') {
+                    statusDiv.textContent = message;
+                    statusDiv.className = 'status ' + type;
+                }
+            });
+        </script>
+    </body>
+</html>
