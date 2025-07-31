@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batch File Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #4e73df;
+            --secondary-color: #f8f9fc;
+            --accent-color: #2e59d9;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .card {
+            border-radius: 0.5rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            border: none;
+        }
+
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 0.5rem 0.5rem 0 0 !important;
+            padding: 1.25rem 1.5rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.25);
+        }
+
+        .preview-box {
+            background-color: #f8f9fc;
+            border: 1px solid #e3e6f0;
+            border-radius: 0.35rem;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            min-height: 120px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .logo {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .footer {
+            color: #858796;
+            font-size: 0.9rem;
+        }
+    </style>
+    </head>
+    <body>
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="text-center mb-5">
+                        <h1 class="logo mb-3">
+                            <i class="bi bi-file-earmark-code"></i> Batch File Generator
+                        </h1>
+                        <p class="lead">Quickly create Windows batch files for your projects</p>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Batch File Configuration</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="batchForm">
+                                <div class="mb-3">
+                                    <label for="projectName" class="form-label">Project Name</label>
+                                    <input type="text" class="form-control" id="projectName" placeholder="e.g. TenantProfiles" required>
+                                    <div class="form-text">This will be the name of your batch file</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="filePath" class="form-label">File Path</label>
+                                    <input type="text" class="form-control" id="filePath" placeholder="e.g. Desktop\Server-Projects\ActiveDevelopment\Tenant-Profiles\tenant-profiles" required>
+                                    <div class="form-text">Relative path from your user directory (no leading backslash)</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="commands" class="form-label">Commands to Run</label>
+                                    <textarea class="form-control" id="commands" rows="3" placeholder="e.g. npm run dev" required></textarea>
+                                    <div class="form-text">Enter each command on a new line if multiple commands are needed</div>
+                                </div>
+
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-primary btn-lg">
+                                        <i class="bi bi-file-earmark-arrow-down"></i> Generate Batch File
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Batch File Preview</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="preview-box" id="preview">
+                                @echo off
+                                cd %USERPROFILE%\path\to\your\project
+                                your-commands-here
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4 footer">
+                        <p>Batch File Generator &copy; <span id="year"></span></i></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            // Set current year in footer
+            document.getElementById('year').textContent = new Date().getFullYear();
+
+            // Update preview in real-time
+            const formInputs = document.querySelectorAll('#batchForm input, #batchForm textarea');
+            formInputs.forEach(input => {
+                input.addEventListener('input', updatePreview);
+            });
+
+            function updatePreview() {
+                const projectName = document.getElementById('projectName').value || 'YourProject';
+                const filePath = document.getElementById('filePath').value || 'path\\to\\your\\project';
+                const commands = document.getElementById('commands').value || 'your-commands-here';
+
+                let commandsText = commands;
+                if (commands.includes('\n')) {
+                    commandsText = commands.split('\n').join('\r\n');
+                }
+
+                const previewContent = `@echo off\r\ncd %USERPROFILE%\\${filePath}\r\n${commandsText}`;
+                document.getElementById('preview').textContent = previewContent;
+            }
+
+            // Handle form submission
+            document.getElementById('batchForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const projectName = document.getElementById('projectName').value.trim();
+                const filePath = document.getElementById('filePath').value.trim();
+                const commands = document.getElementById('commands').value.trim();
+
+                if (!projectName || !filePath || !commands) {
+                    alert('Please fill in all fields');
+                    return;
+                }
+
+                // Format the batch file content
+                let batchContent = '@echo off\r\n';
+                batchContent += `cd %USERPROFILE%\\${filePath}\r\n`;
+
+                // Handle multiple commands
+                if (commands.includes('\n')) {
+                    batchContent += commands.split('\n').join('\r\n');
+                } else {
+                    batchContent += commands;
+                }
+
+                // Create download
+                const blob = new Blob([batchContent], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${projectName}.bat`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+
+            // Initial preview update
+            updatePreview();
+        </script>
+    </body>
+</html>
