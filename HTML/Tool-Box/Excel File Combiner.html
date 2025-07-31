@@ -4,347 +4,395 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Excel File Combiner</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.22.9/babel.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px;
-            line-height: 1.6;
-        }
-        h1 {
-            color: #2c3e50;
-            text-align: center;
-        }
-        .container {
-            background-color: #f9f9f9;
+        body { font-family: 'Inter', sans-serif; }
+        .dropzone {
+            border: 2px dashed #4b5563;
             border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 2rem;
+            text-align: center;
+            background-color: #f9fafb;
+            transition: all 0.3s ease;
         }
-        .file-input {
-            margin-bottom: 20px;
+        .dropzone.drag-active {
+            border-color: #2563eb;
+            background-color: #dbeafe;
         }
-        .form-group {
-            margin-bottom: 15px;
+        .dropzone:hover {
+            border-color: #2563eb;
+            background-color: #eff6ff;
         }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
+        .table-container { max-height: 500px; overflow-y: auto; }
+        #combinedTable { width: 100%; }
+        .dataTables_wrapper .dataTables_paginate .paginate_button { 
+            padding: 0.5rem 1rem; 
+            margin: 0 0.25rem;
+            border-radius: 0.375rem;
+            background-color: #2563eb;
+            color: white !important;
         }
-        input[type="text"] {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+            background-color: #1d4ed8;
         }
-        button {
-            background-color: #3498db;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            margin-right: 10px;
-        }
-        button:hover {
-            background-color: #2980b9;
-        }
-        button:disabled {
-            background-color: #95a5a6;
-            cursor: not-allowed;
-        }
-        #fileList {
-            margin: 15px 0;
-            padding: 10px;
-            background-color: #ecf0f1;
-            border-radius: 4px;
-        }
-        #combinedTable {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        #combinedTable th, #combinedTable td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        #combinedTable th {
-            background-color: #3498db;
-            color: white;
-        }
-        #combinedTable tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-        .status {
-            margin: 10px 0;
-            padding: 10px;
-            border-radius: 4px;
-        }
-        .success {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-        .instructions {
-            background-color: #fff3cd;
-            color: #856404;
-            padding: 15px;
-            border-radius: 4px;
-            margin-bottom: 20px;
+        .dataTables_wrapper .dataTables_filter input {
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            padding: 0.5rem;
         }
     </style>
-    </head>
-    <body>
-        <div class="container">
-            <h1>Excel File Combiner</h1>
+</head>
+<body class="bg-gray-100">
+    <div id="root"></div>
 
-            <div class="instructions">
-                <h3>Instructions:</h3>
-                <ol>
-                    <li>Enter a Tenant Name (optional)</li>
-                    <li>Select multiple Excel files (XLSX, XLS, CSV) with the same header row</li>
-                    <li>Click "Combine Files" to merge them into a single table</li>
-                    <li>Use "Copy to Clipboard" to copy the combined data</li>
-                </ol>
-                <p><strong>Note:</strong> The app will automatically process "Zip" columns by removing anything after a dash (e.g., "84041-1636" becomes "84041").</p>
-            </div>
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
 
-            <div class="form-group">
-                <label for="tenantName">Tenant Name:</label>
-                <input type="text" id="tenantName" placeholder="Enter tenant name (optional)">
-            </div>
+        function ExcelCombiner() {
+            const [files, setFiles] = useState([]);
+            const [tenantName, setTenantName] = useState('');
+            const [combinedData, setCombinedData] = useState([]);
+            const [headers, setHeaders] = useState([]);
+            const [status, setStatus] = useState({ message: '', type: '' });
+            const [zipColumnIndex, setZipColumnIndex] = useState(-1);
+            const [isDragActive, setIsDragActive] = useState(false);
+            const tableRef = useRef(null);
+            const dataTableRef = useRef(null);
+            const dropzoneRef = useRef(null);
 
-            <div class="file-input">
-                <input type="file" id="fileUpload" accept=".xlsx, .xls, .csv" multiple>
-                <button id="combineBtn" disabled>Combine Files</button>
-                <button id="copyBtn" disabled>Copy to Clipboard</button>
-                <button id="clearBtn" disabled>Clear All</button>
-            </div>
-
-            <div id="fileList"></div>
-            <div id="status" class="status"></div>
-
-            <div id="tableContainer" style="overflow-x: auto;">
-                <table id="combinedTable"></table>
-            </div>
-        </div>
-
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const fileUpload = document.getElementById('fileUpload');
-                const combineBtn = document.getElementById('combineBtn');
-                const copyBtn = document.getElementById('copyBtn');
-                const clearBtn = document.getElementById('clearBtn');
-                const fileList = document.getElementById('fileList');
-                const statusDiv = document.getElementById('status');
-                const combinedTable = document.getElementById('combinedTable');
-                const tenantNameInput = document.getElementById('tenantName');
-
-                let files = [];
-                let combinedData = [];
-                let headers = [];
-                let zipColumnIndex = -1;
-
-                // Handle file selection
-                fileUpload.addEventListener('change', function(e) {
-                    files = Array.from(e.target.files);
-                    if (files.length > 0) {
-                        combineBtn.disabled = false;
-                        clearBtn.disabled = false;
-                        updateFileList();
-                    } else {
-                        combineBtn.disabled = true;
-                        clearBtn.disabled = true;
-                    }
+            // Handle file selection (click or drop)
+            const handleFileChange = (selectedFiles) => {
+                const validFiles = Array.from(selectedFiles).filter(file => 
+                    ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 
+                     'application/vnd.ms-excel', 
+                     'text/csv'].includes(file.type)
+                );
+                setFiles(validFiles);
+                setStatus({ 
+                    message: validFiles.length > 0 
+                        ? `${validFiles.length} file(s) selected` 
+                        : 'No valid Excel/CSV files selected', 
+                    type: validFiles.length > 0 ? 'success' : 'error' 
                 });
+            };
 
-                // Update the list of selected files
-                function updateFileList() {
-                    fileList.innerHTML = '<strong>Selected Files:</strong><br>' +
-                        files.map(file => file.name).join('<br>');
-                }
+            // Handle drag events
+            const handleDragOver = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsDragActive(true);
+            };
 
-                // Combine files button click
-                combineBtn.addEventListener('click', function() {
-                    if (files.length === 0) {
-                        showStatus('No files selected', 'error');
-                        return;
-                    }
+            const handleDragEnter = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsDragActive(true);
+            };
 
-                    showStatus('Processing files...');
-                    combinedData = [];
-                    headers = [];
-                    zipColumnIndex = -1;
+            const handleDragLeave = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsDragActive(false);
+            };
 
-                    // Process each file
-                    let processedCount = 0;
-                    files.forEach((file, index) => {
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            try {
-                                const data = new Uint8Array(e.target.result);
-                                const workbook = XLSX.read(data, { type: 'array' });
-                                const firstSheetName = workbook.SheetNames[0];
-                                const worksheet = workbook.Sheets[firstSheetName];
-                                const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+            const handleDrop = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsDragActive(false);
+                const droppedFiles = e.dataTransfer.files;
+                handleFileChange(droppedFiles);
+            };
 
-                                // First file - get headers
-                                if (index === 0) {
-                                    headers = jsonData[0];
-
-                                    // Find Zip column index (case insensitive)
-                                    zipColumnIndex = headers.findIndex(header =>
-                                                                       String(header).toLowerCase().trim() === 'zip');
-
-                                    // Add Tenant Name column if provided
-                                    const tenantName = tenantNameInput.value.trim();
-                                    if (tenantName) {
-                                        headers.push('Tenant Name');
-                                    }
-
-                                    // Process and add data rows (skip header)
-                                    const processedRows = processDataRows(jsonData.slice(1), tenantName);
-                                    combinedData = combinedData.concat(processedRows);
-                                } else {
-                                    // Check if headers match (excluding potential Tenant Name column)
-                                    const currentHeaders = jsonData[0];
-                                    const headersToCompare = tenantNameInput.value.trim() ?
-                                          headers.slice(0, -1) : headers;
-
-                                    if (JSON.stringify(currentHeaders) !== JSON.stringify(headersToCompare)) {
-                                        showStatus(`Error: Headers in ${file.name} don't match the first file`, 'error');
-                                        return;
-                                    }
-
-                                    // Process and add data rows (skip header)
-                                    const tenantName = tenantNameInput.value.trim();
-                                    const processedRows = processDataRows(jsonData.slice(1), tenantName);
-                                    combinedData = combinedData.concat(processedRows);
-                                }
-
-                                processedCount++;
-
-                                // When all files are processed
-                                if (processedCount === files.length) {
-                                    displayCombinedData();
-                                    showStatus(`Successfully combined ${files.length} files with ${combinedData.length} rows`, 'success');
-                                    copyBtn.disabled = false;
-                                }
-                            } catch (error) {
-                                showStatus(`Error processing ${file.name}: ${error.message}`, 'error');
+            // Process data rows
+            const processDataRows = (rows, tenantName, currentZipColumnIndex) => {
+                console.log('Processing rows, zipColumnIndex:', currentZipColumnIndex); // Debug
+                return rows
+                    .filter(row => Array.isArray(row) && row.length > 0 && row.some(cell => cell !== undefined && cell !== null && cell !== '')) // Skip empty/invalid rows
+                    .map(row => {
+                        let newRow = [...row]; // Create a copy to avoid modifying the original
+                        if (currentZipColumnIndex >= 0 && currentZipColumnIndex < newRow.length) {
+                            const zipValue = String(newRow[currentZipColumnIndex]).trim();
+                            console.log('Original zip value:', zipValue); // Debug
+                            if (zipValue.includes('-')) {
+                                newRow[currentZipColumnIndex] = zipValue.split('-')[0];
+                                console.log('Transformed zip value:', newRow[currentZipColumnIndex]); // Debug
                             }
-                        };
-                        reader.onerror = function() {
-                            showStatus(`Error reading ${file.name}`, 'error');
-                        };
-                        reader.readAsArrayBuffer(file);
-                    });
-                });
-
-                // Process data rows - adds tenant name and processes zip codes
-                function processDataRows(rows, tenantName) {
-                    return rows.map(row => {
-                        // Process Zip column if it exists
-                        if (zipColumnIndex >= 0 && zipColumnIndex < row.length) {
-                            const zipValue = String(row[zipColumnIndex]);
-                            // Remove anything after dash in zip code
-                            row[zipColumnIndex] = zipValue.split('-')[0];
                         }
-
-                        // Add tenant name if provided
                         if (tenantName) {
-                            row.push(tenantName);
+                            newRow.push(tenantName);
+                        }
+                        return newRow;
+                    });
+            };
+
+            // Combine files
+            const combineFiles = async () => {
+                if (files.length === 0) {
+                    setStatus({ message: 'No files selected', type: 'error' });
+                    return;
+                }
+
+                setStatus({ message: 'Processing files...', type: '' });
+                let newCombinedData = [];
+                let newHeaders = [];
+                let newZipColumnIndex = -1;
+
+                try {
+                    for (let index = 0; index < files.length; index++) {
+                        const file = files[index];
+                        const data = await file.arrayBuffer();
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const firstSheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[firstSheetName];
+                        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+                        if (jsonData.length === 0) {
+                            setStatus({ message: `Error: ${file.name} is empty`, type: 'error' });
+                            return;
                         }
 
-                        return row;
-                    });
-                }
-
-                // Display combined data in table
-                function displayCombinedData() {
-                    if (combinedData.length === 0) {
-                        combinedTable.innerHTML = '';
-                        return;
+                        if (index === 0) {
+                            newHeaders = jsonData[0].map(header => String(header).trim()); // Ensure headers are strings
+                            newZipColumnIndex = newHeaders.findIndex(header => 
+                                ['zip', 'ZIP', 'Zip', 'ZIP Code', 'Zip Code'].includes(String(header).toLowerCase().trim())
+                            );
+                            console.log('Headers:', newHeaders, 'Zip column index:', newZipColumnIndex); // Debug
+                            if (tenantName) newHeaders.push('Tenant Name');
+                            const processedRows = processDataRows(jsonData.slice(1), tenantName, newZipColumnIndex);
+                            newCombinedData = newCombinedData.concat(processedRows);
+                        } else {
+                            const currentHeaders = jsonData[0].map(header => String(header).trim());
+                            const headersToCompare = tenantName ? newHeaders.slice(0, -1) : newHeaders;
+                            if (JSON.stringify(currentHeaders) !== JSON.stringify(headersToCompare)) {
+                                setStatus({ message: `Error: Headers in ${file.name} don't match the first file`, type: 'error' });
+                                return;
+                            }
+                            const processedRows = processDataRows(jsonData.slice(1), tenantName, newZipColumnIndex);
+                            newCombinedData = newCombinedData.concat(processedRows);
+                        }
                     }
 
-                    // Create table header
-                    let tableHTML = '<thead><tr>';
-                    headers.forEach(header => {
-                        tableHTML += `<th>${header}</th>`;
-                    });
-                    tableHTML += '</tr></thead><tbody>';
+                    setHeaders(newHeaders);
+                    setCombinedData(newCombinedData);
+                    setZipColumnIndex(newZipColumnIndex);
+                    setStatus({ message: `Successfully combined ${files.length} files with ${newCombinedData.length} rows`, type: 'success' });
+                } catch (error) {
+                    setStatus({ message: `Error processing files: ${error.message}`, type: 'error' });
+                }
+            };
 
-                    // Create table rows
-                    combinedData.forEach(row => {
-                        tableHTML += '<tr>';
-                        headers.forEach((header, colIndex) => {
-                            const cellValue = row[colIndex] !== undefined ? row[colIndex] : '';
-                            tableHTML += `<td>${cellValue}</td>`;
+            // Export to CSV/TSV
+            const exportFile = (format) => {
+                if (combinedData.length === 0) {
+                    setStatus({ message: 'No data to export', type: 'error' });
+                    return;
+                }
+
+                const separator = format === 'csv' ? ',' : '\t';
+                const extension = format === 'csv' ? 'csv' : 'tsv';
+                let data = headers.join(separator) + '\n';
+                combinedData.forEach(row => {
+                    data += headers.map((_, index) => row[index] || '').join(separator) + '\n';
+                });
+
+                const blob = new Blob([data], { type: `text/${format}` });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `combined_data.${extension}`;
+                a.click();
+                URL.revokeObjectURL(url);
+                setStatus({ message: `Data exported as ${format.toUpperCase()}`, type: 'success' });
+            };
+
+            // Copy to clipboard
+            const copyToClipboard = () => {
+                if (combinedData.length === 0) {
+                    setStatus({ message: 'No data to copy', type: 'error' });
+                    return;
+                }
+
+                let tsvData = headers.join('\t') + '\n';
+                combinedData.forEach(row => {
+                    tsvData += headers.map((_, index) => row[index] || '').join('\t') + '\n';
+                });
+
+                navigator.clipboard.writeText(tsvData)
+                    .then(() => setStatus({ message: 'Data copied to clipboard!', type: 'success' }))
+                    .catch(() => setStatus({ message: 'Failed to copy data', type: 'error' }));
+            };
+
+            // Clear all
+            const clearAll = () => {
+                setFiles([]);
+                setTenantName('');
+                setCombinedData([]);
+                setHeaders([]);
+                setZipColumnIndex(-1);
+                setStatus({ message: '', type: '' });
+                setIsDragActive(false);
+                if (dataTableRef.current && $.fn.DataTable.isDataTable(tableRef.current)) {
+                    dataTableRef.current.destroy();
+                    dataTableRef.current = null;
+                }
+            };
+
+            // Initialize DataTable
+            useEffect(() => {
+                if (combinedData.length > 0 && tableRef.current && !$.fn.DataTable.isDataTable(tableRef.current)) {
+                    try {
+                        dataTableRef.current = $(tableRef.current).DataTable({
+                            data: combinedData,
+                            columns: headers.map(header => ({ title: header })),
+                            pageLength: 10,
+                            responsive: true,
+                            dom: 'frtip',
+                            scrollX: true
                         });
-                        tableHTML += '</tr>';
-                    });
-
-                    tableHTML += '</tbody>';
-                    combinedTable.innerHTML = tableHTML;
-                }
-
-                // Copy to clipboard button
-                copyBtn.addEventListener('click', function() {
-                    if (combinedData.length === 0) {
-                        showStatus('No data to copy', 'error');
-                        return;
+                    } catch (error) {
+                        console.error('Error initializing DataTable:', error);
+                        setStatus({ message: 'Error rendering table: ' + error.message, type: 'error' });
                     }
-
-                    // Convert data to tab-separated values
-                    let tsvData = headers.join('\t') + '\n';
-                    combinedData.forEach(row => {
-                        tsvData += headers.map((header, colIndex) => {
-                            return row[colIndex] !== undefined ? row[colIndex] : '';
-                        }).join('\t') + '\n';
-                    });
-
-                    // Copy to clipboard
-                    navigator.clipboard.writeText(tsvData)
-                        .then(() => {
-                        showStatus('Data copied to clipboard!', 'success');
-                    })
-                        .catch(err => {
-                        showStatus('Failed to copy data: ' + err, 'error');
-                    });
-                });
-
-                // Clear button
-                clearBtn.addEventListener('click', function() {
-                    files = [];
-                    combinedData = [];
-                    headers = [];
-                    zipColumnIndex = -1;
-                    fileUpload.value = '';
-                    tenantNameInput.value = '';
-                    fileList.innerHTML = '';
-                    combinedTable.innerHTML = '';
-                    statusDiv.textContent = '';
-                    statusDiv.className = 'status';
-                    combineBtn.disabled = true;
-                    copyBtn.disabled = true;
-                    clearBtn.disabled = true;
-                });
-
-                // Show status message
-                function showStatus(message, type = '') {
-                    statusDiv.textContent = message;
-                    statusDiv.className = 'status ' + type;
                 }
-            });
-        </script>
-    </body>
+                return () => {
+                    if (dataTableRef.current && $.fn.DataTable.isDataTable(tableRef.current)) {
+                        dataTableRef.current.destroy();
+                        dataTableRef.current = null;
+                    }
+                };
+            }, [combinedData, headers]);
+
+            return (
+                <div className="max-w-6xl mx-auto p-6">
+                    <div className="bg-white rounded-lg shadow-xl p-6">
+                        <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
+                            Excel File Combiner
+                        </h1>
+
+                        <div className="bg-yellow-50 p-4 rounded-lg mb-6">
+                            <h3 className="font-semibold text-yellow-800">Instructions:</h3>
+                            <ol className="list-decimal list-inside text-yellow-800">
+                                <li>Enter a Tenant Name (optional)</li>
+                                <li>Drag and drop or click to select Excel files (XLSX, XLS, CSV)</li>
+                                <li>Click "Combine Files" to merge them</li>
+                                <li>Export as CSV/TSV or copy to clipboard</li>
+                            </ol>
+                            <p className="text-yellow-800 mt-2">
+                                <strong>Note:</strong> Zip columns are automatically processed to remove anything after a dash (e.g., "84041-1636" becomes "84041").
+                            </p>
+                        </div>
+
+                        <div className="mb-6">
+                            <label htmlFor="tenantName" className="block text-sm font-medium text-gray-700 mb-2">
+                                Tenant Name
+                            </label>
+                            <input
+                                type="text"
+                                id="tenantName"
+                                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="Enter tenant name (optional)"
+                                value={tenantName}
+                                onChange={(e) => setTenantName(e.target.value)}
+                            />
+                        </div>
+
+                        <div
+                            ref={dropzoneRef}
+                            className={`dropzone mb-6 ${isDragActive ? 'drag-active' : ''}`}
+                            onDragOver={handleDragOver}
+                            onDragEnter={handleDragEnter}
+                            onDragLeave={handleDragLeave}
+                            onDrop={handleDrop}
+                        >
+                            <input
+                                type="file"
+                                id="fileUpload"
+                                accept=".xlsx,.xls,.csv"
+                                multiple
+                                onChange={(e) => handleFileChange(e.target.files)}
+                                className="hidden"
+                            />
+                            <label
+                                htmlFor="fileUpload"
+                                className="text-gray-600 cursor-pointer"
+                            >
+                                {isDragActive ? 'Drop the files here...' : 'Drag & drop Excel files here, or click to select'}
+                            </label>
+                            {files.length > 0 && (
+                                <div className="mt-4">
+                                    <p className="font-medium text-gray-700">Selected Files:</p>
+                                    {files.map(file => (
+                                        <p key={file.name} className="text-sm text-gray-600">{file.name}</p>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="flex space-x-4 mb-6">
+                            <button
+                                onClick={combineFiles}
+                                disabled={files.length === 0}
+                                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition duration-200"
+                            >
+                                Combine Files
+                            </button>
+                            <button
+                                onClick={() => exportFile('csv')}
+                                disabled={combinedData.length === 0}
+                                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition duration-200"
+                            >
+                                Export as CSV
+                            </button>
+                            <button
+                                onClick={() => exportFile('tsv')}
+                                disabled={combinedData.length === 0}
+                                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition duration-200"
+                            >
+                                Export as TSV
+                            </button>
+                            <button
+                                onClick={copyToClipboard}
+                                disabled={combinedData.length === 0}
+                                className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition duration-200"
+                            >
+                                Copy to Clipboard
+                            </button>
+                            <button
+                                onClick={clearAll}
+                                disabled={files.length === 0 && combinedData.length === 0}
+                                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition duration-200"
+                            >
+                                Clear All
+                            </button>
+                        </div>
+
+                        {status.message && (
+                            <div className={`p-4 rounded-lg mb-6 ${
+                                status.type === 'success' ? 'bg-green-100 text-green-800' :
+                                status.type === 'error' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'
+                            }`}>
+                                {status.message}
+                            </div>
+                        )}
+
+                        {combinedData.length > 0 && (
+                            <div className="table-container">
+                                <table ref={tableRef} id="combinedTable" className="w-full"></table>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<ExcelCombiner />, document.getElementById('root'));
+    </script>
+</body>
 </html>
