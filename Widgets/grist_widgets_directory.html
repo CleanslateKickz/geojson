@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grist Custom Widgets Directory</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --background-color: #f8fafc;
+            --card-background: #ffffff;
+            --text-color: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --border-radius: 8px;
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+            --shadow-hover: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* Header Styles */
+        .header {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-bottom: 1px solid var(--border-color);
+            padding: 2rem 0;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .header .subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Controls Section */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 2rem 0;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .search-container {
+            flex: 1;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .search-container input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            background: var(--card-background);
+            transition: all 0.2s ease;
+        }
+
+        .search-container input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .search-container::before {
+            content: '\f002';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            z-index: 1;
+        }
+
+        .add-widget-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .add-widget-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-1px);
+        }
+
+        /* Stats Section */
+        .stats {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-background);
+            padding: 1rem 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .stat-card h3 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-card p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Widgets Grid */
+        .widgets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .widget-card {
+            background: var(--card-background);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .widget-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .widget-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: #f1f5f9;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .widget-content {
+            padding: 1.5rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .widget-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .widget-description {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            flex: 1;
+        }
+
+        .widget-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: auto;
+        }
+
+        .widget-link {
+            flex: 1;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .widget-link:hover {
+            background: var(--secondary-color);
+        }
+
+        .grist-link {
+            background: #059669;
+            flex: 1;
+        }
+
+        .grist-link:hover {
+            background: #047857;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            backdrop-filter: blur(2px);
+        }
+
+        .modal-content {
+            background: var(--card-background);
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            color: var(--text-color);
+            font-size: 1.5rem;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            color: var(--text-color);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary-color);
+        }
+
+        .btn-secondary {
+            background: var(--border-color);
+            color: var(--text-color);
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e1;
+        }
+
+        /* Loading States */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--border-color);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 0.75rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-container {
+                max-width: none;
+            }
+
+            .stats {
+                flex-direction: column;
+            }
+
+            .widgets-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .modal-content {
+                margin: 10% auto;
+                width: 95%;
+            }
+
+            .widget-actions {
+                flex-direction: column;
+            }
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 2rem 0;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted);
+            margin-top: 3rem;
+        }
+
+        .footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1><i class="fas fa-puzzle-piece"></i> Grist Custom Widgets</h1>
+            <p class="subtitle">A collection of custom widgets for Grist spreadsheets</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="controls">
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Search widgets...">
+            </div>
+            <button class="add-widget-btn" id="addWidgetBtn">
+                <i class="fas fa-plus"></i> Add Widget
+            </button>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <h3 id="totalWidgets">0</h3>
+                <p>Total Widgets</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="recentWidgets">0</h3>
+                <p>Added This Month</p>
+            </div>
+        </div>
+
+        <div id="widgetsContainer">
+            <div class="loading">Loading widgets...</div>
+        </div>
+    </div>
+
+    <!-- Add Widget Modal -->
+    <div id="addWidgetModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Widget</h2>
+                <button class="close-btn" id="closeModal">&times;</button>
+            </div>
+            <div id="addWidgetForm">
+                <div class="form-group">
+                    <label for="widgetTitle">Widget Title *</label>
+                    <input type="text" id="widgetTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="widgetDescription">Description</label>
+                    <textarea id="widgetDescription" placeholder="Brief description of what this widget does..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="widgetFile">Widget File Path *</label>
+                    <input type="text" id="widgetFile" placeholder="widgets/my-widget.html" required>
+                </div>
+                <div class="form-group">
+                    <label for="widgetImage">Screenshot Path</label>
+                    <input type="text" id="widgetImage" placeholder="images/my-widget.png">
+                </div>
+                <div class="form-group">
+                    <label for="gristUrl">Grist Document URL</label>
+                    <input type="url" id="gristUrl" placeholder="https://docs.getgrist.com/...">
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-secondary" id="cancelAdd">Cancel</button>
+                    <button class="btn btn-primary" id="saveWidget">Add Widget</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="container">
+            <p>&copy; 2025 Grist Custom Widgets Directory | 
+                <a href="https://support.getgrist.com/widget-custom/" target="_blank">Learn about Custom Widgets</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        class GristWidgetsDirectory {
+            constructor() {
+                this.widgets = [];
+                this.filteredWidgets = [];
+                this.githubOwner = 'CleanslateKickz'; // Change this to your GitHub username
+                this.githubRepo = 'grist-widgets'; // Change this to your repo name
+                this.init();
+            }
+
+            async init() {
+                await this.loadWidgets();
+                this.setupEventListeners();
+                this.renderWidgets();
+                this.updateStats();
+            }
+
+            async loadWidgets() {
+                try {
+                    // First try to load from GitHub API
+                    await this.loadFromGitHub();
+                } catch (error) {
+                    console.warn('GitHub API failed, loading from localStorage:', error);
+                    this.loadFromLocalStorage();
+                }
+            }
+
+            async loadFromGitHub() {
+                const widgetsUrl = `https://api.github.com/repos/${this.githubOwner}/${this.githubRepo}/contents/widgets`;
+                
+                try {
+                    const response = await fetch(widgetsUrl);
+                    if (!response.ok) throw new Error('Failed to fetch widgets');
+                    
+                    const files = await response.json();
+                    const htmlFiles = files.filter(file => 
+                        file.type === 'file' && file.name.endsWith('.html')
+                    );
+
+                    // Load widget metadata from localStorage and match with GitHub files
+                    const savedWidgets = JSON.parse(localStorage.getItem('gristWidgets') || '[]');
+                    
+                    this.widgets = htmlFiles.map(file => {
+                        const saved = savedWidgets.find(w => w.file === `widgets/${file.name}`);
+                        return {
+                            id: saved?.id || this.generateId(),
+                            title: saved?.title || this.formatFileName(file.name),
+                            description: saved?.description || '',
+                            file: `widgets/${file.name}`,
+                            image: saved?.image || `images/${file.name.replace('.html', '.png')}`,
+                            gristUrl: saved?.gristUrl || '',
+                            dateAdded: saved?.dateAdded || new Date().toISOString()
+                        };
+                    });
+
+                    // Add any custom widgets that might not be in GitHub yet
+                    const customWidgets = savedWidgets.filter(saved => 
+                        !htmlFiles.some(file => `widgets/${file.name}` === saved.file)
+                    );
+                    this.widgets = [...this.widgets, ...customWidgets];
+
+                } catch (error) {
+                    throw error;
+                }
+            }
+
+            loadFromLocalStorage() {
+                this.widgets = JSON.parse(localStorage.getItem('gristWidgets') || '[]');
+            }
+
+            saveToLocalStorage() {
+                localStorage.setItem('gristWidgets', JSON.stringify(this.widgets));
+            }
+
+            setupEventListeners() {
+                // Search functionality
+                document.getElementById('searchInput').addEventListener('input', (e) => {
+                    this.filterWidgets(e.target.value);
+                });
+
+                // Modal controls
+                document.getElementById('addWidgetBtn').addEventListener('click', () => {
+                    document.getElementById('addWidgetModal').style.display = 'block';
+                });
+
+                document.getElementById('closeModal').addEventListener('click', () => {
+                    this.closeModal();
+                });
+
+                document.getElementById('cancelAdd').addEventListener('click', () => {
+                    this.closeModal();
+                });
+
+                document.getElementById('saveWidget').addEventListener('click', () => {
+                    this.addWidget();
+                });
+
+                // Close modal when clicking outside
+                window.addEventListener('click', (e) => {
+                    const modal = document.getElementById('addWidgetModal');
+                    if (e.target === modal) {
+                        this.closeModal();
+                    }
+                });
+            }
+
+            filterWidgets(searchTerm) {
+                const term = searchTerm.toLowerCase().trim();
+                if (!term) {
+                    this.filteredWidgets = [...this.widgets];
+                } else {
+                    this.filteredWidgets = this.widgets.filter(widget =>
+                        widget.title.toLowerCase().includes(term) ||
+                        widget.description.toLowerCase().includes(term)
+                    );
+                }
+                this.renderWidgets();
+            }
+
+            renderWidgets() {
+                const container = document.getElementById('widgetsContainer');
+                const widgetsToShow = this.filteredWidgets.length ? this.filteredWidgets : this.widgets;
+
+                if (widgetsToShow.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-puzzle-piece"></i>
+                            <h3>No widgets found</h3>
+                            <p>Add your first custom Grist widget to get started!</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const widgetsGrid = document.createElement('div');
+                widgetsGrid.className = 'widgets-grid';
+
+                widgetsToShow.forEach(widget => {
+                    const widgetCard = this.createWidgetCard(widget);
+                    widgetsGrid.appendChild(widgetCard);
+                });
+
+                container.innerHTML = '';
+                container.appendChild(widgetsGrid);
+            }
+
+            createWidgetCard(widget) {
+                const card = document.createElement('div');
+                card.className = 'widget-card';
+                
+                // Format date
+                const dateAdded = new Date(widget.dateAdded).toLocaleDateString();
+                
+                card.innerHTML = `
+                    <img class="widget-image" 
+                         src="${widget.image}" 
+                         alt="${widget.title}"
+                         onerror="this.onerror=null; this.src='https://via.placeholder.com/350x200/f1f5f9/64748b?text=${encodeURIComponent(widget.title)}';">
+                    <div class="widget-content">
+                        <div class="widget-title">${widget.title}</div>
+                        <div class="widget-description">${widget.description || 'No description available'}</div>
+                        <div class="widget-actions">
+                            <a href="${widget.file}" target="_blank" class="widget-link">
+                                <i class="fas fa-code"></i> View Widget
+                            </a>
+                            ${widget.gristUrl ? `
+                                <a href="${widget.gristUrl}" target="_blank" class="widget-link grist-link">
+                                    <i class="fas fa-table"></i> Grist Doc
+                                </a>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+
+                return card;
+            }
+
+            addWidget() {
+                const title = document.getElementById('widgetTitle').value.trim();
+                const description = document.getElementById('widgetDescription').value.trim();
+                const file = document.getElementById('widgetFile').value.trim();
+                const image = document.getElementById('widgetImage').value.trim();
+                const gristUrl = document.getElementById('gristUrl').value.trim();
+
+                if (!title || !file) {
+                    alert('Please fill in the required fields (Title and Widget File Path)');
+                    return;
+                }
+
+                const newWidget = {
+                    id: this.generateId(),
+                    title,
+                    description,
+                    file,
+                    image: image || `images/${file.split('/').pop().replace('.html', '.png')}`,
+                    gristUrl,
+                    dateAdded: new Date().toISOString()
+                };
+
+                this.widgets.unshift(newWidget);
+                this.saveToLocalStorage();
+                this.renderWidgets();
+                this.updateStats();
+                this.closeModal();
+                this.clearForm();
+            }
+
+            closeModal() {
+                document.getElementById('addWidgetModal').style.display = 'none';
+            }
+
+            clearForm() {
+                document.getElementById('widgetTitle').value = '';
+                document.getElementById('widgetDescription').value = '';
+                document.getElementById('widgetFile').value = '';
+                document.getElementById('widgetImage').value = '';
+                document.getElementById('gristUrl').value = '';
+            }
+
+            updateStats() {
+                document.getElementById('totalWidgets').textContent = this.widgets.length;
+                
+                // Count widgets added this month
+                const thisMonth = new Date();
+                thisMonth.setDate(1);
+                thisMonth.setHours(0, 0, 0, 0);
+                
+                const recentCount = this.widgets.filter(widget => 
+                    new Date(widget.dateAdded) >= thisMonth
+                ).length;
+                
+                document.getElementById('recentWidgets').textContent = recentCount;
+            }
+
+            generateId() {
+                return Date.now().toString(36) + Math.random().toString(36).substr(2);
+            }
+
+            formatFileName(filename) {
+                return filename
+                    .replace('.html', '')
+                    .replace(/[-_]/g, ' ')
+                    .replace(/\b\w/g, l => l.toUpperCase());
+            }
+        }
+
+        // Initialize the directory when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new GristWidgetsDirectory();
+        });
+    </script>
+</body>
+</html>
