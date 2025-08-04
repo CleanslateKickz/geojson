@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Code Combiner Pro</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Monaco -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+
+    <!-- Prism for output syntax highlight -->
+    <link rel="stylesheet" href="https://unpkg.com/prismjs@1.29.0/themes/prism.css"/>
+    <script src="https://unpkg.com/prismjs@1.29.0/components/prism-core.min.js"></script>
+    <script src="https://unpkg.com/prismjs@1.29.0/components/prism-markup.min.js"></script>
+
+    <style>
+        html, body { height: 100%; }
+        /* Monaco container heights */
+        #editorContainer { height: calc(100vh - 220px); }
+        .monaco-editor, .monaco-editor .overflow-guard { border-radius: 0.5rem; }
+        /* Drag overlay */
+        #dropOverlay { pointer-events: none; }
+    </style>
+    </head>
+    <body class="bg-slate-50 text-slate-800">
+        <!-- Top App Bar -->
+        <header class="sticky top-0 z-40 backdrop-blur bg-white/75 border-b">
+            <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-lg bg-blue-600 text-white grid place-items-center">
+                        <i data-lucide="combine" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-semibold tracking-tight">Code Combiner Pro</h1>
+                        <p class="text-xs text-slate-500">Combine HTML, CSS, and JS into a single file</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button id="newBtn" class="px-3 py-2 rounded-md border hover:bg-slate-100 text-sm">New</button>
+                    <button id="importBtn" class="px-3 py-2 rounded-md border hover:bg-slate-100 text-sm">Import</button>
+                    <button id="saveBtn" class="px-3 py-2 rounded-md border hover:bg-slate-100 text-sm">Save</button>
+                    <button id="generateBtn" class="px-3 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-sm">Generate</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Toolbar -->
+        <div class="border-b bg-white">
+            <div class="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="text-sm text-slate-600">Theme:</span>
+                    <select id="themeSelect" class="text-sm border rounded-md px-2 py-1">
+                        <option value="vs-light">Light</option>
+                        <option value="vs-dark">Dark</option>
+                    </select>
+
+                    <span class="ml-4 text-sm text-slate-600">Preview:</span>
+                    <select id="previewSize" class="text-sm border rounded-md px-2 py-1">
+                        <option value="100%">Desktop</option>
+                        <option value="768px">Tablet</option>
+                        <option value="390px">Mobile</option>
+                    </select>
+
+                    <button id="runPreview" class="ml-2 px-3 py-1.5 rounded-md border hover:bg-slate-100 text-sm">Refresh Preview</button>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button id="copyAllBtn" class="px-3 py-1.5 rounded-md border hover:bg-slate-100 text-sm">Copy All</button>
+                    <button id="downloadBtn" class="px-3 py-1.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-sm">Download</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main -->
+        <main class="max-w-7xl mx-auto px-4 py-4">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <!-- Editors Panel -->
+                <section class="bg-white border rounded-xl shadow-sm">
+                    <!-- Tabs -->
+                    <div class="flex border-b px-3">
+                        <button data-tab="html" class="tab-btn px-4 py-2 text-sm font-medium border-b-2 -mb-px border-transparent hover:text-blue-600">HTML</button>
+                        <button data-tab="css" class="tab-btn px-4 py-2 text-sm font-medium border-b-2 -mb-px border-transparent hover:text-blue-600">CSS</button>
+                        <button data-tab="js" class="tab-btn px-4 py-2 text-sm font-medium border-b-2 -mb-px border-transparent hover:text-blue-600">JavaScript</button>
+                        <div class="ml-auto flex items-center gap-2 py-2">
+                            <button id="formatBtn" class="px-3 py-1.5 text-sm rounded-md border hover:bg-slate-100">Format</button>
+                            <button id="clearBtn" class="px-3 py-1.5 text-sm rounded-md border hover:bg-slate-100">Clear</button>
+                        </div>
+                    </div>
+                    <div id="editorContainer" class="p-3">
+                        <div id="htmlEditor" class="h-full hidden"></div>
+                        <div id="cssEditor" class="h-full hidden"></div>
+                        <div id="jsEditor" class="h-full hidden"></div>
+                    </div>
+                </section>
+
+                <!-- Preview + Output -->
+                <section class="space-y-4">
+                    <!-- Live Preview -->
+                    <div class="bg-white border rounded-xl shadow-sm">
+                        <div class="flex items-center justify-between border-b px-3 py-2">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="monitor" class="w-4 h-4 text-slate-500"></i>
+                                <span class="text-sm font-medium">Live Preview</span>
+                            </div>
+                            <button id="openOutput" class="px-3 py-1.5 text-sm rounded-md border hover:bg-slate-100">View Combined Code</button>
+                        </div>
+                        <div class="p-3">
+                            <div id="previewFrameWrap" class="mx-auto border rounded-lg overflow-hidden bg-slate-50" style="width:100%;">
+                                <iframe id="preview" class="w-full" style="height:500px;" sandbox="allow-scripts allow-same-origin"></iframe>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tips -->
+                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-xl px-4 py-3">
+                        <div class="flex gap-3">
+                            <i data-lucide="lightbulb" class="w-5 h-5 text-blue-600 mt-0.5"></i>
+                            <div class="text-sm text-slate-700">
+                                Drag & drop an .html file to import. Your work auto-saves to the browser every few seconds.
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Output Modal -->
+        <div id="outputModal" class="fixed inset-0 hidden items-center justify-center z-50">
+            <div class="absolute inset-0 bg-black/40"></div>
+            <div class="relative bg-white rounded-xl shadow-xl max-w-4xl w-full mx-4 overflow-hidden">
+                <div class="flex items-center justify-between px-4 py-3 border-b">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="file-code" class="w-5 h-5 text-blue-600"></i>
+                        <h3 class="font-semibold">Combined File</h3>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button id="copyOutputBtn" class="px-3 py-1.5 text-sm rounded-md border hover:bg-slate-100">Copy</button>
+                        <button id="downloadOutputBtn" class="px-3 py-1.5 text-sm rounded-md bg-blue-600 hover:bg-blue-700 text-white">Download</button>
+                        <button id="closeOutput" class="p-2 rounded-md hover:bg-slate-100">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="max-h-[70vh] overflow-auto p-4">
+                    <pre class="language-markup"><code id="outputCode" class="language-markup"></code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Drag overlay -->
+        <div id="dropOverlay" class="fixed inset-0 hidden z-40">
+            <div class="w-full h-full bg-blue-600/10 border-4 border-dashed border-blue-600"></div>
+        </div>
+
+        <script>
+            // Icons
+            lucide.createIcons();
+
+            // Monaco setup
+            const monacoConfig = { paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } };
+            require.config(monacoConfig);
+            let htmlEditor, cssEditor, jsEditor, active = 'html';
+
+            const defaults = {
+                html: '<div class="p-6">\n  <h1>Hello World</h1>\n  <p>Welcome to Code Combiner Pro.</p>\n</div>',
+                css: 'body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }\n h1 { color: #2563eb; }',
+                js: 'console.log("Ready!");'
+            };
+
+            function combinedFile(html, css, js) {
+                return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+${css}
+            </style>
+            </head>
+<body>
+${html}
+<script>
+${js}
+<\/script>
+            </body>
+            </html>`;
+            }
+
+            require(['vs/editor/editor.main'], function () {
+                const saved = JSON.parse(localStorage.getItem('ccp:data') || 'null');
+
+                htmlEditor = monaco.editor.create(document.getElementById('htmlEditor'), {
+                    value: saved?.html ?? defaults.html,
+                    language: 'html',
+                    theme: 'vs-light',
+                    automaticLayout: true,
+                    minimap: { enabled: false }
+                });
+
+                cssEditor = monaco.editor.create(document.getElementById('cssEditor'), {
+                    value: saved?.css ?? defaults.css,
+                    language: 'css',
+                    theme: 'vs-light',
+                    automaticLayout: true,
+                    minimap: { enabled: false }
+                });
+
+                jsEditor = monaco.editor.create(document.getElementById('jsEditor'), {
+                    value: saved?.js ?? defaults.js,
+                    language: 'javascript',
+                    theme: 'vs-light',
+                    automaticLayout: true,
+                    minimap: { enabled: false }
+                });
+
+                // Show HTML tab by default
+                document.querySelector('#htmlEditor').classList.remove('hidden');
+                setActiveTab('html');
+
+                // Auto-save every 2s
+                setInterval(() => {
+                    localStorage.setItem('ccp:data', JSON.stringify({
+                        html: htmlEditor.getValue(),
+                        css: cssEditor.getValue(),
+                        js: jsEditor.getValue()
+                    }));
+                }, 2000);
+
+                // Initial preview
+                renderPreview();
+            });
+
+            // Tabs
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    setActiveTab(btn.dataset.tab);
+                });
+            });
+
+            function setActiveTab(name) {
+                active = name;
+                document.querySelectorAll('.tab-btn').forEach(b => {
+                    b.classList.toggle('text-blue-600', b.dataset.tab === name);
+                    b.classList.toggle('border-blue-600', b.dataset.tab === name);
+                    b.classList.toggle('border-transparent', b.dataset.tab !== name);
+                });
+                ['html','css','js'].forEach(id => {
+                    document.getElementById(id+'Editor').classList.toggle('hidden', id !== name);
+                });
+            }
+
+            // Theme
+            document.getElementById('themeSelect').addEventListener('change', (e) => {
+                const theme = e.target.value;
+                monaco.editor.setTheme(theme);
+            });
+
+            // Preview size
+            document.getElementById('previewSize').addEventListener('change', (e) => {
+                document.getElementById('previewFrameWrap').style.width = e.target.value;
+            });
+
+            // Buttons
+            document.getElementById('formatBtn').addEventListener('click', () => {
+                if (active === 'html') htmlEditor.getAction('editor.action.formatDocument').run();
+                if (active === 'css') cssEditor.getAction('editor.action.formatDocument').run();
+                if (active === 'js') jsEditor.getAction('editor.action.formatDocument').run();
+            });
+
+            document.getElementById('clearBtn').addEventListener('click', () => {
+                if (active === 'html') htmlEditor.setValue('');
+                if (active === 'css') cssEditor.setValue('');
+                if (active === 'js') jsEditor.setValue('');
+            });
+
+            document.getElementById('runPreview').addEventListener('click', renderPreview);
+
+            document.getElementById('downloadBtn').addEventListener('click', () => {
+                const combined = combinedFile(htmlEditor.getValue(), cssEditor.getValue(), jsEditor.getValue());
+                download('combined.html', combined);
+            });
+
+            document.getElementById('copyAllBtn').addEventListener('click', async () => {
+                const combined = combinedFile(htmlEditor.getValue(), cssEditor.getValue(), jsEditor.getValue());
+                await navigator.clipboard.writeText(combined);
+                toast('Copied combined file to clipboard');
+            });
+
+            document.getElementById('generateBtn').addEventListener('click', openOutput);
+            document.getElementById('openOutput').addEventListener('click', openOutput);
+
+            document.getElementById('closeOutput').addEventListener('click', closeOutput);
+            document.getElementById('copyOutputBtn').addEventListener('click', async () => {
+                const code = document.getElementById('outputCode').textContent;
+                await navigator.clipboard.writeText(code);
+                toast('Combined file copied');
+            });
+            document.getElementById('downloadOutputBtn').addEventListener('click', () => {
+                const code = document.getElementById('outputCode').textContent;
+                download('combined.html', code);
+            });
+
+            document.getElementById('newBtn').addEventListener('click', () => {
+                htmlEditor.setValue(defaults.html);
+                cssEditor.setValue(defaults.css);
+                jsEditor.setValue(defaults.js);
+                renderPreview();
+                toast('New document created');
+            });
+
+            document.getElementById('saveBtn').addEventListener('click', () => {
+                localStorage.setItem('ccp:data', JSON.stringify({
+                    html: htmlEditor.getValue(),
+                    css: cssEditor.getValue(),
+                    js: jsEditor.getValue()
+                }));
+                toast('Saved to browser');
+            });
+
+            // Import
+            document.getElementById('importBtn').addEventListener('click', async () => {
+                const [fileHandle] = await window.showOpenFilePicker?.({
+                    types: [{ description: 'HTML', accept: { 'text/html': ['.html', '.htm'] } }],
+                    multiple: false
+                }).catch(() => [null]) || [null];
+
+                if (!fileHandle) {
+                    // Fallback input
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = '.html,.htm';
+                    input.onchange = async (e) => {
+                        const file = e.target.files[0];
+                        if (file) importHtml(await file.text());
+                    };
+                    input.click();
+                    return;
+                }
+                const file = await fileHandle.getFile();
+                importHtml(await file.text());
+            });
+
+            function importHtml(text) {
+                // naive extraction
+                const html = (text.match(/<body[^>]*>([\s\S]*)<\/body>/i)?.[1] ?? text).trim();
+                const css = (text.match(/<style[^>]*>([\s\S]*?)<\/style>/i)?.[1] ?? '').trim();
+                const js = (text.match(/<script[^>]*>([\s\S]*?)<\/script>/i)?.[1] ?? '').trim();
+                htmlEditor.setValue(html);
+                cssEditor.setValue(css);
+                jsEditor.setValue(js);
+                renderPreview();
+                toast('Imported HTML file');
+            }
+
+            // Drag & drop import
+            const overlay = document.getElementById('dropOverlay');
+            window.addEventListener('dragover', (e) => { e.preventDefault(); overlay.classList.remove('hidden'); });
+            window.addEventListener('dragleave', () => overlay.classList.add('hidden'));
+            window.addEventListener('drop', async (e) => {
+                e.preventDefault();
+                overlay.classList.add('hidden');
+                const file = e.dataTransfer.files?.[0];
+                if (file && /text\/html|\.html?$/i.test(file.type) || /\.html?$/i.test(file.name)) {
+                    importHtml(await file.text());
+                }
+            });
+
+            // Render preview
+            function renderPreview() {
+                const combined = combinedFile(htmlEditor.getValue(), cssEditor.getValue(), jsEditor.getValue());
+                const iframe = document.getElementById('preview');
+                iframe.srcdoc = combined;
+            }
+
+            // Output modal handlers
+            function openOutput() {
+                const combined = combinedFile(htmlEditor.getValue(), cssEditor.getValue(), jsEditor.getValue());
+                const codeEl = document.getElementById('outputCode');
+                codeEl.textContent = combined;
+                Prism.highlightElement(codeEl);
+                document.getElementById('outputModal').classList.remove('hidden');
+                document.getElementById('outputModal').classList.add('flex');
+            }
+            function closeOutput() {
+                document.getElementById('outputModal').classList.add('hidden');
+                document.getElementById('outputModal').classList.remove('flex');
+            }
+
+            function download(filename, content) {
+                const blob = new Blob([content], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+
+            function toast(msg) {
+                const div = document.createElement('div');
+                div.textContent = msg;
+                div.className = 'fixed bottom-4 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-sm px-3 py-2 rounded-md shadow';
+                document.body.appendChild(div);
+                setTimeout(() => div.remove(), 2000);
+            }
+        </script>
+    </body>
+</html>
