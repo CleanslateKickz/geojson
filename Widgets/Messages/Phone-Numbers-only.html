@@ -166,17 +166,17 @@
         return `
           <div class="phone-card">
             <div class="phone-number">
-              <a href="tel:+1${formattedPhoneDigits}" class="phone-link">${formatPhoneNumber(phoneVal)}</a>
+              <a href="tel:${formattedPhoneDigits}" class="phone-link">${formatPhoneNumber(phoneVal)}</a>
               ${notesDisplay}
             </div>
             <div class="phone-actions">
               <button class="phone-action-btn" title="Call with Webex">
-                <a href="sip:+1${formattedPhoneDigits}">
+                <a href="sip:${formattedPhoneDigits}">
                   <img src="https://img.icons8.com/fluent/512/webex.png" alt="Webex" class="action-icon">
                 </a>
               </button>
               <button class="phone-action-btn" title="Call with Phone Link">
-                <a href="tel:+1${formattedPhoneDigits}">
+                <a href="tel:${formattedPhoneDigits}">
                   <img src="https://static.wikia.nocookie.net/logopedia/images/b/b2/Microsoft_Phone_Link_%282022%29.svg" alt="Phone Link" class="action-icon">
                 </a>
               </button>
