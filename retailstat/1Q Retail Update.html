@@ -129,17 +129,21 @@
             }
 
             .table-header h3 {
-                font-size: 20px;
-                color: var(--gray-800);
-                font-weight: 600;
+                font-size: 22px;
+                color: var(--primary-dark);
+                font-weight: 700;
+                background: linear-gradient(90deg, var(--primary), var(--secondary));
+                -webkit-background-clip: text;
+                background-clip: text;
+                color: transparent;
             }
 
             .highlight-badge {
-                background: linear-gradient(90deg, var(--primary), var(--secondary));
+                background: var(--primary-dark);
                 color: white;
-                padding: 5px 12px;
+                padding: 6px 14px;
                 border-radius: 20px;
-                font-size: 12px;
+                font-size: 14px;
                 font-weight: 600;
             }
 
@@ -153,13 +157,13 @@
                 background: var(--gray-100);
                 color: var(--gray-700);
                 font-weight: 600;
-                padding: 12px 15px;
+                padding: 10px 8px;
                 text-align: left;
                 border-bottom: 2px solid var(--gray-200);
             }
 
             .data-table td {
-                padding: 12px 15px;
+                padding: 10px 8px;
                 border-bottom: 1px solid var(--gray-200);
             }
 
@@ -170,6 +174,30 @@
             .data-table tr:hover {
                 background-color: #eff6ff;
                 transition: var(--transition);
+            }
+
+            .company-cell {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .company-logo {
+                width: 60px;
+                height: 60px;
+                object-fit: contain;
+                opacity: 0.9;
+                transition: transform 0.2s ease;
+            }
+
+            .company-logo:hover {
+                transform: scale(1.05);
+                opacity: 1;
+            }
+
+            .company-name {
+                font-weight: 600;
+                color: var(--gray-800);
             }
 
             .strong {
@@ -207,12 +235,13 @@
                 color: white;
                 padding: 20px 25px;
                 font-size: 18px;
-                font-weight: 600;
+                font-weight: 700;
                 cursor: pointer;
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
                 transition: var(--transition);
+                position: relative;
             }
 
             .industry-header:hover {
@@ -220,12 +249,12 @@
             }
 
             .industry-header .icon {
-                font-size: 18px;
+                font-size: 20px;
                 transition: transform 0.3s ease;
             }
 
             .industry-header.active .icon {
-                transform: rotate(45deg);
+                transform: rotate(180deg);
             }
 
             .industry-content {
@@ -272,11 +301,6 @@
                 border-left: 4px solid var(--secondary);
                 margin: 20px 0;
                 border-radius: 0 var(--border-radius) var(--border-radius) 0;
-            }
-
-            .company-name {
-                font-weight: 700;
-                color: var(--primary-dark);
             }
 
             footer {
@@ -343,6 +367,7 @@
                 <table class="data-table">
                     <thead>
                         <tr>
+                            <th>Logo</th>
                             <th>Company</th>
                             <th>Comps</th>
                             <th>Sales Change</th>
@@ -353,7 +378,10 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td class="company">Walmart</td>
+                            <td class="company-cell">
+                                <img src="https://www.theadvertisingclub.org/wp-content/uploads/2022/12/Walmart-Logo-PNG-Transparent.png-scaled.webp" alt="Walmart" class="company-logo">
+                            </td>
+                            <td class="company-name">Walmart</td>
                             <td class="strong">4.8%</td>
                             <td class="strong">2.5%</td>
                             <td class="neutral">10</td>
@@ -361,7 +389,10 @@
                             <td>4/30/25</td>
                         </tr>
                         <tr>
-                            <td class="company">Target</td>
+                            <td class="company-cell">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/9/9a/Target_logo.svg" alt="Target" class="company-logo">
+                            </td>
+                            <td class="company-name">Target</td>
                             <td class="weak">-3.8%</td>
                             <td class="weak">-2.8%</td>
                             <td class="weak">-90</td>
@@ -369,7 +400,10 @@
                             <td>5/3/25</td>
                         </tr>
                         <tr>
-                            <td class="company">BJ's Wholesale</td>
+                            <td class="company-cell">
+                                <img src="https://www.bjs.com/assets/images/icons/BJsNewLogo.svg" alt="BJ's Wholesale" class="company-logo">
+                            </td>
+                            <td class="company-name">BJ's Wholesale</td>
                             <td class="strong">3.9%</td>
                             <td class="strong">4.8%</td>
                             <td class="strong">80</td>
@@ -377,7 +411,10 @@
                             <td>5/3/25</td>
                         </tr>
                         <tr>
-                            <td class="company">Costco</td>
+                            <td class="company-cell">
+                                <img src="https://cdn.bfldr.com/56O3HXZ9/at/wkgcrwxgt5bt39wg63kgmqr/Costco-Logo-Registered.png" alt="Costco" class="company-logo">
+                            </td>
+                            <td class="company-name">Costco</td>
                             <td class="strong">8.0%</td>
                             <td class="strong">8.0%</td>
                             <td class="strong">60</td>
@@ -385,7 +422,10 @@
                             <td>5/11/25</td>
                         </tr>
                         <tr>
-                            <td class="company">Dollar General</td>
+                            <td class="company-cell">
+                                <img src="https://seeklogo.com/images/D/dollar-general-logo-2CA4A2BD6E-seeklogo.com.png" alt="Dollar General" class="company-logo">
+                            </td>
+                            <td class="company-name">Dollar General</td>
                             <td class="neutral">2.4%</td>
                             <td class="strong">5.3%</td>
                             <td class="strong">80</td>
@@ -393,7 +433,10 @@
                             <td>5/2/25</td>
                         </tr>
                         <tr>
-                            <td class="company">Best Buy</td>
+                            <td class="company-cell">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c4/Best_Buy_logo_2018.svg" alt="Best Buy" class="company-logo">
+                            </td>
+                            <td class="company-name">Best Buy</td>
                             <td class="neutral">-0.7%</td>
                             <td class="weak">-4.8%</td>
                             <td class="neutral">10</td>
@@ -401,7 +444,10 @@
                             <td>5/3/25</td>
                         </tr>
                         <tr>
-                            <td class="company">Kohl’s</td>
+                            <td class="company-cell">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/6/60/Kohl%27s_logo.svg" alt="Kohl’s" class="company-logo">
+                            </td>
+                            <td class="company-name">Kohl’s</td>
                             <td class="weak">-3.9%</td>
                             <td class="weak">-4.1%</td>
                             <td class="strong">40</td>
@@ -409,7 +455,10 @@
                             <td>5/3/25</td>
                         </tr>
                         <tr>
-                            <td class="company">Macy's</td>
+                            <td class="company-cell">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/a/a2/Macys_logo.svg" alt="Macy's" class="company-logo">
+                            </td>
+                            <td class="company-name">Macy's</td>
                             <td class="neutral">-1.2%</td>
                             <td class="weak">-5.1%</td>
                             <td>-</td>
@@ -417,7 +466,10 @@
                             <td>5/3/25</td>
                         </tr>
                         <tr>
-                            <td class="company">Gap</td>
+                            <td class="company-cell">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Gap_logo.svg/2048px-Gap_logo.svg.png" alt="Gap" class="company-logo">
+                            </td>
+                            <td class="company-name">Gap</td>
                             <td class="neutral">2.0%</td>
                             <td class="neutral">2.2%</td>
                             <td class="strong">60</td>
@@ -425,7 +477,10 @@
                             <td>5/3/25</td>
                         </tr>
                         <tr>
-                            <td class="company">Urban Outfitters</td>
+                            <td class="company-cell">
+                                <img src="https://download.logo.wine/logo/Urban_Outfitters/Urban_Outfitters-Logo.wine.png" alt="Urban Outfitters" class="company-logo">
+                            </td>
+                            <td class="company-name">Urban Outfitters</td>
                             <td class="strong">4.8%</td>
                             <td class="strong">10.7%</td>
                             <td class="strong">240</td>
@@ -433,7 +488,10 @@
                             <td>4/30/25</td>
                         </tr>
                         <tr>
-                            <td class="company">Abercrombie</td>
+                            <td class="company-cell">
+                                <img src="https://images.seeklogo.com/logo-png/16/2/abercrombie-and-fitch-black-logo-png_seeklogo-168406.png" alt="Abercrombie" class="company-logo">
+                            </td>
+                            <td class="company-name">Abercrombie</td>
                             <td class="strong">4.0%</td>
                             <td class="strong">7.5%</td>
                             <td class="strong">440</td>
@@ -441,7 +499,10 @@
                             <td>5/3/25</td>
                         </tr>
                         <tr>
-                            <td class="company">TJX</td>
+                            <td class="company-cell">
+                                <img src="https://static.tjmaxx.com/content/static_content/global_header/images/tjmaxx-redV2.svg" alt="TJX" class="company-logo">
+                            </td>
+                            <td class="company-name">TJX</td>
                             <td class="strong">3.0%</td>
                             <td class="strong">5.1%</td>
                             <td class="weak">-50</td>
@@ -449,7 +510,10 @@
                             <td>5/3/25</td>
                         </tr>
                         <tr>
-                            <td class="company">Ross</td>
+                            <td class="company-cell">
+                                <img src="https://www.rossstores.com/wp-content/uploads/2021/03/logo-ross.svg" alt="Ross" class="company-logo">
+                            </td>
+                            <td class="company-name">Ross</td>
                             <td class="neutral">0.0%</td>
                             <td class="neutral">2.6%</td>
                             <td>-</td>
@@ -457,7 +521,10 @@
                             <td>5/3/25</td>
                         </tr>
                         <tr>
-                            <td class="company">Foot Locker</td>
+                            <td class="company-cell">
+                                <img src="https://images.squarespace-cdn.com/content/v1/6319806ad9eb1c7d472925de/2b00c1f5-eec9-4c34-ad70-6a9e7aa95755/Foot_Locker_logo_Small.png" alt="Foot Locker" class="company-logo">
+                            </td>
+                            <td class="company-name">Foot Locker</td>
                             <td class="weak">-2.6%</td>
                             <td class="weak">-4.8%</td>
                             <td class="weak">-60</td>
@@ -465,7 +532,10 @@
                             <td>5/3/25</td>
                         </tr>
                         <tr>
-                            <td class="company">Academy</td>
+                            <td class="company-cell">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Academy_Sports_%2B_Outdoors_Logo.svg/1280px-Academy_Sports_%2B_Outdoors_Logo.svg.png" alt="Academy" class="company-logo">
+                            </td>
+                            <td class="company-name">Academy</td>
                             <td class="weak">-3.7%</td>
                             <td class="weak">-0.9%</td>
                             <td class="strong">60</td>
@@ -473,7 +543,10 @@
                             <td>5/3/25</td>
                         </tr>
                         <tr>
-                            <td class="company">Dick's Sporting Goods</td>
+                            <td class="company-cell">
+                                <img src="https://mma.prnewswire.com/media/479785/DICKS_Sporting_Goods_Logo.jpg?p=publish" alt="Dick's Sporting Goods" class="company-logo">
+                            </td>
+                            <td class="company-name">Dick's Sporting Goods</td>
                             <td class="strong">4.5%</td>
                             <td class="strong">5.2%</td>
                             <td class="strong">40</td>
@@ -481,7 +554,10 @@
                             <td>5/3/25</td>
                         </tr>
                         <tr>
-                            <td class="company">Home Depot</td>
+                            <td class="company-cell">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/5/5f/TheHomeDepot.svg" alt="Home Depot" class="company-logo">
+                            </td>
+                            <td class="company-name">Home Depot</td>
                             <td class="neutral">-0.3%</td>
                             <td class="strong">9.4%</td>
                             <td class="weak">-30</td>
@@ -489,7 +565,10 @@
                             <td>5/4/25</td>
                         </tr>
                         <tr>
-                            <td class="company">Lowe’s</td>
+                            <td class="company-cell">
+                                <img src="https://www.lowescdn.com/images/logos/LowesLogo_RGB.png" alt="Lowe’s" class="company-logo">
+                            </td>
+                            <td class="company-name">Lowe’s</td>
                             <td class="weak">-1.7%</td>
                             <td class="weak">-2.0%</td>
                             <td class="neutral">20</td>
@@ -497,7 +576,10 @@
                             <td>5/2/25</td>
                         </tr>
                         <tr>
-                            <td class="company">McDonald's</td>
+                            <td class="company-cell">
+                                <img src="https://cdn.freebiesupply.com/logos/large/2x/mcdonalds-15-logo-png-transparent.png" alt="McDonald's" class="company-logo">
+                            </td>
+                            <td class="company-name">McDonald's</td>
                             <td class="weak">-3.6%</td>
                             <td class="weak">-3.5%</td>
                             <td>-</td>
@@ -505,7 +587,10 @@
                             <td>3/31/25</td>
                         </tr>
                         <tr>
-                            <td class="company">Chipotle</td>
+                            <td class="company-cell">
+                                <img src="https://locations.chipotle.com/permanent-b0b701/assets/images/logo.768561f9.svg" alt="Chipotle" class="company-logo">
+                            </td>
+                            <td class="company-name">Chipotle</td>
                             <td class="neutral">-0.4%</td>
                             <td class="strong">6.4%</td>
                             <td class="weak">-40</td>
@@ -513,7 +598,10 @@
                             <td>3/31/25</td>
                         </tr>
                         <tr>
-                            <td class="company">Bloomin’</td>
+                            <td class="company-cell">
+                                <img src="https://companieslogo.com/img/orig/BLMN_BIG-1ce988b4.png?t=1720244491" alt="Bloomin’" class="company-logo">
+                            </td>
+                            <td class="company-name">Bloomin’</td>
                             <td class="neutral">-0.5%</td>
                             <td class="weak">-12.2%</td>
                             <td class="neutral">10</td>
@@ -521,7 +609,10 @@
                             <td>3/30/25</td>
                         </tr>
                         <tr>
-                            <td class="company">Kroger</td>
+                            <td class="company-cell">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Kroger_logo_%281961-2019%29.svg/1200px-Kroger_logo_%281961-2019%29.svg.png" alt="Kroger" class="company-logo">
+                            </td>
+                            <td class="company-name">Kroger</td>
                             <td class="strong">3.2%</td>
                             <td class="neutral">-0.3%</td>
                             <td class="strong">100</td>
@@ -529,7 +620,10 @@
                             <td>5/24/25</td>
                         </tr>
                         <tr>
-                            <td class="company">Albertsons</td>
+                            <td class="company-cell">
+                                <img src="https://s29.q4cdn.com/239956855/files/doc_downloads/mediaAssets/albertsons/2-Alb_Vert_RGB.png" alt="Albertsons" class="company-logo">
+                            </td>
+                            <td class="company-name">Albertsons</td>
                             <td class="neutral">2.3%</td>
                             <td class="neutral">2.5%</td>
                             <td class="weak">-40</td>
@@ -537,7 +631,10 @@
                             <td>2/22/25</td>
                         </tr>
                         <tr>
-                            <td class="company">Amazon</td>
+                            <td class="company-cell">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Amazon_logo.svg/1200px-Amazon_logo.svg.png" alt="Amazon" class="company-logo">
+                            </td>
+                            <td class="company-name">Amazon</td>
                             <td>N/A</td>
                             <td class="strong">8.6%</td>
                             <td class="strong">120</td>
@@ -545,7 +642,10 @@
                             <td>3/31/25</td>
                         </tr>
                         <tr>
-                            <td class="company">Wayfair</td>
+                            <td class="company-cell">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/0/0a/Wayfair_logo_with_tagline.png" alt="Wayfair" class="company-logo">
+                            </td>
+                            <td class="company-name">Wayfair</td>
                             <td>N/A</td>
                             <td class="neutral">0.0%</td>
                             <td class="strong">70</td>
@@ -788,16 +888,14 @@
                 header.addEventListener('click', () => {
                     const content = header.nextElementSibling;
                     const icon = header.querySelector('.icon');
+                    const allContents = document.querySelectorAll('.industry-content.open');
+                    const allHeaders = document.querySelectorAll('.industry-header.active');
 
-                    // Toggle active class on header
-                    header.classList.toggle('active');
+                    allContents.forEach(c => c.classList.remove('open'));
+                    allHeaders.forEach(h => h.classList.remove('active'));
 
-                    // Toggle open class on content
-                    if (content.classList.contains('open')) {
-                        content.classList.remove('open');
-                    } else {
-                        content.classList.add('open');
-                    }
+                    header.classList.add('active');
+                    content.classList.add('open');
                 });
             });
         </script>
