@@ -1,0 +1,630 @@
+<!DOCTYPE html> <html lang="en"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Interactive SMS & Phone Widget</title> <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"> <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script> <script src="https://docs.getgrist.com/grist-plugin-api.js"></script> <style> /* --- General Styles --- */ :root { --brand-color: #3498db; --brand-color-dark: #2980b9; --border-color: #e0e6ed; --text-light: #6b7280; --text-dark: #2c3e50; --bg-light: #f8f9fa; --bg-widget: #ffffff; --btn-bg: #f8f9fa; --btn-bg-hover: #f1f3f5; } body { font-family: 'Inter', sans-serif; background-color: var(--bg-light); color: var(--text-dark); margin: 0; padding: 16px; font-size: 14px; box-sizing: border-box; } #widget-container, #phone-widget-container { background-color: var(--bg-widget); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); padding: 20px; } #phone-widget-container { margin-top: 16px; } .header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; flex-shrink: 0; } .header h2 { margin: 0; font-size: 1.25rem; font-weight: 600; } .header .icon { width: 24px; height: 24px; fill: currentColor; } .info-box { text-align: center; padding: 40px 20px; }
+
+    /* --- SMS Widget Specific Styles --- */
+    #widget-container {
+        display: flex;
+        flex-direction: column;
+    }
+    .main-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        flex-grow: 1;
+        min-height: 0;
+    }
+    .left-column, .right-column {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        min-width: 0;
+    }
+    .form-group label, .section-label {
+        display: block;
+        font-weight: 500;
+        margin-bottom: 8px;
+        color: var(--text-light);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    select {
+        width: 100%;
+        padding: 8px 10px;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        background-color: var(--bg-widget);
+        font-size: 0.9rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    select:focus {
+        outline: none;
+        border-color: var(--brand-color);
+        box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    }
+    .button-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .swap-btn {
+        padding: 6px 12px;
+        background: var(--btn-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: var(--text-dark);
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .swap-btn:hover {
+        border-color: #bdc3c7;
+        background-color: var(--btn-bg-hover);
+    }
+    .swap-btn.active {
+        background: var(--brand-color);
+        color: #fff;
+        border-color: var(--brand-color-dark);
+        font-weight: 600;
+    }
+    .preview-section {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        min-height: 0;
+    }
+    .preview-box {
+        background-color: #f8f9fa;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        padding: 12px 16px;
+        font-size: 0.9rem;
+        line-height: 1.6;
+        flex-grow: 1;
+        overflow-y: auto;
+        white-space: pre-wrap;
+    }
+    .action-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 16px;
+    }
+    .action-row .form-group {
+        flex-grow: 1;
+        margin-bottom: 0;
+    }
+    .send-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 8px 16px;
+        background-color: var(--brand-color);
+        color: white;
+        text-decoration: none;
+        font-weight: 500;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        font-size: 0.9rem;
+        flex-shrink: 0;
+    }
+    .send-btn:hover { background-color: var(--brand-color-dark); }
+    .send-btn.disabled { background-color: #a1a1aa; cursor: not-allowed; }
+    .send-btn svg { width: 18px; height: 18px; }
+    .copy-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 10px;
+        margin-left: auto;
+    }
+    .copy-btn {
+        padding: 6px 12px;
+        background: #f8f9fa;
+        border: 1px solid #dadada;
+        border-radius: 5px;
+        font-size: 0.8rem;
+        color: #3498db;
+        cursor: pointer;
+        transition: background 0.2s, color 0.2s;
+    }
+    .copy-btn:hover {
+        background: #e0e6ed;
+        color: #2980b9;
+    }
+    .copy-msg {
+        font-size: 0.78rem;
+        color: #6b7280;
+        margin-left: 4px;
+    }
+
+    /* --- Phone Widget Specific Styles --- */
+    .phone-cards-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+    .phone-card {
+        background-color: #f8f9fa;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        padding: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.2s ease;
+    }
+    .phone-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    .phone-number {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        flex: 1;
+    }
+    .phone-link {
+        font-size: 16px;
+        font-weight: 500;
+        color: #374151;
+        text-decoration: none;
+    }
+    .phone-note {
+        color: #6b7280;
+        font-size: 12px;
+    }
+    .phone-note p {
+        margin: 0;
+    }
+    .phone-actions {
+        display: flex;
+        gap: 6px;
+    }
+    .phone-action-btn {
+        background-color: #fff;
+        border: 1px solid #e1e5e9;
+        border-radius: 4px;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .phone-action-btn:hover {
+        background-color: #e9ecef;
+        transform: translateY(-1px);
+    }
+    .phone-action-btn a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .action-icon {
+        width: 18px;
+        height: 18px;
+        object-fit: contain;
+    }
+    .wrong-phone {
+        background-color: #fee2e2;
+        border-color: #fecaca;
+        padding: 12px;
+        justify-content: center;
+        grid-column: 1 / -1;
+    }
+    .wrong-phone-label {
+        color: #b91c1c;
+        font-size: 16px;
+        font-weight: 500;
+    }
+    .no-data-msg {
+        color: #6b7280;
+        font-style: italic;
+        text-align: center;
+        padding: 20px;
+        grid-column: 1 / -1;
+    }
+
+    /* NEW: Inline dialer styles cloned/adapted from your Phone Widget */
+    .dialer-container {
+        border-top: 1px solid #e5e7eb;
+        padding-top: 12px;
+        margin-top: 12px;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+    .dialer-input {
+        flex-grow: 1;
+        padding: 8px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 4px;
+        font-size: 14px;
+        background: #fff;
+    }
+    .dialer-input:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+    .dialer-actions {
+        display: flex;
+        gap: 4px;
+    }
+    .dialer-btn {
+        width: 36px;
+        height: 36px;
+        border: 1px solid #e1e5e9;
+        border-radius: 4px;
+        background: white;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+    }
+    .dialer-btn:hover {
+        background-color: #f3f4f6;
+        transform: translateY(-1px);
+    }
+    .dialer-btn img {
+        width: 20px;
+        height: 20px;
+        object-fit: contain;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
+        .phone-cards-container {
+            grid-template-columns: 1fr;
+        }
+    }
+    </style>
+    </head> <body> <!-- SMS Widget Section --> <div id="widget-container"> <div id="no-record" class="info-box"> <p>Please select a row in the Owners table to begin.</p> </div> <div id="main-content" style="display: none;"> <div class="header"> <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 20 20" fill="currentColor"> <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/> </svg> <h2>Interactive SMS Templates</h2> </div> <div class="main-grid"> <div class="left-column"> <div class="form-group"> <label for="template-select">Template</label> <select id="template-select"></select> </div> <div id="property-selector-placeholder" class="form-group" style="display: none;"> <label for="property-select">Property</label> <select id="property-select"></select> </div> <div class="form-group"> <label>Property Focus</label> <div id="property-focus-group" class="button-group"> <button class="swap-btn active" data-value="retail investment properties">Retail Investment</button> <button class="swap-btn" data-value="Multi-tenant retail properties">Multi-Tenant</button> <button class="swap-btn" data-value="Single Tenant Net Lease">Single Tenant</button> </div> </div> <div class="form-group"> <label>Property Identifier</label> <div id="property-identifier-group" class="button-group"> <button class="swap-btn active" data-value="Property_Name">Name</button> <button class="swap-btn" data-value="Tenants">Tenants</button> <button class="swap-btn" data-value="Property_Type">Type</button> <button class="swap-btn" data-value="Secondary_Type">Secondary Type</button> </div> </div> </div> <div class="right-column"> <div class="preview-section"> <label class="section-label">Preview</label> <div id="preview-box" class="preview-box"></div> </div> </div> </div> <div class="action-row"> <div class="form-group"> <label for="phone-select">Send to</label> <select id="phone-select"></select> </div> <a id="send-sms-link" class="send-btn disabled" href="#" target="_blank"> <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 20 20" fill="white"> <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/> </svg> Send </a> </div> <div id="copy-row" class="copy-row" style="display:none;"> <button id="copy-btn" class="copy-btn">Copy to clipboard</button> <span id="copy-msg" class="copy-msg" style="display:none;">Copied!</span> </div> </div> </div>
+
+    <!-- Phone Widget Section -->
+    <div id="phone-widget-container">
+        <div class="header">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M2 3.5A1.5 1.5 0 013.5 2h1.148a1.5 1.5 0 011.465 1.175l.716 3.223a1.5 1.5 0 01-1.052 1.767l-.933.267c-.41.117-.643.555-.48.95a11.542 11.542 0 006.254 6.254c.395.163.833-.07.95-.48l.267-.933a1.5 1.5 0 011.767-1.052l3.223.716A1.5 1.5 0 0118 15.352V16.5a1.5 1.5 0 01-1.5 1.5h-1.528a13.528 13.528 0 01-11.472-11.472H2A1.5 1.5 0 012 3.5z" clip-rule="evenodd" />
+            </svg>
+            <h2>Phone Numbers</h2>
+        </div>
+        <div id="phone-container" class="phone-cards-container">
+            <div class="no-data-msg">Please select a record to see phone numbers.</div>
+        </div>
+
+        <!-- NEW: Inline dialer copied from your Phone Widget -->
+        <div class="dialer-container">
+            <input type="text" id="dialer-input" class="dialer-input" placeholder="Enter phone number...">
+            <div class="dialer-actions">
+                <button class="dialer-btn" id="dialer-webex-btn" title="Call with Webex">
+                    <img src="https://img.icons8.com/fluent/512/webex.png" alt="Webex">
+                </button>
+                <button class="dialer-btn" id="dialer-tel-btn" title="Call with Phone Link">
+                    <img src="https://static.wikia.nocookie.net/logopedia/images/b/b2/Microsoft_Phone_Link_%282022%29.svg" alt="Phone Link">
+                </button>
+                <button class="dialer-btn" id="dialer-sms-btn" title="Message with SMS">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/IMessage_logo.svg/1024px-IMessage_logo.svg.png" alt="SMS">
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- SHARED ELEMENTS & STATE ---
+            let g_currentOwnerRecord = null;
+            let g_relatedProperties = [];
+            const PHONE_COLUMN_KEYS = ['Phone', 'Phone_2', 'Phone_3', 'Phone_4'];
+
+            // --- SMS WIDGET ELEMENTS ---
+            const SMS_ELS = {
+                templateSelect: document.getElementById('template-select'),
+                propertySelect: document.getElementById('property-select'),
+                propertySelectorPlaceholder: document.getElementById('property-selector-placeholder'),
+                propertyFocusGroup: document.getElementById('property-focus-group'),
+                propertyIdentifierGroup: document.getElementById('property-identifier-group'),
+                phoneSelect: document.getElementById('phone-select'),
+                previewBox: document.getElementById('preview-box'),
+                sendSmsLink: document.getElementById('send-sms-link'),
+                noRecordDiv: document.getElementById('no-record'),
+                mainContentDiv: document.getElementById('main-content'),
+                copyRow: document.getElementById('copy-row'),
+                copyBtn: document.getElementById('copy-btn'),
+                copyMsg: document.getElementById('copy-msg'),
+            };
+
+            // --- PHONE WIDGET ELEMENTS ---
+            const PHONE_ELS = {
+                container: document.getElementById('phone-container'),
+            };
+
+            // NEW: Dialer elements
+            const DIALER = {
+                input: document.getElementById('dialer-input'),
+                webexBtn: document.getElementById('dialer-webex-btn'),
+                telBtn: document.getElementById('dialer-tel-btn'),
+                smsBtn: document.getElementById('dialer-sms-btn'),
+            };
+
+            // --- SMS WIDGET STATE & TEMPLATES ---
+            const SMS_TEMPLATES = {
+                standard: { name: "Standard Introduction", text: "Hi {{firstName}}, this is Sam Gfroerer with M&M. I just tried giving you a quick call — I specialize in {{propertyFocus}} and wanted to connect regarding your {{propertyIdentifier}} in {{propertyCity}}. Let me know if there's a good time to chat, or feel free to text back. Looking forward to connecting!" },
+                followUp: { name: "Brief Follow-up", text: "Hi {{firstName}}, Sam from M&M here. Just called about your {{propertyIdentifier}} in {{propertyCity}}. I help investors with {{propertyFocus}}. Free to connect via text!" },
+                valueProp: { name: "Value Proposition", text: "Hi {{firstName}}, this is Sam with M&M. I specialize in maximizing returns on {{propertyFocus}} like your {{propertyIdentifier}} in {{propertyCity}}. Let's connect soon." }
+            };
+            let lastMessageSent = "";
+
+            // --- PHONE WIDGET STATE ---
+            const PHONE_FIELDS = [
+                { phone: 'Phone', notes: 'Phone_1_Notes' },
+                { phone: 'Phone_2', notes: 'Phone_2_Notes' },
+                { phone: 'Phone_3', notes: 'Phone_3_Notes' },
+                { phone: 'Phone_4', notes: 'Phone_4_Notes' },
+                { phone: 'Wrong_Phone', notes: null }
+            ];
+
+            // --- HELPER FUNCTIONS ---
+            function columnarToRowFormat(data) {
+                if (!data || !data.id || !Array.isArray(data.id)) return [];
+                const keys = Object.keys(data);
+                return data.id.map((id, i) => {
+                    const row = { id, fields: {} };
+                    for (const key of keys) if (key !== 'id') row.fields[key] = data[key][i];
+                    return row;
+                });
+            }
+            const getFirstName = (fullName) => (fullName && typeof fullName === 'string') ? fullName.split(' ')[0] : '[First Name]';
+            const sanitizePhone = (phone) => (phone && typeof phone === 'string') ? phone.replace(/\D/g, '') : '';
+
+            // --- PHONE WIDGET: Phone Number Formatting ---
+            function formatPhoneNumber(phoneStr) {
+                if (!phoneStr) return '';
+                const cleaned = ('' + phoneStr).replace(/\D/g, '');
+                const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+                if (match) {
+                    return `(${match[1]}) ${match[2]}-${match[3]}`;
+                }
+                return phoneStr;
+            }
+
+            // --- DATA FETCHING ---
+            async function fetchAndFilterProperties(ownerId) {
+                try {
+                    const columnarData = await grist.docApi.fetchTable('Properties_');
+                    const allProperties = columnarToRowFormat(columnarData);
+                    g_relatedProperties = allProperties.filter(prop => {
+                        const ownerRefList = prop.fields.Name;
+                        return ownerRefList && Array.isArray(ownerRefList) && ownerRefList.includes(ownerId);
+                    });
+                } catch (err) {
+                    console.error("Error fetching properties:", err);
+                    g_relatedProperties = [];
+                }
+            }
+
+            // --- RENDER FUNCTIONS ---
+            function renderSmsWidget() {
+                if (!g_currentOwnerRecord) {
+                    SMS_ELS.mainContentDiv.style.display = 'none';
+                    SMS_ELS.noRecordDiv.style.display = 'block';
+                    SMS_ELS.copyRow.style.display = 'none';
+                    return;
+                }
+                SMS_ELS.mainContentDiv.style.display = 'block';
+                SMS_ELS.noRecordDiv.style.display = 'none';
+
+                const phoneOptions = PHONE_COLUMN_KEYS
+                .map(key => ({ key, value: g_currentOwnerRecord[key] }))
+                .filter(item => item.value)
+                .map(item => `<option value="${item.value}">${item.key.replace(/_/g, ' ')}: ${item.value}</option>`)
+                .join('') || '<option value="" disabled>No phone numbers found</option>';
+                SMS_ELS.phoneSelect.innerHTML = phoneOptions;
+
+                if (g_relatedProperties.length > 0) {
+                    SMS_ELS.propertySelectorPlaceholder.style.display = 'block';
+                    SMS_ELS.propertySelect.innerHTML = g_relatedProperties.map((prop, index) => {
+                        const displayName = prop.fields.Address_Concatenate || prop.fields.Property_Name || `Property ID ${prop.id}`;
+                        return `<option value="${index}">${displayName}</option>`;
+                    }).join('');
+                } else {
+                    SMS_ELS.propertySelectorPlaceholder.style.display = 'none';
+                }
+
+                updateSmsPreview();
+            }
+
+            function updateSmsPreview() {
+                if (!g_currentOwnerRecord) return;
+
+                const selectedTemplateKey = SMS_ELS.templateSelect.value;
+                const selectedPropertyFocus = SMS_ELS.propertyFocusGroup.querySelector('.active').dataset.value;
+                const selectedPropertyIdentifierKey = SMS_ELS.propertyIdentifierGroup.querySelector('.active').dataset.value;
+                const selectedPhoneNumber = SMS_ELS.phoneSelect.value;
+                const selectedPropertyIndex = SMS_ELS.propertySelect.value !== '' ? parseInt(SMS_ELS.propertySelect.value, 10) : -1;
+                const selectedProperty = selectedPropertyIndex >= 0 ? g_relatedProperties[selectedPropertyIndex] : null;
+
+                const firstName = getFirstName(g_currentOwnerRecord.Name);
+                let propertyIdentifierValue = '';
+                let propertyCityValue = '';
+
+                if (selectedProperty) {
+                    propertyIdentifierValue = selectedProperty.fields[selectedPropertyIdentifierKey] || '';
+                    propertyCityValue = selectedProperty.fields.City || '';
+                    if (Array.isArray(propertyIdentifierValue)) propertyIdentifierValue = propertyIdentifierValue[1] || '';
+                    if (Array.isArray(propertyCityValue)) propertyCityValue = propertyCityValue[1] || '';
+                }
+
+                let message = SMS_TEMPLATES[selectedTemplateKey].text;
+                message = message.replace(/{{firstName}}/g, firstName);
+                message = message.replace(/{{propertyFocus}}/g, selectedPropertyFocus);
+                message = message.replace(/{{propertyIdentifier}}/g, propertyIdentifierValue);
+                message = message.replace(/{{propertyCity}}/g, propertyCityValue);
+                SMS_ELS.previewBox.textContent = message;
+
+                const sanitizedPhone = sanitizePhone(selectedPhoneNumber);
+                if (sanitizedPhone && selectedProperty) {
+                    SMS_ELS.sendSmsLink.href = `sms:${sanitizedPhone}?&body=${encodeURIComponent(message)}`;
+                    SMS_ELS.sendSmsLink.classList.remove('disabled');
+                    SMS_ELS.sendSmsLink.title = `Send SMS to ${selectedPhoneNumber}`;
+                } else {
+                    SMS_ELS.sendSmsLink.href = '#';
+                    SMS_ELS.sendSmsLink.classList.add('disabled');
+                    SMS_ELS.sendSmsLink.title = !sanitizedPhone ? 'No valid phone number selected' : 'A property must be selected';
+                }
+
+                SMS_ELS.copyRow.style.display = 'none';
+                SMS_ELS.copyMsg.style.display = 'none';
+                lastMessageSent = "";
+            }
+
+            function renderPhoneCard(phoneVal, notesVal, isWrongPhone) {
+                const formattedPhoneDigits = String(phoneVal).replace(/[^0-9]/g, '');
+                if (isWrongPhone) {
+                    return `<div class="phone-card wrong-phone"><div class="wrong-phone-label">${formatPhoneNumber(phoneVal)}</div></div>`;
+                }
+                const notesDisplay = notesVal ? `<div class="phone-note">${marked.parseInline(notesVal)}</div>` : '';
+                return `
+          <div class="phone-card">
+            <div class="phone-number">
+              <a href="tel:${formattedPhoneDigits}" class="phone-link">${formatPhoneNumber(phoneVal)}</a>
+              ${notesDisplay}
+        </div>
+            <div class="phone-actions">
+              <button class="phone-action-btn" title="Call with Webex">
+                <a href="sip:${formattedPhoneDigits}">
+                  <img src="https://img.icons8.com/fluent/512/webex.png" alt="Webex" class="action-icon">
+        </a>
+        </button>
+              <button class="phone-action-btn" title="Call with Phone Link">
+                <a href="tel:${formattedPhoneDigits}">
+                  <img src="https://static.wikia.nocookie.net/logopedia/images/b/b2/Microsoft_Phone_Link_%282022%29.svg" alt="Phone Link" class="action-icon">
+        </a>
+        </button>
+              <button class="phone-action-btn" title="Message with SMS">
+                <a href="sms:${formattedPhoneDigits}">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/IMessage_logo.svg/1024px-IMessage_logo.svg.png" alt="SMS" class="action-icon">
+        </a>
+        </button>
+        </div>
+        </div>`;
+            }
+
+            function renderPhoneWidget() {
+                if (!g_currentOwnerRecord) {
+                    PHONE_ELS.container.innerHTML = `<div class="no-data-msg">Please select a record to see phone numbers.</div>`;
+                    return;
+                }
+                let content = '';
+                let hasPhones = false;
+                const PHONE_FIELDS = [
+                    { phone: 'Phone', notes: 'Phone_1_Notes' },
+                    { phone: 'Phone_2', notes: 'Phone_2_Notes' },
+                    { phone: 'Phone_3', notes: 'Phone_3_Notes' },
+                    { phone: 'Phone_4', notes: 'Phone_4_Notes' },
+                    { phone: 'Wrong_Phone', notes: null }
+                ];
+                PHONE_FIELDS.forEach(field => {
+                    const phoneVal = g_currentOwnerRecord[field.phone];
+                    if (phoneVal && String(phoneVal).trim()) {
+                        const notesVal = field.notes ? g_currentOwnerRecord[field.notes] : null;
+                        const isWrong = field.phone === 'Wrong_Phone';
+                        content += renderPhoneCard(phoneVal, notesVal, isWrong);
+                        hasPhones = true;
+                    }
+                });
+                if (!hasPhones) {
+                    PHONE_ELS.container.innerHTML = `<div class="no-data-msg">No phone numbers found for this record.</div>`;
+                } else {
+                    PHONE_ELS.container.innerHTML = content;
+                }
+            }
+
+            function renderAllWidgets() {
+                renderSmsWidget();
+                renderPhoneWidget();
+            }
+
+            function handleSmsButtonClick(event) {
+                const button = event.target.closest('.swap-btn');
+                if (!button) return;
+                const group = button.parentElement;
+                group.querySelector('.active')?.classList.remove('active');
+                button.classList.add('active');
+                updateSmsPreview();
+            }
+
+            SMS_ELS.sendSmsLink.addEventListener('click', function(e) {
+                if (SMS_ELS.sendSmsLink.classList.contains('disabled')) {
+                    e.preventDefault();
+                    return;
+                }
+                const msg = SMS_ELS.previewBox.textContent;
+                if (msg && msg.length > 0) {
+                    lastMessageSent = `Just sent this text: "${msg}"`;
+                    SMS_ELS.copyRow.style.display = 'flex';
+                    SMS_ELS.copyMsg.style.display = 'none';
+                }
+            });
+
+            SMS_ELS.copyBtn.addEventListener('click', function() {
+                if (!lastMessageSent) return;
+                navigator.clipboard.writeText(lastMessageSent).then(() => {
+                    SMS_ELS.copyMsg.style.display = 'inline';
+                    setTimeout(() => { SMS_ELS.copyMsg.style.display = 'none'; }, 1500);
+                });
+            });
+
+            // NEW: Dialer handlers (replicating behavior from your other widget)
+            function handleDial(action) {
+                const raw = (DIALER.input.value || '').trim();
+                if (!raw) return;
+                const digits = raw.replace(/[^0-9]/g, '');
+                if (digits.length < 10) {
+                    alert('Please enter a valid 10-digit phone number');
+                    return;
+                }
+                const num = `+1${digits}`;
+                if (action === 'webex') window.open(`sip:${num}`, '_blank');
+                if (action === 'tel') window.open(`tel:${num}`, '_blank');
+                if (action === 'sms') window.open(`sms:${num}`, '_blank');
+            }
+            DIALER.webexBtn.addEventListener('click', () => handleDial('webex'));
+            DIALER.telBtn.addEventListener('click', () => handleDial('tel'));
+            DIALER.smsBtn.addEventListener('click', () => handleDial('sms'));
+
+            // --- INITIALIZATION ---
+            function initializeWidget() {
+                SMS_ELS.templateSelect.innerHTML = Object.keys(SMS_TEMPLATES)
+                    .map(key => `<option value="${key}">${SMS_TEMPLATES[key].name}</option>`)
+                    .join('');
+
+                SMS_ELS.templateSelect.addEventListener('change', updateSmsPreview);
+                SMS_ELS.propertySelect.addEventListener('change', updateSmsPreview);
+                SMS_ELS.phoneSelect.addEventListener('change', updateSmsPreview);
+                SMS_ELS.propertyFocusGroup.addEventListener('click', handleSmsButtonClick);
+                SMS_ELS.propertyIdentifierGroup.addEventListener('click', handleSmsButtonClick);
+
+                grist.ready({ requiredAccess: 'full' });
+                grist.onRecord(async (record) => {
+                    if (record && record.id) {
+                        g_currentOwnerRecord = record;
+                        await fetchAndFilterProperties(record.id);
+                    } else {
+                        g_currentOwnerRecord = null;
+                        g_relatedProperties = [];
+                    }
+                    renderAllWidgets();
+                });
+            }
+
+            initializeWidget();
+        });
+    </script>
+    </body> </html>
