@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Phone Numbers Widget</title>
+    <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+    <style>
+        /* Main container */
+        .phone-widget {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        /* Phone cards grid */
+        .phone-cards-container {
+            padding: 8px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        /* Individual phone card */
+        .phone-card {
+            background-color: #f8f9fa;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .phone-card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+        }
+
+        /* Phone number display */
+        .phone-number {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .phone-link {
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+            text-decoration: none;
+        }
+
+        .mobile-tag {
+            color: #10b981;
+            font-size: 11px;
+            margin-top: 2px;
+            font-weight: 500;
+        }
+
+        /* Phone notes with Markdown support */
+        .phone-note {
+            color: #6b7280;
+            font-size: 11px;
+            margin-top: 2px;
+            line-height: 1.4;
+        }
+
+        .phone-note strong {
+            font-weight: 600;
+        }
+
+        .phone-note em {
+            font-style: italic;
+        }
+
+        .phone-note a {
+            color: #3b82f6;
+            text-decoration: underline;
+        }
+
+        /* Action buttons container */
+        .phone-actions {
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        /* Individual action button */
+        .phone-action-btn {
+            background-color: #ffffff;
+            border: 1px solid #e1e5e9;
+            border-radius: 4px;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .phone-action-btn:hover {
+            background-color: #e9ecef;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .phone-action-btn a {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+
+        /* Button icons */
+        .action-icon {
+            width: 16px;
+            height: 16px;
+            object-fit: contain;
+        }
+
+        /* Wrong number styling */
+        .wrong-phone {
+            background-color: #fee2e2;
+            border-color: #fecaca;
+        }
+
+        .wrong-phone-label {
+            color: #b91c1c;
+            font-size: 14px;
+        }
+
+        /* Empty state */
+        .no-phones {
+            color: #6b7280;
+            font-style: italic;
+            padding: 12px;
+            text-align: center;
+            grid-column: 1 / -1;
+        }
+
+        /* Dialer section */
+        .dialer-container {
+            border-top: 1px solid #e5e7eb;
+            padding: 12px;
+            background: white;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .dialer-input {
+            flex-grow: 1;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .dialer-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+
+        /* Dialer buttons */
+        .dialer-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .dialer-btn {
+            width: 36px;
+            height: 36px;
+            border: 1px solid #e1e5e9;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .dialer-btn:hover {
+            background-color: #f3f4f6;
+            transform: translateY(-1px);
+        }
+
+        .dialer-btn img {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+        }
+    </style>
+    </head>
+    <body>
+        <div class="phone-widget">
+            <div class="phone-cards-container"></div>
+
+            <div class="dialer-container">
+                <input type="text" class="dialer-input" placeholder="Enter phone number...">
+                <div class="dialer-actions">
+                    <button class="dialer-btn webex-btn" title="Call with Webex">
+                        <img src="https://img.icons8.com/fluent/512/webex.png" alt="Webex">
+                    </button>
+                    <button class="dialer-btn tel-btn" title="Call with Phone Link">
+                        <img src="https://static.wikia.nocookie.net/logopedia/images/b/b2/Microsoft_Phone_Link_%282022%29.svg" alt="Phone Link">
+                    </button>
+                    <button class="dialer-btn sms-btn" title="Message with SMS">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/IMessage_logo.svg/1024px-IMessage_logo.svg.png" alt="SMS">
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            grist.ready();
+
+            // Handle record updates
+            grist.onRecord(function(record) {
+                if (!record) return;
+
+                const container = document.querySelector('.phone-cards-container');
+                container.innerHTML = '';
+
+                // Define phone fields and their note fields
+                const phoneFields = [
+                    { number: record.Phone, notes: record.Phone_1_Notes },
+                    { number: record.Phone_2, notes: record.Phone_2_Notes },
+                    { number: record.Phone_3, notes: record.Phone_3_Notes },
+                    { number: record.Phone_4, notes: record.Phone_4_Notes }
+                ];
+
+                // Add wrong phone if exists
+                if (record.Wrong_Phone) {
+                    phoneFields.push({ number: record.Wrong_Phone, isWrong: true });
+                }
+
+                let hasValidPhones = false;
+
+                phoneFields.forEach(field => {
+                    if (!field.number || String(field.number).trim() === '') return;
+
+                    // Handle wrong numbers
+                    if (field.isWrong) {
+                        container.innerHTML += `
+            <div class="phone-card wrong-phone">
+              <div class="wrong-phone-label">${field.number}</div>
+            </div>
+          `;
+                        return;
+                    }
+
+                    hasValidPhones = true;
+                    const cleanedNumber = String(field.number).replace(/[^0-9]/g, '');
+                    const isMobile = field.notes && String(field.notes).toLowerCase().includes('mobile');
+
+                    container.innerHTML += `
+          <div class="phone-card">
+            <div class="phone-number">
+              <a href="tel:+1${cleanedNumber}" class="phone-link">
+                ${formatPhoneNumber(field.number)}
+            </a>
+              ${isMobile ? `<span class="mobile-tag">Confirmed Mobile</span>` : ''}
+              ${field.notes ? `<div class="phone-note">${parseMarkdown(field.notes)}</div>` : ''}
+            </div>
+            <div class="phone-actions">
+              <button class="phone-action-btn webex-btn">
+                <a href="sip:+1${cleanedNumber}" title="Call with Cisco Webex">
+                  <img src="https://img.icons8.com/fluent/512/webex.png" alt="Webex" class="action-icon">
+            </a>
+            </button>
+              <button class="phone-action-btn tel-btn">
+                <a href="tel:+1${cleanedNumber}" title="Call with Phone Link">
+                  <img src="https://static.wikia.nocookie.net/logopedia/images/b/b2/Microsoft_Phone_Link_%282022%29.svg" alt="Phone Link" class="action-icon">
+            </a>
+            </button>
+              <button class="phone-action-btn sms-btn">
+                <a href="sms:+1${cleanedNumber}" title="Message with SMS">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/IMessage_logo.svg/1024px-IMessage_logo.svg.png" alt="SMS" class="action-icon">
+            </a>
+            </button>
+            </div>
+            </div>
+        `;
+                });
+
+                // Handle empty state
+                if (!hasValidPhones && !record.Wrong_Phone) {
+                    container.innerHTML = `<div class="no-phones">No phone numbers found</div>`;
+                }
+            });
+
+            // Setup dialer functionality
+            const dialerInput = document.querySelector('.dialer-input');
+            const dialerBtns = document.querySelectorAll('.dialer-btn');
+
+            dialerBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const rawNumber = dialerInput.value.trim();
+                    if (!rawNumber) return;
+
+                    const cleanedNumber = rawNumber.replace(/[^0-9]/g, '');
+                    if (cleanedNumber.length < 10) {
+                        alert('Please enter a valid 10-digit phone number');
+                        return;
+                    }
+
+                    const formattedNumber = `+1${cleanedNumber}`;
+
+                    if (btn.classList.contains('webex-btn')) {
+                        window.open(`sip:${formattedNumber}`, '_blank');
+                    }
+                    else if (btn.classList.contains('tel-btn')) {
+                        window.open(`tel:${formattedNumber}`, '_blank');
+                    }
+                    else if (btn.classList.contains('sms-btn')) {
+                        window.open(`sms:${formattedNumber}`, '_blank');
+                    }
+                });
+            });
+
+            // Format phone numbers as (XXX) XXX-XXXX
+            function formatPhoneNumber(phone) {
+                const cleaned = String(phone).replace(/\D/g, '');
+                const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+                return match ? `(${match[1]}) ${match[2]}-${match[3]}` : phone;
+            }
+
+            // Simple Markdown parser
+            function parseMarkdown(text) {
+                return String(text)
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
+            }
+        </script>
+    </body>
+</html>
