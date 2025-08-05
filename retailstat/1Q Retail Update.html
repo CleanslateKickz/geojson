@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>1Q Retail Update - July 31, 2025</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+        <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+        <style>
+            :root {
+                --primary: #516E89;
+                --primary-dark: #1d4ed8;
+                --secondary: #8ca4bb;
+                --success: #059669;
+                --warning: #ca8a04;
+                --danger: #dc2626;
+                --gray-100: #f8fafc;
+                --gray-200: #e2e8f0;
+                --gray-300: #cbd5e1;
+                --gray-500: #64748b;
+                --gray-700: #334155;
+                --gray-800: #1e293b;
+                --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+                --border-radius: 12px;
+                --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+                background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+                color: var(--gray-800);
+                line-height: 1.7;
+                padding: 20px;
+                min-height: 100vh;
+            }
+
+            .container {
+                max-width: 1200px;
+                margin: 0 auto;
+            }
+
+            header {
+                text-align: center;
+                margin-bottom: 40px;
+            }
+
+            h1 {
+                font-size: 36px;
+                font-weight: 700;
+                color: var(--gray-800);
+                margin-bottom: 8px;
+            }
+
+            .subtitle {
+                font-size: 18px;
+                color: var(--gray-700);
+                margin-bottom: 20px;
+            }
+
+            .meta {
+                display: flex;
+                justify-content: center;
+                gap: 20px;
+                font-size: 14px;
+                color: var(--gray-500);
+            }
+
+            /* Key Takeaways */
+            .key-takeaways {
+                background: white;
+                border-radius: var(--border-radius);
+                padding: 25px;
+                margin-bottom: 30px;
+                box-shadow: var(--card-shadow);
+                border-left: 5px solid var(--primary);
+            }
+
+            .key-takeaways h2 {
+                font-size: 20px;
+                color: var(--primary-dark);
+                margin-bottom: 15px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .key-takeaways ul {
+                list-style: none;
+                padding-left: 10px;
+            }
+
+            .key-takeaways li {
+                margin-bottom: 12px;
+                position: relative;
+                padding-left: 25px;
+                font-weight: 500;
+            }
+
+            .key-takeaways li::before {
+                content: "•";
+                color: var(--primary);
+                font-size: 24px;
+                position: absolute;
+                left: 0;
+                top: -6px;
+            }
+
+            /* Data Table */
+            .table-container {
+                background: white;
+                border-radius: var(--border-radius);
+                padding: 20px;
+                margin-bottom: 30px;
+                box-shadow: var(--card-shadow);
+                overflow: hidden;
+            }
+
+            .table-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 15px;
+            }
+
+            .table-header h3 {
+                font-size: 20px;
+                color: var(--gray-800);
+                font-weight: 600;
+            }
+
+            .highlight-badge {
+                background: linear-gradient(90deg, var(--primary), var(--secondary));
+                color: white;
+                padding: 5px 12px;
+                border-radius: 20px;
+                font-size: 12px;
+                font-weight: 600;
+            }
+
+            .data-table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 14px;
+            }
+
+            .data-table th {
+                background: var(--gray-100);
+                color: var(--gray-700);
+                font-weight: 600;
+                padding: 12px 15px;
+                text-align: left;
+                border-bottom: 2px solid var(--gray-200);
+            }
+
+            .data-table td {
+                padding: 12px 15px;
+                border-bottom: 1px solid var(--gray-200);
+            }
+
+            .data-table tr:nth-child(even) {
+                background-color: var(--gray-50);
+            }
+
+            .data-table tr:hover {
+                background-color: #eff6ff;
+                transition: var(--transition);
+            }
+
+            .strong {
+                color: var(--success);
+                font-weight: 600;
+            }
+
+            .weak {
+                color: var(--danger);
+                font-weight: 600;
+            }
+
+            .neutral {
+                color: var(--warning);
+                font-weight: 500;
+            }
+
+            .company {
+                font-weight: 600;
+                color: var(--gray-800);
+            }
+
+            /* Industry Section */
+            .industry-section {
+                margin-bottom: 25px;
+                border-radius: var(--border-radius);
+                overflow: hidden;
+                box-shadow: var(--card-shadow);
+                background: white;
+                border: 1px solid var(--gray-200);
+            }
+
+            .industry-header {
+                background: linear-gradient(135deg, var(--primary), var(--secondary));
+                color: white;
+                padding: 20px 25px;
+                font-size: 18px;
+                font-weight: 600;
+                cursor: pointer;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                transition: var(--transition);
+            }
+
+            .industry-header:hover {
+                background: linear-gradient(135deg, #6497b1, #97b9cb);
+            }
+
+            .industry-header .icon {
+                font-size: 18px;
+                transition: transform 0.3s ease;
+            }
+
+            .industry-header.active .icon {
+                transform: rotate(45deg);
+            }
+
+            .industry-content {
+                padding: 0;
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.5s ease-out, padding 0.4s ease;
+            }
+
+            .industry-content.open {
+                max-height: 5000px;
+                padding: 25px;
+            }
+
+            .content-grid {
+                display: grid;
+                gap: 20px;
+            }
+
+            .metric-card {
+                background: var(--gray-50);
+                padding: 18px;
+                border-radius: 10px;
+                border-left: 4px solid var(--primary);
+            }
+
+            .metric-card h4 {
+                font-size: 15px;
+                color: var(--gray-700);
+                margin-bottom: 8px;
+                font-weight: 600;
+            }
+
+            .metric-value {
+                font-size: 18px;
+                font-weight: 700;
+                color: var(--primary-dark);
+            }
+
+            .quote {
+                font-style: italic;
+                padding: 20px;
+                background: #f1f5f9;
+                border-left: 4px solid var(--secondary);
+                margin: 20px 0;
+                border-radius: 0 var(--border-radius) var(--border-radius) 0;
+            }
+
+            .company-name {
+                font-weight: 700;
+                color: var(--primary-dark);
+            }
+
+            footer {
+                text-align: center;
+                margin-top: 50px;
+                font-size: 14px;
+                color: var(--gray-500);
+                padding: 20px;
+            }
+
+            @media (max-width: 768px) {
+                .container {
+                    padding: 10px;
+                }
+                h1 {
+                    font-size: 28px;
+                }
+                .industry-header {
+                    font-size: 16px;
+                    padding: 16px 20px;
+                }
+                .industry-content.open {
+                    padding: 20px 15px;
+                }
+                .table-header {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: 10px;
+                }
+                .content-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <header>
+                <h1>1Q Retail Update</h1>
+                <p class="subtitle">Comprehensive Analysis of Q1 2025 Performance</p>
+                <div class="meta">
+                    <span><i class="fas fa-calendar"></i> July 31, 2025</span>
+                    <span><i class="fas fa-globe"></i> Source: RetailStat</span>
+                    <span><i class="fas fa-chart-line"></i> Sector: Retail</span>
+                </div>
+            </header>
+
+            <!-- Key Takeaways -->
+            <section class="key-takeaways">
+                <h2><i class="fas fa-bolt"></i> Key Takeaways</h2>
+                <ul>
+                    <li><strong>Value and digital leaders outperformed:</strong> Retailers like <strong>Walmart</strong>, <strong>Costco</strong>, and <strong>TJX</strong> saw strong gains driven by value positioning and e-commerce growth, while traditional and discretionary-heavy players lagged.</li>
+                    <li><strong>Macroeconomic headwinds persist:</strong> Unpredictable tariff policy has created business uncertainty, cautious consumer spending, and expected higher inflation.</li>
+                    <li><strong>Market bifurcation widened:</strong> Retail winners are scaling through digital investment and capex, while weaker players continue to lose ground amid declining traffic and profitability.</li>
+                </ul>
+            </section>
+
+            <!-- Data Table -->
+            <div class="table-container">
+                <div class="table-header">
+                    <h3><i class="fas fa-table"></i> Retail Performance Dashboard</h3>
+                    <span class="highlight-badge">1Q 2025</span>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Company</th>
+                            <th>Comps</th>
+                            <th>Sales Change</th>
+                            <th>∆ Gross Margin (bps)</th>
+                            <th>Inventory Change</th>
+                            <th>Quarter-End Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="company">Walmart</td>
+                            <td class="strong">4.8%</td>
+                            <td class="strong">2.5%</td>
+                            <td class="neutral">10</td>
+                            <td class="neutral">3.8%</td>
+                            <td>4/30/25</td>
+                        </tr>
+                        <tr>
+                            <td class="company">Target</td>
+                            <td class="weak">-3.8%</td>
+                            <td class="weak">-2.8%</td>
+                            <td class="weak">-90</td>
+                            <td class="strong">11.2%</td>
+                            <td>5/3/25</td>
+                        </tr>
+                        <tr>
+                            <td class="company">BJ's Wholesale</td>
+                            <td class="strong">3.9%</td>
+                            <td class="strong">4.8%</td>
+                            <td class="strong">80</td>
+                            <td class="neutral">2.2%</td>
+                            <td>5/3/25</td>
+                        </tr>
+                        <tr>
+                            <td class="company">Costco</td>
+                            <td class="strong">8.0%</td>
+                            <td class="strong">8.0%</td>
+                            <td class="strong">60</td>
+                            <td class="neutral">6.7%</td>
+                            <td>5/11/25</td>
+                        </tr>
+                        <tr>
+                            <td class="company">Dollar General</td>
+                            <td class="neutral">2.4%</td>
+                            <td class="strong">5.3%</td>
+                            <td class="strong">80</td>
+                            <td class="strong">-5.0%</td>
+                            <td>5/2/25</td>
+                        </tr>
+                        <tr>
+                            <td class="company">Best Buy</td>
+                            <td class="neutral">-0.7%</td>
+                            <td class="weak">-4.8%</td>
+                            <td class="neutral">10</td>
+                            <td class="neutral">-0.6%</td>
+                            <td>5/3/25</td>
+                        </tr>
+                        <tr>
+                            <td class="company">Kohl’s</td>
+                            <td class="weak">-3.9%</td>
+                            <td class="weak">-4.1%</td>
+                            <td class="strong">40</td>
+                            <td class="neutral">1.8%</td>
+                            <td>5/3/25</td>
+                        </tr>
+                        <tr>
+                            <td class="company">Macy's</td>
+                            <td class="neutral">-1.2%</td>
+                            <td class="weak">-5.1%</td>
+                            <td>-</td>
+                            <td class="neutral">0.5%</td>
+                            <td>5/3/25</td>
+                        </tr>
+                        <tr>
+                            <td class="company">Gap</td>
+                            <td class="neutral">2.0%</td>
+                            <td class="neutral">2.2%</td>
+                            <td class="strong">60</td>
+                            <td class="neutral">7.4%</td>
+                            <td>5/3/25</td>
+                        </tr>
+                        <tr>
+                            <td class="company">Urban Outfitters</td>
+                            <td class="strong">4.8%</td>
+                            <td class="strong">10.7%</td>
+                            <td class="strong">240</td>
+                            <td class="neutral">14.6%</td>
+                            <td>4/30/25</td>
+                        </tr>
+                        <tr>
+                            <td class="company">Abercrombie</td>
+                            <td class="strong">4.0%</td>
+                            <td class="strong">7.5%</td>
+                            <td class="strong">440</td>
+                            <td class="neutral">20.7%</td>
+                            <td>5/3/25</td>
+                        </tr>
+                        <tr>
+                            <td class="company">TJX</td>
+                            <td class="strong">3.0%</td>
+                            <td class="strong">5.1%</td>
+                            <td class="weak">-50</td>
+                            <td class="neutral">14.6%</td>
+                            <td>5/3/25</td>
+                        </tr>
+                        <tr>
+                            <td class="company">Ross</td>
+                            <td class="neutral">0.0%</td>
+                            <td class="neutral">2.6%</td>
+                            <td>-</td>
+                            <td class="neutral">8.5%</td>
+                            <td>5/3/25</td>
+                        </tr>
+                        <tr>
+                            <td class="company">Foot Locker</td>
+                            <td class="weak">-2.6%</td>
+                            <td class="weak">-4.8%</td>
+                            <td class="weak">-60</td>
+                            <td class="neutral">0.4%</td>
+                            <td>5/3/25</td>
+                        </tr>
+                        <tr>
+                            <td class="company">Academy</td>
+                            <td class="weak">-3.7%</td>
+                            <td class="weak">-0.9%</td>
+                            <td class="strong">60</td>
+                            <td class="neutral">15.0%</td>
+                            <td>5/3/25</td>
+                        </tr>
+                        <tr>
+                            <td class="company">Dick's Sporting Goods</td>
+                            <td class="strong">4.5%</td>
+                            <td class="strong">5.2%</td>
+                            <td class="strong">40</td>
+                            <td class="neutral">11.5%</td>
+                            <td>5/3/25</td>
+                        </tr>
+                        <tr>
+                            <td class="company">Home Depot</td>
+                            <td class="neutral">-0.3%</td>
+                            <td class="strong">9.4%</td>
+                            <td class="weak">-30</td>
+                            <td class="neutral">14.9%</td>
+                            <td>5/4/25</td>
+                        </tr>
+                        <tr>
+                            <td class="company">Lowe’s</td>
+                            <td class="weak">-1.7%</td>
+                            <td class="weak">-2.0%</td>
+                            <td class="neutral">20</td>
+                            <td class="neutral">0.6%</td>
+                            <td>5/2/25</td>
+                        </tr>
+                        <tr>
+                            <td class="company">McDonald's</td>
+                            <td class="weak">-3.6%</td>
+                            <td class="weak">-3.5%</td>
+                            <td>-</td>
+                            <td class="neutral">10.9%</td>
+                            <td>3/31/25</td>
+                        </tr>
+                        <tr>
+                            <td class="company">Chipotle</td>
+                            <td class="neutral">-0.4%</td>
+                            <td class="strong">6.4%</td>
+                            <td class="weak">-40</td>
+                            <td class="neutral">9.1%</td>
+                            <td>3/31/25</td>
+                        </tr>
+                        <tr>
+                            <td class="company">Bloomin’</td>
+                            <td class="neutral">-0.5%</td>
+                            <td class="weak">-12.2%</td>
+                            <td class="neutral">10</td>
+                            <td class="strong">-7.1%</td>
+                            <td>3/30/25</td>
+                        </tr>
+                        <tr>
+                            <td class="company">Kroger</td>
+                            <td class="strong">3.2%</td>
+                            <td class="neutral">-0.3%</td>
+                            <td class="strong">100</td>
+                            <td class="strong">41.4%</td>
+                            <td>5/24/25</td>
+                        </tr>
+                        <tr>
+                            <td class="company">Albertsons</td>
+                            <td class="neutral">2.3%</td>
+                            <td class="neutral">2.5%</td>
+                            <td class="weak">-40</td>
+                            <td class="strong">-0.8%</td>
+                            <td>2/22/25</td>
+                        </tr>
+                        <tr>
+                            <td class="company">Amazon</td>
+                            <td>N/A</td>
+                            <td class="strong">8.6%</td>
+                            <td class="strong">120</td>
+                            <td class="neutral">15.1%</td>
+                            <td>3/31/25</td>
+                        </tr>
+                        <tr>
+                            <td class="company">Wayfair</td>
+                            <td>N/A</td>
+                            <td class="neutral">0.0%</td>
+                            <td class="strong">70</td>
+                            <td class="neutral">11.1%</td>
+                            <td>3/31/25</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Industry Sections -->
+            <div class="industry-section">
+                <div class="industry-header">
+                    <span>Mass Merchandisers</span>
+                    <i class="fas fa-chevron-down icon"></i>
+                </div>
+                <div class="industry-content">
+                    <div class="content-grid">
+                        <p>The broader mass sector posted solid gains in 1Q25, with average U.S. comp growth of 4.2%, though <strong>Target</strong> continued to lag amid discretionary softness. Excluding <strong>Target</strong>’s –3.8% comp decline, the sector averaged a stronger 5.2% gain. Longtime outperformers continued to extend their lead, with <strong>Walmart U.S.</strong> (+4.5%), <strong>Sam’s Club</strong> (+6.7%), <strong>Costco U.S.</strong> (+7.9%), and <strong>BJ’s</strong> (+3.9%) all delivering strong comp growth (ex-fuel), fueled by ongoing consumer demand for value and convenience across income levels.</p>
+
+                        <p><strong>E-commerce</strong> remained a key focus and growth engine. <strong>Walmart</strong> turned a profit in its e-comm business for the first time, citing improved route densification and expanding omnichannel scale. One-third of store deliveries were fulfilled in under three hours (for added fee), highlighting consumer appetite for speed and flexibility, particularly among higher-income shoppers. <strong>BJ’s</strong> saw e-commerce sales rise 35% (+56% on a two-year stack), driven by increased adoption of curbside pickup, BOPIC, ExpressPay and same-day delivery. <strong>Costco</strong> posted 15.7% e-commerce growth, led by strength in gold and jewelry, toys, home furnishings and small appliances. <strong>Target</strong> saw modest digital growth of 4.7%, one of the few bright spots in an otherwise challenging quarter, as consumer preferences continued shifting toward convenience-based fulfillment.</p>
+
+                        <div class="metric-card">
+                            <h4>Notable Transaction</h4>
+                            <div class="metric-value"><strong>Dollar Tree</strong> completed the sale of <strong>Family Dollar</strong> for $1 billion ($800 million in net proceeds) on July 7.</div>
+                        </div>
+
+                        <p><strong>Dollar stores</strong> also reported solid results, benefiting from elevated trade-down activity as lower-income consumers remained under financial pressure. <strong>Dollar Tree</strong>’s results exclude <strong>Family Dollar</strong>, which had weighed on performance; the divestiture positions <strong>Dollar Tree</strong> to focus on its higher performing 3.0 store formats, which now represent roughly 39% of the chain and have consistently outpaced legacy locations. <strong>Dollar General</strong> raised its FY25 guidance following stronger-than-expected 1Q results but flagged increased tariff uncertainty.</p>
+
+                        <p><strong>Five Below</strong> started FY25 with a sharp rebound, posting 7.1% comp growth and modestly raising its full-year outlook. Margin expansion was driven by better seasonal inventory alignment, higher initial markups and lower markdowns, along with continued contribution from higher-margin <strong>Five Beyond</strong> products. EBITDA rose 38%, and margin expanded 140 bps to 11.1%. <strong>Ollie’s</strong> added 25 stores in 1Q25—more than one-third of its 68-store YOY increase—with many new locations coming from <strong>Big Lots</strong> closures, underscoring its opportunistic approach to retail shakeouts.</p>
+
+                        <div class="quote">
+                            “The current outlook assumes tariff rates remain unchanged through mid-August, with mitigation efforts underway, though management warned that further escalation could weigh on consumer demand later this year.” — <strong>Dollar General</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="industry-section">
+                <div class="industry-header">
+                    <span>Department Store & Off-Price Apparel</span>
+                    <i class="fas fa-chevron-down icon"></i>
+                </div>
+                <div class="industry-content">
+                    <div class="content-grid">
+                        <p>With the full impact of tariffs yet to be manifested, department store retailers delivered mixed results in the first quarter of FY25, with off-price operators once again outperforming traditional players. Value-focused consumers continued to favor lower-priced alternatives, driving strong sales growth at <strong>TJX</strong> and <strong>Burlington</strong>, which posted increases of 5.1% and 6.1%, respectively.</p>
+
+                        <p><strong>Ross</strong> saw more modest growth of 2.6%. These gains were largely fueled by ongoing store expansion across all three chains. Comparable sales were flat at <strong>Burlington</strong> and <strong>Ross</strong>, while <strong>TJX</strong> reported a 3% increase. Profitability trends among off-price retailers were mixed but generally stable. <strong>Ross</strong> sustained steady margins despite tariff and freight pressures, while <strong>Burlington</strong> delivered strong EBITDA growth driven by improved gross margin and SG&A leverage. <strong>TJX</strong> experienced modest margin compression due to hedge-related adjustments and higher labor costs, though overall profit levels remained healthy.</p>
+
+                        <div class="metric-card">
+                            <h4>Store Expansion</h4>
+                            <div class="metric-value"><strong>TJX</strong>, <strong>Burlington</strong>, and <strong>Ross</strong> all expanded their footprints in 1Q25 through new store openings.</div>
+                        </div>
+
+                        <p>In contrast, traditional department stores continued to face headwinds. <strong>Macy’s</strong> reported a 5.1% sales decline, largely attributed to weaker comparable sales and ongoing store closures at its core <strong>Macy’s</strong> banner. However, the Company’s upscale divisions provided a partial offset, with <strong>Bloomingdale’s</strong> and <strong>Bluemercury</strong> posting comp gains of 3.8% and 1.5%, respectively. <strong>Macy’s</strong> EBITDA also declined, pressured by lower sales and elevated delivery costs.</p>
+
+                        <p><strong>Kohl’s</strong> extended its streak of underperformance, with another quarter of declining sales and comps as it remains stuck in a prolonged turnaround. Continued executive turnover has weighed on momentum, and the Company is now searching for its fourth CEO in as many years. Its FY25 guidance points to further deterioration in both sales and profit margins, leading us to speculate that more store closures are planned (27 were closed in FY25). <strong>JCPenney</strong> also reported lower sales, though it achieved modest profitability improvements driven by cost-cutting measures—a strategy that is unlikely to be sustainable over the long term.</p>
+
+                        <div class="quote">
+                            “Prior to going private in May, <strong>Nordstrom</strong> was showing signs of a sales rebound, with both its namesake and Rack banners posting positive comps.” — RetailStat Analyst
+                        </div>
+
+                        <p><strong>Nordstrom</strong>, prior to going private, showed signs of recovery with positive comps and healthy liquidity. Growth efforts remain concentrated on the Rack banner, with approximately two dozen new store openings planned for 2025.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="industry-section">
+                <div class="industry-header">
+                    <span>Apparel</span>
+                    <i class="fas fa-chevron-down icon"></i>
+                </div>
+                <div class="industry-content">
+                    <div class="content-grid">
+                        <p>Specialty apparel sales were mixed in 1Q25, as inflation, cautious discretionary spending, and intensified promotions created an uneven operating environment. Average omnichannel comparable sales declined 1%, in line with the 1.1% drop a year earlier. Digital and direct-to-consumer channels continued to outperform stores, but even online sales dipped 0.5% on average, reflecting broad-based demand pressure.</p>
+
+                        <p>Retailers with differentiated assortments and strong brand positioning, such as <strong>Abercrombie & Fitch</strong>, <strong>Urban Outfitters</strong>, <strong>Zumiez</strong>, and <strong>Citi Trends</strong> reported solid comp growth of 4% to 10%, supported by early merchandise buys, disciplined promotions, and pricing power. Meanwhile, middle-tier performers, including <strong>The Buckle</strong>, <strong>Gap</strong>, and <strong>Lululemon</strong>, saw modest growth of 1% to 3%, though <strong>Lululemon</strong>’s gains were largely international.</p>
+
+                        <div class="metric-card">
+                            <h4>Underperformers</h4>
+                            <div class="metric-value"><strong>The Children’s Place</strong> (-13.6%), <strong>American Eagle</strong> (-3%), <strong>Victoria’s Secret</strong> (-1%), <strong>Carter’s</strong>, <strong>J.Jill</strong>, <strong>Destination XL</strong>, and <strong>Tilly’s</strong> all reported meaningful comp declines.</div>
+                        </div>
+
+                        <p>In contrast, value-oriented and lower-income-focused brands underperformed. <strong>The Children’s Place</strong> posted the steepest comp decline at -13.6%, citing weaker store traffic, a higher e-commerce shipping threshold, and structural challenges. <strong>American Eagle</strong> posted a surprising 3% comp drop and recorded a $75 million inventory write-down tied to merchandising missteps. <strong>Victoria’s Secret</strong> reported a 1% comp decline, driven by a 3% drop in digital sales.</p>
+
+                        <div class="quote">
+                            “Retailers with clean balance sheets, supply chain agility, and clear value propositions—such as <strong>Gap</strong>, <strong>Urban Outfitters</strong>, and <strong>Lululemon</strong>—are better positioned to protect margins and gain share.” — Retail Strategy Note
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="industry-section">
+                <div class="industry-header">
+                    <span>Restaurants</span>
+                    <i class="fas fa-chevron-down icon"></i>
+                </div>
+                <div class="industry-content">
+                    <div class="content-grid">
+                        <p>Restaurant sales growth slowed during 1Q25 as broader customer traffic trends remained weak due to concerns about retail inflation and pushback over higher menu prices. Month-to-month sales trends were uneven, with U.S. Census Bureau data indicating that food services and drinking places sales grew 7.4% in January, followed by a 1.5% increase in February that then rebounded to a 6.3% improvement in March.</p>
+
+                        <p>Among the QSR/Fast Casual categories, several major operators reported low-to-mid-single digit comp declines, including <strong>McDonald’s</strong> (-3.6%), <strong>Wendy’s</strong> (-2.8%), <strong>Jack in the Box</strong> (-4.4%) and <strong>Starbucks</strong> (-1%). <strong>McDonald’s</strong> launched a new value menu in January, but guest counts were down for the quarter, particularly among lower-income consumers. <strong>Chipotle</strong> comps (-0.4%) were negative for the first time since early 2020 due to a 2.3% drop in transactions.</p>
+
+                        <div class="metric-card">
+                            <h4>Top Performers</h4>
+                            <div class="metric-value"><strong>CAVA</strong> (+10.8%), <strong>Taco Bell</strong> (+9%), and <strong>KFC</strong> (+2%) gained share through effective promotions and value offerings.</div>
+                        </div>
+
+                        <p>Some chains saw positive comps, including <strong>CAVA</strong> (+10.8%) and <strong>Yum</strong> (3%), with the latter including 9% and 2% increases at <strong>Taco Bell</strong> and <strong>KFC</strong>, respectively. Mixed trends were also seen in the traditional full-service category. <strong>Brinker’s Chili’s</strong> banner led with 25.9% comp growth on the success of its “3 for Me” and other promotions. Similar promotions from other chains have been less effective, with <strong>Cracker Barrel</strong> (+1%), <strong>The Cheesecake Factory</strong> (+0.7%) and <strong>Shake Shack</strong> (+0.2%) generating soft comp growth driven by price increases that were partially offset by traffic declines.</p>
+
+                        <p>Others remained in the red, including <strong>Dine Brands’ Applebee’s</strong> (-2.2%) and <strong>Denny’s</strong> (-3%).</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="industry-section">
+                <div class="industry-header">
+                    <span>Electronics</span>
+                    <i class="fas fa-chevron-down icon"></i>
+                </div>
+                <div class="industry-content">
+                    <div class="content-grid">
+                        <p>The consumer electronics industry remains under pressure in 2025, as macroeconomic headwinds and shifting consumer priorities continue to weigh on discretionary spending. While some retailers are cautiously optimistic that demand may have reached a low point, the recovery has been slow and uneven across the board.</p>
+
+                        <p><strong>Best Buy</strong>’s recent results reflect the broader industry trends, with 1Q sales and comps declining 0.9% and 0.7%, respectively, with the largest drivers of the comp decline being home theater, appliances, and drones, slightly offset by improvements in computing and mobile phone categories. Performance is even worse at <strong>Office Depot</strong>, which saw 1Q sales and comps decline 9% and 5%, respectively, largely attributed to its shrinking ODP business, which closed 46 locations from the prior year.</p>
+
+                        <div class="metric-card">
+                            <h4>Guidance Update</h4>
+                            <div class="metric-value"><strong>Best Buy</strong> revised its annual sales and profit guidance downward due to anticipated tariff pass-throughs from vendors.</div>
+                        </div>
+
+                        <p>Adding to uncertainty is the potential for tariffs on select electronics and components imported from China and other overseas suppliers; <strong>Best Buy</strong> similarly noted “we expect our vendors... will pass along some level of tariff costs to retailers, making price increases for American consumers highly likely”.</p>
+
+                        <div class="quote">
+                            “Despite near-term challenges, retailers are betting on a gradual recovery supported by aging product bases, holiday promotions, and emerging categories such as AI-powered devices, wearables, and connected home tech.” — Sector Outlook
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="industry-section">
+                <div class="industry-header">
+                    <span>Home Improvement</span>
+                    <i class="fas fa-chevron-down icon"></i>
+                </div>
+                <div class="industry-content">
+                    <div class="content-grid">
+                        <p>In 1Q25, the home improvement sector showed signs of stabilization despite continued macroeconomic challenges, including elevated interest rates, soft big-ticket discretionary spending, and persistent tariff concerns. <strong>Home Depot</strong>’s comparable sales were down 0.3% (up 0.2% in the U.S.), with average comp ticket flat, and comp transactions down 0.5%. Big-ticket comp transactions (over $1,000) were up 0.3% on solid performance in categories such as building materials, lumber and hardware.</p>
+
+                        <p>However, there was softer engagement in larger discretionary projects where customers typically use financing to fund the project, such as kitchen and bath remodels. Online sales represented 15.5% of net sales in 1Q25 and increased 10.9%.</p>
+
+                        <div class="metric-card">
+                            <h4>Major M&A Activity</h4>
+                            <div class="metric-value"><strong>Lowe’s</strong> to acquire <strong>Artisan Design Group (ADG)</strong> for enhanced Pro customer penetration. <strong>Home Depot</strong> agreed to buy <strong>GMS Inc.</strong> for $5.50 billion.</div>
+                        </div>
+
+                        <p><strong>Paint retailer Sherwin Williams</strong> was the only retailer in our coverage to generate positive comps, up 1.2%, reflecting the benefit of higher pricing and growth in protective/marine coatings, residential repaint, and new residential business. Meanwhile, <strong>The Tile Shop</strong> posted the weakest numbers among home improvement retailers in the group, reporting a 4% decline in sales and comps due to a decrease in traffic.</p>
+
+                        <div class="quote">
+                            “According to the Leading Indicator of Remodeling Activity (LIRA), annual expenditures for improvements and maintenance to owner-occupied homes are now expected to grow by 2.5% through 1Q26, reaching a record $526 billion.” — Industry Forecast
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="industry-section">
+                <div class="industry-header">
+                    <span>Sporting Goods</span>
+                    <i class="fas fa-chevron-down icon"></i>
+                </div>
+                <div class="industry-content">
+                    <div class="content-grid">
+                        <p>The sporting goods sector showed signs of renewed momentum in 1Q25, with average sales up 1% and comps turning modestly positive. However, the improvement may be short-lived, as consumers may have pulled forward purchases ahead of anticipated tariff-driven price hikes.</p>
+
+                        <p><strong>Dick’s Sporting Goods</strong> continues to outperform in the sector, posting solid comparable sales growth, though outdoor gear remains a drag. In a surprise move, management announced the $2.4 billion acquisition of struggling <strong>Foot Locker</strong>. While met with investor skepticism, <strong>Dick’s</strong> pointed to potential cost synergies and long-term growth opportunities, including an expanded global footprint and deeper vendor partnerships.</p>
+
+                        <div class="metric-card">
+                            <h4>Major Transactions</h4>
+                            <div class="metric-value"><strong>Dick’s</strong> acquires <strong>Foot Locker</strong> for $2.4B. <strong>Big 5</strong> agrees to be acquired by <strong>Worldwide Sports Group Holdings</strong> for $113M enterprise value.</div>
+                        </div>
+
+                        <p><strong>Sportsman’s Warehouse</strong> posted its first quarter of positive comps in four years, up 2%, though still down 12% on a two-year stacked basis and EBITDA remained negative in the quarter. <strong>Big 5 Sporting Goods</strong> continued to struggle, with comps down 7.8%, widening EBITDA losses, and tighter liquidity due to high inventories and increased revolver borrowings.</p>
+
+                        <p><strong>Academy Sports</strong> also posted soft 1Q25 results, with comps down 3.7% and EBITDA down 22%, pressured by elevated SG&A tied to new store openings and the <strong>Jordan Brand</strong> launch. <strong>Camping World</strong>, by contrast, showed improving momentum in 1Q25, with sales up 3.6%, driven by strong used vehicle demand and tighter cost controls that nearly doubled EBITDA.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="industry-section">
+                <div class="industry-header">
+                    <span>Grocery</span>
+                    <i class="fas fa-chevron-down icon"></i>
+                </div>
+                <div class="industry-content">
+                    <div class="content-grid">
+                        <p>In 1Q25, grocery shoppers continued to battle stubbornly high prices while seeking convenience and value. Inflation remained a challenge for many households, prompting consumers to seek more budget-friendly options, including private label products, and fueling the ongoing surge in online grocery shopping.</p>
+
+                        <p>In 1Q25 U.S. private label grocery sales continued to outperform national brands, with dollar sales rising approximately 5% and unit sales up 0.9%, compared to just 0.8% growth and a 1.1% decline for national brands. Private labels captured 21.5% of grocery dollar share and 23.7% of unit share. Retailers responded by expanding their store brand offerings. <strong>Kroger</strong> is introducing over 900 new items this year, and <strong>Sprouts</strong> increased its private label sales mix to 24%.</p>
+
+                        <div class="metric-card">
+                            <h4>Online Grocery Growth</h4>
+                            <div class="metric-value">March sales: $9.7B (+21% YoY). April & June: $9.8B (+15% & +27.6% YoY). Ship-to-home rose 33% in June.</div>
+                        </div>
+
+                        <p><strong>Kroger</strong>, a leader in the online grocery space, reported a 15% jump in digital sales, its 12th consecutive quarter of double-digit digital growth. Notwithstanding the collapse of the <strong>Kroger-Albertsons</strong> merger, we believe the sector will see continued M&A activity, particularly among regional supermarkets and independent, family-owned grocers.</p>
+
+                        <p>Unit-level expansion continues among a handful of grocery players. <strong>Aldi</strong> is on pace to expand to approximately 3,200 locations by 2028 and <strong>Walmart</strong> plans to add 150 new stores in the U.S. over the next five years. <strong>Kroger</strong> plans to shutter about 60 underperforming locations over the next 18 months and reinvest in higher-performing stores.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="industry-section">
+                <div class="industry-header">
+                    <span>Online Retailers</span>
+                    <i class="fas fa-chevron-down icon"></i>
+                </div>
+                <div class="industry-content">
+                    <div class="content-grid">
+                        <p>Online shopping remains a key focus and driver of retail growth, fueled by both pure-play e-commerce players and traditional retailers enhancing their digital capabilities through store-based fulfillment. In 1Q25, U.S. online sales rose 6.1% YoY and accounted for 16.2% of total retail sales.</p>
+
+                        <p>The most notable headline came from <strong>Walmart</strong>, which turned a profit in its online business for the first time, citing improved route densification and growing omnichannel scale. One-third of store deliveries were fulfilled in under three hours (for a fee), underscoring rising consumer demand for speed and flexibility.</p>
+
+                        <div class="metric-card">
+                            <h4>Digital Leaders</h4>
+                            <div class="metric-value"><strong>BJ’s</strong>: 35% e-commerce growth. <strong>Costco</strong>: 15.7% e-commerce growth. <strong>Kroger</strong>: 15% digital sales jump (12th straight double-digit quarter).</div>
+                        </div>
+
+                        <p><strong>Amazon</strong> reported paid unit growth of 8% in 1Q25, supported by continued investments in customer experience through expanded selection, pricing and faster delivery. Everyday essentials grew more than twice as fast as the rest of the business and made up approximately one-third of all U.S. units sold. <strong>Chewy</strong> reported a similar 8% gain with its Autoship business now accounting for a whopping 82% of sales.</p>
+
+                        <div class="quote">
+                            “Amazon delivered more same-day or next-day items than in any prior quarter, highlighting the strength of its regionalized fulfillment network.” — Amazon Statement
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            document.querySelectorAll('.industry-header').forEach(header => {
+                header.addEventListener('click', () => {
+                    const content = header.nextElementSibling;
+                    const icon = header.querySelector('.icon');
+
+                    // Toggle active class on header
+                    header.classList.toggle('active');
+
+                    // Toggle open class on content
+                    if (content.classList.contains('open')) {
+                        content.classList.remove('open');
+                    } else {
+                        content.classList.add('open');
+                    }
+                });
+            });
+        </script>
+    </body>
+</html>
