@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Property Listings Widget</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="icon" type="image/x-icon" href="../Images/for-sale-retail.png">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif, system-ui;
+      background-color: #f0f9ff;
+    }
+    @import url('https://rsms.me/inter/inter.css');
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fadeIn {
+      animation: fadeIn 0.4s ease-out forwards;
+    }
+    
+    .dropdown-menu {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 105%;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.09);
+      max-height: 240px;
+      overflow-y: auto;
+      margin-top: 0.3rem;
+      display: none;
+      z-index: 50;
+      padding: 0.25rem;
+    }
+    .dropdown-menu.show { display: block; }
+    .dropdown-option {
+      @apply w-full px-3 py-1.5 text-left text-sm text-slate-700 rounded-md hover:bg-slate-100;
+    }
+    .dropdown-option[aria-selected="true"] {
+      @apply bg-blue-50 font-semibold text-blue-700;
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+  <div class="max-w-6xl mx-auto px-4">
+    <!-- TOP FILTER BAR -->
+    <div id="top-bar" class="sticky top-4 z-30 mb-5">
+      <div class="bg-white/80 backdrop-blur-lg rounded-xl shadow-lg shadow-sky-200/50 p-2 flex flex-wrap items-center gap-2">
+        
+        <!-- Left Side: Filters -->
+        <div class="flex-grow flex items-center gap-2 flex-wrap sm:flex-nowrap">
+          <!-- Search -->
+          <div class="relative flex-grow min-w-[200px] w-full sm:w-auto">
+            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400"></i>
+            <input type="text" id="property-search-bar" placeholder="Search..." disabled
+                   class="h-10 pl-9 pr-3 rounded-lg border border-slate-300 bg-white w-full text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none">
+            <ul id="property-search-suggestions" class="absolute top-full mt-1 w-full bg-white border border-slate-200 rounded-md shadow-lg max-h-60 overflow-y-auto z-50 hidden"></ul>
+          </div>
+          
+          <!-- Type Filter -->
+          <select id="type-filter" class="h-10 px-3 rounded-lg border border-slate-300 bg-white text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none w-full sm:w-auto min-w-[140px]">
+            <option value="all">All Types</option>
+          </select>
+          
+          <!-- City Filter -->
+          <div class="relative w-full sm:w-auto sm:min-w-[180px]" id="city-control-wrap">
+            <button id="city-input-btn" type="button" aria-haspopup="listbox" aria-expanded="false"
+                    class="h-10 px-3 rounded-lg border border-slate-300 bg-white w-full text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none flex items-center justify-between">
+              <span id="city-input-label" class="truncate text-slate-700">All Cities</span>
+              <i data-lucide="chevron-down" class="h-4 w-4 text-slate-500 ml-2"></i>
+            </button>
+            <div id="city-menu" class="dropdown-menu">
+              <!-- City options will be populated by JS -->
+            </div>
+          </div>
+        </div>
+        
+        <!-- Right Side: Actions -->
+        <div class="flex items-center gap-2 ml-auto">
+          <!-- Sort Dropdown -->
+          <div class="relative" id="sort-control-wrap">
+            <button id="sort-dropdown-btn" type="button" aria-haspopup="listbox" aria-expanded="false"
+                    class="h-10 pl-3 pr-2 rounded-lg border border-slate-300 bg-white text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none flex items-center justify-between min-w-[170px]">
+              <span id="sort-selected-label" class="truncate text-slate-700"></span>
+              <i data-lucide="chevron-down" class="h-4 w-4 text-slate-500 ml-2"></i>
+            </button>
+            <div id="sort-dropdown-menu" class="dropdown-menu">
+              <!-- Sort options will be populated by JS -->
+            </div>
+          </div>
+          
+          <!-- Reset -->
+          <button id="reset-filters-btn" type="button" title="Reset Filters"
+                  class="h-10 w-10 flex-shrink-0 flex items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 transition-colors focus:ring-2 focus:ring-blue-400 focus:outline-none">
+            <i data-lucide="rotate-cw" class="h-4 w-4"></i>
+          </button>
+          
+          <!-- Export -->
+          <button id="export-btn" type="button" title="Export Current View"
+                  class="h-10 px-4 flex-shrink-0 flex items-center justify-center gap-2 rounded-lg border border-slate-700 bg-slate-800 text-white hover:bg-slate-700 transition-colors text-sm font-medium focus:ring-2 focus:ring-offset-2 focus:ring-slate-600 focus:outline-none">
+            <i data-lucide="download" class="h-4 w-4"></i>
+            <span>Export</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <div id="status-message" class="text-center text-slate-500 py-10">Loading widget...</div>
+    <div id="property-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6"></div>
+  </div>
+  
+  <!-- MODAL -->
+  <div id="modal-container" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div id="modal-backdrop" class="fixed inset-0 bg-black/70"></div>
+    <div class="fixed left-1/2 top-1/2 w-full max-w-3xl -translate-x-1/2 -translate-y-1/2">
+      <div class="relative max-h-[95vh] overflow-y-auto bg-white rounded-lg shadow-xl">
+        <button id="modal-close-button" class="absolute right-3 top-3 text-gray-400 hover:text-gray-600 z-10 bg-white/50 rounded-full p-1">
+          <i data-lucide="x" class="h-6 w-6"></i>
+        </button>
+        <div id="modal-body"></div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- TEMPLATES -->
+  <template id="property-card-template">
+    <div class="group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col bg-white rounded-lg border border-gray-200 overflow-hidden shadow-md shadow-sky-200/50">
+      <div class="relative overflow-hidden h-48">
+        <img data-template-field="photo_url" alt="" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+        <div class="absolute top-2.5 right-2.5 z-10 flex flex-col items-end gap-1.5">
+            <div class="days-chip-container"></div>
+            <div class="type-chip-container"></div>
+        </div>
+        <div class="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-black/80 to-transparent"></div>
+        <div class="absolute bottom-3 left-4 text-white z-10">
+          <p data-template-field="Property_Name" class="font-bold text-lg drop-shadow-md"></p>
+        </div>
+      </div>
+      <div class="p-4 flex-grow flex flex-col">
+        <p data-template-field="Address" class="text-sm text-gray-500 flex items-center gap-2 mt-1 truncate">
+          <i data-lucide="map-pin" class="h-4 w-4 flex-shrink-0"></i>
+          <span class="truncate"></span>
+        </p>
+        <div class="mt-auto pt-5 flex justify-between items-center">
+          <div class="flex items-center gap-1.5">
+            <i data-lucide="dollar-sign" class="h-5 w-5 text-green-500"></i>
+            <span data-template-field="Price" class="font-semibold text-gray-800 text-base"></span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <i data-lucide="trending-up" class="h-5 w-5 text-blue-500"></i>
+            <span data-template-field="Cap_Rate" class="font-semibold text-gray-800 text-base"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </template>
+  
+  <template id="modal-body-template">
+    <div class="relative w-full">
+      <img data-template-field="photo_url" class="w-full h-[320px] md:h-[400px] object-cover bg-slate-100 rounded-t-lg" />
+    </div>
+    <div class="p-6 pb-2">
+      <h2 data-template-field="Property_Name" class="text-2xl font-bold text-gray-800"></h2>
+      <p data-template-field="Address" class="text-md text-gray-500 flex items-center gap-2 pt-1">
+        <i data-lucide="map-pin" class="h-4 w-4"></i><span></span>
+      </p>
+    </div>
+    <div class="px-6 pb-6 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+      <div class="p-3 bg-slate-50 rounded-lg"><h4 class="text-sm text-gray-500">Price</h4><p data-template-field="Price" class="font-bold text-lg text-green-600"></p></div>
+      <div class="p-3 bg-slate-50 rounded-lg"><h4 class="text-sm text-gray-500">Building Size</h4><p data-template-field="RBA" class="font-bold text-lg"></p></div>
+      <div class="p-3 bg-slate-50 rounded-lg"><h4 class="text-sm text-gray-500">Cap Rate</h4><p data-template-field="Cap_Rate" class="font-bold text-lg"></p></div>
+      <div class="p-3 bg-slate-50 rounded-lg"><h4 class="text-sm text-gray-500">Type</h4><p data-template-field="Property_Type" class="font-bold text-lg"></p></div>
+    </div>
+    <div class="px-6 pb-6"><h4 class="font-bold mb-2">Description</h4><p data-template-field="Notes" class="text-sm text-gray-600"></p></div>
+    <div class="px-6 pb-8"><h4 class="font-bold mb-3">External Resources</h4><div data-template-field="links" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div></div>
+  </template>
+  
+  <script type="module">
+    let allRecords = [];
+    let filteredRecords = [];
+    let isReady = false;
+    let searchColumnName = "Property_Name";
+  
+    // UI Elements
+    const propertyGrid = document.getElementById('property-grid');
+    const cardTemplate = document.getElementById('property-card-template');
+    const statusMessage = document.getElementById('status-message');
+    const searchInput = document.getElementById('property-search-bar');
+    const suggestionsContainer = document.getElementById('property-search-suggestions');
+    const typeFilterSelect = document.getElementById('type-filter');
+    const resetButton = document.getElementById('reset-filters-btn');
+    const exportBtn = document.getElementById('export-btn');
+  
+    // Modal
+    const modalContainer = document.getElementById('modal-container');
+    const modalBody = document.getElementById('modal-body');
+    const modalBodyTemplate = document.getElementById('modal-body-template');
+  
+    // City Filter
+    const cityControlWrap = document.getElementById('city-control-wrap');
+    const cityInputBtn = document.getElementById('city-input-btn');
+    const cityInputLabel = document.getElementById('city-input-label');
+    const cityMenu = document.getElementById('city-menu');
+    let allCities = [];
+    let selectedCities = new Set();
+  
+    // Sort Control
+    const sortControlWrap = document.getElementById('sort-control-wrap');
+    const sortDropdownBtn = document.getElementById('sort-dropdown-btn');
+    const sortDropdownMenu = document.getElementById('sort-dropdown-menu');
+    const sortSelectedLabel = document.getElementById('sort-selected-label');
+    let currentSort = 'modified_desc';
+    const sortOptions = {
+        'modified_desc': 'Updated: Newest',
+        'modified_asc': 'Updated: Oldest',
+        'price_desc': 'Price: High to Low',
+        'price_asc': 'Price: Low to High',
+        'date_desc': 'Listed: Newest',
+        'date_asc': 'Listed: Oldest',
+    };
+  
+    const formatters = {
+      Price: (val) => val ? `$${Number(val).toLocaleString('en-US')}` : 'N/A',
+      RBA: (val) => val ? `${Number(val).toLocaleString()} sq ft` : 'N/A',
+      Cap_Rate: (val) => val ? `${(Number(val) * 100).toFixed(2)}%` : 'N/A',
+      default: (val) => val || 'N/A',
+    };
+  
+    function getDaysOnMarket(dateVal) {
+      if (!dateVal) return null;
+      let listedDate = new Date(dateVal instanceof Date ? dateVal : typeof dateVal === "number" ? dateVal : Date.parse(dateVal));
+      if (isNaN(listedDate?.getTime())) return null;
+      const diffDays = Math.floor((Date.now() - listedDate.getTime()) / 86400000);
+      return diffDays < 0 ? 0 : diffDays;
+    }
+  
+    function renderProperties(recordsToRender) {
+      propertyGrid.innerHTML = '';
+      if (!recordsToRender || recordsToRender.length === 0) {
+        statusMessage.textContent = allRecords.length > 0 ? 'No properties match the current filters.' : 'No properties found in the table.';
+        statusMessage.style.display = 'block';
+        return;
+      }
+      statusMessage.style.display = 'none';
+  
+      recordsToRender.forEach((record, index) => {
+        if (!record || typeof record !== 'object') return;
+        const card = cardTemplate.content.cloneNode(true);
+        const cardElement = card.firstElementChild;
+        cardElement.style.animationDelay = `${index * 40}ms`;
+        cardElement.classList.add('animate-fadeIn');
+  
+        const createChip = (text) => {
+            const chip = document.createElement('span');
+            chip.className = 'bg-black/60 backdrop-blur-sm text-white text-xs font-medium px-2.5 py-1 rounded-full';
+            chip.textContent = text;
+            return chip;
+        }
+        
+        const dom = getDaysOnMarket(record.Date_Listed);
+        if (record.Date_Listed && dom !== null && !isNaN(dom)) {
+            cardElement.querySelector('.days-chip-container').appendChild(createChip(`${dom}d ago`));
+        }
+        if (record.Property_Type) {
+            cardElement.querySelector('.type-chip-container').appendChild(createChip(record.Property_Type));
+        }
+  
+        card.querySelectorAll('[data-template-field]').forEach(el => {
+          const field = el.dataset.templateField;
+          const value = record[field];
+          const formatter = formatters[field] || formatters.default;
+          if (field === 'photo_url') {
+            el.src = value || `https://placehold.co/600x400/e2e8f0/64748b?text=${encodeURIComponent(record.Property_Name || 'No Image')}`;
+            el.alt = record.Property_Name;
+          } else if (el.querySelector('span')) {
+            el.querySelector('span').textContent = formatter(value);
+          } else {
+            el.textContent = formatter(value);
+          }
+        });
+  
+        cardElement.addEventListener('click', () => showModal(record));
+        propertyGrid.appendChild(card);
+      });
+      lucide.createIcons();
+    }
+  
+    function showModal(record) {
+      if (!record) return;
+      const modalContent = modalBodyTemplate.content.cloneNode(true);
+      modalContent.querySelectorAll('[data-template-field]').forEach(el => {
+        const field = el.dataset.templateField;
+        const value = record[field];
+        const formatter = formatters[field] || formatters.default;
+        if (field === 'links') {
+          const linksContainer = el;
+          linksContainer.innerHTML = '';
+          const linkButton = (url, icon, text) => `
+            <a href="${url}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center rounded-md text-sm font-medium h-10 px-4 py-2 border border-slate-200 bg-white hover:bg-slate-50 transition">
+              <i data-lucide="${icon}" class="h-4 w-4 mr-2"></i> ${text}
+            </a>`;
+          if (record.CoStar) linksContainer.innerHTML += linkButton(record.CoStar, 'external-link', 'View on CoStar');
+          if (record.Crexi) linksContainer.innerHTML += linkButton(record.Crexi, 'external-link', 'View on Crexi');
+          if (linksContainer.innerHTML === '') linksContainer.innerHTML = '<p class="text-sm text-gray-500 col-span-full">No external resources provided.</p>';
+        } else if (field === 'photo_url') {
+          el.src = value || `https://placehold.co/800x600/e2e8f0/64748b?text=${encodeURIComponent(record.Property_Name || 'No Image')}`;
+          el.alt = record.Property_Name;
+        } else if (el.querySelector('span')) {
+          el.querySelector('span').textContent = formatter(value);
+        } else {
+          el.textContent = formatter(value);
+        }
+      });
+      modalBody.innerHTML = '';
+      modalBody.appendChild(modalContent);
+      modalContainer.classList.remove('hidden');
+      lucide.createIcons();
+    }
+  
+    function hideModal() {
+      modalContainer.classList.add('hidden');
+      modalBody.innerHTML = '';
+    }
+  
+    function populateFilters(records) {
+      const types = [...new Set(records.map(r => r.Property_Type).filter(Boolean))].sort();
+      typeFilterSelect.innerHTML = '<option value="all">All Types</option>';
+      types.forEach(type => {
+        const option = document.createElement('option');
+        option.value = type;
+        option.textContent = type;
+        typeFilterSelect.appendChild(option);
+      });
+  
+      const deriveCity = (address) => {
+        if (!address || typeof address !== 'string') return '';
+        const parts = address.split(',').map(p => p.trim());
+        return parts.length > 2 ? parts[parts.length - 2] : '';
+      };
+      allCities = [...new Set(records.map(r => deriveCity(r.Address)).filter(Boolean))].sort();
+      populateCityMenu();
+    }
+  
+    function populateCityMenu() {
+      cityMenu.innerHTML = `
+        <button type="button" data-value="all" class="dropdown-option">All Cities</button>
+        ${allCities.map(c => `
+          <label class="w-full px-3 py-1.5 text-left text-sm text-slate-700 rounded-md hover:bg-slate-100 flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" data-city="${c}" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+            ${c}
+          </label>
+        `).join('')}
+      `;
+      cityMenu.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+        checkbox.checked = selectedCities.has(checkbox.dataset.city);
+        checkbox.addEventListener('change', (e) => {
+            const city = e.target.dataset.city;
+            if (e.target.checked) selectedCities.add(city);
+            else selectedCities.delete(city);
+            updateCityLabel();
+            applyFiltersAndRender();
+        });
+      });
+      cityMenu.querySelector('button[data-value="all"]').addEventListener('click', () => {
+        selectedCities.clear();
+        cityMenu.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
+        updateCityLabel();
+        applyFiltersAndRender();
+        closeDropdown(cityMenu, cityInputBtn);
+      });
+    }
+  
+    function updateCityLabel() {
+      if (selectedCities.size === 0) {
+        cityInputLabel.textContent = 'All Cities';
+      } else if (selectedCities.size === 1) {
+        cityInputLabel.textContent = [...selectedCities][0];
+      } else {
+        cityInputLabel.textContent = `${selectedCities.size} Cities`;
+      }
+    }
+  
+    function populateSortMenu() {
+        sortDropdownMenu.innerHTML = Object.entries(sortOptions).map(([key, label]) => `
+            <li>
+                <button type="button" class="dropdown-option" data-sort="${key}" aria-selected="${key === currentSort}">
+                    ${label}
+                </button>
+            </li>
+        `).join('');
+        sortSelectedLabel.textContent = sortOptions[currentSort];
+        sortDropdownMenu.querySelectorAll('.dropdown-option').forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentSort = btn.dataset.sort;
+                sortSelectedLabel.textContent = sortOptions[currentSort];
+                sortDropdownMenu.querySelectorAll('.dropdown-option').forEach(b => b.setAttribute('aria-selected', b === btn));
+                closeDropdown(sortDropdownMenu, sortDropdownBtn);
+                applyFiltersAndRender();
+            });
+        });
+    }
+    
+    function sortRecords(records) {
+      const [sortBy, order] = currentSort.split('_');
+      const sorted = [...records];
+      
+      const fieldMap = {
+          modified: 'Last_updated_at',
+          created: 'Created_at',
+          date: 'Date_Listed',
+          price: 'Price'
+      };
+      const sortField = fieldMap[sortBy];
+  
+      sorted.sort((a, b) => {
+        let valA = a[sortField];
+        let valB = b[sortField];
+  
+        if (sortBy === 'price') {
+          valA = parseFloat(valA) || 0;
+          valB = parseFloat(valB) || 0;
+        } else if (['modified', 'created', 'date'].includes(sortBy)) {
+          valA = valA ? new Date(valA).getTime() : 0;
+          valB = valB ? new Date(valB).getTime() : 0;
+        }
+  
+        if (valA < valB) return order === 'asc' ? -1 : 1;
+        if (valA > valB) return order === 'asc' ? 1 : -1;
+        return 0;
+      });
+      return sorted;
+    }
+  
+    function applyFiltersAndRender() {
+      const deriveCity = (address) => {
+          if (!address || typeof address !== 'string') return '';
+          const parts = address.split(',').map(p => p.trim());
+          return parts.length > 2 ? parts[parts.length - 2] : '';
+      };
+      
+      let filtered = [...allRecords];
+  
+      const searchQuery = searchInput.value.trim().toLowerCase();
+      if (searchQuery) {
+          filtered = filtered.filter(r => r[searchColumnName]?.toLowerCase().includes(searchQuery));
+      }
+  
+      if (selectedCities.size > 0) {
+        filtered = filtered.filter(r => selectedCities.has(deriveCity(r.Address)));
+      }
+  
+      const typeFilterValue = typeFilterSelect.value;
+      if (typeFilterValue !== 'all') {
+        filtered = filtered.filter(r => r.Property_Type === typeFilterValue);
+      }
+  
+      filtered = sortRecords(filtered);
+      filteredRecords = filtered;
+      renderProperties(filtered);
+    }
+  
+    const debounce = (func, wait) => {
+        let timeout;
+        return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+    };
+  
+    // Event Listeners Setup
+    searchInput.addEventListener('input', debounce(applyFiltersAndRender, 300));
+    typeFilterSelect.addEventListener('change', applyFiltersAndRender);
+  
+    resetButton.addEventListener('click', () => {
+      searchInput.value = '';
+      typeFilterSelect.value = 'all';
+      selectedCities.clear();
+      populateCityMenu();
+      updateCityLabel();
+      currentSort = 'modified_desc';
+      populateSortMenu();
+      applyFiltersAndRender();
+    });
+  
+    function closeDropdown(menu, button) {
+        menu.classList.remove('show');
+        button.setAttribute('aria-expanded', 'false');
+    }
+
+    function setupDropdown(button, menu, wrapper) {
+        button.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isShown = menu.classList.toggle('show');
+            button.setAttribute('aria-expanded', isShown);
+        });
+        document.addEventListener('click', (e) => {
+            if (!wrapper.contains(e.target)) {
+                closeDropdown(menu, button);
+            }
+        });
+    }
+    
+    setupDropdown(cityInputBtn, cityMenu, cityControlWrap);
+    setupDropdown(sortDropdownBtn, sortDropdownMenu, sortControlWrap);
+  
+    document.getElementById('modal-close-button').addEventListener('click', hideModal);
+    document.getElementById('modal-backdrop').addEventListener('click', hideModal);
+  
+    // EXPORT FUNCTIONALITY
+    function exportCurrentView() {
+        const recs = filteredRecords || [];
+        const title = `Property Export (${recs.length} Items)`;
+        
+        const getFilterSummary = () => {
+            let parts = [];
+            if (selectedCities.size > 0) parts.push(`Cities: ${[...selectedCities].join(', ')}`);
+            if (typeFilterSelect.value !== 'all') parts.push(`Type: ${typeFilterSelect.value}`);
+            if (searchInput.value) parts.push(`Search: "${searchInput.value}"`);
+            return parts.length ? `Filters Applied: ${parts.join('; ')}.` : 'No filters applied.';
+        };
+  
+        const rowsHtml = recs.map(r => {
+            const img = r.photo_url || `https://placehold.co/600x400/e2e8f0/64748b?text=${encodeURIComponent(r.Property_Name || 'No+Image')}`;
+            const addr = r.Address || 'N/A';
+            const googleMapsLink = `https://www.google.com/maps?q=${encodeURIComponent(addr)}`;
+            return `
+            <div class="bg-white rounded-lg shadow-md overflow-hidden border border-slate-200 flex flex-col break-inside-avoid">
+                <img src="${img}" alt="${r.Property_Name || ''}" class="w-full h-48 object-cover bg-slate-100">
+                <div class="p-4 flex flex-col flex-grow">
+                    <h3 class="text-lg font-bold text-slate-900 mb-1 truncate">${r.Property_Name || 'Untitled Property'}</h3>
+                    <a href="${googleMapsLink}" target="_blank" rel="noopener noreferrer" class="text-sm text-slate-500 hover:text-blue-600 mb-4 block truncate">${addr}</a>
+                    <div class="mt-auto space-y-2 text-sm">
+                        <div class="flex justify-between"><span class="text-slate-600">Price:</span> <span class="font-semibold">${formatters.Price(r.Price)}</span></div>
+                        <div class="flex justify-between"><span class="text-slate-600">Cap Rate:</span> <span class="font-semibold">${formatters.Cap_Rate(r.Cap_Rate)}</span></div>
+                        <div class="flex justify-between"><span class="text-slate-600">Building Size:</span> <span class="font-semibold">${formatters.RBA(r.RBA)}</span></div>
+                        <div class="flex justify-between"><span class="text-slate-600">Type:</span> <span class="font-semibold">${formatters.default(r.Property_Type)}</span></div>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+  
+        const html = `
+        <!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${title}</title><script src="https://cdn.tailwindcss.com"><\/script>
+        <style> @import url('https://rsms.me/inter/inter.css'); body { font-family: 'Inter', sans-serif; background-color: #f8fafc; } @media print { .no-print { display: none; } body { background-color: #fff; } } </style>
+        </head><body class="text-slate-800">
+        <div class="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8">
+            <header class="mb-8 no-print"><h1 class="text-3xl font-bold text-slate-900">${title}</h1>
+            <p class="text-slate-500 mt-1">Exported on ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+            <p class="text-slate-500 mt-1">${getFilterSummary()}</p></header>
+            <div class="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
+                ${rowsHtml || '<div class="col-span-full text-center text-slate-500 py-10">No properties in the current view to export.</div>'}
+            </div>
+        </div></body></html>`;
+  
+        const blob = new Blob([html], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `properties-export-${new Date().toISOString().slice(0, 10)}.html`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+    exportBtn.addEventListener('click', exportCurrentView);
+  
+    // Grist Ready
+    grist.ready({ requiredAccess: 'read table' });
+    grist.onRecords((records) => {
+      allRecords = records.filter(r => r.id); // Ensure records are valid
+      isReady = true;
+      searchInput.disabled = false;
+      populateFilters(records);
+      populateSortMenu();
+      applyFiltersAndRender();
+      lucide.createIcons();
+    });
+    grist.onOptions((options) => {
+      if (options && options.searchColumn) {
+        searchColumnName = options.searchColumn;
+        searchInput.placeholder = `Search ${searchColumnName.replace(/_/g, ' ')}...`;
+      }
+    });
+  </script>
+</body>
+</html>
