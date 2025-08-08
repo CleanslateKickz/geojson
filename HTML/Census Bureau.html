@@ -410,7 +410,7 @@
                     setLoadingState(true);
                     let success = false;
                     const varList = Object.values(CENSUS_VARS).join(',');
-                    const year = '2022';
+                    const year = '2023';
                     const url = `https://api.census.gov/data/${year}/acs/acs5?get=${varList}&for=county:${county.fips}&in=state:${state.fips}&key=${apiKey}`;
 
                     try {
