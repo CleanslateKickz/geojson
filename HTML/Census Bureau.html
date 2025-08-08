@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Census Bureau Statistics by County</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Add autoComplete.js CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tarekraafat/autocomplete.js@10.2.7/dist/css/autoComplete.min.css">
+  <style>
+    body {
+      font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+        background-color: #f7f8f9;
+        color: #3c4043;
+        margin: 20px;
+      }
+      .container {
+          max-width: 1200px;
+          margin: auto;
+      }
+      .search-container {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 10px;
+          margin-bottom: 10px;
+          align-items: center;
+      }
+      /* Style the new input fields */
+      .search-container input[type="text"] {
+          flex-grow: 1;
+          padding: 10px;
+          font-size: 16px;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          background-color: white;
+      }
+      /* Ensure autoCompleteJS dropdown is styled well */
+      .autoComplete_wrapper {
+          flex-grow: 1;
+          position: relative;
+      }
+      #search-button, #export-button {
+          padding: 10px 20px;
+          font-size: 16px;
+          color: #fff;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          flex-shrink: 0;
+      }
+      #search-button {
+          background-color: #1e73be;
+      }
+      #export-button {
+          background-color: #1a8a3a;
+      }
+      #search-button:hover {
+          background-color: #2196f3;
+      }
+      #export-button:hover {
+          background-color: #20a346;
+      }
+      #search-button:disabled, #export-button:disabled {
+          background-color: #aaa;
+          cursor: not-allowed;
+      }
+      #feedback-message {
+          min-height: 20px;
+          margin-bottom: 20px;
+          color: #555;
+          font-style: italic;
+      }
+      .census-stats-container {
+          background: #ebf4ff;
+          border: 1px solid #c1c1c1;
+          border-radius: 5px;
+          padding: 20px;
+          margin-top: 10px;
+          margin-bottom: 40px;
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 15px;
+      }
+      .census-stat-item {
+          background-color: #fff;
+          border-radius: 8px;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, .1);
+          display: flex;
+          align-items: center;
+          padding: 12px;
+          min-height: 70px;
+          line-height: 1.2em;
+      }
+      .census-icon {
+          width: 2.5rem;
+          height: 2.5rem;
+          margin-right: 8px;
+          flex-shrink: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+      }
+      .census-icon img { width: 80%; height: auto; display: block; }
+      .census-bar { width: 2px; height: 60%; background-color: #0080ff; margin-right: 14px; align-self: center; }
+      .census-stat-content { display: flex; flex-direction: column; justify-content: center; flex-grow: 1; }
+      .census-topic { font-weight: 600; font-size: .8rem; color: #444; margin-bottom: 2px; }
+      .census-label { color: #888; font-size: .75rem; margin-bottom: 2px; }
+      .census-value { font-size: 1.2rem; font-weight: 700; color: #555; min-height: 1.5rem; }
+      .census-source { font-size: .65rem; line-height: 1em; margin-top: 4px; }
+      .census-source a { text-decoration: none; }
+      .census-source a:hover { text-decoration: underline; }
+      @keyframes loadingBar { 0%, 100% { opacity: .4; } 50% { opacity: 1; } }
+      .loading-placeholder::before {
+          content: "▮▮▮▮▮▮▮▮";
+          display: inline-block;
+          font-size: 1.2rem;
+          color: #e0e0e0;
+          letter-spacing: .1rem;
+          animation: loadingBar 1.5s infinite linear;
+      }
+    </style>
+    </head>
+    <body>
+
+        <div class="container">
+            <h1>U.S. County Statistics</h1>
+            <div class="search-container">
+                <!-- Replaced select elements with inputs for autoComplete.js -->
+                <input id="state-input" type="text" placeholder="-- Type to find a State --" />
+                <input id="county-input" type="text" placeholder="-- Select a State First --" disabled />
+                <button id="search-button" disabled>Search</button>
+                <button id="export-button" disabled>Export HTML</button>
+            </div>
+            <div id="feedback-message">Type in the state search box to begin.</div>
+
+            <div class="census-stats-container" id="census-stats-container">
+                <!-- Stat items remain the same -->
+                 <div class="census-stat-item" data-id="population">
+                    <div class="census-icon"><img src="https://www.randymajors.org/wp-content/uploads/icons/people.svg"></div>
+                    <div class="census-bar"></div>
+                    <div class="census-stat-content">
+                        <div class="census-topic">Populations and People</div>
+                        <div class="census-label">Total Population</div>
+                        <div class="census-value"></div>
+                        <div class="census-source"></div>
+                    </div>
+                </div>
+                <div class="census-stat-item" data-id="income">
+                    <div class="census-icon"><img src="https://www.randymajors.org/wp-content/uploads/icons/income.svg"></div>
+                    <div class="census-bar"></div>
+                    <div class="census-stat-content">
+                        <div class="census-topic">Income and Poverty</div>
+                        <div class="census-label">Median Household Income</div>
+                        <div class="census-value"></div>
+                        <div class="census-source"></div>
+                    </div>
+                </div>
+                <div class="census-stat-item" data-id="education">
+                    <div class="census-icon"><img src="https://www.randymajors.org/wp-content/uploads/icons/education.svg"></div>
+                    <div class="census-bar"></div>
+                    <div class="census-stat-content">
+                        <div class="census-topic">Education</div>
+                        <div class="census-label">Bachelor's Degree or Higher</div>
+                        <div class="census-value"></div>
+                        <div class="census-source"></div>
+                    </div>
+                </div>
+                <div class="census-stat-item" data-id="employment">
+                    <div class="census-icon"><img src="https://www.randymajors.org/wp-content/uploads/icons/employment.svg"></div>
+                    <div class="census-bar"></div>
+                    <div class="census-stat-content">
+                        <div class="census-topic">Employment</div>
+                        <div class="census-label">Employment Rate</div>
+                        <div class="census-value"></div>
+                        <div class="census-source"></div>
+                    </div>
+                </div>
+                <div class="census-stat-item" data-id="housing">
+                    <div class="census-icon"><img src="https://www.randymajors.org/wp-content/uploads/icons/housing.svg"></div>
+                    <div class="census-bar"></div>
+                    <div class="census-stat-content">
+                        <div class="census-topic">Housing</div>
+                        <div class="census-label">Total Housing Units</div>
+                        <div class="census-value"></div>
+                        <div class="census-source"></div>
+                    </div>
+                </div>
+                <div class="census-stat-item" data-id="health">
+                    <div class="census-icon"><img src="https://www.randymajors.org/wp-content/uploads/icons/health.svg"></div>
+                    <div class="census-bar"></div>
+                    <div class="census-stat-content">
+                        <div class="census-topic">Health</div>
+                        <div class="census-label">Without Health Care Coverage</div>
+                        <div class="census-value"></div>
+                        <div class="census-source"></div>
+                    </div>
+                </div>
+                <div class="census-stat-item" data-id="households">
+                    <div class="census-icon"><img src="https://www.randymajors.org/wp-content/uploads/icons/family.svg"></div>
+                    <div class="census-bar"></div>
+                    <div class="census-stat-content">
+                        <div class="census-topic">Families and Living Arrangements</div>
+                        <div class="census-label">Total Households</div>
+                        <div class="census-value"></div>
+                        <div class="census-source"></div>
+                    </div>
+                </div>
+                <div class="census-stat-item" data-id="ethnicity">
+                    <div class="census-icon"><img src="https://www.randymajors.org/wp-content/uploads/icons/race.svg"></div>
+                    <div class="census-bar"></div>
+                    <div class="census-stat-content">
+                        <div class="census-topic">Race and Ethnicity</div>
+                        <div class="census-label">Hispanic or Latino (of any race)</div>
+                        <div class="census-value"></div>
+                        <div class="census-source"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add autoComplete.js SCRIPT -->
+        <script src="https://cdn.jsdelivr.net/npm/@tarekraafat/autocomplete.js@10.2.7/dist/autoComplete.min.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const apiKey = 'b1819672ea28ef76ff4262612aea81b018db6674';
+                const stateInput = document.getElementById('state-input');
+                const countyInput = document.getElementById('county-input');
+                const searchButton = document.getElementById('search-button');
+                const exportButton = document.getElementById('export-button');
+                const feedbackMessage = document.getElementById('feedback-message');
+
+                let selectedState = null;
+                let selectedCounty = null;
+                
+                const states = [
+                    { name: 'Alabama', fips: '01' }, { name: 'Alaska', fips: '02' }, { name: 'Arizona', fips: '04' },
+                    { name: 'Arkansas', fips: '05' }, { name: 'California', fips: '06' }, { name: 'Colorado', fips: '08' },
+                    { name: 'Connecticut', fips: '09' }, { name: 'Delaware', fips: '10' }, { name: 'District of Columbia', fips: '11' },
+                    { name: 'Florida', fips: '12' }, { name: 'Georgia', fips: '13' }, { name: 'Hawaii', fips: '15' },
+                    { name: 'Idaho', fips: '16' }, { name: 'Illinois', fips: '17' }, { name: 'Indiana', fips: '18' },
+                    { name: 'Iowa', fips: '19' }, { name: 'Kansas', fips: '20' }, { name: 'Kentucky', fips: '21' },
+                    { name: 'Louisiana', fips: '22' }, { name: 'Maine', fips: '23' }, { name: 'Maryland', fips: '24' },
+                    { name: 'Massachusetts', fips: '25' }, { name: 'Michigan', fips: '26' }, { name: 'Minnesota', fips: '27' },
+                    { name: 'Mississippi', fips: '28' }, { name: 'Missouri', fips: '29' }, { name: 'Montana', fips: '30' },
+                    { name: 'Nebraska', fips: '31' }, { name: 'Nevada', fips: '32' }, { name: 'New Hampshire', fips: '33' },
+                    { name: 'New Jersey', fips: '34' }, { name: 'New Mexico', fips: '35' }, { name: 'New York', fips: '36' },
+                    { name: 'North Carolina', fips: '37' }, { name: 'North Dakota', fips: '38' }, { name: 'Ohio', fips: '39' },
+                    { name: 'Oklahoma', fips: '40' }, { name: 'Oregon', fips: '41' }, { name: 'Pennsylvania', fips: '42' },
+                    { name: 'Rhode Island', fips: '44' }, { name: 'South Carolina', fips: '45' }, { name: 'South Dakota', fips: '46' },
+                    { name: 'Tennessee', fips: '47' }, { name: 'Texas', fips: '48' }, { name: 'Utah', fips: '49' },
+                    { name: 'Vermont', fips: '50' }, { name: 'Virginia', fips: '51' }, { name: 'Washington', fips: '53' },
+                    { name: 'West Virginia', fips: '54' }, { name: 'Wisconsin', fips: '55' }, { name: 'Wyoming', fips: '56' },
+                    { name: 'Puerto Rico', fips: '72' }
+                ];
+
+                const CENSUS_VARS = {
+                    NAME: 'NAME', POPULATION: 'B01003_001E', MEDIAN_INCOME: 'B19013_001E',
+                    TOTAL_HOUSING: 'B25001_001E', TOTAL_HOUSEHOLDS: 'B11012_001E',
+                    EDU_TOTAL: 'B15003_001E', BACHELORS: 'B15003_022E', MASTERS: 'B15003_023E',
+                    PROFESSIONAL: 'B15003_024E', DOCTORATE: 'B15003_025E', LABOR_FORCE: 'B23025_002E',
+                    EMPLOYED: 'B23025_004E', HEALTH_TOTAL: 'B27010_001E', NO_HEALTH_INS: 'B27010_064E',
+                    ETHNICITY_TOTAL: 'B03003_001E', HISPANIC: 'B03003_003E'
+                };
+                
+                const formatValue = (value, type = 'number') => {
+                    const num = parseFloat(value);
+                    if (isNaN(num) || num < 0) return 'N/A';
+                    switch (type) {
+                        case 'currency': return num.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+                        case 'percent': return `${num.toFixed(1)}%`;
+                        default: return num.toLocaleString('en-US');
+                    }
+                };
+                
+                const setLoadingState = (isLoading) => {
+                    document.querySelectorAll('.census-value, .census-source').forEach(el => {
+                        if (isLoading) {
+                            el.textContent = '';
+                            if (el.classList.contains('census-value')) {
+                                el.classList.add('loading-placeholder');
+                            }
+                        } else {
+                            el.classList.remove('loading-placeholder');
+                        }
+                    });
+                };
+
+                const updateCard = (id, value, sourceText) => {
+                    const card = document.querySelector(`.census-stat-item[data-id="${id}"]`);
+                    if (!card) return;
+                    card.querySelector('.census-value').textContent = value;
+                    const sourceEl = card.querySelector('.census-source');
+                    sourceEl.innerHTML = sourceText ? `Source: <a href="https://data.census.gov" target="_blank" rel="noopener">U.S. Census Bureau, ${sourceText}</a>` : '';
+                };
+
+                // ===== NEW AutoComplete Logic =====
+
+                // Reset function to clear selections and disable inputs
+                const resetCountyAndSearch = () => {
+                    countyInput.value = '';
+                    countyInput.disabled = true;
+                    countyInput.placeholder = '-- Select a State First --';
+                    selectedCounty = null;
+                    searchButton.disabled = true;
+                    exportButton.disabled = true;
+                };
+
+                // State autocomplete configuration
+                const stateAutoComplete = new autoComplete({
+                    selector: '#state-input',
+                    placeHolder: "-- Type to find a State --",
+                    data: {
+                        src: states,
+                        keys: ['name']
+                    },
+                    resultItem: {
+                        highlight: true
+                    },
+                    events: {
+                        input: {
+                            selection: (event) => {
+                                const selection = event.detail.selection.value;
+                                stateInput.value = selection.name;
+                                selectedState = selection;
+
+                                // --- THIS IS THE FIX ---
+                                // The previous call to resetCountyAndSearch() was re-disabling the input.
+                                // Instead, we now perform the necessary reset actions manually here.
+                                
+                                // 1. Clear previous county selection and disable buttons
+                                countyInput.value = '';
+                                selectedCounty = null;
+                                searchButton.disabled = true;
+                                exportButton.disabled = true;
+
+                                // 2. Now, enable and configure the county input for the new state
+                                countyInput.disabled = false;
+                                countyInput.placeholder = `-- Type to find a county in ${selection.name} --`;
+                                countyInput.focus(); // This will now work as intended.
+                                
+                                feedbackMessage.textContent = `Now, please find a county in ${selection.name}.`;
+                            }
+                        }
+                    }
+                });
+                
+                // If user clears the state input, reset everything
+                stateInput.addEventListener('input', () => {
+                    if (stateInput.value === '') {
+                        selectedState = null;
+                        resetCountyAndSearch(); // This is the correct place for this function call
+                        feedbackMessage.textContent = 'Type in the state search box to begin.';
+                    }
+                });
+
+                // County autocomplete configuration
+                const countyAutoComplete = new autoComplete({
+                    selector: '#county-input',
+                    placeHolder: "-- Select a State First --",
+                    data: {
+                        src: async (query) => {
+                            if (!selectedState) return []; // Don't search if no state is selected
+                            feedbackMessage.textContent = `Fetching counties for ${selectedState.name}...`;
+                            const url = `https://api.census.gov/data/2023/acs/acs5?get=NAME&for=county:*&in=state:${selectedState.fips}&key=${apiKey}`;
+                            try {
+                                const response = await fetch(url);
+                                const data = await response.json();
+                                feedbackMessage.textContent = "Please select a county.";
+                                // Format data for autoComplete.js: [{name: "...", fips: "..."}]
+                                return data.slice(1).map(countyData => ({
+                                    name: countyData[0].split(',')[0],
+                                    fips: countyData[2]
+                                }));
+                            } catch (error) {
+                                feedbackMessage.textContent = "Error fetching counties.";
+                                return [];
+                            }
+                        },
+                        keys: ['name'],
+                        cache: false // Important for dynamic data
+                    },
+                    resultItem: {
+                        highlight: true
+                    },
+                    events: {
+                        input: {
+                            selection: (event) => {
+                                const selection = event.detail.selection.value;
+                                countyInput.value = selection.name;
+                                selectedCounty = selection;
+                                searchButton.disabled = false;
+                                feedbackMessage.textContent = `Click "Search" to get data for ${selection.name}, ${selectedState.name}.`;
+                            }
+                        }
+                    }
+                });
+                
+                // If user clears county input, disable search
+                countyInput.addEventListener('input', () => {
+                    if (countyInput.value === '') {
+                        selectedCounty = null;
+                        searchButton.disabled = true;
+                        exportButton.disabled = true;
+                    }
+                });
+
+
+                // ===== MODIFIED Search and Data Fetching Logic =====
+
+                async function getCensusData(state, county) {
+                    setLoadingState(true);
+                    let success = false;
+                    const varList = Object.values(CENSUS_VARS).join(',');
+                    const year = '2022';
+                    const url = `https://api.census.gov/data/${year}/acs/acs5?get=${varList}&for=county:${county.fips}&in=state:${state.fips}&key=${apiKey}`;
+
+                    try {
+                        const response = await fetch(url);
+                        if (!response.ok) throw new Error('Census data fetch failed.');
+                        const data = await response.json();
+                        
+                        if (!data || data.length < 2) {
+                             throw new Error('No data returned for this county.');
+                        }
+
+                        const headers = data[0];
+                        const values = data[1];
+                        const stats = headers.reduce((obj, header, index) => {
+                            obj[header] = parseFloat(values[index]) || 0;
+                            return obj;
+                        }, {});
+
+                        const educationPercent = ((stats[CENSUS_VARS.BACHELORS] + stats[CENSUS_VARS.MASTERS] + stats[CENSUS_VARS.PROFESSIONAL] + stats[CENSUS_VARS.DOCTORATE]) / stats[CENSUS_VARS.EDU_TOTAL]) * 100;
+                        const employmentPercent = (stats[CENSUS_VARS.EMPLOYED] / stats[CENSUS_VARS.LABOR_FORCE]) * 100;
+                        const noHealthPercent = (stats[CENSUS_VARS.NO_HEALTH_INS] / stats[CENSUS_VARS.HEALTH_TOTAL]) * 100;
+                        const hispanicPercent = (stats[CENSUS_VARS.HISPANIC] / stats[CENSUS_VARS.ETHNICITY_TOTAL]) * 100;
+
+                        const sourceText = `ACS 5-Year Estimates (${year})`;
+                        updateCard('population', formatValue(stats[CENSUS_VARS.POPULATION]), sourceText);
+                        updateCard('income', formatValue(stats[CENSUS_VARS.MEDIAN_INCOME], 'currency'), sourceText);
+                        updateCard('housing', formatValue(stats[CENSUS_VARS.TOTAL_HOUSING]), sourceText);
+                        updateCard('households', formatValue(stats[CENSUS_VARS.TOTAL_HOUSEHOLDS]), sourceText);
+                        updateCard('education', formatValue(educationPercent, 'percent'), sourceText);
+                        updateCard('employment', formatValue(employmentPercent, 'percent'), sourceText);
+                        updateCard('health', formatValue(noHealthPercent, 'percent'), sourceText);
+                        updateCard('ethnicity', formatValue(hispanicPercent, 'percent'), sourceText);
+                        success = true;
+
+                    } catch (err) {
+                        console.error('Error fetching Census data:', err);
+                        feedbackMessage.textContent = 'Error: Could not retrieve statistics for this county.';
+                    } finally {
+                        setLoadingState(false);
+                        return success;
+                    }
+                }
+                
+                async function handleSearch() {
+                    if (!selectedState || !selectedCounty) {
+                        feedbackMessage.textContent = 'Please select a valid state and county.';
+                        return;
+                    }
+                                        
+                    searchButton.disabled = true;
+                    exportButton.disabled = true;
+                    feedbackMessage.textContent = `Fetching data for ${selectedCounty.name}, ${selectedState.name}...`;
+
+                    const success = await getCensusData(selectedState, selectedCounty);
+
+                    searchButton.disabled = false;
+                    if (success) {
+                        exportButton.disabled = false;
+                        feedbackMessage.textContent = `Displaying statistics for ${selectedCounty.name}, ${selectedState.name}.`;
+                    }
+                }
+                
+                function handleExport() {
+                    if (!selectedState || !selectedCounty) return;
+
+                    const statsContainer = document.getElementById('census-stats-container');
+                    const styles = document.querySelector('style').innerHTML;
+
+                    const htmlContent = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Census Statistics for ${selectedCounty.name}, ${selectedState.name}</title>
+    <style>
+        ${styles}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Census Statistics for ${selectedCounty.name}, ${selectedState.name}</h1>
+        ${statsContainer.outerHTML}
+    </div>
+</body>
+</html>`;
+
+                    const blob = new Blob([htmlContent], { type: 'text/html' });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = `statistics-${selectedCounty.name.replace(/\s+/g, '_')}-${selectedState.name.replace(/\s+/g, '_')}.html`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(link.href);
+                }
+
+                searchButton.addEventListener('click', handleSearch);
+                exportButton.addEventListener('click', handleExport);
+            });
+        </script>
+
+    </body>
+</html>
