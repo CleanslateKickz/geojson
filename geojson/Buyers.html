@@ -1,0 +1,1793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Active Buyers List</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div id="app-container">
+        <!-- Main List View -->
+        <div id="main-list-view">
+            <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+                <header class="mb-8">
+                    <h1 class="text-4xl font-bold text-gray-900 tracking-tight">Active Buyers</h1>
+                    <p class="mt-2 text-lg text-gray-600">Your curated list of commercial real estate investors.</p>
+                </header>
+
+                <!-- Action Bar -->
+                <div class="mb-6 bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div class="relative w-full sm:w-auto sm:flex-grow">
+                            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5"></i>
+                            <input
+                                type="text"
+                                id="search-input"
+                                placeholder="Search buyers, locations, property types..."
+                                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                            />
+                        </div>
+                        <button id="toggle-filters-btn" class="w-full sm:w-auto px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition flex items-center justify-center gap-2">
+                            Filters <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                    <div id="filters-container" class="hidden mt-4 pt-4 border-t border-gray-200 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-semibold mb-2 text-gray-700">Urgency Level</h4>
+                            <div id="urgency-filters" class="flex flex-wrap gap-2">
+                                <!-- Urgency filter chips will be inserted here -->
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold mb-2 text-gray-700">Property Type</h4>
+                            <div id="property-type-filters" class="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
+                                <!-- Property type filter chips will be inserted here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Buyer List -->
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
+                    <div class="hidden md:grid grid-cols-12 gap-4 px-6 py-4 bg-gray-50 border-b border-gray-200 text-sm">
+                        <div class="col-span-3"><button class="sort-btn flex items-center gap-1 font-semibold text-gray-600 hover:text-gray-900 transition" data-sort-key="Buyer Name">Buyer Name</button></div>
+                        <div class="col-span-3"><button class="sort-btn flex items-center gap-1 font-semibold text-gray-600 hover:text-gray-900 transition" data-sort-key="Preferred Locations">Preferred Locations</button></div>
+                        <div class="col-span-2"><button class="sort-btn flex items-center gap-1 font-semibold text-gray-600 hover:text-gray-900 transition" data-sort-key="Budget Range">Budget</button></div>
+                        <div class="col-span-2"><button class="sort-btn flex items-center gap-1 font-semibold text-gray-600 hover:text-gray-900 transition" data-sort-key="Urgency Level">Urgency</button></div>
+                        <div class="col-span-2"></div>
+                    </div>
+                    <div id="buyer-list-container">
+                        <!-- Buyer cards will be injected here by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detail View (hidden by default) -->
+        <div id="detail-view-container" class="hidden container mx-auto p-4 sm:p-6 lg:p-8">
+             <!-- Detail content will be injected here -->
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DATA ---
+            // Mock data based on the provided TSV file
+const initialData = [
+  {
+    "Buyer Name": "John Attar",
+    "Preferred Property Types": "Multi-Tenant, Retail; Grocery & Supermarkets",
+    "Budget Range": "",
+    "Preferred Locations": "Portland, OR",
+    "Urgency Level": "Moderate",
+    "Notes": "Looking to expand, appreciates off-market deals, currently working with another company. He said the size varies on the location, for example out in Wine country it would be about 8-10K SF, whereas in Beaverton it would be closer to 20K -- (essentially 10K+)",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Carl Cadonau",
+    "Preferred Property Types": "Single-Tenant (Wendy's, Chipotle)",
+    "Budget Range": "",
+    "Preferred Locations": "Anywhere (US)",
+    "Urgency Level": "Moderate",
+    "Notes": "Planning to buy mid-year, prefers national tenants, open to multiple states.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Scott Dechambeau",
+    "Preferred Property Types": "Retail (specifically PVA Velocity stores)",
+    "Budget Range": "",
+    "Preferred Locations": "Idaho (Nampa, Boise)",
+    "Urgency Level": "High",
+    "Notes": "Actively pursuing locations owned by PVA Velocity, expressed appreciation for tracking.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Douglas Seely",
+    "Preferred Property Types": "Multi-Tenant",
+    "Budget Range": "",
+    "Preferred Locations": "Suburban SW Portland (Wilsonville, Tualatin, West Linn, Sherwood, LO)",
+    "Urgency Level": "High",
+    "Notes": "Always looking, focuses on I-5 corridor properties.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Michael Kelly",
+    "Preferred Property Types": "Retail (Single Tenant, No Food/Fast Food)",
+    "Budget Range": "5-25K SF",
+    "Preferred Locations": "Anywhere",
+    "Urgency Level": "Moderate",
+    "Notes": "Seeking in-place income, avoids restaurants, prefers single-tenant.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Scott Lee",
+    "Preferred Property Types": "Multi-Tenant Strip Mall",
+    "Budget Range": "",
+    "Preferred Locations": "Outside Portland, up to McMinnville",
+    "Urgency Level": "High",
+    "Notes": "Prefers value-add, 5-6% income, 7-8% cap rate on upside potential. Prefers own listings.",
+    "Cap Rate Min": "7%",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Pasquale Desantis",
+    "Preferred Property Types": "Any",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "Moderate",
+    "Notes": "Looking for good deals, rejected 7.26% cap, seeking 8%+.",
+    "Cap Rate Min": "8%",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Gurjap Singh",
+    "Preferred Property Types": "Truck Stops, Gas Stations, Convenience Stores",
+    "Budget Range": "",
+    "Preferred Locations": "Portland Metro Area to Salem, along I-5",
+    "Urgency Level": "Moderate",
+    "Notes": "Always looking, interested in off-market transactions.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Eric Buck",
+    "Preferred Property Types": "Grocery Anchored Retail (Grocery Outlet)",
+    "Budget Range": "",
+    "Preferred Locations": "Albany, OR & surrounding; avoids Ontario, OR",
+    "Urgency Level": "Moderate",
+    "Notes": "Considering expansion, positive about current Grocery Outlet investment. High interest in market updates.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Mike Sidley",
+    "Preferred Property Types": "",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "Low",
+    "Notes": "Not actively seeking; will consider offers > 7.5% cap rate.",
+    "Cap Rate Min": "7.50%",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Ken McKinster",
+    "Preferred Property Types": "Multi-Tenant (Daycare, Retail)",
+    "Budget Range": "",
+    "Preferred Locations": "Woodstock (Portland), potentially wider area for exchange",
+    "Urgency Level": "Moderate",
+    "Notes": "Considering 1031 exchange, open to negotiation on existing leases, focused on tenant quality.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Jason Moon",
+    "Preferred Property Types": "Ace Hardware Stores",
+    "Budget Range": "",
+    "Preferred Locations": "Within 10 blocks of existing location",
+    "Urgency Level": "Moderate",
+    "Notes": "Interested in acquiring other Ace stores, seeking low down payment options (SBA).",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Salomon Sibony",
+    "Preferred Property Types": "Land, Multi-Family, Commercial",
+    "Budget Range": "$375,000+",
+    "Preferred Locations": "Clatsop County, Seaside, OR",
+    "Urgency Level": "Moderate",
+    "Notes": "Selling land with permits in place, transitioning out of residential to commercial.",
+    "Cap Rate Min": "",
+    "Price Min": "$375,000",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Dennis Blackman",
+    "Preferred Property Types": "",
+    "Budget Range": "",
+    "Preferred Locations": "Salem/Keizer Area, Smaller towns in Oregon",
+    "Urgency Level": "Moderate",
+    "Notes": "Looking to buy OR sell. Long term hold strategy.",
+    "Cap Rate Min": "",
+    "Price Min": "$1,000,000",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Sohail Tanveer",
+    "Preferred Property Types": "Retail (7-Eleven), Single-Tenant",
+    "Budget Range": "$1.8M (Down Payment)",
+    "Preferred Locations": "Nationwide, Arizona",
+    "Urgency Level": "High",
+    "Notes": "Looking to exchange 1031, prefers local, has equity in current property. Cap rate was a factor in previous listing not selling.",
+    "Cap Rate Min": "6%",
+    "Price Min": "",
+    "Price Max": "$0"
+  },
+  {
+    "Buyer Name": "Ed Kim",
+    "Preferred Property Types": "Retail (Single or Multi-Tenant)",
+    "Budget Range": "$2M - $7M",
+    "Preferred Locations": "Portland, OR; Vancouver, WA",
+    "Urgency Level": "Moderate",
+    "Notes": "Waiting for the right deal, looking for good cap rates (8% preferable), interested in single & multi-tenant retail.  Overseas until end of August.",
+    "Cap Rate Min": "6.50%",
+    "Price Min": "$2,000,000",
+    "Price Max": "$7,000,000"
+  },
+  {
+    "Buyer Name": "Dave Gold",
+    "Preferred Property Types": "STNL (Popeyes, Goodwill)",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "Low",
+    "Notes": "Liquidating assets, transitioning to STNL investments. Not currently actively buying.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "William More",
+    "Preferred Property Types": "",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "Low",
+    "Notes": "Holder not actively looking to sell, but open to discussing options/1031 exchange.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Wally Tesfa",
+    "Preferred Property Types": "Apartments",
+    "Budget Range": "",
+    "Preferred Locations": "East Portland",
+    "Urgency Level": "Moderate",
+    "Notes": "Looking for apartments built in the 60s-80s with good parking. Responded quickly to pre-list offering.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Greg Lowrey",
+    "Preferred Property Types": "Retail (Plaza)",
+    "Budget Range": "$1.48M - $2M",
+    "Preferred Locations": "",
+    "Urgency Level": "Moderate",
+    "Notes": "Approaching retirement, considering 1031 exchange. Current property appraised at $1.48M, hoping for $2M.",
+    "Cap Rate Min": "",
+    "Price Min": "$1,480,000",
+    "Price Max": "$2,000,000"
+  },
+  {
+    "Buyer Name": "Lap Nguyen",
+    "Preferred Property Types": "",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "Low",
+    "Notes": "Confused about initial contact, expressed potential interest but indicated affordability concerns.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Mark Stender",
+    "Preferred Property Types": "Grocery Store (STNL), Auto Parts",
+    "Budget Range": "",
+    "Preferred Locations": "SE Portland, OR (and outside)",
+    "Urgency Level": "High",
+    "Notes": "Actively looking, interested in growth areas (SE Portland Rising), mentioned In-N-Out and Chick-fil-a locations.",
+    "Cap Rate Min": "6.25%",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Woo Choi",
+    "Preferred Property Types": "Retail",
+    "Budget Range": "$3M",
+    "Preferred Locations": "Clackamas, Beaverton, West Linn, OR",
+    "Urgency Level": "Moderate",
+    "Notes": "Interested in properties in Clackamas, Beaverton, and West Linn. Likes the Beaverton and West Linn locations.",
+    "Cap Rate Min": "",
+    "Price Min": "$3,000,000",
+    "Price Max": "$3,000,000"
+  },
+  {
+    "Buyer Name": "Nasir Javaid",
+    "Preferred Property Types": "Gas Station",
+    "Budget Range": "",
+    "Preferred Locations": "82nd Ave (Portland, OR), WA",
+    "Urgency Level": "Moderate",
+    "Notes": "Looking to acquire, interested in branded/unbranded gas stations.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Susan Polen",
+    "Preferred Property Types": "Smallish Shopping Centers",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "Moderate",
+    "Notes": "Always looking to acquire, send any deals.",
+    "Cap Rate Min": "6%",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Ray Elkins",
+    "Preferred Property Types": "Office",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "Low",
+    "Notes": "Wants to be emailed deals, will let you know if interested.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Steve Bailey",
+    "Preferred Property Types": "Retail, Industrial",
+    "Budget Range": "",
+    "Preferred Locations": "Portland Area (Newberg, towards Seattle)",
+    "Urgency Level": "Moderate",
+    "Notes": "Adding to portfolio, focused on current business. Will be in Portland area in late August.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Soni Singh",
+    "Preferred Property Types": "Convenience Store/Service Station",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "High",
+    "Notes": "Wants to buy building to convert, even if not right commercial property/business.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Howard Bode",
+    "Preferred Property Types": "",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "Low",
+    "Notes": "Not currently buying, waiting for market to stabilize. Looks for hold properties.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Tieno Huynh",
+    "Preferred Property Types": "Community Center, NNN",
+    "Budget Range": "$2,000,000 - $2,500,000",
+    "Preferred Locations": "Portland (Northeast/Southeast)",
+    "Urgency Level": "Moderate",
+    "Notes": "Looking to acquire with grant funding. Prefers hands-off (NNN).",
+    "Cap Rate Min": "",
+    "Price Min": "$2,000,000",
+    "Price Max": "$2,500,000"
+  },
+  {
+    "Buyer Name": "Mardell Pedersen",
+    "Preferred Property Types": "",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "Low",
+    "Notes": "Waiting for market to stabilize, deal fell through. Teaching grandson investment process.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Ann Soentpiet",
+    "Preferred Property Types": "Multi-Tenant Retail",
+    "Budget Range": "",
+    "Preferred Locations": "I-5 Corridor",
+    "Urgency Level": "Moderate",
+    "Notes": "Exchanging properties, husband handles details.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Wendy Pierce",
+    "Preferred Property Types": "Retail",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "Moderate",
+    "Notes": "Renovations ongoing, looking to acquire in a few years.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Mike Lehne",
+    "Preferred Property Types": "Industrial/Flex",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "Low",
+    "Notes": "Buying out partner, not interested in retail.",
+    "Cap Rate Min": "5%",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Louis Fasano",
+    "Preferred Property Types": "Multi-family",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "Low",
+    "Notes": "Long-term holder, currently not looking.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "David Smith",
+    "Preferred Property Types": "",
+    "Budget Range": "",
+    "Preferred Locations": "Hermiston, OR",
+    "Urgency Level": "Moderate",
+    "Notes": "Friends with Scott Logan, looking for anything in Hermiston.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Guoming Zhang",
+    "Preferred Property Types": "Multi-Tenant Retail",
+    "Budget Range": "Under $2,000,000",
+    "Preferred Locations": "OR, WA",
+    "Urgency Level": "High",
+    "Notes": "Looking to buy, manages himself, prefers NNN.",
+    "Cap Rate Min": "6%",
+    "Price Min": "",
+    "Price Max": "$2,000,000"
+  },
+  {
+    "Buyer Name": "Jordan Brown",
+    "Preferred Property Types": "",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "Low",
+    "Notes": "Interested in market updates and connections, picked brain for cap rates/financing.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Don Wirth",
+    "Preferred Property Types": "Multi-Tenant",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "Low",
+    "Notes": "Dislikes single tenants, prefers 10-plex or similar. Estate planning in progress.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Jerry Marlow",
+    "Preferred Property Types": "Medical Retail",
+    "Budget Range": "$2M-$3M",
+    "Preferred Locations": "Beaverton, Lake Oswego, Suburbs (Portland area)",
+    "Urgency Level": "Moderate",
+    "Notes": "Interested in medical use buildings, or retail similar to existing properties.",
+    "Cap Rate Min": "",
+    "Price Min": "$2,000,000",
+    "Price Max": "$3,000,000"
+  },
+  {
+    "Buyer Name": "Dave Pietka",
+    "Preferred Property Types": "Small Incubator Business Centers",
+    "Budget Range": "",
+    "Preferred Locations": "Portland, PNW",
+    "Urgency Level": "Moderate",
+    "Notes": "Looking for 1500 sq ft, 10-15,000 sq ft spaces. Experienced real estate professional.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Josh Poling",
+    "Preferred Property Types": "Retail, Storage, Industrial",
+    "Budget Range": "",
+    "Preferred Locations": "Grants Pass, Central Oregon, White City",
+    "Urgency Level": "High",
+    "Notes": "Actively looking at value-add properties. Prefers cash purchases. Considering exchange.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Meg Feitelberg",
+    "Preferred Property Types": "Strip Centers, Office (Medical)",
+    "Budget Range": "$3M-$5M",
+    "Preferred Locations": "Oregon & Washington",
+    "Urgency Level": "Moderate",
+    "Notes": "Doesn’t typically sell acquired properties, gathering comps/research.",
+    "Cap Rate Min": "",
+    "Price Min": "$3,000,000",
+    "Price Max": "$5,000,000"
+  },
+  {
+    "Buyer Name": "Brian Rosenthal",
+    "Preferred Property Types": "Multi-Tenant",
+    "Budget Range": "",
+    "Preferred Locations": "Scappoose, OR",
+    "Urgency Level": "Moderate",
+    "Notes": "Interested in second-tier properties, potential for redevelopment.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Paul Coussens",
+    "Preferred Property Types": "",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "Moderate",
+    "Notes": "Considering selling, but holding tight currently. Interested in market updates.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Young Noh",
+    "Preferred Property Types": "Grocery Anchored Retail",
+    "Budget Range": "",
+    "Preferred Locations": "Southern California (potential exchange)",
+    "Urgency Level": "High",
+    "Notes": "Looking for properties with potential for improvement, open to exchange. Month-to-month tenant is a concern.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Hoang Nguyen",
+    "Preferred Property Types": "Retail",
+    "Budget Range": "",
+    "Preferred Locations": "Portland, OR",
+    "Urgency Level": "Moderate",
+    "Notes": "Actively looking, recently under contract, financially savvy.",
+    "Cap Rate Min": "6%",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Dean Higginson",
+    "Preferred Property Types": "Small Retail, Small Strip Centers",
+    "Budget Range": "Under $1 million",
+    "Preferred Locations": "Lane County, OR",
+    "Urgency Level": "Moderate",
+    "Notes": "Friendly, always looking, value-add opportunities.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": "$1,000,000"
+  },
+  {
+    "Buyer Name": "Dave Vandehey",
+    "Preferred Property Types": "Land, Commercial, Residential",
+    "Budget Range": "",
+    "Preferred Locations": "Oregon, Washington",
+    "Urgency Level": "Low",
+    "Notes": "Open to various investments, long-term hold.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Kyu Yu",
+    "Preferred Property Types": "Multi-Tenant Retail",
+    "Budget Range": "$10M-$14M",
+    "Preferred Locations": "Oregon",
+    "Urgency Level": "High",
+    "Notes": "Looking to expand portfolio, won't exchange.",
+    "Cap Rate Min": "",
+    "Price Min": "$10,000,000",
+    "Price Max": "$14,000,000"
+  },
+  {
+    "Buyer Name": "Steve Brown",
+    "Preferred Property Types": "Single-Tenant Retail",
+    "Budget Range": "",
+    "Preferred Locations": "Hermiston, OR",
+    "Urgency Level": "Low",
+    "Notes": "Considering exchange, market dependent, friendly.  Leasing issues.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "William Wright",
+    "Preferred Property Types": "Medical Building",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "Moderate",
+    "Notes": "Looking for property he could use as a medical building.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Alfred Leenstra",
+    "Preferred Property Types": "",
+    "Budget Range": "",
+    "Preferred Locations": "Salem, OR; Federal Way, WA",
+    "Urgency Level": "Low",
+    "Notes": "Not actively looking, tax considerations.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Jay Murnick",
+    "Preferred Property Types": "",
+    "Budget Range": "",
+    "Preferred Locations": "Marysville, WA",
+    "Urgency Level": "Moderate",
+    "Notes": "Recently purchased property at 5.5% cap.",
+    "Cap Rate Min": "5.50%",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Marty Fleck",
+    "Preferred Property Types": "",
+    "Budget Range": "",
+    "Preferred Locations": "Central Oregon, Clackamas, OR",
+    "Urgency Level": "Moderate",
+    "Notes": "Interested in value-add, avoids fast food, Walgreens, etc.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Sanjay Patel",
+    "Preferred Property Types": "Hospitality",
+    "Budget Range": "",
+    "Preferred Locations": "Oregon, Washington",
+    "Urgency Level": "Moderate",
+    "Notes": "Looking to buy hospitality properties.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Trevor Moon",
+    "Preferred Property Types": "",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "Moderate",
+    "Notes": "Currently appraising properties, looking to acquire around summer.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Tom Meletis",
+    "Preferred Property Types": "Retail, Industrial",
+    "Budget Range": "",
+    "Preferred Locations": "Oregon",
+    "Urgency Level": "Moderate",
+    "Notes": "Waiting for interest rate decrease, considering exchange.",
+    "Cap Rate Min": "7%",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Peter Nelson",
+    "Preferred Property Types": "Industrial/Flex",
+    "Budget Range": "",
+    "Preferred Locations": "Oregon, ID",
+    "Urgency Level": "Moderate",
+    "Notes": "Potential portfolio evaluation for expansion. Prefers industrial.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Paul Rudinsky",
+    "Preferred Property Types": "Multifamily, Land",
+    "Budget Range": "",
+    "Preferred Locations": "Bend, OR; Salem/McMinnville, OR",
+    "Urgency Level": "Low",
+    "Notes": "Looking for land to develop multifamily, uninterested in retail.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Don Satter",
+    "Preferred Property Types": "STNL Fast Food",
+    "Budget Range": "",
+    "Preferred Locations": "Oregon/Washington",
+    "Urgency Level": "High",
+    "Notes": "Looking for new, sharp fast food properties with long term leases.",
+    "Cap Rate Min": "6%",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Latham Williams",
+    "Preferred Property Types": "",
+    "Budget Range": "",
+    "Preferred Locations": "OR, ID",
+    "Urgency Level": "Low",
+    "Notes": "Contemplating selling and exchanging properties.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Adam Anundi",
+    "Preferred Property Types": "",
+    "Budget Range": "",
+    "Preferred Locations": "Salem/McMinnville, OR",
+    "Urgency Level": "Moderate",
+    "Notes": "Leasing up properties, checks Loopnet frequently.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Michele Jacobs",
+    "Preferred Property Types": "",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "Low",
+    "Notes": "Initial contact, needs follow-up. Potentially interested in growth.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Ron Emmerson",
+    "Preferred Property Types": "Industrial, Warehousing",
+    "Budget Range": "",
+    "Preferred Locations": "Oregon/Washington",
+    "Urgency Level": "Low",
+    "Notes": "Long-term holder, not interested in selling, actively looking to acquire.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Rasoul Oskouy",
+    "Preferred Property Types": "Single Tenant, Multi-Tenant",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "High",
+    "Notes": "Focus on stable tenants, analyzes intrinsic value. Prefers grocery stores.",
+    "Cap Rate Min": "6%",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Michael Moll",
+    "Preferred Property Types": "Light Industrial",
+    "Budget Range": "Under $2M",
+    "Preferred Locations": "",
+    "Urgency Level": "Low",
+    "Notes": "Owner-user properties preferred, hasn't seen good deals recently.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Dan Zhang",
+    "Preferred Property Types": "Multi-Tenant",
+    "Budget Range": "",
+    "Preferred Locations": "Beaverton, Portland Metro",
+    "Urgency Level": "Moderate",
+    "Notes": "Interested in second-generation restaurants. Rates impact decision.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "James King",
+    "Preferred Property Types": "Strip Retail/Office, Apartment/Retail",
+    "Budget Range": "$1M-$1.5M",
+    "Preferred Locations": "Washington",
+    "Urgency Level": "Low",
+    "Notes": "Looking in Washington, similar properties.",
+    "Cap Rate Min": "",
+    "Price Min": "$1,000,000",
+    "Price Max": "$1,500,000"
+  },
+  {
+    "Buyer Name": "Amy Lin",
+    "Preferred Property Types": "Multi-Tenant, STNL",
+    "Budget Range": "",
+    "Preferred Locations": "Las Vegas, OR (opportunistic)",
+    "Urgency Level": "Moderate",
+    "Notes": "Looking for 7% cap rate in Las Vegas. Flexible on OR deals.",
+    "Cap Rate Min": "7%",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Eric Pedersen",
+    "Preferred Property Types": "Strip Centers, Storage",
+    "Budget Range": "Under $2M",
+    "Preferred Locations": "Outside Multnomah County",
+    "Urgency Level": "Moderate",
+    "Notes": "Prefers non-owner occupied properties.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": "$2,000,000"
+  },
+  {
+    "Buyer Name": "Adam Monshi",
+    "Preferred Property Types": "Multi-Family",
+    "Budget Range": "",
+    "Preferred Locations": "Portland Metro (suburbs, urban)",
+    "Urgency Level": "Moderate",
+    "Notes": "50+ units, long-term plan to acquire more multi-family.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Dean Hurford",
+    "Preferred Property Types": "Retail/Commercial",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "Low",
+    "Notes": "Holding current property, interested in \"Store and Locks\" (self-storage).",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Hoi Chan",
+    "Preferred Property Types": "Triple Net, Freestanding Retail",
+    "Budget Range": "Under $2M",
+    "Preferred Locations": "OR, WA",
+    "Urgency Level": "High",
+    "Notes": "Prefers restaurant tenants (drive-thru). Cap rate over 6%.",
+    "Cap Rate Min": "6%",
+    "Price Min": "",
+    "Price Max": "$2,000,000"
+  },
+  {
+    "Buyer Name": "Sarwan Singh",
+    "Preferred Property Types": "Gas Stations",
+    "Budget Range": "",
+    "Preferred Locations": "Washington, Oregon, Idaho",
+    "Urgency Level": "High",
+    "Notes": "Actively looking at vacant gas stations, has capital for down payments.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Andy Liu",
+    "Preferred Property Types": "NNN",
+    "Budget Range": "$2M-$4M",
+    "Preferred Locations": "West Side of Portland",
+    "Urgency Level": "Moderate",
+    "Notes": "No multi-family, prefers NNN leases.",
+    "Cap Rate Min": "",
+    "Price Min": "$2,000,000",
+    "Price Max": "$4,000,000"
+  },
+  {
+    "Buyer Name": "Ken Levy",
+    "Preferred Property Types": "Industrial",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "Moderate",
+    "Notes": "Seeking industrial properties, linked to Glen Una.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Chris Crever",
+    "Preferred Property Types": "Absolute Triple Net",
+    "Budget Range": "",
+    "Preferred Locations": "Idaho, Nevada, Washington",
+    "Urgency Level": "Low",
+    "Notes": "6.5% cap rate, long-term hold.",
+    "Cap Rate Min": "6.50%",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Byron Crossen",
+    "Preferred Property Types": "Strip Centers, Storage",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "Low",
+    "Notes": "Actively leasing/occupying, always looking to acquire.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Sukhpreet Singh",
+    "Preferred Property Types": "Gas Stations",
+    "Budget Range": "",
+    "Preferred Locations": "WA, OR",
+    "Urgency Level": "High",
+    "Notes": "Looking for any good gas station deal, considers vacant properties.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Dennis Bottem",
+    "Preferred Property Types": "Strip Centers, Self Storage",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "Low",
+    "Notes": "Currently holding, interested in self-storage.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Dany Sadakah",
+    "Preferred Property Types": "Commercial",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "High",
+    "Notes": "Actively looking, no multi-family preference.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Stuart Lindquist",
+    "Preferred Property Types": "Retail, Industrial",
+    "Budget Range": "",
+    "Preferred Locations": "McMinnville, OR",
+    "Urgency Level": "Moderate",
+    "Notes": "Interested in McMinnville area, potential exchange.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "David Stoner",
+    "Preferred Property Types": "",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "Low",
+    "Notes": "Waiting for market improvements, not actively buying/selling.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Barry Ma",
+    "Preferred Property Types": "Strip Centers",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "Moderate",
+    "Notes": "Waiting for market improvements, open to offers.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Kelly Jones",
+    "Preferred Property Types": "Retail/Multi-Family",
+    "Budget Range": "",
+    "Preferred Locations": "Bend, OR",
+    "Urgency Level": "Moderate",
+    "Notes": "Potential exchange, retail on bottom, housing above.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Sam Gilbert",
+    "Preferred Property Types": "Medical Office",
+    "Budget Range": "",
+    "Preferred Locations": "Oregon",
+    "Urgency Level": "Moderate",
+    "Notes": "Looking for leased-up medical office properties.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Deena Mitchell",
+    "Preferred Property Types": "Industrial",
+    "Budget Range": "",
+    "Preferred Locations": "Florence, OR (but open to others)",
+    "Urgency Level": "Moderate",
+    "Notes": "Seeking industrial for construction yard, potential partnership.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Warren Freece",
+    "Preferred Property Types": "Storage, Commercial",
+    "Budget Range": "",
+    "Preferred Locations": "Canby, OR (within 10-20 min of Portland)",
+    "Urgency Level": "High",
+    "Notes": "Immediate need for storage, water sports equipment.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Julie Seid",
+    "Preferred Property Types": "Retail/Multifamily",
+    "Budget Range": "",
+    "Preferred Locations": "Bend, OR",
+    "Urgency Level": "Moderate",
+    "Notes": "Considering exchange, prefers retail with housing above.",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Ben Wilson",
+    "Preferred Property Types": "👶 Day Care 👶",
+    "Budget Range": "",
+    "Preferred Locations": "SW Porland > Beaverton, Tigard, West Linn, Lake Oswego",
+    "Urgency Level": "",
+    "Notes": "",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": "$3,000,000"
+  },
+  {
+    "Buyer Name": "Michael Zukin",
+    "Preferred Property Types": "Likes Off Markets, Distressed Or Value Adds But Not Always, Stuff That My Boss Or I Would Want To Buy That Has Actual Value. Spoke About McMinnville Town Center See Notes 03/01",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "High",
+    "Notes": "Said Was Calling About This Property And If They Are Looking To Acquire Anything Else And What The Plan With This Property Was, Said To Call Back Next Tuesday (2/6), His Plane Was About To Take Off And He's Very Busy The Next Few Days But Said He'll Talk To Me About That Then; Always Looking To Acquire",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Ron Frey",
+    "Preferred Property Types": "",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "High",
+    "Notes": "Friendly guy, is a Buyer not seller. Just closed on one today, the Dutch bros in Coos Bay. So not going to by buying anything else this year but definitely in the future. 7/22/24",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Deanna Strauss",
+    "Preferred Property Types": "Still looking for a smaller industrial piece of property, to move construction yard. Park heavy equipment, more parking yard, need about 1 or 2 acres for Strauss Excavating. Also has a good friend with a towing company and they're looking for around 3-4 acres. They've talked about partnering up and buying together at 5-6 acres. She is selling business to her son, she wants to develop the current construction yard. Wants to develop at their excavating company but waiting for interest rates to go down, spoke with a contractor/developer out there and is looking to build 2 small buildings for 2-4 million. Also looking to acquire anything smaller, \"2-3 tenants, $2-3 million\" is \"smaller investment\". She likes Hillsboro or South Hillsboro since they're based out of Hillsboro. They do 3-4 huge big box builders in South Hillsboro. They could go to east north plains, or evergreen if price right, and zoned right for parking. Not in a huge rush to move, the towing company has more urgency but they have a broker. 5/23",
+    "Budget Range": "",
+    "Preferred Locations": "Moderate",
+    "Urgency Level": "Still looking for a smaller industrial piece of property, to move construction yard. Park heavy equipment, more parking yard, need about 1 or 2 acres for Strauss Excavating. Also has a good friend with a towing company and they're looking for around 3-4 acres. They've talked about partnering up and buying together at 5-6 acres. She is selling business to her son, she wants to develop the current construction yard. Wants to develop at their excavating company but waiting for interest rates to go down, spoke with a contractor/developer out there and is looking to build 2 small buildings for 2-4 million. Also looking to acquire anything smaller, \"2-3 tenants, $2-3 million\" is \"smaller investment\". She likes Hillsboro or South Hillsboro since they're based out of Hillsboro. They do 3-4 huge big box builders in South Hillsboro. They could go to east north plains, or evergreen if price right, and zoned right for parking. Not in a huge rush to move, the towing company has more urgency but they have a broker. 5/23",
+    "Notes": "",
+    "Cap Rate Min": "$2,000,000",
+    "Price Min": "$3,000,000",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Susan Stein",
+    "Preferred Property Types": "",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "High",
+    "Notes": "Very Friendly, Not Looking To Acquire Anything In Oregon. Has A Lot Of Multifamily Properties, This Is Her Only Retail And She Got A Great Tenant With Great Rent, So Just Holding On To This One, But Will Save My Contact Info 02/07",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Scott Arena",
+    "Preferred Property Types": "Preferably Single Tenant NNNs.",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "High",
+    "Notes": "They Focus More On The Management Side With The Company, Work With Their Clients And Investors, But Have Been Talking With Some Private Owners Trying To Buy Off Market. Said They Are Always Looking For Deals And To Send Him Any Oms We Got And Said Multiple Times That We'll Be In Touch Or Look Over The Om Together. Preferably Single Tenant NNNs. Cut Me Off Initially \"Hey Sam How's It Going\", Appreciative That I Reached Out And Will Stay In Touch. 03/13",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Donald Forbes",
+    "Preferred Property Types": "",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "Low",
+    "Notes": "They hold long term, have worked with M&M out of Salt Lake City. Said not much in Portland really but they're always looking to acquire. Not the stereotypical strip center, but good deals, price and they look at Location as well. Specifically mentioned O'Reilly's. Friendly guy, said I will reach out with any deals that pops up that I think he should take a look at. 8/01",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Sharon Lund",
+    "Preferred Property Types": "",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "Low",
+    "Notes": "This Property Has Been Great, Operating Well And No Issues With The Tenants. Her Daughter Is More Involved On The Day-to-day Involvement So She Was Going To Go Over Our Conversation And My Contact Info With Her Daughter But Was Currently Playing Golf. Sent Email With Our Information, Said Someone Else Had Called Them But Different Firm So Wanted Our Information. Potential Plans To Expand Portfolio. 02/26",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Kevin Abrams",
+    "Preferred Property Types": "Multi and single, as well as industrial",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "High",
+    "Notes": "Under a master lease where the tenant has an option to buy, buy never sell investors, always in acquisition mode. Low price/sf properties, not necessarily in retail. About to buy one for under $50 a sf in CO, $30 in TN, they look nationally, have multi and single, as well as industrial, all sorts of properties. They have a large portfolio 5/13",
+    "Cap Rate Min": "7%",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Brendan O'Scannlain",
+    "Preferred Property Types": "",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "Moderate",
+    "Notes": "Very friendly guy, said it is managed by Wyse, (said he could put me in touch with Gregory Close), and they get updated valuations every year for financial statement purposes and whatnot. This property has been great and especially the past three years has just been a cash cow with great tenant mix, great location. Said they are open to offers and would consider selling if one was brought to them. Said Gregory has had a few conversations with interested buyers but he doesn't know what happened so safe to assume they went nowhere. Asked what price point he would look to get, he said he wasn't sure and he would have to look at the most recent valuation. Said I will call back on Tuesday to continue the discussion, he was nice and appreciated the call, ended with \"talk soon\" 5/22",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Jared Prushansky",
+    "Preferred Property Types": "Value Add",
+    "Budget Range": "",
+    "Preferred Locations": "Hillsboro",
+    "Urgency Level": "High",
+    "Notes": "Very Friendly, \"Oh Hi Sam!\"; Investment Fund Always Looking To Buy Value Add Then Sell, Dependent Upon Where The Market Is At And Rates/prices; Always Willing To Sell, Long Term Holders, Stilll In Process Of Finalizing; Buy Value Add, In Place Yield, Ability To Stabilize; Hillsboro; Macys Lease Expiring Hillsboro 11/16",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Tj Sullivan",
+    "Preferred Property Types": "Multi-family",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "Low",
+    "Notes": "Very Friendly, Emailed Om Of Taco Time, Cut Me Off To Ask Who I Am Again And How I'm Doing, Asked What An Om Is Old",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Leslie Lundin",
+    "Preferred Property Types": "Malls and larger retail assets",
+    "Budget Range": "",
+    "Preferred Locations": "West Coast",
+    "Urgency Level": "Moderate",
+    "Notes": "Very Friendly, Holding For Now, Looking For Other Similar Assets That Are Value Add Deals, West Coast, Asked About What I'm Seeing In The Market With Cap Rates 11/16/24",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Yuejin Guo",
+    "Preferred Property Types": "Multi and single tenant",
+    "Budget Range": "",
+    "Preferred Locations": "North to Seattle, along I-5 and 205",
+    "Urgency Level": "High",
+    "Notes": "Very friendly, made me repeat company and explain and he goes \"Ohhhh retail ah ok ok\" (accent). Hold onto their properties for now no plans to sell in short term i believe. But actively looking to acquire properties: North all way to Seattle, so along I-5 and 205. They have enough properties in Vancouver he said, but looks at both multi and single tenant, most important factor to them is location. NNN is easier, but always looking for anything else (when I asked about value-add",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Stacy Henderson",
+    "Preferred Property Types": "Retail, Multi-Tenant",
+    "Budget Range": "$2,200,000",
+    "Preferred Locations": "Tualatin, OR, North Dakota",
+    "Urgency Level": "High",
+    "Notes": "Very Friendly, Not Looking To Acquire Anything In Oregon. Has A Lot Of Multifamily Properties, This Is Her Only Retail And She Got A Great Tenant With Great Rent, So Just Holding On To This One, But Will Save My Contact Info. Exchanging out of Oregon into other multi family. Complaining about Oregon., Between that sale and another property she exchanged out of, she bought a 16-Apartment complex that pays more than what the basic's lease was paying her. And she STILL has half of the funds to exchange ($1.7M), with only 15 days remaining to identify an upleg.",
+    "Cap Rate Min": "5.25",
+    "Price Min": "None",
+    "Price Max": "None"
+  },
+  {
+    "Buyer Name": "Kara Letcher",
+    "Preferred Property Types": "Grocery Outlet",
+    "Budget Range": "None",
+    "Preferred Locations": "Coos Bay, OR",
+    "Urgency Level": "Low",
+    "Notes": "Very friendly, said just plans to hold this long term, had it for 26 years. Talked about how great of a tenant they are and company to work with. Looking to buy other properties in the future but nothing as of right now, she's not at that point yet.",
+    "Cap Rate Min": "None",
+    "Price Min": "None",
+    "Price Max": "None"
+  },
+  {
+    "Buyer Name": "Rajan Sohi",
+    "Preferred Property Types": "Gas Stations, Service Stations",
+    "Budget Range": "None",
+    "Preferred Locations": "Kalama, WA, Ridgefield to Eugene, Oregon",
+    "Urgency Level": "Moderate",
+    "Notes": "Very Friendly, Wants Me To Send Any Listings Of Gas Stations/service Stations; Plans To Sell: Would Consider Selling If The Right Offer Came Along; Plans To Buy: Gas Stations And Service Stores From Ridgefield Down Through Eugene.",
+    "Cap Rate Min": "None",
+    "Price Min": "None",
+    "Price Max": "None"
+  },
+  {
+    "Buyer Name": "Dan Lewer",
+    "Preferred Property Types": "Vet Clinic",
+    "Budget Range": "None",
+    "Preferred Locations": "Medford, OR, Newport, OR, Castle Rock",
+    "Urgency Level": "High",
+    "Notes": "Making Reed Company, Owns 26 Properties; Just Bought One In Castle Rock; Buy Anything But Most Of The Time, Properties In Retro, Other State Bare Land And Build Up; Always For Veternary Clinic; Owns Businesses Too Not Just Real Estate, Looking For Medford.",
+    "Cap Rate Min": "None",
+    "Price Min": "None",
+    "Price Max": "None"
+  },
+  {
+    "Buyer Name": "Gurlal Brar",
+    "Preferred Property Types": "Multi-Tenant Retail",
+    "Budget Range": "None",
+    "Preferred Locations": "I-5 Corridor, Eugene, Salem, Tacoma",
+    "Urgency Level": "Moderate",
+    "Notes": "Not Wanting To Sell But Asked A Lot Of Questions About The Market And His Vacant Lots In Cottage Grove With Suit To Build And What Retail Would Go There. Advised To Wait Until February To See What Happens In 2024 Before Looking To Sell The Land.",
+    "Cap Rate Min": "None",
+    "Price Min": "None",
+    "Price Max": "None"
+  },
+  {
+    "Buyer Name": "Penney Kim",
+    "Preferred Property Types": "Retail, Multi-Tenant",
+    "Budget Range": "$500,000 (x2)",
+    "Preferred Locations": "SW Portland, Beaverton, Tigard",
+    "Urgency Level": "Moderate",
+    "Notes": "Looking For Another Property To Acquire, Nice Lady Strong Accent, Hasn't Gotten Valuations Done Before On These Properties, Said She Would Just Buy Or Would Be Open To Exchanging, Wants to exchange out of the Tigard property.",
+    "Cap Rate Min": "5.6",
+    "Price Min": "None",
+    "Price Max": "None"
+  },
+  {
+    "Buyer Name": "Sammy Sharifi",
+    "Preferred Property Types": "Gas Stations",
+    "Budget Range": "None",
+    "Preferred Locations": "WA, OR",
+    "Urgency Level": "Moderate",
+    "Notes": "Wanting To Buy Gas Stations; Will Take A Look At OM's.",
+    "Cap Rate Min": "None",
+    "Price Min": "None",
+    "Price Max": "None"
+  },
+  {
+    "Buyer Name": "Wei Chow",
+    "Preferred Property Types": "Multi-Family",
+    "Budget Range": "$1,500,000",
+    "Preferred Locations": "None",
+    "Urgency Level": "Low",
+    "Notes": "Wants To Sell, Got Valuation Over Summer, Financials For Last 2 Years Are Less Than What They Would Like It",
+    "Cap Rate Min": "None",
+    "Price Min": "None",
+    "Price Max": "None"
+  },
+  {
+    "Buyer Name": "Dave Snazuk",
+    "Preferred Property Types": "Retail, Value Add",
+    "Budget Range": "None",
+    "Preferred Locations": "Southern Oregon, Eugene, Medford",
+    "Urgency Level": "High",
+    "Notes": "Actively looking to acquire a larger center, Hoping for an 8% cap or value add. Would not exchange out of Green Valley Plaza.",
+    "Cap Rate Min": "8",
+    "Price Min": "None",
+    "Price Max": "None"
+  },
+  {
+    "Buyer Name": "John Wilber",
+    "Preferred Property Types": "None",
+    "Budget Range": "None",
+    "Preferred Locations": "None",
+    "Urgency Level": "Low",
+    "Notes": "Always looking for deals and to let him know if we have anything interesting. Currently not actively looking but holding tight until the economy improves and interest rates get better.",
+    "Cap Rate Min": "None",
+    "Price Min": "None",
+    "Price Max": "None"
+  },
+  {
+    "Buyer Name": "Paul Truttman",
+    "Preferred Property Types": "STNL, Fast Food, Drive-Thru",
+    "Budget Range": "None",
+    "Preferred Locations": "Washington, Clackamas, OR",
+    "Urgency Level": "Moderate",
+    "Notes": "Will hold this Wendy's long term, not too happy about some other property tenant. Not serious",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Terry Price",
+    "Preferred Property Types": "Retail",
+    "Budget Range": "$1.2-1.3 million",
+    "Preferred Locations": "Portland, OR",
+    "Urgency Level": "Moderate",
+    "Notes": "Willard's wife answered, said Willard passed away several years ago. She said for anything real estate related or if we had any real estate to give her son a call. She gave me Terry Price's number (09/23 | 3:16 pm)",
+    "Cap Rate Min": "Called me back, his brother and him own it together. Would consider selling it, they 1031 exchanged it, so would need to talk to his accountant. Kept mentioned and making jokes about losing money on it and hoping after an exchange they won't be at a big loss from selling this. Looked at Collision Centers like Gerber Collisions. Talked about O'Reilly's, Jiffy Lube, Valvoline, etc. and he said he had looked at these and they were typically 15-30 year leases with a 5 or 10 year option. Currently has land listed with Bradley King of Keller Williams, he purchased in the 80's. He said someone interested or the person next door was recently considering building a Jiffy Lube or Valvoline there. They just want to supply the ground, so would be open to a ground lease or something. There's only one mom & pop oil change in town, which is always booked 2 weeks out, and he mentioned any other competitor is out in Woodburn or far away. His wife does the leasing, and got a really good Vet clinic tenant in there, who is always wanting more space and wanting to expand. Redoing parking lot next month on the 8th. Asked if they are all NNN leases, and he said no they are not. Most are 1-yr lease's, him and his brother work on the MTM leases, the restaurant for example covers their own equipment. He said basically if there's a leak or something, they need to go fix it themselves. Asked how much he would want to get for it, he said $1.2-1.3 million range. He said he shoots for 10% gross income, and since he bought it he's put $100,000 into it. Started breaking up he couldn't hear me as I was doing the updated valuation pitch, said it was getting very buggy and sounded digital. He said he lives up in the hills so he gets spotty connected and it was probably on his end. (09/23/24 | 3:28 pm | 14mins)",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Patrick Kessi",
+    "Preferred Property Types": "",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "Moderate",
+    "Notes": "With this property in particular, long term hold. Not interested in selling this at all but they developed it. Said they are interested in buying properties, value add's to put in a Starbuck's for example. \"Value add where you need a developer to buy it and come in to develop it out, then have you sell it\". Joke that with this property they don't want to sell but for future projects they would take on that's how they would do it usually. I asked about location and he said \"North/NW portland, Hwy 30 so St Helens, Astoria, Beaverton, Hillsboro.\" (09/16/24 | 3:12 pm | 3mins)",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Tom Casey",
+    "Preferred Property Types": "",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "Low",
+    "Notes": "Working on a few projects currently so it will be a few years until he's not busy with these. Said he will look to acquire once he's done with these projects, but always looking and wants similar cap rates to what he bought these for, but hasn't seen anything interesting come to market recently and not actively looking. 5/07/24",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Seth Fortier",
+    "Preferred Property Types": "Retail",
+    "Budget Range": "",
+    "Preferred Locations": "Anything in Albany",
+    "Urgency Level": "Low",
+    "Notes": "- Looks to buy anything in Albany, he owns Land, mini storage, medical, office, retail, he looks for anything in Albany and said to give him a call with anything we have for sale in Albany.  - Mentioned he just doesn't like dealing with residential tenants - Owner carry with favorable terms makes him more comfortable",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Scott Laplante",
+    "Preferred Property Types": "Retail",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "Low",
+    "Notes": "Pays to have Auto Care affiliation, not Napa specifically. My end goal is to attract and retain other similar businesses to his own. There are some specific stipulations in his plan which involves parcel. Wants to become the succession plan for other similar auto repairs. He's used to say \"My dream, I can make it as big as I want\". He's been in the industry for 30 years, and has a great system that can be implemented in other locations. His peers call on him for advice and opportunities because of his involvement in the industry. His connection to the industry, different opportunities. Maybe later next year, it will be something he's looking to do. He basically said that he is very well connected and involved with the industry, and was very straight forward: mentioned what value a broker truly brings to the table if he's speaking with an owner that wants to retire and take over their business, he doesn't need a broker. He also originally told me that if I sent him something it would have to be a really great deal because he works with so many people. He mentioned how he's not ready over this first phone conversation to tell me exactly what he's looking for and what specifics interest him, and was busy throughout the end of December so unable to grab coffee with me. Was very blunt, at one point said something like \"and Ill be straight forward, but at this point in our relationship, I don't owe you anything and you don't owe me anything\" I gave an amazing pitch/explanation of what value I do bring, having all locations for all auto tenants, with the owners for each with contact notes of each, so based on what he's hoping to do in the future with expanding out his business and implementing his systems at other locations, I can hone in on a geographical area and show him all the leads and properties where the owners would consider selling. Because when you run a business like this you don't have time to go make thousands of cold calls trying to get ahold of all these owners, which is where I come in. We talked back and forth about developing a fruitful relationship that will be mutually beneficial. We ended with me reminding him my name when he asked, and I will take a look through my list of off-market leads and other auto tenant operators, and will circle around back at the beginning of the new year to set up a meeting and talk further. (12/10/24 | 2:18 pm | 13mins)",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Stephen Harkless",
+    "Preferred Property Types": "Retail",
+    "Budget Range": "",
+    "Preferred Locations": "Portland, OR",
+    "Urgency Level": "Moderate",
+    "Notes": "Just buy's retail and one industrial. Always looks for retail. Value add, nothing expensive, cheap stuff like value add. Very friendly guy, said he gets calls from our firm and other brokers at least once or twice a week. I asked what it's regarding and he said his warehouse. I joked that I was actually giving him a call about the warehouse and he started laughing. He also said nobody's ever called him on this property or his retail, (he had me repeat which property specifically I was calling about, I read off the address). Asked if I've seen any retail deals popping up, and that his broker/property manager sends him stuff and he checks LoopNet regularly but hasn't seen anything good, or when there is something that pops up, it's too late and already under contract. He brought up Rockwood Plaza and how that sold. Had 3 stores, back in 2015, sold it and the business and retired. His non-compete expired, so he opened a store again, and has been operating out of a 3,000 sf store, which he has desperately outgrown and needs more room. Love's the East Side. Looking for another retail store. Single tenant, above 6,000 sqft. Good visibility. Most of his properties are in the East side of Portland, so he would like to keep the overall portfolio within that area, specifically mentioned \"growing his footprint\" at one point. He is aware that the East side of Portland is not a popular area that most investor's want to get into. Asked if he was familiar with the firm or has worked with us before, he said he sold some property in Montana with M&M about 4 months ago. Said to let him know about any potential properties that come up for sale. (10/31/24 | 5:32 pm | 12mins)",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Robert Wienert",
+    "Preferred Property Types": "",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "Low",
+    "Notes": "P1 Confirmed, he said they aren't interested in selling at all. I asked about plans to buy and he said if it was something within that parameter of their properties, so roughly same size multi-tenant in the Newport area. Friendly guy but not wanting anything. (03/18/2025 | 2:18 pm)",
+    "Cap Rate Min": "",
+    "Price Min": "",
+    "Price Max": ""
+  },
+  {
+    "Buyer Name": "Greg White",
+    "Preferred Property Types": "Restaurant",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "Moderate",
+    "Notes": "P2 Very friendly guy, they operate the business (I called P2) He said \"this is __, Greg's not here right now, is there anything I can help you with?\" So I did intro and explained, then he said he thinks they're alright, not looking to do anything. Then shifted his tone and asked if I've been to their restaurant before, so I said yes I have. He goes \"oh that's good to hear, thank you. What's your favorite part about Tom's Pancake House then?\" So I took a second then told him my fondest memories are sitting around the front counter while waiting for our orders to watch the Mexican Jumping Beans. His whole demeanor changed up and he was happy and energetic. We were talking about how great those are and how it draws all the kids around, but he needs to get those back in stock soon. We were going back and forth for a few minutes before I re-stated my purpose and said \"yeah I wanted to reach out and connect, wasn't sure if you guys were hoping to expand and open another Tom's Pancake House location, so that's why I wanted to see what the long term plans were.\" Then he started thinking, and definitely entertained the idea. He said \"well, find me one. Bring me a spot you think we should take a look at and I'm definitely all ears.\" I brought up there being a good amount of vacant restaurant-zoned properties such as all the Shari's that closed down. He said he saw that, and how Elmer's was buying all of them up. So I explained that yeah IHOP, Elmer's and some owner user's have been the main buyers for those locations. Great conversation, he really appreciated it and I passed all the tests I think of making sure I actually had been there before. He said several times at the end to stop on by and introduce myself in-person next time. (06/13/25 | 4:33 pm | 8mins)",
+    "Cap Rate Min": "None",
+    "Price Min": "None",
+    "Price Max": "None"
+  },
+  {
+    "Buyer Name": "Dana Biggi",
+    "Preferred Property Types": "",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "Low",
+    "Notes": "Very friendly lady, said she's not ready to transact or do anything. She said she's waiting for the next 5-6 months to see what happens with the economy. Said she's not ready to consolidate/sell anything yet, just sitting back and collecting the monthly check in the mail. Told me to circle around and call her in 6 months. (12/06/24 | 1:38 pm)",
+    "Cap Rate Min": "None",
+    "Price Min": "None",
+    "Price Max": "None"
+  },
+  {
+    "Buyer Name": "Danielle Andrus",
+    "Preferred Property Types": "Retail, Starbucks",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "Moderate",
+    "Notes": "Very Friendly younger lady. Said she's not looking to expand the footprint this year but mentioned that if I have any tenants looking to fill a space, they have a space coming available, 2,400sf where US Cellular is currently occupying but they will be vacating at the end of the month. It is currently listed for lease with the property manager. I explained what we do with investment sales specialization, and basically summarized her thoughts/plans for this next year \"ok yeah so other than filling that future vacancy, just holding out for the time being and not looking to transact at all in this coming year?\" and then she opens up and goes \"well actually, idk...\" once I got her talking, she explained they they would be interested in looking for a space to build another Starbucks. She LOVES projects she joked. They just finished building the Starbucks in Madras, so sounded like the other partners/siblings were more inclined to wait a bit but she ended up saying it wouldn't even have to be later into next year and that I could start letting her know about any value-add and redevelopment plays now. I told her we are very experienced with that side of Retail as well, and gave her the Dickerhoof deal story with Starbucks in the former Taco Time in Corvallis. She seemed a bit shocked (instant credibility) and continued to talk about what they like and look for. I told her about the Albany Land deal and asked if she had any interest in that, she goes \"uhh idk about restaurants, but maybe. Why don't you just send it over to me anyways. You have my email right? (...) You don't?!?\" gave me her email and will send the package for that. (11/08/24 | 3:03 pm | 5mins)",
+    "Cap Rate Min": "None",
+    "Price Min": "None",
+    "Price Max": "None"
+  },
+  {
+    "Buyer Name": "Patricia Miller",
+    "Preferred Property Types": "Multi-Family",
+    "Budget Range": "",
+    "Preferred Locations": "Washington",
+    "Urgency Level": "Low",
+    "Notes": "Very friendly lady, said she gets calls from brokers about this property at least 1-2 times a month. No motivation or urgency to sell, but was planning on just holding for now. She had originally wanted a multi family property in Washington, which is where she lives now. When she purchased this property, it was a horrible 1031 exchange process for her as her husband was in hospice, so she had to focus on helping him and worrying about the exchange. She said luckily she worked for a law firm, so they were able to help her out with a reduced rate. That was a concern for her in a sale, is that she would have to worry about an exchange again and have to go through that whole process. She said if I see any good deals to reach out and let her know, assuming she means multi-family in Washington. I told her I will bring this property up in conversations with the owners that are currently in an exchange, and if any of them are genuinely interested and wanting to pursue a potential purchase of her property that I would let her know. She had said she has no idea of a number she would want for it, and wasn't sure with cap rates and the current market what the value would be. She joked that she certainly wouldn't immediately turn down any offer and would at least take a look. I mentioned cap rates for Starbucks and told her a little about the heightened interest in them as a tenant, and she laughed saying she didn't understand why they were such a sought after tenant since from her experience, they complain a lot and are always asking to fix things. She also said that during covid, some brokerage reached out via email about the lease and wanting to make adjustments or reduce rent and she just never even responded but nothing happened. Part of it is owned by a trust that her step-children are beneficiaries of. She said after her husband died, it was broken up into the following: she has 1/3 ownership, her children have 1/3, and her step-children have the remaining 1/3. So if entertaining an offer or considering a sale of the property, she would involve the children and discuss the options with them. Starbucks just renewed their lease, she said they just had a 10% increase and have 2 more 5-year renewals. Then she said she remembered it went through 2039. She also mentioned that she recently had the parking lot fixed (not redone). After Starbucks went in, they had restrictions put in that limited what type of food/restaurant tenants could go into the other unit. (10/16/24 | 6:14 pm | 12mins)",
+    "Cap Rate Min": "None",
+    "Price Min": "None",
+    "Price Max": "None"
+  },
+  {
+    "Buyer Name": "Peter Maertens",
+    "Preferred Property Types": "",
+    "Budget Range": "",
+    "Preferred Locations": "",
+    "Urgency Level": "Low",
+    "Notes": "Matthew Maertens Said He's Not Wanting To Sell, But Possibly Looking To Buy Another Asset, Told Me To Call Back And Leave A Vm So He Could Give To His Dad (Phone 2) 02/07/24",
+    "Cap Rate Min": "None",
+    "Price Min": "None",
+    "Price Max": "None"
+  },
+  {
+    "Buyer Name": "Gary Rifkin",
+    "Preferred Property Types": "",
+    "Budget Range": "",
+    "Preferred Locations": "Coos Bay",
+    "Urgency Level": "Moderate",
+    "Notes": "Weird awkward old guy. Didn't ever answer my questions about Newmark Plaza, but said in the future they definitely will want to expand the portfolio. I asked more questions to clarify and he said that they don't want to do anything right now, but will be wanting to buy in the future. I said I would be happy to keep in touch and keep him updated -- also did the whole pitch for how we can put all the best properties in front of them when they're ready to buy. (03/28/2025 | 12:47 pm)",
+    "Cap Rate Min": "None",
+    "Price Min": "None",
+    "Price Max": "None"
+  }
+];
+
+
+            // --- STATE MANAGEMENT ---
+            let state = {
+                searchTerm: '',
+                filters: {
+                    urgency: [],
+                    propertyType: [],
+                },
+                sortConfig: {
+                    key: 'Buyer Name',
+                    direction: 'ascending'
+                }
+            };
+
+            // --- DOM ELEMENTS ---
+            const buyerListContainer = document.getElementById('buyer-list-container');
+            const searchInput = document.getElementById('search-input');
+            const toggleFiltersBtn = document.getElementById('toggle-filters-btn');
+            const filtersContainer = document.getElementById('filters-container');
+            const urgencyFiltersContainer = document.getElementById('urgency-filters');
+            const propertyTypeFiltersContainer = document.getElementById('property-type-filters');
+            const mainListView = document.getElementById('main-list-view');
+            const detailViewContainer = document.getElementById('detail-view-container');
+
+            // --- UTILITY FUNCTIONS ---
+            const formatCurrency = (value) => {
+                if (!value) return 'N/A';
+                return new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
+                }).format(value);
+            };
+
+            const urgencyStyles = {
+                High: 'bg-red-100 text-red-800',
+                Moderate: 'bg-yellow-100 text-yellow-800',
+                Low: 'bg-green-100 text-green-800',
+            };
+            
+            const getUniquePropertyTypes = () => {
+                const allTypes = initialData.flatMap(b => b['Preferred Property Types']?.split(/[,;]/).map(t => t.trim()) || []);
+                return [...new Set(allTypes)].filter(Boolean).sort();
+            };
+
+            // --- RENDER FUNCTIONS ---
+            const renderBuyers = () => {
+                buyerListContainer.innerHTML = ''; // Clear previous list
+
+                let filtered = [...initialData];
+
+                // Apply search
+                if (state.searchTerm) {
+                    const lowercasedTerm = state.searchTerm.toLowerCase();
+                    filtered = filtered.filter(buyer =>
+                        Object.values(buyer).some(value =>
+                            String(value).toLowerCase().includes(lowercasedTerm)
+                        )
+                    );
+                }
+
+                // Apply filters
+                if (state.filters.urgency.length > 0) {
+                    filtered = filtered.filter(buyer => state.filters.urgency.includes(buyer['Urgency Level']));
+                }
+                if (state.filters.propertyType.length > 0) {
+                    filtered = filtered.filter(buyer =>
+                        state.filters.propertyType.some(pt => buyer['Preferred Property Types']?.toLowerCase().includes(pt.toLowerCase()))
+                    );
+                }
+
+                // Apply sorting
+                if (state.sortConfig.key) {
+                    filtered.sort((a, b) => {
+                        const aValue = a[state.sortConfig.key] || '';
+                        const bValue = b[state.sortConfig.key] || '';
+                        
+                        if (aValue < bValue) return state.sortConfig.direction === 'ascending' ? -1 : 1;
+                        if (aValue > bValue) return state.sortConfig.direction === 'ascending' ? 1 : -1;
+                        return 0;
+                    });
+                }
+                
+                updateSortHeaders();
+
+                if (filtered.length === 0) {
+                    buyerListContainer.innerHTML = `
+                        <div class="text-center py-16 px-6">
+                            <h3 class="text-xl font-semibold text-gray-700">No Buyers Found</h3>
+                            <p class="text-gray-500 mt-2">Try adjusting your search or filters.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                filtered.forEach((buyer, index) => {
+                    const budgetDisplay = buyer['Budget Range'] || `${formatCurrency(buyer['Price Min'])} - ${formatCurrency(buyer['Price Max'])}`;
+                    const card = document.createElement('div');
+                    card.className = 'buyer-card grid grid-cols-12 gap-4 px-6 py-5 border-b border-gray-200 last:border-b-0 hover:bg-gray-50 transition cursor-pointer';
+                    card.dataset.buyerIndex = initialData.indexOf(buyer);
+                    card.innerHTML = `
+                        <div class="col-span-12 md:col-span-3 flex flex-col justify-center">
+                            <p class="font-semibold text-blue-600 text-lg">${buyer['Buyer Name']}</p>
+                            <p class="text-sm text-gray-500 truncate hidden md:block">${buyer['Preferred Property Types']}</p>
+                        </div>
+                        <div class="col-span-12 md:col-span-3 flex items-center text-gray-700">
+                            <i data-lucide="map-pin" class="w-4 h-4 mr-2 text-gray-400 flex-shrink-0"></i>
+                            <span class="truncate">${buyer['Preferred Locations'] || 'N/A'}</span>
+                        </div>
+                        <div class="col-span-6 md:col-span-2 flex items-center text-gray-700">
+                            <i data-lucide="dollar-sign" class="w-4 h-4 mr-2 text-gray-400 flex-shrink-0"></i>
+                            <span>${budgetDisplay}</span>
+                        </div>
+                        <div class="col-span-6 md:col-span-2 flex items-center">
+                            <span class="px-3 py-1 text-xs font-medium rounded-full ${urgencyStyles[buyer['Urgency Level']] || 'bg-gray-100 text-gray-800'}">
+                                ${buyer['Urgency Level']}
+                            </span>
+                        </div>
+                        <div class="col-span-12 md:col-span-2 flex items-center justify-start md:justify-end">
+                            <span class="text-sm font-semibold text-blue-600 hover:text-blue-800 transition">View Details</span>
+                        </div>
+                    `;
+                    buyerListContainer.appendChild(card);
+                });
+                lucide.createIcons();
+            };
+            
+            const renderDetailView = (buyer) => {
+                detailViewContainer.innerHTML = `
+                    <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200 animate-fade-in">
+                        <div class="flex justify-between items-start mb-6">
+                            <div>
+                                <h2 class="text-3xl font-bold text-gray-900">${buyer['Buyer Name']}</h2>
+                                <span class="mt-2 inline-block px-3 py-1 text-sm font-semibold rounded-full ${urgencyStyles[buyer['Urgency Level']] || 'bg-gray-100 text-gray-800'}">
+                                    ${buyer['Urgency Level']} Urgency
+                                </span>
+                            </div>
+                            <button id="back-to-list-btn" class="flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-800 transition">
+                                <i data-lucide="x" class="w-5 h-5"></i> Back to List
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            <div class="flex gap-4">
+                                <div class="flex-shrink-0 w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center"><i data-lucide="building" class="w-5 h-5"></i></div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-500 text-sm uppercase tracking-wider">Preferred Property Types</h4>
+                                    <div class="mt-1 text-gray-800 text-base"><p>${buyer['Preferred Property Types']}</p></div>
+                                </div>
+                            </div>
+                            <div class="flex gap-4">
+                                <div class="flex-shrink-0 w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center"><i data-lucide="dollar-sign" class="w-5 h-5"></i></div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-500 text-sm uppercase tracking-wider">Budget & Pricing</h4>
+                                    <div class="mt-1 text-gray-800 text-base">
+                                        <p><strong>Range:</strong> ${buyer['Budget Range'] || 'Not Specified'}</p>
+                                        <p><strong>Min Price:</strong> ${formatCurrency(buyer['Price Min'])}</p>
+                                        <p><strong>Max Price:</strong> ${formatCurrency(buyer['Price Max'])}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex gap-4">
+                                <div class="flex-shrink-0 w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center"><i data-lucide="map-pin" class="w-5 h-5"></i></div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-500 text-sm uppercase tracking-wider">Preferred Locations</h4>
+                                    <div class="mt-1 text-gray-800 text-base"><p>${buyer['Preferred Locations']}</p></div>
+                                </div>
+                            </div>
+                            <div class="flex gap-4">
+                                <div class="flex-shrink-0 w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center"><i data-lucide="star" class="w-5 h-5"></i></div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-500 text-sm uppercase tracking-wider">Minimum Cap Rate</h4>
+                                    <div class="mt-1 text-gray-800 text-base"><p>${buyer['Cap Rate Min'] || 'Not Specified'}</p></div>
+                                </div>
+                            </div>
+                            <div class="md:col-span-2 lg:col-span-3 bg-gray-50 p-6 rounded-lg border border-gray-200">
+                                <h4 class="font-semibold text-lg mb-3 text-gray-800">Notes</h4>
+                                <p class="text-gray-600 leading-relaxed whitespace-pre-wrap">${buyer['Notes']}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                mainListView.classList.add('hidden');
+                detailViewContainer.classList.remove('hidden');
+                lucide.createIcons();
+
+                document.getElementById('back-to-list-btn').addEventListener('click', () => {
+                    detailViewContainer.classList.add('hidden');
+                    mainListView.classList.remove('hidden');
+                    detailViewContainer.innerHTML = '';
+                });
+            };
+            
+            const renderFilters = () => {
+                // Urgency Filters
+                urgencyFiltersContainer.innerHTML = '';
+                ['High', 'Moderate', 'Low'].forEach(level => {
+                    const isActive = state.filters.urgency.includes(level);
+                    const chip = document.createElement('button');
+                    chip.className = `filter-chip px-3 py-1 text-sm rounded-full border transition ${isActive ? 'bg-blue-500 border-blue-500 text-white' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-100 hover:border-gray-400'}`;
+                    chip.textContent = level;
+                    chip.dataset.filterType = 'urgency';
+                    chip.dataset.filterValue = level;
+                    urgencyFiltersContainer.appendChild(chip);
+                });
+                
+                // Property Type Filters
+                propertyTypeFiltersContainer.innerHTML = '';
+                getUniquePropertyTypes().forEach(type => {
+                    const isActive = state.filters.propertyType.includes(type);
+                    const chip = document.createElement('button');
+                    chip.className = `filter-chip px-3 py-1 text-sm rounded-full border transition ${isActive ? 'bg-blue-500 border-blue-500 text-white' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-100 hover:border-gray-400'}`;
+                    chip.textContent = type;
+                    chip.dataset.filterType = 'propertyType';
+                    chip.dataset.filterValue = type;
+                    propertyTypeFiltersContainer.appendChild(chip);
+                });
+            };
+            
+            const updateSortHeaders = () => {
+                document.querySelectorAll('.sort-btn').forEach(btn => {
+                    const sortKey = btn.dataset.sortKey;
+                    let iconHtml = '';
+                    if (state.sortConfig.key === sortKey) {
+                        const icon = state.sortConfig.direction === 'ascending' ? 'chevron-up' : 'chevron-down';
+                        iconHtml = `<i data-lucide="${icon}" class="w-4 h-4"></i>`;
+                    }
+                    btn.innerHTML = `${sortKey} ${iconHtml}`;
+                });
+                lucide.createIcons();
+            };
+
+            // --- EVENT LISTENERS ---
+            searchInput.addEventListener('input', (e) => {
+                state.searchTerm = e.target.value;
+                renderBuyers();
+            });
+
+            toggleFiltersBtn.addEventListener('click', () => {
+                const isHidden = filtersContainer.classList.toggle('hidden');
+                toggleFiltersBtn.innerHTML = `Filters <i data-lucide="${isHidden ? 'chevron-down' : 'chevron-up'}" class="w-4 h-4"></i>`;
+                lucide.createIcons();
+            });
+            
+            document.addEventListener('click', (e) => {
+                // Handle filter chip clicks
+                if (e.target.classList.contains('filter-chip')) {
+                    const { filterType, filterValue } = e.target.dataset;
+                    const currentValues = state.filters[filterType];
+                    if (currentValues.includes(filterValue)) {
+                        state.filters[filterType] = currentValues.filter(v => v !== filterValue);
+                    } else {
+                        state.filters[filterType].push(filterValue);
+                    }
+                    renderFilters(); // Re-render to update active styles
+                    renderBuyers(); // Re-render the buyer list
+                }
+
+                // Handle sort button clicks
+                if (e.target.closest('.sort-btn')) {
+                    const btn = e.target.closest('.sort-btn');
+                    const key = btn.dataset.sortKey;
+                    let direction = 'ascending';
+                    if (state.sortConfig.key === key && state.sortConfig.direction === 'ascending') {
+                        direction = 'descending';
+                    }
+                    state.sortConfig = { key, direction };
+                    renderBuyers();
+                }
+
+                // Handle buyer card clicks for detail view
+                const card = e.target.closest('.buyer-card');
+                if (card) {
+                    const buyerIndex = parseInt(card.dataset.buyerIndex, 10);
+                    const selectedBuyer = initialData[buyerIndex];
+                    if (selectedBuyer) {
+                        renderDetailView(selectedBuyer);
+                    }
+                }
+            });
+
+            // --- INITIALIZATION ---
+            renderFilters();
+            renderBuyers();
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>
