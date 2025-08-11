@@ -590,7 +590,7 @@
                     alert('Please enter a valid 10-digit phone number');
                     return;
                 }
-                const num = `+1${digits}`;
+                const num = `${digits}`;
                 if (action === 'webex') window.open(`sip:${num}`, '_blank');
                 if (action === 'tel') window.open(`tel:${num}`, '_blank');
                 if (action === 'sms') window.open(`sms:${num}`, '_blank');
