@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Property Listings Widget</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="icon" type="image/x-icon" href="../Images/for-sale-retail.png">
+  <style>
+    @import url('https://rsms.me/inter/inter.css');
+    :root {
+      --ring-color: #3b82f6;
+      --body-bg: linear-gradient(180deg, #f0f9ff 0%, #f8fafc 60%);
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--body-bg);
+      color: #0f172a;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fadeIn { animation: fadeIn 0.4s ease-out forwards; }
+    
+    .dropdown-menu, .popover-menu {
+      position: absolute; background: #fff; border: 1px solid #e5e7eb; border-radius: 0.75rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-height: 280px; overflow-y: auto;
+      margin-top: 0.5rem; display: none; z-index: 50; padding: 0.5rem;
+    }
+    .dropdown-menu.show, .popover-menu.show { display: block; }
+
+    .dropdown-option {
+      width: 100%; padding: 0.5rem 0.75rem; text-align: left; font-size: 0.9rem;
+      color: #334155; border-radius: 0.5rem; cursor: pointer; transition: background 0.15s;
+    }
+    .dropdown-option:hover { background: #f1f5f9; }
+    .dropdown-option[aria-selected="true"] { background: #eff6ff; color: #1d4ed8; font-weight: 600; }
+    
+    .card.selected-card {
+      box-shadow: 0 0 0 2px var(--ring-color), 0 8px 25px rgba(59, 130, 246, 0.2);
+    }
+    .select-checkbox-overlay {
+      position: absolute; top: 12px; left: 12px; z-index: 15;
+      width: 36px; height: 36px; display: grid; place-items: center;
+      border-radius: 999px; cursor: pointer;
+      background: rgba(255,255,255,0.7); backdrop-filter: blur(4px);
+      border: 1px solid rgba(0,0,0,0.05);
+      transition: background .2s, box-shadow .2s;
+    }
+    .select-checkbox-overlay:hover { background: rgba(255,255,255,0.9); }
+    .select-checkbox {
+      width: 18px; height: 18px; border: 2px solid #94a3b8; border-radius: 50%;
+      background: #fff; display: grid; place-items: center; transition: all .2s;
+    }
+    .card.selected-card .select-checkbox {
+      background: var(--ring-color); border-color: var(--ring-color);
+    }
+    .select-checkbox::after {
+      content: "✓"; color: white; font-size: 14px; font-weight: bold;
+      transform: scale(0); transition: transform .2s;
+    }
+    .card.selected-card .select-checkbox::after { transform: scale(1); }
+
+    .chip {
+      background: rgba(0,0,0,0.6); color: #fff; font-size: 11px; font-weight: 600;
+      padding: 4px 10px; border-radius: 999px; line-height: 1; backdrop-filter: blur(6px);
+    }
+    
+    .selection-toolbar { display: none; }
+    .selection-toolbar.show { display: block; }
+    
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+      height: 38px; padding: 0 14px; border-radius: .6rem; font-weight: 600; font-size: 0.9rem;
+      transition: all .15s; cursor: pointer; border: 1px solid transparent;
+    }
+    .btn:disabled { cursor: not-allowed; opacity: 0.5; }
+    .btn-primary { background: #1e293b; color: #fff; border-color: #1e293b; }
+    .btn-primary:hover:not(:disabled) { background: #0f172a; }
+    .btn-secondary { background: #fff; color: #334155; border-color: #cbd5e1; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    .btn-secondary:hover:not(:disabled) { border-color: #94a3b8; background: #f8fafc; }
+
+    input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=number] { -moz-appearance: textfield; }
+  </style>
+</head>
+<body class="min-h-screen">
+  <div class="max-w-7xl mx-auto px-4 pb-12">
+    <!-- TOP BAR -->
+    <div class="sticky top-4 z-30 mb-4">
+      <div class="bg-white/80 backdrop-blur-lg rounded-xl shadow-lg shadow-sky-100/50 p-2 flex flex-wrap items-center gap-2">
+        <div class="relative flex-grow min-w-[200px] w-full sm:w-auto">
+          <i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400"></i>
+          <input type="text" id="property-search-bar" placeholder="Search properties..." disabled class="h-10 pl-10 pr-3 rounded-lg border-transparent bg-slate-100/80 w-full text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none focus:bg-white focus:border-slate-300 transition">
+        </div>
+
+        <div class="relative" id="filter-control-wrap">
+          <button id="filter-btn" type="button" class="btn btn-secondary">
+            <i data-lucide="sliders-horizontal" class="h-4 w-4"></i>
+            <span>Filters</span>
+            <span id="filter-badge" class="hidden h-5 w-5 bg-blue-500 text-white text-xs font-bold rounded-full items-center justify-center"></span>
+          </button>
+          <div id="filter-popover" class="popover-menu w-80">
+            <h4 class="px-2 pb-2 text-sm font-semibold text-slate-800">Filters</h4>
+            <div class="space-y-4 p-2">
+              <div>
+                <label class="text-xs font-medium text-slate-500">Price Range</label>
+                <div class="flex items-center gap-2 mt-1">
+                  <input type="number" id="min-price" placeholder="Min price" class="w-full h-9 px-2 rounded-md border-slate-300 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                  <span class="text-slate-400">-</span>
+                  <input type="number" id="max-price" placeholder="Max price" class="w-full h-9 px-2 rounded-md border-slate-300 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+              </div>
+              <div>
+                <label for="type-filter" class="text-xs font-medium text-slate-500">Property Type</label>
+                <select id="type-filter" class="mt-1 w-full h-9 px-2 rounded-md border-slate-300 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                  <option value="all">All Types</option>
+                </select>
+              </div>
+              <div>
+                <label class="text-xs font-medium text-slate-500">City</label>
+                <div class="relative mt-1" id="city-control-wrap">
+                  <button id="city-input-btn" type="button" aria-haspopup="listbox" aria-expanded="false" class="h-9 px-3 rounded-md border border-slate-300 bg-white w-full text-sm focus:ring-1 focus:ring-blue-500 flex items-center justify-between">
+                    <span id="city-input-label" class="truncate text-slate-700">All Cities</span>
+                    <i data-lucide="chevron-down" class="h-4 w-4 text-slate-500 ml-2"></i>
+                  </button>
+                  <div id="city-menu" class="dropdown-menu"></div>
+                </div>
+              </div>
+            </div>
+            <div class="border-t border-slate-200 mt-2 pt-2 px-2 flex justify-end">
+              <button id="reset-filters-btn" class="btn btn-secondary h-8 text-xs">Reset Filters</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="relative" id="sort-control-wrap">
+          <button id="sort-dropdown-btn" type="button" class="btn btn-secondary min-w-[170px] justify-between">
+            <span id="sort-selected-label" class="truncate"></span>
+            <i data-lucide="chevron-down" class="h-4 w-4 text-slate-500"></i>
+          </button>
+          <div id="sort-dropdown-menu" class="dropdown-menu"></div>
+        </div>
+
+        <div class="h-6 border-l border-slate-200 mx-1"></div>
+
+        <button id="select-all-btn" title="Select all visible" class="btn btn-secondary"><i data-lucide="check-square" class="h-4 w-4"></i></button>
+        <button id="clear-selection-btn" title="Clear selection" class="btn btn-secondary"><i data-lucide="x-circle" class="h-4 w-4"></i></button>
+
+        <button id="export-btn" type="button" title="Export" class="btn btn-primary">
+          <i data-lucide="download" class="h-4 w-4"></i>
+          <span id="export-btn-label">Export</span>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Selection Toolbar -->
+    <div id="selection-toolbar" class="selection-toolbar mb-4">
+      <div class="bg-blue-50 border border-blue-200 rounded-lg p-2 flex items-center gap-3 animate-fadeIn">
+        <span class="flex items-center gap-2 font-semibold text-blue-800 text-sm"><i data-lucide="check-circle-2" class="h-5 w-5 text-blue-600"></i><span id="selected-count">0</span> properties selected</span>
+        <div class="ml-auto flex items-center gap-2">
+          <button id="filter-selected-btn" type="button" class="btn btn-secondary h-8 text-xs bg-white/70" title="Show only selected"><i data-lucide="filter" class="h-4 w-4"></i>Only Selected</button>
+          <button id="export-selected-btn" type="button" class="btn btn-primary h-8 text-xs" title="Export only selected"><i data-lucide="download" class="h-4 w-4"></i>Export Selected</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="status-message" class="text-center text-slate-500 py-10">Loading widget...</div>
+    <div id="property-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+  </div>
+
+  <!-- MODAL -->
+  <div id="modal-container" class="fixed inset-0 z-50 hidden" aria-modal="true">
+    <div id="modal-backdrop" class="fixed inset-0 bg-black/70"></div>
+    <div class="fixed left-1/2 top-1/2 w-full max-w-3xl -translate-x-1/2 -translate-y-1/2">
+      <div class="relative max-h-[95vh] bg-white rounded-lg shadow-xl flex flex-col">
+        <div class="p-3 pb-0 flex items-center justify-between shrink-0">
+           <button id="modal-select-toggle" class="btn btn-secondary"><i data-lucide="check-square" class="h-4 w-4"></i><span id="modal-select-label">Select</span></button>
+           <button id="modal-close-button" class="text-gray-400 hover:text-gray-600 rounded-full p-1"><i data-lucide="x" class="h-6 w-6"></i></button>
+        </div>
+        <div id="modal-body" class="overflow-y-auto"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TEMPLATES -->
+  <template id="property-card-template">
+    <div class="card group flex flex-col bg-white rounded-lg border border-gray-200/80 overflow-hidden shadow-md shadow-sky-200/50 transition-all duration-300">
+      <div class="relative overflow-hidden h-48 cursor-pointer" data-action="open-modal">
+        <img data-template-field="photo_url" alt="" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+        <div class="select-checkbox-overlay" title="Select property"><div class="select-checkbox"></div></div>
+        <div class="absolute top-2.5 right-2.5 z-10 flex flex-col items-end gap-1.5">
+          <div class="days-chip-container"></div>
+          <div class="type-chip-container"></div>
+        </div>
+        <div class="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-black/80 to-transparent"></div>
+        <div class="absolute bottom-3 left-4 text-white z-10">
+          <p data-template-field="Property_Name" class="font-bold text-lg drop-shadow-md"></p>
+        </div>
+      </div>
+      <div class="p-4 flex-grow flex flex-col cursor-pointer" data-action="open-modal">
+        <p data-template-field="Address" class="text-sm text-gray-500 flex items-center gap-2 mt-1 truncate">
+          <i data-lucide="map-pin" class="h-4 w-4 flex-shrink-0"></i><span class="truncate"></span>
+        </p>
+        <div class="mt-auto pt-5 flex justify-between items-center">
+          <div class="flex items-center gap-1.5">
+            <i data-lucide="dollar-sign" class="h-5 w-5 text-green-500"></i><span data-template-field="Price" class="font-semibold text-gray-800 text-base"></span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <i data-lucide="trending-up" class="h-5 w-5 text-blue-500"></i><span data-template-field="Cap_Rate" class="font-semibold text-gray-800 text-base"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <template id="modal-body-template">
+    <div class="relative w-full"><img data-template-field="photo_url" class="w-full h-[320px] md:h-[400px] object-cover bg-slate-100" /></div>
+    <div class="p-6 pb-2">
+      <h2 data-template-field="Property_Name" class="text-2xl font-bold text-gray-800"></h2>
+      <p data-template-field="Address" class="text-md text-gray-500 flex items-center gap-2 pt-1"><i data-lucide="map-pin" class="h-4 w-4"></i><span></span></p>
+    </div>
+    <div class="px-6 pb-6 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+      <div class="p-3 bg-slate-50 rounded-lg"><h4 class="text-sm text-gray-500">Price</h4><p data-template-field="Price" class="font-bold text-lg text-green-600"></p></div>
+      <div class="p-3 bg-slate-50 rounded-lg"><h4 class="text-sm text-gray-500">Building Size</h4><p data-template-field="RBA" class="font-bold text-lg"></p></div>
+      <div class="p-3 bg-slate-50 rounded-lg"><h4 class="text-sm text-gray-500">Cap Rate</h4><p data-template-field="Cap_Rate" class="font-bold text-lg"></p></div>
+      <div class="p-3 bg-slate-50 rounded-lg"><h4 class="text-sm text-gray-500">Type</h4><p data-template-field="Property_Type" class="font-bold text-lg"></p></div>
+    </div>
+    <div class="px-6 pb-6"><h4 class="font-bold mb-2">Description</h4><p data-template-field="Notes" class="text-sm text-gray-600"></p></div>
+    <div class="px-6 pb-8"><h4 class="font-bold mb-3">External Resources</h4><div data-template-field="links" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div></div>
+  </template>
+
+  <script type="module">
+    let allRecords = [];
+    let filteredRecords = [];
+    let searchColumnName = "Property_Name";
+
+    const UI = {
+      propertyGrid: document.getElementById('property-grid'),
+      cardTemplate: document.getElementById('property-card-template'),
+      statusMessage: document.getElementById('status-message'),
+      searchBar: document.getElementById('property-search-bar'),
+      typeFilter: document.getElementById('type-filter'),
+      minPrice: document.getElementById('min-price'),
+      maxPrice: document.getElementById('max-price'),
+      resetFiltersBtn: document.getElementById('reset-filters-btn'),
+      exportBtn: document.getElementById('export-btn'),
+      exportBtnLabel: document.getElementById('export-btn-label'),
+      selectAllBtn: document.getElementById('select-all-btn'),
+      clearSelectionBtn: document.getElementById('clear-selection-btn'),
+      selectionToolbar: document.getElementById('selection-toolbar'),
+      selectedCount: document.getElementById('selected-count'),
+      filterSelectedBtn: document.getElementById('filter-selected-btn'),
+      exportSelectedBtn: document.getElementById('export-selected-btn'),
+      modal: {
+        container: document.getElementById('modal-container'),
+        body: document.getElementById('modal-body'),
+        template: document.getElementById('modal-body-template'),
+        selectToggle: document.getElementById('modal-select-toggle'),
+        selectLabel: document.getElementById('modal-select-label'),
+        closeBtn: document.getElementById('modal-close-button'),
+        backdrop: document.getElementById('modal-backdrop'),
+      },
+      city: {
+        wrap: document.getElementById('city-control-wrap'),
+        btn: document.getElementById('city-input-btn'),
+        label: document.getElementById('city-input-label'),
+        menu: document.getElementById('city-menu'),
+      },
+      sort: {
+        wrap: document.getElementById('sort-control-wrap'),
+        btn: document.getElementById('sort-dropdown-btn'),
+        label: document.getElementById('sort-selected-label'),
+        menu: document.getElementById('sort-dropdown-menu'),
+      },
+      filter: {
+        wrap: document.getElementById('filter-control-wrap'),
+        btn: document.getElementById('filter-btn'),
+        popover: document.getElementById('filter-popover'),
+        badge: document.getElementById('filter-badge'),
+      }
+    };
+
+    let state = {
+      selectedIds: new Set(),
+      onlySelectedFilter: false,
+      modalRecordId: null,
+      selectedCities: new Set(),
+      allCities: [],
+      currentSort: 'modified_desc',
+    };
+    
+    const sortOptions = { 'modified_desc': 'Updated: Newest', 'modified_asc': 'Updated: Oldest', 'price_desc': 'Price: High to Low', 'price_asc': 'Price: Low to High', 'date_desc': 'Listed: Newest', 'date_asc': 'Listed: Oldest' };
+    const formatters = { Price: (v) => (v!=null&&v!=='')?`$${Number(v).toLocaleString('en-US')}`:'N/A', RBA: (v) => (v!=null&&v!=='')?`${Number(v).toLocaleString()} sq ft`:'N/A', Cap_Rate: (v) => (v!=null&&v!=='')?`${(Number(v)*100).toFixed(2)}%`:'N/A', default: (v) => (v!=null&&v!=='')?v:'N/A' };
+    
+    function getDaysOnMarket(dateVal) { if (!dateVal) return null; const d=new Date(dateVal instanceof Date ? dateVal : typeof dateVal === "number" ? dateVal : Date.parse(dateVal)); if(isNaN(d?.getTime())) return null; const diff=Math.floor((Date.now()-d.getTime())/86400000); return diff<0?0:diff; }
+    function isSelected(id) { return state.selectedIds.has(String(id)); }
+    function setSelected(id, on) { const k=String(id); if (on) state.selectedIds.add(k); else state.selectedIds.delete(k); updateSelectionUI(); }
+
+    function updateSelectionUI() {
+      const count = state.selectedIds.size;
+      UI.selectedCount.textContent = count;
+      UI.selectionToolbar.classList.toggle('show', count > 0);
+      const hasSelection = count > 0;
+      UI.exportSelectedBtn.disabled = !hasSelection;
+      UI.clearSelectionBtn.disabled = !hasSelection;
+      UI.filterSelectedBtn.disabled = !hasSelection;
+      UI.exportBtnLabel.textContent = hasSelection ? `Export (${count})` : 'Export';
+      document.querySelectorAll('[data-record-id]').forEach(el => {
+        el.classList.toggle('selected-card', isSelected(el.dataset.recordId));
+      });
+    }
+
+    function renderProperties(recordsToRender) {
+      UI.propertyGrid.innerHTML = '';
+      if (!recordsToRender || recordsToRender.length === 0) {
+        UI.statusMessage.textContent = allRecords.length > 0 ? 'No properties match current filters.' : 'No properties in table.';
+        UI.statusMessage.style.display = 'block';
+        return;
+      }
+      UI.statusMessage.style.display = 'none';
+
+      recordsToRender.forEach((record, index) => {
+        const card = UI.cardTemplate.content.cloneNode(true);
+        const cardEl = card.firstElementChild;
+        cardEl.style.animationDelay = `${index*30}ms`;
+        cardEl.dataset.recordId = record.id;
+        
+        // **FIX:** Use classList.toggle() to conditionally add/remove the class.
+        cardEl.classList.add('animate-fadeIn');
+        cardEl.classList.toggle('selected-card', isSelected(record.id));
+        
+        const createChip = (text) => { const c=document.createElement('span'); c.className='chip'; c.textContent=text; return c; };
+        const dom = getDaysOnMarket(record.Date_Listed);
+        if (dom !== null) { cardEl.querySelector('.days-chip-container').appendChild(createChip(`${dom}d ago`)); }
+        if (record.Property_Type) { cardEl.querySelector('.type-chip-container').appendChild(createChip(record.Property_Type)); }
+
+        card.querySelectorAll('[data-template-field]').forEach(el => {
+          const field = el.dataset.templateField;
+          const value = record[field];
+          const formatter = formatters[field] || formatters.default;
+          if (field === 'photo_url') {
+            const urls = extractImageUrls(record);
+            el.src = urls[0] || `https://placehold.co/600x400/e2e8f0/64748b?text=${encodeURIComponent(record.Property_Name||'No Image')}`;
+            el.alt = record.Property_Name || 'Property image';
+          } else if (el.querySelector('span')) {
+            el.querySelector('span').textContent = formatter(value);
+          } else {
+            el.textContent = formatter(value);
+          }
+        });
+
+        cardEl.querySelector('.select-checkbox-overlay').addEventListener('click', (e) => { e.stopPropagation(); setSelected(record.id, !isSelected(record.id)); });
+        cardEl.querySelectorAll('[data-action="open-modal"]').forEach(el => { el.addEventListener('click', () => showModal(record)); });
+        UI.propertyGrid.appendChild(card);
+      });
+      lucide.createIcons();
+    }
+
+    function showModal(record) {
+      if (!record) return;
+      state.modalRecordId = record.id;
+      const content = UI.modal.template.content.cloneNode(true);
+      content.querySelectorAll('[data-template-field]').forEach(el => {
+        const field = el.dataset.templateField;
+        const value = record[field];
+        if (field === 'links') {
+          el.innerHTML = '';
+          const linkBtn = (url, icon, text) => `<a href="${url}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary"><i data-lucide="${icon}" class="h-4 w-4 mr-2"></i>${text}</a>`;
+          if (record.CoStar) el.innerHTML += linkBtn(record.CoStar, 'external-link', 'View on CoStar');
+          if (record.Crexi) el.innerHTML += linkBtn(record.Crexi, 'external-link', 'View on Crexi');
+          if (el.innerHTML === '') el.innerHTML = '<p class="text-sm text-gray-500 col-span-full">No external resources provided.</p>';
+        } else if (field === 'photo_url') {
+           const urls = extractImageUrls(record);
+           el.src = urls[0] || `https://placehold.co/800x600/e2e8f0/64748b?text=${encodeURIComponent(record.Property_Name||'No Image')}`;
+           el.alt = record.Property_Name || 'Property image';
+        } else if (el.querySelector('span')) {
+          el.querySelector('span').textContent = (formatters[field]||formatters.default)(value);
+        } else {
+          el.textContent = (formatters[field]||formatters.default)(value);
+        }
+      });
+      UI.modal.body.innerHTML = '';
+      UI.modal.body.appendChild(content);
+      UI.modal.selectLabel.textContent = isSelected(state.modalRecordId) ? 'Unselect' : 'Select';
+      UI.modal.container.classList.remove('hidden');
+      lucide.createIcons();
+    }
+    
+    function hideModal() { UI.modal.container.classList.add('hidden'); UI.modal.body.innerHTML = ''; state.modalRecordId = null; }
+
+    function setupDropdown(btn, menu, wrap) {
+      btn.addEventListener('click', (e) => { e.stopPropagation(); const isShown = menu.classList.toggle('show'); btn.setAttribute('aria-expanded', isShown); });
+      document.addEventListener('click', (e) => { if (!wrap.contains(e.target)) { menu.classList.remove('show'); btn.setAttribute('aria-expanded', 'false'); } });
+    }
+
+    function populateFilters(records) {
+      const types = [...new Set(records.map(r => r.Property_Type).filter(Boolean))].sort();
+      UI.typeFilter.innerHTML = '<option value="all">All Types</option>';
+      types.forEach(type => { const o=document.createElement('option'); o.value=type; o.textContent=type; UI.typeFilter.appendChild(o); });
+
+      const deriveCity = (addr) => !addr?'':(addr.split(',').map(p=>p.trim())[addr.split(',').length-2] || '');
+      state.allCities = [...new Set(records.map(r => deriveCity(r.Address)).filter(Boolean))].sort();
+      
+      UI.city.menu.innerHTML = `<button type="button" data-value="all" class="dropdown-option">All Cities</button>
+        ${state.allCities.map(c => `<label class="w-full px-3 py-1.5 text-sm text-slate-700 rounded-md hover:bg-slate-100 flex items-center gap-2 cursor-pointer"><input type="checkbox" data-city="${c}" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">${c}</label>`).join('')}`;
+      UI.city.menu.querySelectorAll('input[type=checkbox]').forEach(cb => {
+        cb.checked = state.selectedCities.has(cb.dataset.city);
+        cb.addEventListener('change', (e) => { e.target.checked ? state.selectedCities.add(e.target.dataset.city) : state.selectedCities.delete(e.target.dataset.city); applyFiltersAndRender(); });
+      });
+      UI.city.menu.querySelector('button[data-value="all"]').addEventListener('click', () => { state.selectedCities.clear(); UI.city.menu.querySelectorAll('input').forEach(c => c.checked=false); applyFiltersAndRender(); UI.city.menu.classList.remove('show'); });
+    }
+    
+    function populateSortMenu() {
+      UI.sort.menu.innerHTML = Object.entries(sortOptions).map(([k, l]) => `<li><button type="button" class="dropdown-option" data-sort="${k}" aria-selected="${k===state.currentSort}">${l}</button></li>`).join('');
+      UI.sort.label.textContent = sortOptions[state.currentSort];
+      UI.sort.menu.querySelectorAll('.dropdown-option').forEach(btn => btn.addEventListener('click', () => {
+        state.currentSort = btn.dataset.sort; UI.sort.label.textContent = sortOptions[state.currentSort];
+        UI.sort.menu.querySelectorAll('.dropdown-option').forEach(b => b.setAttribute('aria-selected', b === btn));
+        UI.sort.menu.classList.remove('show'); applyFiltersAndRender();
+      }));
+    }
+
+    function applyFiltersAndRender() {
+      const deriveCity = (addr) => !addr?'':(addr.split(',').map(p=>p.trim())[addr.split(',').length-2] || '');
+      const minPrice = parseFloat(UI.minPrice.value) || 0;
+      const maxPrice = parseFloat(UI.maxPrice.value) || 0;
+      const typeFilter = UI.typeFilter.value;
+      const searchQuery = UI.searchBar.value.trim().toLowerCase();
+
+      let filtered = [...allRecords];
+      if (state.onlySelectedFilter && state.selectedIds.size > 0) {
+        filtered = filtered.filter(r => isSelected(r.id));
+      } else {
+        if (searchQuery) { filtered = filtered.filter(r => String(r[searchColumnName]||'').toLowerCase().includes(searchQuery)); }
+        if (minPrice > 0) { filtered = filtered.filter(r => r.Price >= minPrice); }
+        if (maxPrice > 0) { filtered = filtered.filter(r => r.Price <= maxPrice); }
+        if (typeFilter !== 'all') { filtered = filtered.filter(r => r.Property_Type === typeFilter); }
+        if (state.selectedCities.size > 0) { filtered = filtered.filter(r => state.selectedCities.has(deriveCity(r.Address))); }
+      }
+
+      const sortMap = { modified: 'Last_updated_at', created: 'Created_at', date: 'Date_Listed', price: 'Price' };
+      const [sortBy, order] = state.currentSort.split('_');
+      filtered.sort((a, b) => {
+        let valA = a[sortMap[sortBy]], valB = b[sortMap[sortBy]];
+        if (sortBy === 'price') { valA = parseFloat(valA)||0; valB = parseFloat(valB)||0; }
+        else if (['modified', 'created', 'date'].includes(sortBy)) { valA = valA ? new Date(valA).getTime():0; valB = valB ? new Date(valB).getTime():0; }
+        if (valA < valB) return order === 'asc' ? -1 : 1; if (valA > valB) return order === 'asc' ? 1 : -1; return 0;
+      });
+      
+      filteredRecords = filtered;
+      renderProperties(filtered);
+      updateActiveFilterCount();
+      if (state.selectedCities.size === 0) { UI.city.label.textContent = 'All Cities'; } 
+      else if (state.selectedCities.size === 1) { UI.city.label.textContent = [...state.selectedCities][0]; }
+      else { UI.city.label.textContent = `${state.selectedCities.size} Cities`; }
+    }
+
+    function updateActiveFilterCount() {
+      let count = 0;
+      if (UI.minPrice.value || UI.maxPrice.value) count++;
+      if (UI.typeFilter.value !== 'all') count++;
+      if (state.selectedCities.size > 0) count++;
+      UI.filter.badge.textContent = count;
+      UI.filter.badge.classList.toggle('hidden', count === 0);
+      UI.filter.badge.classList.toggle('flex', count > 0);
+    }
+    
+    function resetAllFilters() {
+      UI.searchBar.value = ''; UI.minPrice.value = ''; UI.maxPrice.value = '';
+      UI.typeFilter.value = 'all'; state.selectedCities.clear();
+      UI.city.menu.querySelectorAll('input').forEach(c => c.checked=false);
+      state.onlySelectedFilter = false;
+      UI.filterSelectedBtn.classList.remove('bg-blue-600', 'text-white', 'border-blue-600');
+      applyFiltersAndRender();
+    }
+
+    const debounce = (func, wait) => { let t; return (...a) => { clearTimeout(t); t=setTimeout(()=>func.apply(this,a),wait); }; };
+    
+    // Event Listeners Setup
+    [UI.searchBar, UI.minPrice, UI.maxPrice].forEach(el => el.addEventListener('input', debounce(applyFiltersAndRender, 350)));
+    UI.typeFilter.addEventListener('change', applyFiltersAndRender);
+    UI.resetFiltersBtn.addEventListener('click', resetAllFilters);
+    UI.selectAllBtn.addEventListener('click', () => { filteredRecords.forEach(r => state.selectedIds.add(String(r.id))); updateSelectionUI(); });
+    UI.clearSelectionBtn.addEventListener('click', () => { if (state.selectedIds.size===0) return; state.selectedIds.clear(); if(state.onlySelectedFilter){ resetAllFilters(); } else { updateSelectionUI(); } });
+    UI.filterSelectedBtn.addEventListener('click', () => { if (state.selectedIds.size === 0) return; state.onlySelectedFilter = !state.onlySelectedFilter; UI.filterSelectedBtn.classList.toggle('bg-blue-600'); UI.filterSelectedBtn.classList.toggle('text-white'); UI.filterSelectedBtn.classList.toggle('border-blue-600'); applyFiltersAndRender(); });
+    UI.modal.closeBtn.addEventListener('click', hideModal);
+    UI.modal.backdrop.addEventListener('click', hideModal);
+    UI.modal.selectToggle.addEventListener('click', () => { if (state.modalRecordId == null) return; setSelected(state.modalRecordId, !isSelected(state.modalRecordId)); UI.modal.selectLabel.textContent = isSelected(state.modalRecordId) ? 'Unselect' : 'Select'; });
+    setupDropdown(UI.city.btn, UI.city.menu, UI.city.wrap);
+    setupDropdown(UI.sort.btn, UI.sort.menu, UI.sort.wrap);
+    setupDropdown(UI.filter.btn, UI.filter.popover, UI.filter.wrap);
+
+    // EXPORT
+    function extractImageUrls(record) { const c = [record['IMG URL'], record.photo_url, record.Image_URL, record.Images].filter(Boolean); let p = []; for(const i of c){if(Array.isArray(i))p.push(...i);else if(typeof i==='string')p.push(...i.split(/[\s,]+/));} return [...new Set(p.map(s=>String(s).trim()).filter(s=>s&&s.startsWith('http')))]; }
+    function mapToExportFormat(r) { const p=r.Price!=null?Number(r.Price):null, rb=r.RBA!=null?Number(r.RBA):null, n=r.Sale_Notes||r.Notes||null; return { "IMG URL": extractImageUrls(r).join(' '), "Property Name": r.Property_Name||null, Address:r.Address||'', Price:p, "Price/SF": (p&&rb)?(p/rb):null, "Cap Rate": r.Cap_Rate!=null?Number(r.Cap_Rate):null, RBA: rb, Land:r.Land?Number(r.Land):null, "Sale Notes":n };}
+    function getFilterSummary() { const p=[]; if(state.selectedCities.size>0)p.push(`Cities: ${[...state.selectedCities].join(', ')}`); if(UI.typeFilter.value!=='all')p.push(`Type: ${UI.typeFilter.value}`); if(UI.minPrice.value)p.push(`Min Price: ${formatters.Price(UI.minPrice.value)}`); if(UI.maxPrice.value)p.push(`Max Price: ${formatters.Price(UI.maxPrice.value)}`); if(UI.searchBar.value)p.push(`Search: "${UI.searchBar.value}"`); return p.length?`Filters: ${p.join('; ')}`:''; }
+    function buildExportHtml(props, meta) {
+      const dataJson = JSON.stringify(props, null, 2);
+      return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${meta.title}</title><style>*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;line-height:1.6;color:#333;background-color:#f0f2f5;font-size:16px}.header{background:linear-gradient(135deg,#1a2b3c 0%,#4a86b8 100%);color:#fff;padding:15px 20px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.15)}.header h1{font-size:1.5rem;margin-bottom:5px;letter-spacing:.5px}.header p{font-size:.9rem;opacity:.9}.container{max-width:1200px;margin:0 auto;padding:20px 15px}.property-grid{display:grid;gap:20px;grid-template-columns:1fr}.property-card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 3px 12px rgba(0,0,0,.07);transition:transform .25s,box-shadow .25s;display:flex;flex-direction:column;border:1px solid #e8e8e8}.property-card:hover{transform:translateY(-4px);box-shadow:0 6px 20px rgba(0,0,0,.1)}.property-image-carousel{position:relative;width:100%;height:220px;overflow:hidden;background-color:#f0f2f5;display:flex;align-items:center;justify-content:center}.carousel-image{width:100%;height:100%;object-fit:cover;display:block;transition:opacity .4s}.no-image,.image-error{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1rem;text-align:center;padding:10px}.no-image{background:#e9ecef;color:#6c757d}.image-error{background:#ffebeb;color:#dc3545;font-weight:500}.carousel-button{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.35);color:#fff;border:none;padding:8px 6px;cursor:pointer;font-size:1.5rem;line-height:1;z-index:10;border-radius:4px;transition:all .2s;opacity:.6}.property-image-carousel:hover .carousel-button{opacity:.8}.carousel-button:hover{background:rgba(0,0,0,.55);opacity:1}.carousel-button.prev{left:6px}.carousel-button.next{right:6px}.property-image-carousel[data-image-count="0"] .carousel-button,.property-image-carousel[data-image-count="1"] .carousel-button{display:none!important}.carousel-indicators{position:absolute;bottom:6px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:10}.indicator-dot{width:8px;height:8px;background-color:rgba(255,255,255,.5);border-radius:50%;cursor:pointer;transition:all .2s;border:1px solid rgba(0,0,0,.1)}.indicator-dot.active{background-color:#3498db;transform:scale(1.1);border-color:#2980b9}.property-content{padding:15px;display:flex;flex-direction:column;flex-grow:1}.property-name{font-size:1.15rem;font-weight:600;color:#2c3e50;margin-bottom:6px;line-height:1.25}.property-address{font-size:.9rem;color:#555;margin-bottom:15px;line-height:1.3}.property-details{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:15px}.detail-item{background:#f9f9f9;padding:8px;border-radius:6px;text-align:center;border:1px solid #efefef}.detail-label{font-size:.7rem;color:#777;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px;font-weight:500}.detail-value{font-size:.95rem;font-weight:600;word-break:break-word}.price{color:#27ae60!important;font-size:1rem!important}.investment-details{background:#fdfdfd;padding:12px;border-radius:6px;border-left:3px solid #3498db;margin-top:auto;box-shadow:0 1px 3px rgba(0,0,0,.03)}.investment-details h4{color:#333;margin-bottom:6px;font-size:.9rem;text-transform:uppercase;border-bottom:1px solid #f0f0f0;padding-bottom:6px}.investment-details ul{list-style:none;padding:0;margin:0}.investment-details li{position:relative;padding-left:18px;margin-bottom:5px;font-size:.8rem;color:#555;line-height:1.4}.investment-details li::before{content:'•';color:#3498db;font-weight:700;position:absolute;left:0;top:-1px;font-size:1.1em}.footer{text-align:center;padding:25px 15px;color:#777;font-size:.85rem;border-top:1px solid #e8e8e8;margin-top:25px;background-color:#fafafa}@media (max-width:380px){.property-details{grid-template-columns:1fr}}@media (min-width:769px){.header h1{font-size:2.2rem}.header p{font-size:1.2rem}.container{padding:30px}.property-details{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px}.detail-label{font-size:.8rem}.detail-value{font-size:1.05rem}.price{font-size:1.15rem!important}.property-grid{grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:30px}.property-image-carousel{height:250px}.property-image-carousel .carousel-button{opacity:0}.property-content{padding:20px}.property-name{font-size:1.3rem}.property-address{font-size:1rem}.investment-details{padding:15px}.investment-details li{font-size:.85rem}}@media (min-width:1024px){.property-grid{grid-template-columns:repeat(auto-fit,minmax(380px,1fr))}}</style></head><body><div class="header"><h1>${meta.headerTitle}</h1><p>${meta.subtitle||''}</p></div><div class="container"><div class="property-grid" id="propertyGrid"><p>Loading properties...</p></div></div><div class="footer"><p>Generated on <span id="currentDate">${meta.generatedOn}</span></p></div><script>
+      const properties=${dataJson};const currentImageIndexes={};function formatCurrency(v){if(v==null||isNaN(parseFloat(v)))return'N/A';return'$'+parseFloat(v).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})}function formatNumber(v){if(v==null||isNaN(parseInt(v)))return'N/A';return parseInt(v).toLocaleString('en-US')}function showImage(propIdx,imgIdx){const card=document.querySelector(\`.property-card[data-property-idx="\${propIdx}"]\`);if(!card)return;const carousel=card.querySelector('.property-image-carousel'),imgEl=carousel.querySelector('.carousel-image'),noImg=carousel.querySelector('.no-image'),err=carousel.querySelector('.image-error'),inds=carousel.querySelector('.carousel-indicators'),urls=(carousel.dataset.imageUrls||'').split(' ').filter(u=>u.trim()!=='');if(urls.length===0){imgEl.style.display='none';noImg.style.display='flex';err.style.display='none';if(inds)inds.innerHTML='';return}imgIdx=(imgIdx+urls.length)%urls.length;currentImageIndexes[propIdx]=imgIdx;imgEl.src=urls[imgIdx];imgEl.alt=\`\${properties[propIdx]['Property Name']||properties[propIdx].Address} - Image \${imgIdx+1}\`;imgEl.style.display='block';noImg.style.display='none';err.style.display='none';imgEl.onload=()=>{err.style.display='none';imgEl.style.display='block';};imgEl.onerror=()=>{imgEl.style.display='none';noImg.style.display='none';err.style.display='flex';};if(inds){inds.innerHTML='';urls.forEach((_,idx)=>{const dot=document.createElement('div');dot.classList.add('indicator-dot');if(idx===imgIdx)dot.classList.add('active');dot.dataset.imageIndex=idx;inds.appendChild(dot)})}}function navigateImage(propIdx,dir){const urls=(document.querySelector(\`.property-card[data-property-idx="\${propIdx}"] .property-image-carousel\`).dataset.imageUrls||'').split(' ').filter(u=>u.trim()!=='');if(urls.length<=1)return;let current=currentImageIndexes[propIdx]||0;current+=dir;showImage(propIdx,current)}function createPropertyCard(p,i){const urls=p['IMG URL']?p['IMG URL'].split(' ').filter(u=>u.trim()!==''):[];const initialUrl=urls[0]||'https://placehold.co/600x400/e9ecef/6c757d?text=No+Image';let notesHtml='';if(p['Sale Notes']){const notes=String(p['Sale Notes']).split(/\\n|\\r\\n|\\r/).filter(n=>n.trim()!=='');if(notes.length>0)notesHtml=\`<ul>\${notes.map(n=>\`<li>\${n.trim()}</li>\`).join('')}</ul>\`}return\`<div class="property-card" data-property-idx="\${i}"><div class="property-image-carousel" data-image-count="\${urls.length}" data-image-urls="\${urls.join(' ')}"><img src="\${initialUrl}" alt="\${p['Property Name']||p.Address||'Property image'}" class="carousel-image"><div class="no-image" style="\${urls.length===0?'display:flex;':'display:none;'}">📷 No Image</div><div class="image-error" style="display:none">⚠️ Error</div>\${urls.length>1?\`<button class="carousel-button prev">❮</button><button class="carousel-button next">❯</button><div class="carousel-indicators"></div>\`:''}</div><div class="property-content">\${p['Property Name']?\`<div class="property-name">\${p['Property Name']}</div>\`:''}<div class="property-address">\${p.Address||'Address N/A'}</div><div class="property-details"><div class="detail-item"><div class="detail-label">Price</div><div class="detail-value price">\${formatCurrency(p.Price)}</div></div><div class="detail-item"><div class="detail-label">Price/SF</div><div class="detail-value">\${p['Price/SF']?formatCurrency(p['Price/SF']).replace(/,/g,''):'N/A'}</div></div><div class="detail-item"><div class="detail-label">RBA (SF)</div><div class="detail-value">\${formatNumber(p.RBA)}</div></div><div class="detail-item"><div class="detail-label">Land (SF)</div><div class="detail-value">\${formatNumber(p.Land)}</div></div></div>\${notesHtml?\`<div class="investment-details"><h4>Highlights</h4>\${notesHtml}</div>\`:''}</div></div>\`}
+      function render(){const grid=document.getElementById('propertyGrid');if(!grid)return;if(!properties||properties.length===0){grid.innerHTML='<p style="text-align:center;padding:20px;">No properties.</p>';return}grid.innerHTML=properties.map((p,i)=>createPropertyCard(p,i)).join('');properties.forEach((_,i)=>{currentImageIndexes[i]=0;showImage(i,0)})}
+      document.addEventListener('DOMContentLoaded',()=>{render();document.getElementById('propertyGrid').addEventListener('click',e=>{const card=e.target.closest('.property-card');if(!card)return;const idx=parseInt(card.dataset.propertyIdx);if(e.target.classList.contains('carousel-button')){navigateImage(idx,e.target.classList.contains('next')?1:-1)}else if(e.target.classList.contains('indicator-dot')){showImage(idx,parseInt(e.target.dataset.imageIndex))}})});
+    <\/script></body></html>`;
+    }
+    function exportContext() {
+      const recordsToExport = state.selectedIds.size > 0 ? allRecords.filter(r => isSelected(r.id)) : filteredRecords;
+      if (recordsToExport.length === 0) return alert("No properties to export.");
+      const isSelection = state.selectedIds.size > 0;
+      const props = recordsToExport.map(mapToExportFormat);
+      const html = buildExportHtml(props, {
+        title: `Listings - ${isSelection ? 'Selected' : 'View'} (${props.length})`,
+        headerTitle: 'Current Listings | Great Opportunities',
+        subtitle: getFilterSummary(),
+        generatedOn: new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})
+      });
+      const blob = new Blob([html],{type:'text/html'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `property-export-${new Date().toISOString().slice(0,10)}.html`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+    UI.exportBtn.addEventListener('click', exportContext);
+    UI.exportSelectedBtn.addEventListener('click', exportContext);
+
+    // Grist Ready
+    grist.ready({ requiredAccess: 'read table' });
+    grist.onRecords((records, mappings) => {
+      // Use grist.mapColumnNames to handle columns with spaces or invalid identifiers
+      allRecords = grist.mapColumnNames(records, mappings) || [];
+      UI.searchBar.disabled = false;
+      populateFilters(allRecords);
+      populateSortMenu();
+      applyFiltersAndRender();
+      updateSelectionUI();
+    });
+    grist.onOptions((options) => {
+      if (options?.searchColumn) {
+        searchColumnName = options.searchColumn;
+        UI.searchBar.placeholder = `Search ${searchColumnName.replace(/_/g,' ')}...`;
+      }
+    });
+  </script>
+</body>
+</html>
