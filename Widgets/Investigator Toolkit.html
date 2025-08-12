@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Investigator Toolkit (Grist Edition)</title>
+  <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+      @import url('https://rsms.me/inter/inter.css');
+      html { 
+          font-family: 'Inter', sans-serif; 
+          --c-brand: #4f46e5;
+          --c-brand-hover: #4338ca;
+          --c-brand-light: #e0e7ff;
+      }
+      .spinner { animation: spin 1s linear infinite; }
+      @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+      .tab-content { display: none; }
+      .tab-content.active { display: flex; }
+      .tab-button { transition: all 0.2s ease-in-out; border-bottom: 2px solid transparent; }
+      .tab-button.active { color: var(--c-brand); border-bottom-color: var(--c-brand); }
+      .tool-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+      .tool-card:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
+      .search-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+      .history-item { transition: background-color 0.2s ease, border-color 0.2s ease; }
+      .history-item:hover { background-color: var(--c-brand-light); border-color: #c7d2fe; }
+  </style>
+</head>
+<body class="h-full flex flex-col overflow-hidden antialiased bg-gray-100">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 p-2 shadow-sm flex flex-col sm:flex-row justify-between items-center z-20 shrink-0 gap-4">
+        <div class="flex items-center space-x-3">
+            <div class="bg-indigo-600 p-2 rounded-lg">
+                <i class="fa-solid fa-search h-6 w-6 text-white flex items-center justify-center text-2xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-800">Investigator Toolkit</h1>
+        </div>
+        <nav class="flex flex-wrap justify-center gap-4 sm:gap-6">
+            <button class="tab-button active text-gray-600 hover:text-indigo-600 px-6 py-3 text-sm font-semibold" data-tab="private-eye">
+                <i class="fas fa-user-secret mr-2"></i>
+                Person Search
+            </button>
+            <button class="tab-button text-gray-600 hover:text-indigo-600 px-6 py-3 text-sm font-semibold" data-tab="business-search">
+                <i class="fas fa-building mr-2"></i>
+                Business Search
+            </button>
+        </nav>
+        <div id="gristStatus" class="hidden sm:flex items-center text-sm text-gray-500 pr-4">
+             <span id="connectionStatus">Connecting to Grist...</span>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-hidden">
+        <!-- Private Eye Tab Content -->
+        <div id="private-eye-tab" class="tab-content active h-full flex-col">
+            <div class="bg-white border-b border-gray-200 p-1 flex justify-between items-center shrink-0">
+                <h2 class="text-lg font-semibold text-gray-800">Person Search Tool</h2>
+                <button id="pe_togglePanelBtn" class="p-2 rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" aria-expanded="true" aria-controls="pe_inputPanel">
+                    <svg id="pe_toggleIcon" class="h-8 w-8 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" /></svg>
+                    <span class="sr-only">Toggle Input Panel</span>
+                </button>
+            </div>
+
+            <!-- Tool Body -->
+            <div class="flex flex-1 h-full overflow-hidden">
+                <!-- Input Panel (MODIFIED for smooth width transition) -->
+                <aside id="pe_inputPanel" class="bg-white w-full md:w-[400px] lg:w-[450px] border-r border-gray-200 shadow-lg transform translate-x-0 flex flex-col fixed md:relative z-30 h-full" style="transition: transform 0.3s ease-in-out, width 0.3s ease-in-out;">
+                    <div class="p-6 overflow-y-auto">
+                        <div id="recordInfo" class="mb-4 p-3 bg-indigo-50 border border-indigo-200 rounded-md hidden">
+                            <div class="flex items-center">
+                                <i class="fas fa-link text-indigo-500 mr-2"></i>
+                                <span class="text-sm font-medium text-indigo-800">Record Selected</span>
+                            </div>
+                            <p class="text-xs text-indigo-600 mt-1">Data auto-populated from Grist.</p>
+                        </div>
+
+                        <h3 class="text-lg font-semibold text-gray-800 mb-6">Search Parameters</h3>
+                        <form id="pe_searchForm" class="space-y-6">
+                            <div>
+                                <label for="pe_name" class="block text-sm font-medium leading-6 text-gray-900"><i class="fa-solid fa-user w-4 mr-2 text-gray-400"></i>Person's Name</label>
+                                <div class="mt-2"><input type="text" id="pe_name" placeholder="e.g., Florian Davis" class="block w-full rounded-md border-0 py-2.5 px-3.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600"></div>
+                            </div>
+                            <div>
+                                <label for="pe_address" class="block text-sm font-medium leading-6 text-gray-900"><i class="fa-solid fa-location-dot w-4 mr-2 text-gray-400"></i>Address</label>
+                                <div class="mt-2"><input type="text" id="pe_address" placeholder="Number Street, City, State ZIP" class="block w-full rounded-md border-0 py-2.5 px-3.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600"></div>
+                            </div>
+                            <!-- MODIFIED: Phone input with click-to-call button -->
+                            <div>
+                                <label for="pe_phone" class="block text-sm font-medium leading-6 text-gray-900"><i class="fa-solid fa-phone w-4 mr-2 text-gray-400"></i>Phone Number</label>
+                                <div class="mt-2 flex items-center gap-x-2">
+                                    <input type="tel" id="pe_phone" placeholder="xxx-xxx-xxxx" class="block w-full rounded-md border-0 py-2.5 px-3.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600">
+                                    <a id="pe_sipLink" href="#" title="Click to call via SIP" class="hidden shrink-0 p-2.5 rounded-md bg-green-100 text-green-700 hover:bg-green-200">
+                                        <i class="fa-solid fa-phone-volume"></i>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="space-y-3 pt-4 border-t border-gray-200">
+                                <button type="submit" data-search-type="name" class="search-btn flex w-full justify-center items-center gap-x-2 rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"><i class="fa-solid fa-user-plus"></i><span>Search by Name & Address</span></button>
+                                <button type="submit" data-search-type="address" class="search-btn flex w-full justify-center items-center gap-x-2 rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"><i class="fa-solid fa-map-location-dot"></i><span>Search by Address</span></button>
+                                <button type="submit" data-search-type="phone" class="search-btn flex w-full justify-center items-center gap-x-2 rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"><i class="fa-solid fa-square-phone"></i><span>Search by Phone</span></button>
+                            </div>
+                        </form>
+                        <div id="pe_messageArea" role="alert" class="text-sm mt-6 text-center p-3 rounded-md hidden"></div>
+                    </div>
+
+                    <div id="pe_historySection" class="mt-auto border-t border-gray-200 p-4 bg-gray-50">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="text-sm font-medium text-gray-600"><i class="fa-solid fa-history mr-2"></i>Search History</h3>
+                            <button id="pe_clearHistoryBtn" class="text-xs text-indigo-600 hover:text-indigo-800 font-semibold hidden"><i class="fa-solid fa-trash-can mr-1"></i>Clear All</button>
+                        </div>
+                        <div id="pe_historyList" class="space-y-1.5 overflow-y-auto max-h-48"></div>
+                    </div>
+                </aside>
+                
+                <!-- Main Iframe Area -->
+                <div class="flex-1 bg-gray-100 flex items-center justify-center relative">
+                    <iframe id="pe_resultFrame" src="about:blank" class="w-full h-full border-none absolute top-0 left-0 hidden" title="Search Result" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
+                    <div id="pe_welcomeMessage" class="text-center text-gray-500 p-8">
+                        <i class="fa-solid fa-magnifying-glass-location text-5xl text-gray-300 mb-4"></i>
+                        <h3 class="mt-2 text-lg font-medium text-gray-900">Search Results Will Appear Here</h3>
+                        <p class="mt-1 text-sm text-gray-500">Select a record in Grist to auto-populate fields, then choose a search type.</p>
+                        <button id="pe_clearAllBtn" class="mt-6 inline-flex items-center gap-x-1.5 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"><i class="fa-solid fa-plus -ml-0.5 h-5 w-5"></i>New Search</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Business Search Tab Content (unchanged) -->
+        <div id="business-search-tab" class="tab-content h-full overflow-auto bg-gray-100 p-4 sm:p-8 flex-col">
+            <div class="max-w-4xl mx-auto space-y-8 w-full">
+                <div class="bg-white rounded-xl shadow-lg p-6 sm:p-8 tool-card">
+                    <div class="flex items-center mb-6">
+                        <div class="bg-indigo-600 rounded-lg p-3 mr-4"><i class="fas fa-building text-white text-xl"></i></div>
+                        <h2 class="text-2xl font-bold text-gray-800">Business Entity Search</h2>
+                    </div>
+                    <div class="space-y-6">
+                        <div>
+                            <label for="bs_businessName" class="block text-sm font-medium text-gray-700 mb-1"><i class="fa-solid fa-briefcase w-4 mr-2 text-gray-400"></i>Business Name/Account</label>
+                            <input type="text" id="bs_businessName" placeholder="Enter business name or account" class="w-full mt-1 px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                        </div>
+                        <div>
+                            <label for="bs_address" class="block text-sm font-medium text-gray-700 mb-1"><i class="fa-solid fa-location-dot w-4 mr-2 text-gray-400"></i>Business Address</label>
+                            <textarea id="bs_address" rows="3" placeholder="Enter full business address including state" class="w-full mt-1 px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"></textarea>
+                        </div>
+                        <div class="flex justify-center pt-2">
+                            <button id="bs_searchBtn" class="bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition flex items-center shadow-sm">
+                                <i class="fas fa-search mr-2"></i>Generate Search URL
+                            </button>
+                        </div>
+                    </div>
+                    <div id="bs_messageArea" role="alert" class="text-sm mt-6 text-center p-3 rounded-md hidden"></div>
+                </div>
+                <div id="bs_resultContainer" class="hidden"><!-- ... business results ... --></div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- GRIST INTEGRATION LOGIC ---
+        const connectionStatusEl = document.getElementById('connectionStatus');
+        const recordInfoEl = document.getElementById('recordInfo');
+        
+        const updateConnectionStatus = (status) => {
+            if (connectionStatusEl) connectionStatusEl.textContent = status;
+        };
+
+        const clearAllFields = () => {
+             document.getElementById('pe_name').value = '';
+             document.getElementById('pe_address').value = '';
+             document.getElementById('pe_phone').value = '';
+             document.getElementById('bs_businessName').value = '';
+             document.getElementById('bs_address').value = '';
+             // Manually trigger phone input event to hide sip link
+             document.getElementById('pe_phone').dispatchEvent(new Event('input'));
+        };
+
+        const populateFromGrist = (record) => {
+            if (record) {
+                document.getElementById('pe_name').value = record.Owner_Name || '';
+                document.getElementById('pe_address').value = record.Owner_Address || '';
+                const phoneInput = document.getElementById('pe_phone');
+                phoneInput.value = record.Owner_Phone || '';
+                phoneInput.dispatchEvent(new Event('input')); // Trigger update for SIP link
+
+                document.getElementById('bs_businessName').value = record.Recorded_Owner_Name || '';
+                document.getElementById('bs_address').value = record.Owner_Address || '';
+            }
+        };
+
+        grist.ready({
+            requiredAccess: 'full',
+            columns: [ 'Owner_Name', 'Owner_Address', 'Owner_Phone', 'Recorded_Owner_Name' ],
+            selection: true
+        });
+
+        grist.onRecord((record, mappings) => {
+            const mappedRecord = grist.mapColumnNames(record, mappings);
+            if (mappedRecord) {
+                populateFromGrist(mappedRecord);
+                updateConnectionStatus(`Record ID: ${mappedRecord.id}`);
+                recordInfoEl.classList.remove('hidden');
+            } else {
+                clearAllFields();
+                updateConnectionStatus('No record selected');
+                recordInfoEl.classList.add('hidden');
+            }
+        });
+        
+        // --- TAB SWITCHING & TOOL INITIALIZATION ---
+        const tabs = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('hidden', 'active'));
+                tab.classList.add('active');
+                const activeTabContent = document.getElementById(`${tab.dataset.tab}-tab`);
+                activeTabContent.classList.remove('hidden');
+                activeTabContent.classList.add('active');
+            });
+        });
+        initPrivateEyeTool();
+        initBusinessSearchTool(); // Business tool code is collapsed for brevity but included below
+    });
+
+    /**
+     *  Initializes all functionality for the Private Eye Person Search tool.
+     */
+    function initPrivateEyeTool() {
+        const ui = { inputPanel: document.getElementById('pe_inputPanel'), toggleBtn: document.getElementById('pe_togglePanelBtn'), toggleIcon: document.getElementById('pe_toggleIcon'), searchForm: document.getElementById('pe_searchForm'), messageArea: document.getElementById('pe_messageArea'), resultFrame: document.getElementById('pe_resultFrame'), welcomeMessage: document.getElementById('pe_welcomeMessage'), clearAllBtn: document.getElementById('pe_clearAllBtn'), history: { list: document.getElementById('pe_historyList'), clearBtn: document.getElementById('pe_clearHistoryBtn') }, inputs: { name: document.getElementById('pe_name'), address: document.getElementById('pe_address'), phone: document.getElementById('pe_phone') }, searchBtns: document.querySelectorAll('#private-eye-tab .search-btn'), sipLink: document.getElementById('pe_sipLink') };
+        let isPanelOpen = window.innerWidth > 768;
+        let searchHistory = JSON.parse(localStorage.getItem('privateEyeHistory')) || [];
+        
+        const format = { name: (str) => { const p = str.trim().split(/\s+/); return (p.length < 2 || p[0] === '' || p[1] === '') ? null : { first: p[0].toLowerCase(), last: p[p.length - 1].toLowerCase() }; }, address: (str) => { const m = str.trim().match(/^\s*(\d+)\s+(.+?),\s*([^,]+?),\s*([A-Z]{2})\s*(\d{5})\s*$/i); return m ? { number: m[1], street: m[2].trim().toLowerCase().replace(/\s+/g, '-'), city: m[3].trim().toLowerCase().replace(/\s+/g, '-'), state: m[4].toLowerCase() } : null; }, phone: (str) => { const c = str.replace(/\D/g, ''); return c.length !== 10 ? null : c.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3'); } };
+        
+        const showMessage = (text, type = 'error') => { ui.messageArea.textContent = text; ui.messageArea.className = `text-sm mt-6 text-center p-3 rounded-md ${type === 'error' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}`; ui.messageArea.classList.remove('hidden'); };
+        const clearMessage = () => ui.messageArea.classList.add('hidden');
+
+        // MODIFIED: setPanelState for responsive layout
+        const setPanelState = (open) => {
+            isPanelOpen = open;
+            // Handle transform for slide effect
+            ui.inputPanel.classList.toggle('-translate-x-full', !isPanelOpen);
+            ui.inputPanel.classList.toggle('translate-x-0', isPanelOpen);
+            
+            // Handle width for layout reflow on medium+ screens
+            ui.inputPanel.classList.toggle('md:w-0', !isPanelOpen);
+            ui.inputPanel.classList.toggle('md:w-[400px]', isPanelOpen);
+            ui.inputPanel.classList.toggle('lg:w-[450px]', isPanelOpen);
+
+            // Hide completely on mobile when closed
+            if (window.innerWidth < 768) {
+                if (isPanelOpen) {
+                    ui.inputPanel.classList.remove('hidden');
+                } else {
+                    setTimeout(() => ui.inputPanel.classList.add('hidden'), 300);
+                }
+            }
+            ui.toggleIcon.classList.toggle('rotate-180', !isPanelOpen);
+            ui.toggleBtn.setAttribute('aria-expanded', isPanelOpen);
+        };
+
+        // NEW: Function to handle the click-to-call link
+        const updateSipLink = (phoneNumber) => {
+            const cleaned = (phoneNumber || '').replace(/\D/g, '');
+            if (cleaned.length >= 10) {
+                ui.sipLink.href = `sip:+1${cleaned}`;
+                ui.sipLink.classList.remove('hidden');
+            } else {
+                ui.sipLink.classList.add('hidden');
+            }
+        };
+        
+        const setLoadingState = (isLoading, clickedBtn) => { ui.searchBtns.forEach(btn => { btn.disabled = isLoading; const icon = btn.querySelector('i'); const span = btn.querySelector('span'); const originalContent = { name: 'Search by Name & Address', address: 'Search by Address', phone: 'Search by Phone' }; icon.classList.remove('spinner', 'fa-user-plus', 'fa-map-location-dot', 'fa-square-phone'); if (isLoading && btn === clickedBtn) { span.textContent = 'Searching...'; icon.classList.add('spinner', 'fa-solid', 'fa-spinner'); } else if (!isLoading) { span.textContent = originalContent[btn.dataset.searchType]; const iconClass = {name: 'fa-user-plus', address: 'fa-map-location-dot', phone: 'fa-square-phone'}; icon.classList.add('fa-solid', iconClass[btn.dataset.searchType]); } }); };
+        const resetToInitialState = () => { ui.searchForm.reset(); Object.values(ui.inputs).forEach(input => input.classList.remove('ring-red-500', 'ring-green-500')); clearMessage(); ui.resultFrame.src = 'about:blank'; ui.resultFrame.classList.add('hidden'); ui.welcomeMessage.classList.remove('hidden'); setLoadingState(false); grist.onRec(null); };
+        const renderHistory = () => { ui.history.list.innerHTML = ''; if (searchHistory.length === 0) { ui.history.list.innerHTML = '<p class="text-xs text-gray-400 text-center p-2">No recent searches.</p>'; ui.history.clearBtn.classList.add('hidden'); return; } ui.history.clearBtn.classList.remove('hidden'); searchHistory.forEach(item => { const btn = document.createElement('button'); btn.className = 'history-item w-full p-2.5 rounded-md text-sm text-gray-800 truncate text-left border border-transparent flex items-center justify-between'; btn.title = item.label; btn.innerHTML = `<div class="flex-1 truncate"><i class="fa-solid fa-search text-indigo-500 mr-2.5"></i>${item.label}</div><i class="fa-solid fa-chevron-right text-gray-400 ml-2"></i>`; btn.onclick = () => { Object.keys(item.values).forEach(key => ui.inputs[key].value = item.values[key]); ui.inputs.phone.dispatchEvent(new Event('input')); const fakeSubmitter = document.querySelector(`#private-eye-tab button[data-search-type="${item.type}"]`); handleSearch(new Event('submit'), fakeSubmitter); }; ui.history.list.prepend(btn); }); };
+        const addToHistory = (type, values, label) => { const newEntry = { type, values, label, timestamp: new Date().toISOString() }; searchHistory = [newEntry, ...searchHistory.filter(item => item.label !== label)].slice(0, 10); localStorage.setItem('privateEyeHistory', JSON.stringify(searchHistory)); renderHistory(); };
+        const clearHistory = () => { searchHistory = []; localStorage.removeItem('privateEyeHistory'); renderHistory(); };
+        const handleSearch = (event, submitterOverride) => { event.preventDefault(); clearMessage(); const submitter = submitterOverride || event.submitter; const searchType = submitter?.dataset.searchType; if (!searchType) return; setLoadingState(true, submitter); const values = { name: ui.inputs.name.value, address: ui.inputs.address.value, phone: ui.inputs.phone.value }; let url = '', validationError = '', historyLabel = ''; try { switch (searchType) { case 'name': if (!format.name(values.name) || !format.address(values.address)) throw new Error('A valid name and full address are required.'); const nameData = format.name(values.name); const addressDataForName = format.address(values.address); url = `https://www.privateeye.com/name/${nameData.first}-${nameData.last}/${addressDataForName.state}/${addressDataForName.city}`; historyLabel = `${values.name}, ${values.address}`; break; case 'address': if (!format.address(values.address)) throw new Error('Please provide a valid address (e.g., 123 Main St, Anytown, ST 12345).'); const addressData = format.address(values.address); url = `https://www.privateeye.com/postal-address/${addressData.state}/${addressData.city}/${addressData.street}/${addressData.number}`; historyLabel = values.address; break; case 'phone': if (!format.phone(values.phone)) throw new Error('Please provide a valid 10-digit phone number.'); const phoneData = format.phone(values.phone); url = `https://www.privateeye.com/phone-number/${phoneData}`; historyLabel = values.phone; break; } } catch (e) { validationError = e.message; } if (validationError) { showMessage(validationError, 'error'); setLoadingState(false); } else { ui.welcomeMessage.classList.add('hidden'); ui.resultFrame.classList.remove('hidden'); ui.resultFrame.src = url; ui.resultFrame.onload = () => { showMessage(`Search for "${historyLabel}" complete.`, 'info'); setLoadingState(false); addToHistory(searchType, values, historyLabel); }; ui.resultFrame.onerror = () => { showMessage(`Failed to load results for "${historyLabel}".`, 'error'); setLoadingState(false); }; if (window.innerWidth < 768 && isPanelOpen) setPanelState(false); } };
+        
+        ui.toggleBtn.addEventListener('click', () => setPanelState(!isPanelOpen));
+        ui.searchForm.addEventListener('submit', handleSearch);
+        ui.clearAllBtn.addEventListener('click', resetToInitialState);
+        ui.history.clearBtn.addEventListener('click', clearHistory);
+        ui.inputs.phone.addEventListener('input', (e) => updateSipLink(e.target.value));
+
+        setPanelState(isPanelOpen);
+        renderHistory();
+    }
+
+    /**
+     *  Initializes all functionality for the Business Search tool.
+     */
+    function initBusinessSearchTool() {
+        const ui = { businessName: document.getElementById('bs_businessName'), address: document.getElementById('bs_address'), searchBtn: document.getElementById('bs_searchBtn'), messageArea: document.getElementById('bs_messageArea'), resultContainer: document.getElementById('bs_resultContainer'), detectedState: document.getElementById('bs_detectedState'), generatedUrl: document.getElementById('bs_generatedUrl'), copyBtn: document.getElementById('bs_copyBtn') };
+        const stateUrls = { 'ALABAMA': { sosUrl: 'https://arc-sos.state.al.us/CGI/CORPNAME.MBR/INPUT' }, 'ALASKA': { sosUrl: 'https://www.commerce.alaska.gov/cbp/main/search/entities' }, 'ARIZONA': { sosUrl: 'https://ecorp.azcc.gov/EntitySearch/Index' }, 'ARKANSAS': { sosUrl: 'https://www.sos.arkansas.gov/corps/search_all.php' }, 'CALIFORNIA': { sosUrl: 'https://bizfileonline.sos.ca.gov/search/business' }, 'COLORADO': { sosUrl: 'https://www.sos.state.co.us/biz/BusinessEntityCriteriaExt.do?resetTransTyp=Y' }, 'CONNECTICUT': { sosUrl: 'https://service.ct.gov/business/s/onlinebusinesssearch?language=en_US' }, 'DELAWARE': { sosUrl: 'https://icis.corp.delaware.gov/Ecorp/EntitySearch/NameSearch.aspx' }, 'DISTRICT OF COLUMBIA': { sosUrl: 'https://corponline.dcra.dc.gov/Home.aspx' }, 'FLORIDA': { sosUrl: 'http://search.sunbiz.org/Inquiry/CorporationSearch/ByName' }, 'GEORGIA': { sosUrl: 'https://ecorp.sos.ga.gov/BusinessSearch' }, 'HAWAII': { sosUrl: 'https://hbe.ehawaii.gov/documents/search.html' }, 'IDAHO': { sosUrl: 'https://sosbiz.idaho.gov/search/business' }, 'ILLINOIS': { sosUrl: 'https://www.ilsos.gov/corporatellc/' }, 'INDIANA': { sosUrl: 'https://bsd.sos.in.gov/publicbusinesssearch' }, 'IOWA': { sosUrl: 'https://sos.iowa.gov/search/business/search.aspx' }, 'KANSAS': { sosUrl: 'https://www.kansas.gov/bess/flow/main?execution=e1s1' }, 'KENTUCKY': { sosUrl: 'https://web.sos.ky.gov/ftsearch/' }, 'LOUISIANA': { sosUrl: 'https://coraweb.sos.la.gov/CommercialSearch/CommercialSearch.aspx' }, 'MAINE': { sosUrl: 'https://apps1.web.maine.gov/online/icrs/icrs_database_search/' }, 'MARYLAND': { sosUrl: 'https://egov.maryland.gov/BusinessExpress/EntitySearch' }, 'MASSACHUSETTS': { sosUrl: 'https://corp.sec.state.ma.us/corpweb/CorpSearch/CorpSearch.aspx' }, 'MICHIGAN': { sosUrl: 'https://cofs.lara.state.mi.us/corpweb/CorpSearch/CorpSearch.aspx' }, 'MINNESOTA': { sosUrl: 'https://mblsportal.sos.state.mn.us/Business/Search' }, 'MISSISSIPPI': { sosUrl: 'https://corp.sos.ms.gov/corp/portal/c/page/corpBusinessIdSearch/portal.aspx' }, 'MISSOURI': { sosUrl: 'https://bsd.sos.mo.gov/BusinessEntity/BESearch.aspx' }, 'MONTANA': { sosUrl: 'https://biz.sosmt.gov/search/business' }, 'NEBRASKA': { sosUrl: 'https://www.nebraska.gov/sos/corp/corpsearch.cgi?nav=search' }, 'NEVADA': { sosUrl: 'https://esos.nv.gov/EntitySearch/OnlineEntitySearch' }, 'NEW HAMPSHIRE': { sosUrl: 'https://quickstart.sos.nh.gov/online/BusinessInquire' }, 'NEW JERSEY': { sosUrl: 'https://www.njportal.com/DOR/BusinessNameSearch/Search/BusinessName' }, 'NEW MEXICO': { sosUrl: 'https://portal.sos.state.nm.us/BFS/online/Account/SearchBusiness' }, 'NEW YORK': { sosUrl: 'https://apps.dos.ny.gov/publicInquiry/' }, 'NORTH CAROLINA': { sosUrl: 'https://www.sosnc.gov/search/index/corp' }, 'NORTH DAKOTA': { sosUrl: 'https://firststop.sos.nd.gov/search/business' }, 'OHIO': { sosUrl: 'https://businesssearch.ohiosos.gov/' }, 'OKLAHOMA': { sosUrl: 'https://www.sos.ok.gov/corp/corpinquiryfind.aspx' }, 'OREGON': { sosUrl: 'https://egov.sos.state.or.us/br/pkg_web_name_srch_inq.do_name_srch' }, 'PENNSYLVANIA': { sosUrl: 'https://file.dos.pa.gov/search/business' }, 'RHODE ISLAND': { sosUrl: 'https://business.sos.ri.gov/CorpWeb/CorpSearch/CorpSearch.aspx' }, 'SOUTH CAROLINA': { sosUrl: 'https://businessfilings.sc.gov/BusinessFiling/Entity/Search' }, 'SOUTH DAKOTA': { sosUrl: 'https://sos.sd.gov/business-services/business-name-search.aspx' }, 'TENNESSEE': { sosUrl: 'https://tnbear.tn.gov/ECommerce/FilingSearch.aspx' }, 'TEXAS': { sosUrl: 'https://mycpa.cpa.state.tx.us/coa/' }, 'UTAH': { sosUrl: 'https://secure.utah.gov/bes/' }, 'VERMONT': { sosUrl: 'https://sos.vermont.gov/corporations/search/' }, 'VIRGINIA': { sosUrl: 'https://cis.scc.virginia.gov/' }, 'WASHINGTON': { sosUrl: 'https://ccfs.sos.wa.gov/#/Home' }, 'WEST VIRGINIA': { sosUrl: 'https://apps.wv.gov/SOS/BusinessEntitySearch/' }, 'WISCONSIN': { sosUrl: 'https://www.wdfi.org/apps/CorpSearch/Search.aspx' }, 'WYOMING': { sosUrl: 'https://wyobiz.wyo.gov/Business/FilingSearch.aspx' } };
+        const stateAbbreviations = {'AL': 'ALABAMA', 'AK': 'ALASKA', 'AZ': 'ARIZONA', 'AR': 'ARKANSAS', 'CA': 'CALIFORNIA', 'CO': 'COLORADO', 'CT': 'CONNECTICUT', 'DE': 'DELAWARE', 'DC': 'DISTRICT OF COLUMBIA', 'FL': 'FLORIDA', 'GA': 'GEORGIA', 'HI': 'HAWAII', 'ID': 'IDAHO', 'IL': 'ILLINOIS', 'IN': 'INDIANA', 'IA': 'IOWA', 'KS': 'KANSAS', 'KY': 'KENTUCKY', 'LA': 'LOUISIANA', 'ME': 'MAINE', 'MD': 'MARYLAND', 'MA': 'MASSACHUSETTS', 'MI': 'MICHIGAN', 'MN': 'MINNESOTA', 'MS': 'MISSISSIPPI', 'MO': 'MISSOURI', 'MT': 'MONTANA', 'NE': 'NEBRASKA', 'NV': 'NEVADA', 'NH': 'NEW HAMPSHIRE', 'NJ': 'NEW JERSEY', 'NM': 'NEW MEXICO', 'NY': 'NEW YORK', 'NC': 'NORTH CAROLINA', 'ND': 'NORTH DAKOTA', 'OH': 'OHIO', 'OK': 'OKLAHOMA', 'OR': 'OREGON', 'PA': 'PENNSYLVANIA', 'RI': 'RHODE ISLAND', 'SC': 'SOUTH CAROLINA', 'SD': 'SOUTH DAKOTA', 'TN': 'TENNESSEE', 'TX': 'TEXAS', 'UT': 'UTAH', 'VT': 'VERMONT', 'VA': 'VIRGINIA', 'WA': 'WASHINGTON', 'WV': 'WEST VIRGINIA', 'WI': 'WISCONSIN', 'WY': 'WYOMING' };
+        const showMessage = (text, type = 'error') => { ui.messageArea.textContent = text; ui.messageArea.className = `text-sm mt-6 text-center p-3 rounded-md ${type === 'error' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}`; ui.messageArea.classList.remove('hidden'); };
+        const clearMessage = () => ui.messageArea.classList.add('hidden');
+        function detectState(address) { const upperAddress = address.toUpperCase(); for (const state in stateUrls) { if (upperAddress.includes(state)) return state; } for (const abbr in stateAbbreviations) { const regex = new RegExp(`\\b${abbr}\\b`, 'i'); if (regex.test(upperAddress)) return stateAbbreviations[abbr]; } return null; }
+        function generateSearchUrl(state, businessName) { if (!state || !stateUrls[state]) return null; const baseUrl = stateUrls[state].sosUrl; const encodedName = encodeURIComponent(businessName.trim()); if (state === 'FLORIDA') { return `http://search.sunbiz.org/Inquiry/CorporationSearch/SearchResults/EntityName/${encodedName}/Page1`; } else if (state === 'OREGON') { return `https://egov.sos.state.or.us/br/pkg_web_name_srch_inq.do_name_srch?p_name=${encodedName}&p_regist_nbr=&p_srch=PHASE1&p_print=FALSE&p_entity_status=ACTINA`; } if (baseUrl.includes('?')) { return `${baseUrl}&search_term=${encodedName}`; } else { return `${baseUrl}?search_term=${encodedName}`; } }
+        ui.searchBtn.addEventListener('click', () => { clearMessage(); const businessName = ui.businessName.value; const address = ui.address.value; if (!businessName || !address) { showMessage('Please enter both business name and address.', 'error'); return; } const state = detectState(address); if (!state) { showMessage('Could not detect state from address. Please use a full state name or 2-letter abbreviation.', 'error'); return; } const searchUrl = generateSearchUrl(state, businessName); if (!searchUrl) { showMessage('Could not generate search URL for the detected state.', 'error'); return; } ui.detectedState.textContent = state; ui.generatedUrl.textContent = searchUrl; ui.generatedUrl.href = searchUrl; ui.generatedUrl.dataset.businessName = businessName.trim(); ui.resultContainer.classList.remove('hidden'); const copySpan = ui.copyBtn.querySelector('span'); const copyIcon = ui.copyBtn.querySelector('i'); copySpan.textContent = 'Copy URL'; copyIcon.className = 'far fa-copy mr-2'; });
+        ui.generatedUrl.addEventListener('click', (e) => { const businessName = e.currentTarget.dataset.businessName; if (businessName) { navigator.clipboard.writeText(businessName).then(() => { const notification = document.createElement('div'); notification.textContent = 'Business name copied to clipboard!'; notification.className = 'fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity duration-300'; document.body.appendChild(notification); setTimeout(() => { notification.classList.add('opacity-0'); notification.addEventListener('transitionend', () => notification.remove()); }, 2000); }); } });
+        ui.copyBtn.addEventListener('click', () => { const url = ui.generatedUrl.href; navigator.clipboard.writeText(url).then(() => { const copySpan = ui.copyBtn.querySelector('span'); const copyIcon = ui.copyBtn.querySelector('i'); copySpan.textContent = 'Copied!'; copyIcon.className = 'fas fa-check mr-2'; setTimeout(() => { copySpan.textContent = 'Copy URL'; copyIcon.className = 'far fa-copy mr-2'; }, 2000); }); });
+    }
+    </script>
+</body>
+</html>
