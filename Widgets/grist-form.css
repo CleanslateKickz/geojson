@@ -1,0 +1,30 @@
+/* Only affects Grist forms */
+[data-grist-form] {
+  --accent: #0066cc;
+  --radius: 6px;
+}
+
+[data-grist-form] body {
+  font-family: system-ui, sans-serif;
+  background: #fafafa;
+  margin: 0;
+  padding: 2rem;
+}
+
+[data-grist-form] input,
+[data-grist-form] select,
+[data-grist-form] textarea {
+  font: inherit;
+  padding: .6rem .8rem;
+  border: 1px solid #ccc;
+  border-radius: var(--radius);
+}
+
+[data-grist-form] button[type="submit"] {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: .7rem 1.6rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
