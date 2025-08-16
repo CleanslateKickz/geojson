@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Google Maps Embed Generator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            color: #2c3e50;
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .input-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #495057;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .coordinates-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .advanced-settings {
+            background: #fff3cd;
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #ffc107;
+        }
+
+        .advanced-settings h3 {
+            color: #856404;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .slider-group {
+            margin-bottom: 15px;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #e1e8ed;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .generate-btn, .reset-btn {
+            padding: 14px 28px;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .generate-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .reset-btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .generate-btn:hover, .reset-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .results-section {
+            display: none;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .results-section.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        section {
+            margin-bottom: 20px;
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        section h2 {
+            color: #2c3e50;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        section p {
+            color: #6c757d;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .map-container {
+            position: relative;
+            margin-top: 15px;
+        }
+
+        .map {
+            width: 100%;
+            height: 400px;
+            border-radius: 8px;
+            border: none;
+        }
+
+        .map-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            display: flex;
+            gap: 10px;
+        }
+
+        .map-control-btn {
+            padding: 8px 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .map-control-btn:hover {
+            background: #5a67d8;
+        }
+
+        .map-control-btn.active {
+            background: #764ba2;
+        }
+
+        .code-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .code-section h3 {
+            color: #495057;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .code-block {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            overflow-x: auto;
+            position: relative;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .copy-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .copy-btn:hover {
+            background: #5a67d8;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2c3e50;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            display: none;
+            animation: toastAnimation 2s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            display: block;
+        }
+
+        @keyframes toastAnimation {
+            0%, 100% {
+                opacity: 0;
+                transform: translate(-50%, 20px);
+            }
+            10%, 90% {
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e1e8ed;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            color: #6c757d;
+            font-weight: 600;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            color: #667eea;
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .preset-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .preset-btn {
+            padding: 10px;
+            background: #e9ecef;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .preset-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .info-box {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #0c5460;
+        }
+
+        .info-box i {
+            margin-right: 8px;
+        }
+
+        @media (max-width: 968px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .settings-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .coordinates-row {
+                grid-template-columns: 1fr;
+            }
+
+            .code-block {
+                font-size: 0.8rem;
+                padding: 15px;
+            }
+
+            .map {
+                height: 250px;
+            }
+
+            .map-controls {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>
+            <i class="fas fa-map-marked-alt"></i>
+            Advanced Google Maps Embed Generator
+        </h1>
+        <p class="subtitle">Generate customizable embed codes for Google Maps with advanced controls</p>
+
+        <div class="main-grid">
+            <div class="input-section">
+                <h3><i class="fas fa-map-pin"></i> Location Details</h3>
+                <div class="input-group">
+                    <label for="address">
+                        <i class="fas fa-location-dot"></i> Address
+                    </label>
+                    <input type="text" id="address" placeholder="e.g., 3527 US-101, Gearhart, OR 97138">
+                </div>
+
+                <div class="coordinates-row">
+                    <div class="input-group">
+                        <label for="latitude">
+                            <i class="fas fa-compass"></i> Latitude
+                        </label>
+                        <input type="text" id="latitude" placeholder="e.g., 46.0257">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="longitude">
+                            <i class="fas fa-compass"></i> Longitude
+                        </label>
+                        <input type="text" id="longitude" placeholder="e.g., -123.9113">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="description">
+                        <i class="fas fa-info-circle"></i> Location Description
+                    </label>
+                    <input type="text" id="description" placeholder="e.g., Located next to Nike's global campus...">
+                </div>
+
+                <div class="preset-buttons">
+                    <button class="preset-btn" onclick="loadPreset('standard')">
+                        <i class="fas fa-map"></i> Standard View
+                    </button>
+                    <button class="preset-btn" onclick="loadPreset('satellite')">
+                        <i class="fas fa-satellite"></i> Satellite View
+                    </button>
+                    <button class="preset-btn" onclick="loadPreset('3d')">
+                        <i class="fas fa-cube"></i> 3D Buildings
+                    </button>
+                    <button class="preset-btn" onclick="loadPreset('street')">
+                        <i class="fas fa-street-view"></i> Street Level
+                    </button>
+                </div>
+            </div>
+
+            <div class="advanced-settings">
+                <h3><i class="fas fa-sliders-h"></i> Advanced Map Controls</h3>
+                
+                <div class="info-box">
+                    <i class="fas fa-info-circle"></i>
+                    Adjust these settings to customize your map view. The 3D tilt effect works best with satellite view enabled.
+                </div>
+
+                <div class="settings-grid">
+                    <div class="slider-group">
+                        <div class="slider-label">
+                            <label for="zoom">Zoom Level</label>
+                            <span id="zoom-value">1000</span>
+                        </div>
+                        <input type="range" id="zoom" class="slider" min="100" max="5000" value="1000" step="100">
+                    </div>
+
+                    <div class="slider-group">
+                        <div class="slider-label">
+                            <label for="tilt">Tilt (3D View)</label>
+                            <span id="tilt-value">0°</span>
+                        </div>
+                        <input type="range" id="tilt" class="slider" min="0" max="90" value="0" step="15">
+                    </div>
+
+                    <div class="slider-group">
+                        <div class="slider-label">
+                            <label for="heading">Rotation</label>
+                            <span id="heading-value">0°</span>
+                        </div>
+                        <input type="range" id="heading" class="slider" min="0" max="360" value="0" step="15">
+                    </div>
+
+                    <div class="slider-group">
+                        <div class="slider-label">
+                            <label for="pitch">Camera Pitch</label>
+                            <span id="pitch-value">0°</span>
+                        </div>
+                        <input type="range" id="pitch" class="slider" min="0" max="90" value="0" step="5">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="map-type">Map Type</label>
+                    <select id="map-type">
+                        <option value="1">Roadmap (Standard)</option>
+                        <option value="2">Satellite</option>
+                        <option value="3">Hybrid</option>
+                        <option value="4">Terrain</option>
+                    </select>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="enable-3d" checked>
+                    <label for="enable-3d">Enable 3D Buildings (when available)</label>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="fullscreen" checked>
+                    <label for="fullscreen">Allow Fullscreen</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button class="generate-btn" onclick="generateEmbed()">
+                <i class="fas fa-magic"></i>
+                Generate Embed Code
+            </button>
+            <button class="reset-btn" onclick="resetForm()">
+                <i class="fas fa-undo"></i>
+                Reset All Settings
+            </button>
+        </div>
+
+        <div class="results-section" id="results">
+            <section>
+                <h2><i class="fas fa-map"></i> Live Map Preview</h2>
+                <p id="location-description">Your embedded map will appear here</p>
+                <div class="map-container">
+                    <iframe id="map-preview" class="map" frameborder="0" allowfullscreen></iframe>
+                    <div class="map-controls">
+                        <button class="map-control-btn" onclick="refreshMap()">
+                            <i class="fas fa-sync"></i> Refresh
+                        </button>
+                        <button class="map-control-btn" onclick="toggleView()">
+                            <i class="fas fa-exchange-alt"></i> Toggle View
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('url')">Embed URL</button>
+                <button class="tab" onclick="switchTab('iframe')">Complete iFrame</button>
+                <button class="tab" onclick="switchTab('html')">HTML Section</button>
+                <button class="tab" onclick="switchTab('css')">CSS Styles</button>
+                <button class="tab" onclick="switchTab('params')">URL Parameters</button>
+            </div>
+
+            <div class="tab-content active" id="url-tab">
+                <div class="code-section">
+                    <h3>
+                        Google Maps Embed URL
+                        <button class="copy-btn" onclick="copyCode('embed-url')">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </h3>
+                    <div class="code-block" id="embed-url"></div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="iframe-tab">
+                <div class="code-section">
+                    <h3>
+                        Complete iFrame Element
+                        <button class="copy-btn" onclick="copyCode('iframe-code')">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </h3>
+                    <div class="code-block" id="iframe-code"></div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="html-tab">
+                <div class="code-section">
+                    <h3>
+                        Complete HTML Section
+                        <button class="copy-btn" onclick="copyCode('html-section')">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </h3>
+                    <div class="code-block" id="html-section"></div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="css-tab">
+                <div class="code-section">
+                    <h3>
+                        CSS Styles
+                        <button class="copy-btn" onclick="copyCode('css-styles')">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </h3>
+                    <div class="code-block" id="css-styles"></div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="params-tab">
+                <div class="code-section">
+                    <h3>
+                        URL Parameters Explained
+                        <button class="copy-btn" onclick="copyCode('url-params')">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </h3>
+                    <div class="code-block" id="url-params"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">Copied to clipboard!</div>
+
+    <script>
+        // Update slider values in real-time
+        document.getElementById('zoom').addEventListener('input', function() {
+            document.getElementById('zoom-value').textContent = this.value;
+            if (document.getElementById('results').classList.contains('active')) {
+                generateEmbed();
+            }
+        });
+
+        document.getElementById('tilt').addEventListener('input', function() {
+            document.getElementById('tilt-value').textContent = this.value + '°';
+            if (document.getElementById('results').classList.contains('active')) {
+                generateEmbed();
+            }
+        });
+
+        document.getElementById('heading').addEventListener('input', function() {
+            document.getElementById('heading-value').textContent = this.value + '°';
+            if (document.getElementById('results').classList.contains('active')) {
+                generateEmbed();
+            }
+        });
+
+        document.getElementById('pitch').addEventListener('input', function() {
+            document.getElementById('pitch-value').textContent = this.value + '°';
+            if (document.getElementById('results').classList.contains('active')) {
+                generateEmbed();
+            }
+        });
+
+        // Listen to map type changes
+        document.getElementById('map-type').addEventListener('change', function() {
+            if (document.getElementById('results').classList.contains('active')) {
+                generateEmbed();
+            }
+        });
+
+        document.getElementById('enable-3d').addEventListener('change', function() {
+            if (document.getElementById('results').classList.contains('active')) {
+                generateEmbed();
+            }
+        });
+
+        function loadPreset(preset) {
+            const presets = {
+                'standard': {
+                    zoom: 1000,
+                    tilt: 0,
+                    heading: 0,
+                    pitch: 0,
+                    mapType: '1',
+                    enable3d: false
+                },
+                'satellite': {
+                    zoom: 500,
+                    tilt: 0,
+                    heading: 0,
+                    pitch: 0,
+                    mapType: '2',
+                    enable3d: false
+                },
+                '3d': {
+                    zoom: 300,
+                    tilt: 45,
+                    heading: 0,
+                    pitch: 35,
+                    mapType: '2',
+                    enable3d: true
+                },
+                'street': {
+                    zoom: 200,
+                    tilt: 60,
+                    heading: 0,
+                    pitch: 10,
+                    mapType: '3',
+                    enable3d: true
+                }
+            };
+
+            const settings = presets[preset];
+            if (settings) {
+                document.getElementById('zoom').value = settings.zoom;
+                document.getElementById('zoom-value').textContent = settings.zoom;
+                document.getElementById('tilt').value = settings.tilt;
+                document.getElementById('tilt-value').textContent = settings.tilt + '°';
+                document.getElementById('heading').value = settings.heading;
+                document.getElementById('heading-value').textContent = settings.heading + '°';
+                document.getElementById('pitch').value = settings.pitch;
+                document.getElementById('pitch-value').textContent = settings.pitch + '°';
+                document.getElementById('map-type').value = settings.mapType;
+                document.getElementById('enable-3d').checked = settings.enable3d;
+
+                if (document.getElementById('results').classList.contains('active')) {
+                    generateEmbed();
+                }
+            }
+        }
+
+        function generateEmbed() {
+            const address = document.getElementById('address').value.trim();
+            const latitude = document.getElementById('latitude').value.trim();
+            const longitude = document.getElementById('longitude').value.trim();
+            const description = document.getElementById('description').value.trim() || `Located at ${address}`;
+
+            if (!address || !latitude || !longitude) {
+                alert('Please fill in address, latitude, and longitude fields');
+                return;
+            }
+
+            if (isNaN(parseFloat(latitude)) || isNaN(parseFloat(longitude))) {
+                alert('Please enter valid latitude and longitude values');
+                return;
+            }
+
+            // Get advanced settings
+            const zoom = document.getElementById('zoom').value;
+            const tilt = document.getElementById('tilt').value;
+            const heading = document.getElementById('heading').value;
+            const pitch = document.getElementById('pitch').value;
+            const mapType = document.getElementById('map-type').value;
+            const enable3d = document.getElementById('enable-3d').checked;
+            const allowFullscreen = document.getElementById('fullscreen').checked;
+
+            const encodedAddress = encodeURIComponent(address);
+            
+            // Build the embed URL with advanced parameters
+            let embedUrl = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d${zoom}!2d${longitude}!3d${latitude}!2m3!1f${heading}!2f${tilt}!3f${pitch}!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2s${encodedAddress}!5e${mapType}!3m2!1sen!2sus!4v${Date.now()}`;
+
+            if (enable3d) {
+                embedUrl += '!5m1!1e4';
+            }
+
+            // Update preview
+            document.getElementById('map-preview').src = embedUrl;
+            document.getElementById('map-preview').allowFullscreen = allowFullscreen;
+            document.getElementById('location-description').textContent = description;
+
+            // Update code blocks
+            document.getElementById('embed-url').textContent = embedUrl;
+
+            const iframeCode = `<iframe class="map" src="${embedUrl}" frameborder="0"${allowFullscreen ? ' allowfullscreen' : ''}></iframe>`;
+            document.getElementById('iframe-code').textContent = iframeCode;
+
+            const htmlSection = `<section>
+    <h2>Location</h2>
+    <p>${description}</p>
+    <iframe class="map" src="${embedUrl}" frameborder="0"${allowFullscreen ? ' allowfullscreen' : ''}></iframe>
+</section>`;
+            document.getElementById('html-section').textContent = htmlSection;
+
+            const cssStyles = `section {
+    margin-bottom: 20px;
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.map {
+    width: 100%;
+    height: 200px;
+    margin-top: 15px;
+    border-radius: 8px;
+}`;
+            document.getElementById('css-styles').textContent = cssStyles;
+
+            const urlParams = `URL Parameters Breakdown:
+----------------------------------------
+Zoom Level: !1d${zoom} - Controls map zoom (100-5000, lower = closer)
+Longitude: !2d${longitude} - Geographic longitude coordinate
+Latitude: !3d${latitude} - Geographic latitude coordinate
+Heading: !1f${heading} - Rotation angle (0-360 degrees)
+Tilt: !2f${tilt} - Vertical tilt for 3D view (0-90 degrees)
+Pitch: !3f${pitch} - Camera angle (0-90 degrees)
+Map Type: !5e${mapType} - Map display type:
+  1 = Roadmap (Standard)
+  2 = Satellite
+  3 = Hybrid
+  4 = Terrain
+3D Buildings: ${enable3d ? '!5m1!1e4 - Enabled' : 'Not enabled'}
+Address: ${address}
+Timestamp: !4v${Date.now()} - Unique timestamp for cache busting`;
+            document.getElementById('url-params').textContent = urlParams;
+
+            // Show results
+            document.getElementById('results').classList.add('active');
+
+            // Scroll to results
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function refreshMap() {
+            generateEmbed();
+        }
+
+        function toggleView() {
+            const mapType = document.getElementById('map-type');
+            const currentValue = parseInt(mapType.value);
+            mapType.value = currentValue === 4 ? '1' : (currentValue + 1).toString();
+            generateEmbed();
+        }
+
+        function resetForm() {
+            document.getElementById('address').value = '';
+            document.getElementById('latitude').value = '';
+            document.getElementById('longitude').value = '';
+            document.getElementById('description').value = '';
+            document.getElementById('zoom').value = 1000;
+            document.getElementById('zoom-value').textContent = '1000';
+            document.getElementById('tilt').value = 0;
+            document.getElementById('tilt-value').textContent = '0°';
+            document.getElementById('heading').value = 0;
+            document.getElementById('heading-value').textContent = '0°';
+            document.getElementById('pitch').value = 0;
+            document.getElementById('pitch-value').textContent = '0°';
+            document.getElementById('map-type').value = '1';
+            document.getElementById('enable-3d').checked = true;
+            document.getElementById('fullscreen').checked = true;
+            document.getElementById('results').classList.remove('active');
+        }
+
+        function switchTab(tabName) {
+            // Remove active class from all tabs and contents
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            // Add active class to selected tab and content
+            event.target.classList.add('active');
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+        }
+
+        function copyCode(elementId) {
+            const codeElement = document.getElementById(elementId);
+            const textToCopy = codeElement.textContent;
+
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                showToast();
+            }).catch(err => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = textToCopy;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showToast();
+            });
+        }
+
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        // Add Enter key support for generating embed
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                const activeElement = document.activeElement;
+                if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'SELECT')) {
+                    generateEmbed();
+                }
+            }
+        });
+
+        // Example data for testing
+        function loadExample() {
+            document.getElementById('address').value = '3527 US-101, Gearhart, OR 97138';
+            document.getElementById('latitude').value = '46.0257';
+            document.getElementById('longitude').value = '-123.9113';
+            document.getElementById('description').value = 'Located next to Nike\'s global campus, this property benefits from high traffic, affluent demographics, and a strong employment base, ideal for family-oriented services like child care.';
+        }
+
+        // Auto-load example on page load for demonstration
+        window.addEventListener('load', function() {
+            loadExample();
+        });
+    </script>
+</body>
+</html>
