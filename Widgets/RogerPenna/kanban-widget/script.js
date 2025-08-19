@@ -612,7 +612,7 @@ containerEl.innerHTML = '<p>Loading linked records...</p>';
 try { 
 const tableA_Id = gristTableMeta.nameId; 
 const tableB_Id = colDef.referencedTableId; 
-const linkedRecordIds = Array.isArray(refListValue) && refListValue[0] === 'L' ? r efListValue.slice(1) : []; 
+const linkedRecordIds = Array.isArray(refListValue) && refListValue[0] === 'L' ? refListValue.slice(1) : []; 
 const [tableB_Schema, allRefTableRecords] = await Promise.all([ GristDataManager.getTableSchema(tableB_Id), GristDataManager.colToRows(await grist.docApi.fetchTable(tableB_Id)) ]); 
 const backRefColId = await findBackReferenceColumn(tableA_Id, tableB_Schema); 
 const linkedRecords = allRefTableRecords.filter(r => linkedRecordIds.includes(r.id)); 
