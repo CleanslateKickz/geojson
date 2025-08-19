@@ -1,0 +1,2082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Outlook Email Templates Studio</title>
+  <meta name="color-scheme" content="light dark" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.ckeditor.com/ckeditor5/40.2.0/classic/ckeditor.js"></script>
+  <script src="https://unpkg.com/feather-icons"></script>
+  <style>
+    /* Updated color system with actual values instead of undefined CSS variables */
+    :root {
+      /* Color System */
+      --primary: #0891b2;
+      --primary-foreground: #ffffff;
+      --secondary: #f59e0b;
+      --secondary-foreground: #ffffff;
+      
+      /* Neutral Palette */
+      --background: #ffffff;
+      --foreground: #0f172a;
+      --card: #f8fafc;
+      --muted: #f1f5f9;
+      --muted-foreground: #64748b;
+      --border: #e2e8f0;
+      --input: #ffffff;
+      --ring: rgba(8, 145, 178, 0.3);
+      
+      /* Sidebar */
+      --sidebar: #f8fafc;
+      --sidebar-foreground: #0f172a;
+      --sidebar-border: #e2e8f0;
+      
+      /* Layout Variables */
+      --sidebar-width: 320px;
+      --header-height: 44px;
+      --radius: 8px;
+      --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    }
+
+    .dark {
+      /* Dark theme colors */
+      --background: #0f172a;
+      --foreground: #f8fafc;
+      --card: #1e293b;
+      --muted: #334155;
+      --muted-foreground: #94a3b8;
+      --border: #334155;
+      --input: #1e293b;
+      --ring: rgba(8, 145, 178, 0.3);
+      
+      --sidebar: #1e293b;
+      --sidebar-foreground: #f8fafc;
+      --sidebar-border: #334155;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      font-family: 'DM Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: var(--foreground);
+      background: var(--background);
+      line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Modern App Layout */
+    .app {
+      display: grid;
+      grid-template-columns: var(--sidebar-width) 1fr;
+      grid-template-rows: var(--header-height) 1fr;
+      grid-template-areas:
+        "header header"
+        "sidebar main";
+      min-height: 100vh;
+      flex: 1;
+    }
+
+    /* Clean Header */
+    .header {
+      grid-area: header;
+      background: var(--background);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 0 16px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(8px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--foreground);
+    }
+
+    .brand-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: var(--primary);
+      display: grid;
+      place-items: center;
+      color: var(--primary-foreground);
+      font-weight: 800;
+      font-size: 14px;
+    }
+
+    .search-container {
+      flex: 1;
+      max-width: 400px;
+      margin-left: 16px;
+    }
+
+    .search {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--input);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: var(--radius);
+      width: 100%;
+    }
+
+    .search input {
+      border: 0;
+      outline: none;
+      width: 100%;
+      background: transparent;
+      color: var(--foreground);
+      font: inherit;
+    }
+
+    .search input::placeholder {
+      color: var(--muted-foreground);
+    }
+
+    .header-actions {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Modern Button Styles */
+    .btn {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: var(--background);
+      color: var(--foreground);
+      padding: 8px 16px;
+      border-radius: var(--radius);
+      font-weight: 500;
+      font-size: 14px;
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .btn:hover {
+      background: var(--card);
+      border-color: var(--primary);
+    }
+
+    .btn.primary {
+      background: var(--primary);
+      color: var(--primary-foreground);
+      border-color: var(--primary);
+    }
+
+    .btn.primary:hover {
+      background: color-mix(in srgb, var(--primary) 90%, black);
+    }
+
+    .btn.secondary {
+      background: var(--secondary);
+      color: var(--secondary-foreground);
+      border-color: var(--secondary);
+    }
+
+    .btn.secondary:hover {
+      background: color-mix(in srgb, var(--secondary) 90%, black);
+    }
+
+    .btn.destructive {
+      background: var(--destructive);
+      color: var(--destructive-foreground);
+      border-color: var(--destructive);
+    }
+
+    .btn.destructive:hover {
+      background: color-mix(in srgb, var(--destructive) 90%, black);
+    }
+
+    .btn.ghost {
+      background: transparent;
+      border-color: transparent;
+      color: var(--muted-foreground);
+    }
+
+    .btn.ghost:hover {
+      background: var(--card);
+      color: var(--foreground);
+    }
+
+    .icon-btn {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: var(--background);
+      color: var(--muted-foreground);
+      padding: 8px;
+      border-radius: var(--radius);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .icon-btn:hover {
+      background: var(--card);
+      color: var(--foreground);
+      border-color: var(--primary);
+    }
+
+    .icon-btn[aria-pressed="true"] {
+      background: var(--primary);
+      color: var(--primary-foreground);
+      border-color: var(--primary);
+    }
+
+    /* Clean Sidebar */
+    .sidebar {
+      grid-area: sidebar;
+      background: var(--sidebar);
+      border-right: 1px solid var(--sidebar-border);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      overflow: hidden;
+    }
+
+    .sidebar-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .filters {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .filter-chip {
+      border: 1px solid var(--border);
+      background: var(--background);
+      color: var(--muted-foreground);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-weight: 500;
+      font-size: 12px;
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .filter-chip.active {
+      background: var(--primary);
+      color: var(--primary-foreground);
+      border-color: var(--primary);
+    }
+
+    .templates-list {
+      flex: 1;
+      overflow: auto;
+      margin: 0 -8px;
+      padding: 0 8px;
+    }
+
+    .template-item {
+      background: var(--background);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .template-item:hover {
+      border-color: var(--primary);
+      box-shadow: var(--shadow);
+    }
+
+    .template-item.active {
+      border-color: var(--primary);
+      background: color-mix(in srgb, var(--primary) 5%, var(--background));
+      box-shadow: var(--shadow);
+    }
+
+    .template-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 8px;
+    }
+
+    .template-title {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--foreground);
+      margin: 0;
+    }
+
+    .template-actions {
+      display: flex;
+      gap: 4px;
+    }
+
+    .template-subject {
+      color: var(--muted-foreground);
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+
+    .template-tags {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .tag {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--muted-foreground);
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: 500;
+    }
+
+    .template-meta {
+      color: var(--muted-foreground);
+      font-size: 11px;
+    }
+
+    /* Main Content Area */
+    .main {
+      grid-area: main;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding: 16px;
+      overflow: hidden;
+    }
+
+    .template-form {
+      background: var(--background);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .form-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--foreground);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .form-input {
+      border: 1px solid var(--border);
+      background: var(--input);
+      color: var(--foreground);
+      border-radius: var(--radius);
+      padding: 6px 10px;
+      font: inherit;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .form-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--ring);
+    }
+
+    .tags-section {
+      grid-column: 1 / -1;
+    }
+
+    .tags-editor {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      min-height: 32px;
+      padding: 6px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--input);
+    }
+
+    .tag-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--primary);
+      color: var(--primary-foreground);
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .tag-chip button {
+      border: 0;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      padding: 0;
+      margin: 0;
+    }
+
+    .tag-input {
+      border: 0;
+      background: transparent;
+      color: var(--foreground);
+      outline: none;
+      font: inherit;
+      font-size: 12px;
+      min-width: 120px;
+      flex: 1;
+    }
+
+    .tag-input::placeholder {
+      color: var(--muted-foreground);
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .form-actions-left {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .form-actions-right {
+      display: flex;
+      gap: 6px;
+    }
+
+    /* Editor Tabs */
+    .editor-tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 4px;
+    }
+
+    .editor-tab {
+      flex: 1;
+      text-align: center;
+      border: 0;
+      background: transparent;
+      color: var(--muted-foreground);
+      padding: 8px 16px;
+      border-radius: calc(var(--radius) - 2px);
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .editor-tab.active {
+      background: var(--background);
+      color: var(--foreground);
+      box-shadow: var(--shadow);
+    }
+
+    /* Editor Area */
+    .editor-area {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+      min-height: 0;
+    }
+
+    .editor-area.split {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .editor-panel {
+      background: var(--background);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow);
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--card);
+    }
+
+    .panel-title {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--foreground);
+    }
+
+    .panel-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .editor-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    /* CKEditor Styling */
+    .ck-editor__editable {
+      flex: 1 !important;
+      border: 0 !important;
+      box-shadow: none !important;
+      background: var(--background) !important;
+      color: var(--foreground) !important;
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace !important;
+      font-size: 13px !important;
+      line-height: 1.6 !important;
+      min-height: 400px !important;
+    }
+
+    .ck.ck-toolbar {
+      background: var(--card) !important;
+      border: 0 !important;
+      border-bottom: 1px solid var(--border) !important;
+      border-radius: 0 !important;
+    }
+
+    .ck.ck-button {
+      color: var(--foreground) !important;
+    }
+
+    .ck.ck-button:hover {
+      background: var(--primary) !important;
+      color: var(--primary-foreground) !important;
+    }
+
+    /* Preview Panel */
+    .preview-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--card);
+      overflow: hidden;
+    }
+
+    .preview-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      background: var(--background);
+    }
+
+    .device-controls {
+      display: flex;
+      gap: 4px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2px;
+    }
+
+    .device-btn {
+      border: 0;
+      background: transparent;
+      color: var(--muted-foreground);
+      padding: 6px 8px;
+      border-radius: calc(var(--radius) - 2px);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .device-btn.active {
+      background: var(--primary);
+      color: var(--primary-foreground);
+    }
+
+    .preview-stage {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+      background: 
+        radial-gradient(circle at 25% 25%, color-mix(in srgb, var(--primary) 10%, transparent) 0%, transparent 50%),
+        var(--card);
+      overflow: auto;
+    }
+
+    .preview-device {
+      width: 720px;
+      max-width: 100%;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: #ffffff;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      transition: all 0.3s ease;
+    }
+
+    .preview-device.mobile {
+      width: 414px;
+    }
+
+    .device-header {
+      background: var(--foreground);
+      color: var(--background);
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .preview-iframe {
+      display: block;
+      width: 100%;
+      height: 500px;
+      border: 0;
+      background: #ffffff;
+    }
+
+    /* Status Bar */
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 16px;
+      border-top: 1px solid var(--border);
+      background: var(--card);
+      font-size: 12px;
+      color: var(--muted-foreground);
+    }
+
+    .status-left {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--primary);
+    }
+
+    .status-dot.dirty {
+      background: var(--secondary);
+    }
+
+    .status-dot.error {
+      background: var(--destructive);
+    }
+
+    /* Modal Styles */
+    dialog {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--background);
+      color: var(--foreground);
+      width: min(600px, 90vw);
+      box-shadow: var(--shadow-lg);
+      padding: 0;
+    }
+
+    dialog::backdrop {
+      backdrop-filter: blur(4px);
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-title {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    .modal-body {
+      padding: 24px;
+    }
+
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      background: var(--card);
+    }
+
+    .textarea {
+      width: 100%;
+      min-height: 200px;
+      background: var(--input);
+      color: var(--foreground);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      resize: vertical;
+      outline: none;
+    }
+
+    .textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--ring);
+    }
+
+    /* Context Menu */
+    .context-menu {
+      position: fixed;
+      z-index: 1000;
+      background: var(--background);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      padding: 8px;
+      min-width: 160px;
+    }
+
+    .context-menu .btn {
+      width: 100%;
+      justify-content: flex-start;
+      margin: 2px 0;
+      border: 0;
+      background: transparent;
+    }
+
+    .context-menu .btn:hover {
+      background: var(--card);
+    }
+
+    /* Utility Classes */
+    .hidden {
+      display: none !important;
+    }
+
+    .separator {
+      width: 1px;
+      height: 24px;
+      background: var(--border);
+      margin: 0 8px;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1200px) {
+      .app {
+        grid-template-columns: 280px 1fr;
+      }
+      
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .app {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "header"
+          "main";
+      }
+      
+      .sidebar {
+        display: none;
+      }
+      
+      .editor-area.split {
+        grid-template-columns: 1fr;
+      }
+      
+      .header-actions .btn span {
+        display: none;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .header {
+        padding: 0 16px;
+      }
+      
+      .main {
+        padding: 16px;
+        gap: 16px;
+      }
+      
+      .template-form {
+        padding: 16px;
+      }
+      
+      .search-container {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Redesigned header with cleaner layout and modern styling -->
+    <header class="header">
+      <div class="brand">
+        <div class="brand-icon">ET</div>
+        <span>Email Templates Studio</span>
+      </div>
+      
+      <div class="search-container">
+        <div class="search">
+          <i data-feather="search"></i>
+          <input type="search" id="searchInput" placeholder="Search templates..." autocomplete="off" />
+        </div>
+      </div>
+      
+      <div class="header-actions">
+        <button class="btn primary" id="newTemplateBtn">
+          <i data-feather="plus"></i><span>New Template</span>
+        </button>
+        <div class="separator"></div>
+        <button class="btn ghost" id="exportAllBtn">
+          <i data-feather="download"></i><span>Export</span>
+        </button>
+        <button class="btn ghost" id="importBtn">
+          <i data-feather="upload"></i><span>Import</span>
+        </button>
+        <div class="separator"></div>
+        <button class="icon-btn" id="themeToggle">
+          <i data-feather="moon"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Redesigned sidebar with cleaner template list and modern filters -->
+    <aside class="sidebar">
+      <div class="sidebar-actions">
+        <button class="btn primary" id="quickNew">
+          <i data-feather="file-plus"></i><span>New</span>
+        </button>
+        <button class="btn ghost" id="duplicateBtn">
+          <i data-feather="copy"></i>
+        </button>
+        <button class="btn destructive" id="deleteBtn">
+          <i data-feather="trash-2"></i>
+        </button>
+      </div>
+      
+      <div class="filters" id="filters">
+        <!-- Dynamic filter chips -->
+      </div>
+      
+      <div class="templates-list" id="templatesList">
+        <!-- Dynamic template items -->
+      </div>
+    </aside>
+
+    <!-- Redesigned main content area with cleaner form and editor layout -->
+    <main class="main">
+      <section class="template-form">
+        <div class="form-grid">
+          <div class="form-field">
+            <label class="form-label" for="templateName">Template Name</label>
+            <input class="form-input" id="templateName" type="text" placeholder="Enter template name" />
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="emailSubject">Email Subject</label>
+            <input class="form-input" id="emailSubject" type="text" placeholder="Subject line" />
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="preheaderText">Preheader</label>
+            <input class="form-input" id="preheaderText" type="text" placeholder="Preview text" />
+          </div>
+          <div class="form-field tags-section">
+            <label class="form-label">Tags</label>
+            <div class="tags-editor" id="tagsEditor">
+              <input class="tag-input" id="tagInput" placeholder="Add tag..." />
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-actions">
+          <div class="form-actions-left">
+            <button class="icon-btn" id="favoriteBtn" aria-pressed="false">
+              <i data-feather="star"></i>
+            </button>
+            <span class="status-left">
+              <span class="status-dot" id="statusDot"></span>
+              <span id="statusText">Ready</span>
+            </span>
+          </div>
+          <div class="form-actions-right">
+            <button class="btn ghost" id="copyHtmlBtn">
+              <i data-feather="clipboard"></i><span>Copy HTML</span>
+            </button>
+            <button class="btn ghost" id="downloadHtmlBtn">
+              <i data-feather="download"></i><span>Download</span>
+            </button>
+            <button class="btn secondary" id="formatBtn">
+              <i data-feather="code"></i><span>Format</span>
+            </button>
+            <button class="btn primary" id="saveBtn">
+              <i data-feather="save"></i><span>Save</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <nav class="editor-tabs">
+        <button class="editor-tab active" id="tabCode">Code</button>
+        <button class="editor-tab" id="tabPreview">Preview</button>
+        <button class="editor-tab" id="tabSplit">Split View</button>
+      </nav>
+
+      <section class="editor-area" id="editorArea">
+        <div class="editor-panel" id="codePanel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i data-feather="code"></i>
+              <span>HTML Editor</span>
+            </div>
+            <div class="panel-actions">
+              <button class="icon-btn" id="formatCodeBtn">
+                <i data-feather="align-left"></i>
+              </button>
+            </div>
+          </div>
+          <div class="editor-container">
+            <div id="htmlEditor"></div>
+          </div>
+          <div class="status-bar">
+            <div class="status-left">
+              <span>Outlook-compatible HTML</span>
+            </div>
+            <div id="cursorPosition">Ln 1, Col 1</div>
+          </div>
+        </div>
+
+        <div class="editor-panel" id="previewPanel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i data-feather="monitor"></i>
+              <span>Live Preview</span>
+            </div>
+            <div class="panel-actions">
+              <div class="device-controls">
+                <button class="device-btn active" id="desktopBtn" data-width="720">
+                  <i data-feather="monitor"></i>
+                </button>
+                <button class="device-btn" id="mobileBtn" data-width="414">
+                  <i data-feather="smartphone"></i>
+                </button>
+              </div>
+              <button class="icon-btn" id="toggleImagesBtn">
+                <i data-feather="image"></i>
+              </button>
+              <button class="icon-btn" id="refreshPreviewBtn">
+                <i data-feather="refresh-cw"></i>
+              </button>
+            </div>
+          </div>
+          <div class="preview-container">
+            <div class="preview-stage">
+              <div class="preview-device" id="previewDevice">
+                <div class="device-header">
+                  <span id="deviceLabel">Desktop • 720px</span>
+                  <span>Email Preview</span>
+                </div>
+                <iframe class="preview-iframe" id="previewFrame"></iframe>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Simplified modal with cleaner styling -->
+  <dialog id="importModal">
+    <div class="modal-header">
+      <div class="modal-title">
+        <i data-feather="upload"></i>
+        <span>Import Templates</span>
+      </div>
+      <button class="icon-btn" id="closeImportBtn">
+        <i data-feather="x"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p style="color: var(--muted-foreground); margin-bottom: 16px;">
+        Paste JSON data exported from this app or upload a JSON file.
+      </p>
+      <textarea class="textarea" id="importTextarea" placeholder="Paste JSON data here..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn ghost" id="importFileBtn">
+        <i data-feather="file"></i><span>Upload File</span>
+      </button>
+      <button class="btn ghost" id="cancelImportBtn">Cancel</button>
+      <button class="btn primary" id="confirmImportBtn">
+        <i data-feather="check"></i><span>Import</span>
+      </button>
+    </div>
+    <input type="file" accept="application/json" id="fileInput" class="hidden" />
+  </dialog>
+
+  <script>
+    feather.replace();
+
+    const LS_KEY = 'emailTemplatesAppDataV1';
+    const THEME_KEY = 'emailTemplatesTheme';
+
+    // Elements with updated IDs
+    const templatesList = document.getElementById('templatesList');
+    const searchInput = document.getElementById('searchInput');
+    const filters = document.getElementById('filters');
+
+    const templateName = document.getElementById('templateName');
+    const emailSubject = document.getElementById('emailSubject');
+    const preheaderText = document.getElementById('preheaderText');
+    const tagInput = document.getElementById('tagInput');
+    const tagsEditor = document.getElementById('tagsEditor');
+
+    const newTemplateBtn = document.getElementById('newTemplateBtn');
+    const quickNew = document.getElementById('quickNew');
+    const duplicateBtn = document.getElementById('duplicateBtn');
+    const deleteBtn = document.getElementById('deleteBtn');
+    const saveBtn = document.getElementById('saveBtn');
+    const favoriteBtn = document.getElementById('favoriteBtn');
+    const copyHtmlBtn = document.getElementById('copyHtmlBtn');
+    const downloadHtmlBtn = document.getElementById('downloadHtmlBtn');
+    const formatBtn = document.getElementById('formatBtn');
+
+    const tabCode = document.getElementById('tabCode');
+    const tabPreview = document.getElementById('tabPreview');
+    const tabSplit = document.getElementById('tabSplit');
+    const editorArea = document.getElementById('editorArea');
+    const codePanel = document.getElementById('codePanel');
+    const previewPanel = document.getElementById('previewPanel');
+
+    const statusText = document.getElementById('statusText');
+    const statusDot = document.getElementById('statusDot');
+    const cursorPosition = document.getElementById('cursorPosition');
+
+    const previewDevice = document.getElementById('previewDevice');
+    const deviceLabel = document.getElementById('deviceLabel');
+    const desktopBtn = document.getElementById('desktopBtn');
+    const mobileBtn = document.getElementById('mobileBtn');
+    const previewFrame = document.getElementById('previewFrame');
+    const refreshPreviewBtn = document.getElementById('refreshPreviewBtn');
+    const toggleImagesBtn = document.getElementById('toggleImagesBtn');
+
+    const importModal = document.getElementById('importModal');
+    const importBtn = document.getElementById('importBtn');
+    const exportAllBtn = document.getElementById('exportAllBtn');
+    const closeImportBtn = document.getElementById('closeImportBtn');
+    const cancelImportBtn = document.getElementById('cancelImportBtn');
+    const confirmImportBtn = document.getElementById('confirmImportBtn');
+    const importTextarea = document.getElementById('importTextarea');
+    const fileInput = document.getElementById('fileInput');
+    const importFileBtn = document.getElementById('importFileBtn');
+
+    const themeToggle = document.getElementById('themeToggle');
+
+    let state = {
+      templates: [],
+      currentId: null,
+      filter: { search: '', tag: null, favoritesOnly: false },
+      dirty: false,
+      deviceWidth: 720,
+      blockImages: false
+    };
+
+    const DEFAULT_HTML = `<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="x-apple-disable-message-reformatting">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Email Template</title>
+  <!--[if mso]>
+  <noscript>
+    <xml>
+      <o:OfficeDocumentSettings>
+        <o:AllowPNG/>
+        <o:PixelsPerInch>96</o:PixelsPerInch>
+      </o:OfficeDocumentSettings>
+    </xml>
+  </noscript>
+  <![endif]-->
+  <style>
+    /* Reset styles */
+    html,body{margin:0 !important;padding:0 !important;height:100% !important;width:100% !important;}
+    *{-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%;}
+    table,td{border-collapse:collapse !important;mso-table-lspace:0pt !important;mso-table-rspace:0pt !important;}
+    img{-ms-interpolation-mode:bicubic;border:0;height:auto;line-height:100%;outline:none;text-decoration:none;}
+    
+    /* Outlook specific */
+    .ReadMsgBody{width:100%;}
+    .ExternalClass{width:100%;}
+    .ExternalClass,.ExternalClass p,.ExternalClass span,.ExternalClass font,.ExternalClass td,.ExternalClass div{line-height:100%;}
+    
+    /* Mobile styles */
+    @media screen and (max-width:600px){
+      .container{width:100% !important;max-width:100% !important;}
+      .mobile-padding{padding:20px !important;}
+      .mobile-center{text-align:center !important;}
+      .mobile-hide{display:none !important;}
+      .mobile-full{width:100% !important;display:block !important;}
+    }
+  </style>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f4f4;font-family:'DM Sans',Arial,sans-serif;">
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color:#f4f4f4;">
+    <tr>
+      <td align="center" style="padding:40px 20px;">
+        <table role="presentation" class="container" cellspacing="0" cellpadding="0" border="0" width="600" style="background-color:#ffffff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+          
+          <!-- Header -->
+          <tr>
+            <td class="mobile-padding" style="padding:40px 40px 20px;text-align:center;">
+              <h1 style="margin:0;color:#0891b2;font-size:28px;font-weight:bold;line-height:1.2;font-family:'DM Sans',Arial,sans-serif;">Welcome to Our Newsletter</h1>
+            </td>
+          </tr>
+          
+          <!-- Content -->
+          <tr>
+            <td class="mobile-padding" style="padding:20px 40px;">
+              <p style="margin:0 0 20px;color:#4b5563;font-size:16px;line-height:1.6;font-family:'DM Sans',Arial,sans-serif;">
+                This is a modern email template optimized for Outlook and other email clients. The design uses clean typography and a professional color scheme.
+              </p>
+              
+              <p style="margin:0 0 30px;color:#4b5563;font-size:16px;line-height:1.6;font-family:'DM Sans',Arial,sans-serif;">
+                The template includes proper HTML structure, CSS resets, and mobile-responsive design to ensure consistent rendering across different email clients.
+              </p>
+              
+              <!-- CTA Button -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center">
+                <tr>
+                  <td style="border-radius:8px;background-color:#0891b2;">
+                    <a href="#" style="display:inline-block;padding:16px 32px;color:#ffffff;text-decoration:none;font-size:16px;font-weight:600;font-family:'DM Sans',Arial,sans-serif;">Get Started</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+          <!-- Footer -->
+          <tr>
+            <td class="mobile-padding" style="padding:30px 40px;border-top:1px solid #e5e7eb;text-align:center;">
+              <p style="margin:0;color:#9ca3af;font-size:14px;line-height:1.5;font-family:'DM Sans',Arial,sans-serif;">
+                © 2025 Your Company Name. All rights reserved.<br>
+                <a href="#" style="color:#0891b2;text-decoration:none;">Unsubscribe</a> | 
+                <a href="#" style="color:#0891b2;text-decoration:none;">Update Preferences</a>
+              </p>
+            </td>
+          </tr>
+          
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+    let editor;
+
+    // ... existing code continues with same functionality but updated element references ...
+    function seedIfEmpty() {
+      const exists = localStorage.getItem(LS_KEY);
+      if (exists) return;
+      const now = Date.now();
+      const templates = [{
+        id: crypto.randomUUID(),
+        name: 'Modern Newsletter Template',
+        subject: 'Welcome to Our Newsletter!',
+        preheader: 'Get started with our latest updates and exclusive content.',
+        tags: ['newsletter', 'welcome', 'modern'],
+        html: DEFAULT_HTML,
+        favorite: true,
+        createdAt: now,
+        updatedAt: now
+      }];
+      localStorage.setItem(LS_KEY, JSON.stringify(templates));
+    }
+
+    function loadState() {
+      seedIfEmpty();
+      try {
+        state.templates = JSON.parse(localStorage.getItem(LS_KEY)) || [];
+      } catch {
+        state.templates = [];
+      }
+      if (state.templates.length) state.currentId = state.templates[0].id;
+    }
+
+    function saveState() {
+      localStorage.setItem(LS_KEY, JSON.stringify(state.templates));
+      setDirty(false);
+      updateStatus('Saved');
+    }
+
+    function setDirty(d) {
+      state.dirty = d;
+      statusDot.className = 'status-dot' + (d ? ' dirty' : '');
+    }
+
+    function currentIndex() {
+      return state.templates.findIndex(t => t.id === state.currentId);
+    }
+
+    function currentTemplate() {
+      return state.templates.find(t => t.id === state.currentId) || null;
+    }
+
+    function collectAllTags() {
+      const set = new Set();
+      state.templates.forEach(t => (t.tags || []).forEach(tag => set.add(tag)));
+      return Array.from(set).sort();
+    }
+
+    function renderFilters() {
+      filters.innerHTML = '';
+      
+      const favChip = document.createElement('button');
+      favChip.className = 'filter-chip' + (state.filter.favoritesOnly ? ' active' : '');
+      favChip.innerHTML = `<i data-feather="star"></i><span>Favorites</span>`;
+      favChip.onclick = () => {
+        state.filter.favoritesOnly = !state.filter.favoritesOnly;
+        renderAll();
+      };
+      filters.appendChild(favChip);
+
+      const allChip = document.createElement('button');
+      allChip.className = 'filter-chip' + (!state.filter.tag ? ' active' : '');
+      allChip.textContent = 'All Tags';
+      allChip.onclick = () => {
+        state.filter.tag = null;
+        renderAll();
+      };
+      filters.appendChild(allChip);
+
+      collectAllTags().forEach(tag => {
+        const chip = document.createElement('button');
+        chip.className = 'filter-chip' + (state.filter.tag === tag ? ' active' : '');
+        chip.textContent = tag;
+        chip.onclick = () => {
+          state.filter.tag = (state.filter.tag === tag ? null : tag);
+          renderAll();
+        };
+        filters.appendChild(chip);
+      });
+      
+      feather.replace();
+    }
+
+    function renderList() {
+      const q = (state.filter.search || '').toLowerCase().trim();
+      const list = state.templates.filter(t => {
+        const inSearch = !q || [t.name, t.subject, ...(t.tags||[])].join(' ').toLowerCase().includes(q);
+        const inTag = !state.filter.tag || (t.tags||[]).includes(state.filter.tag);
+        const inFav = !state.filter.favoritesOnly || t.favorite;
+        return inSearch && inTag && inFav;
+      }).sort((a,b) => (b.favorite - a.favorite) || (b.updatedAt - a.updatedAt));
+
+      templatesList.innerHTML = '';
+      
+      if (!list.length) {
+        const empty = document.createElement('div');
+        empty.style.cssText = 'color: var(--muted-foreground); padding: 40px 20px; text-align: center;';
+        empty.innerHTML = '<i data-feather="inbox" style="margin-bottom: 12px;"></i><br><strong>No templates found</strong><br><small>Create a new template to get started</small>';
+        templatesList.appendChild(empty);
+        feather.replace();
+        return;
+      }
+
+      list.forEach(t => {
+        const item = document.createElement('div');
+        item.className = 'template-item' + (t.id === state.currentId ? ' active' : '');
+        
+        item.innerHTML = `
+          <div class="template-header">
+            <h3 class="template-title">${escapeHtml(t.name || 'Untitled')}</h3>
+            <div class="template-actions">
+              <button class="icon-btn favorite-btn" title="${t.favorite ? 'Remove from favorites' : 'Add to favorites'}" style="color: ${t.favorite ? 'var(--secondary)' : 'var(--muted-foreground)'}">
+                <i data-feather="star" ${t.favorite ? 'fill="currentColor"' : ''}></i>
+              </button>
+              <button class="icon-btn more-btn" title="More options">
+                <i data-feather="more-horizontal"></i>
+              </button>
+            </div>
+          </div>
+          <div class="template-subject">${escapeHtml(t.subject || 'No subject')}</div>
+          <div class="template-tags">
+            ${(t.tags||[]).slice(0,3).map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}
+            ${(t.tags||[]).length > 3 ? `<span class="tag">+${(t.tags||[]).length - 3}</span>` : ''}
+          </div>
+          <div class="template-meta">Updated ${timeAgo(t.updatedAt)}</div>
+        `;
+
+        item.querySelector('.favorite-btn').onclick = (e) => {
+          e.stopPropagation();
+          t.favorite = !t.favorite;
+          t.updatedAt = Date.now();
+          saveState();
+          renderAll();
+        };
+
+        item.querySelector('.more-btn').onclick = (e) => {
+          e.stopPropagation();
+          showContextMenu(e.currentTarget, t);
+        };
+
+        item.onclick = () => {
+          state.currentId = t.id;
+          renderAll();
+        };
+
+        templatesList.appendChild(item);
+      });
+
+      feather.replace();
+    }
+
+    function showContextMenu(anchor, template) {
+      document.querySelectorAll('.context-menu').forEach(m => m.remove());
+      
+      const menu = document.createElement('div');
+      menu.className = 'context-menu';
+      menu.innerHTML = `
+        <button class="btn edit-btn"><i data-feather="edit-3"></i>Edit</button>
+        <button class="btn duplicate-btn"><i data-feather="copy"></i>Duplicate</button>
+        <hr style="border: none; border-top: 1px solid var(--border); margin: 8px 0;">
+        <button class="btn destructive delete-btn"><i data-feather="trash-2"></i>Delete</button>
+      `;
+
+      document.body.appendChild(menu);
+      const rect = anchor.getBoundingClientRect();
+      menu.style.left = Math.min(rect.left - 160 + rect.width, window.innerWidth - 180) + 'px';
+      menu.style.top = (rect.bottom + 8) + 'px';
+      feather.replace();
+
+      menu.querySelector('.edit-btn').onclick = () => {
+        state.currentId = template.id;
+        renderAll();
+        menu.remove();
+      };
+
+      menu.querySelector('.duplicate-btn').onclick = () => {
+        duplicateTemplate(template.id);
+        menu.remove();
+      };
+
+      menu.querySelector('.delete-btn').onclick = () => {
+        deleteTemplate(template.id);
+        menu.remove();
+      };
+
+      const handleClickOutside = (e) => {
+        if (!menu.contains(e.target) && e.target !== anchor) {
+          menu.remove();
+          document.removeEventListener('click', handleClickOutside);
+        }
+      };
+
+      setTimeout(() => {
+        document.addEventListener('click', handleClickOutside);
+      }, 0);
+    }
+
+    function renderEditor() {
+      const t = currentTemplate();
+      if (!t) {
+        if (editor) editor.setData('');
+        templateName.value = '';
+        emailSubject.value = '';
+        preheaderText.value = '';
+        tagsEditor.querySelectorAll('.tag-chip').forEach(n => n.remove());
+        setDirty(false);
+        updateStatus('No template selected');
+        return;
+      }
+
+      templateName.value = t.name || '';
+      emailSubject.value = t.subject || '';
+      preheaderText.value = t.preheader || '';
+      renderTagsEditor(t.tags || []);
+      favoriteBtn.setAttribute('aria-pressed', t.favorite ? 'true' : 'false');
+      favoriteBtn.style.color = t.favorite ? 'var(--secondary)' : 'var(--muted-foreground)';
+      favoriteBtn.querySelector('i').setAttribute('fill', t.favorite ? 'currentColor' : 'none');
+
+      if (editor) {
+        editor.setData(t.html || '');
+      }
+
+      setDirty(false);
+      updateStatus('Template loaded');
+      updatePreview();
+    }
+
+    function renderTagsEditor(tags) {
+      tagsEditor.querySelectorAll('.tag-chip').forEach(n => n.remove());
+      tags.forEach(tag => {
+        const chip = document.createElement('span');
+        chip.className = 'tag-chip';
+        chip.innerHTML = `${escapeHtml(tag)} <button type="button"><i data-feather="x"></i></button>`;
+
+        chip.querySelector('button').onclick = () => {
+          const t = currentTemplate();
+          if (!t) return;
+          t.tags = (t.tags || []).filter(x => x !== tag);
+          t.updatedAt = Date.now();
+          setDirty(true);
+          renderTagsEditor(t.tags);
+          renderFilters();
+        };
+
+        tagsEditor.insertBefore(chip, tagInput);
+      });
+
+      feather.replace();
+    }
+
+    function renderAll() {
+      renderFilters();
+      renderList();
+      renderEditor();
+    }
+
+    function updateStatus(msg) {
+      statusText.textContent = msg;
+      setTimeout(() => {
+        if (statusText.textContent === msg) {
+          statusText.textContent = 'Ready';
+        }
+      }, 3000);
+    }
+
+    function setDeviceWidth(width) {
+      state.deviceWidth = parseInt(width, 10);
+      previewDevice.classList.toggle('mobile', state.deviceWidth < 600);
+      deviceLabel.textContent = `${state.deviceWidth < 600 ? 'Mobile' : 'Desktop'} • ${state.deviceWidth}px`;
+      desktopBtn.classList.toggle('active', state.deviceWidth >= 600);
+      mobileBtn.classList.toggle('active', state.deviceWidth < 600);
+    }
+
+    function updatePreview() {
+      const t = currentTemplate();
+      if (!t || !t.html) {
+        previewFrame.srcdoc = '<div style="padding:40px;text-align:center;color:#999;font-family:Arial,sans-serif;">No content to preview</div>';
+        return;
+      }
+      
+      let html = t.html;
+      
+      const preheader = (preheaderText.value || '').trim();
+      if (preheader) {
+        const hiddenPreheader = `<div style="display:none;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">${escapeHtml(preheader)}</div>`;
+        html = html.replace(/<body[^>]*>/i, (match) => `${match}\n  ${hiddenPreheader}`);
+      }
+      
+      if (state.blockImages) {
+        const imageBlockCSS = `<style>img{opacity:0.1 !important; filter:grayscale(1) !important; background:#f0f0f0 !important;}</style>`;
+        html = html.includes('</head>') 
+          ? html.replace('</head>', `${imageBlockCSS}</head>`)
+          : `${imageBlockCSS}${html}`;
+      }
+      
+      previewFrame.srcdoc = html;
+    }
+
+    function newTemplate() {
+      const now = Date.now();
+      const template = {
+        id: crypto.randomUUID(),
+        name: 'New Template',
+        subject: '',
+        preheader: '',
+        tags: [],
+        html: DEFAULT_HTML,
+        favorite: false,
+        createdAt: now,
+        updatedAt: now
+      };
+
+      state.templates.unshift(template);
+      state.currentId = template.id;
+      saveState();
+      renderAll();
+      updateStatus('New template created');
+      
+      setTimeout(() => {
+        templateName.focus();
+        templateName.select();
+      }, 100);
+    }
+
+    function duplicateTemplate(id = state.currentId) {
+      const idx = state.templates.findIndex(t => t.id === id);
+      if (idx === -1) return;
+      
+      const src = state.templates[idx];
+      const now = Date.now();
+      const template = {
+        ...structuredClone(src),
+        id: crypto.randomUUID(),
+        name: src.name + ' (Copy)',
+        favorite: false,
+        createdAt: now,
+        updatedAt: now
+      };
+
+      state.templates.splice(idx + 1, 0, template);
+      state.currentId = template.id;
+      saveState();
+      renderAll();
+      updateStatus('Template duplicated');
+    }
+
+    function deleteTemplate(id = state.currentId) {
+      const idx = state.templates.findIndex(t => t.id === id);
+      if (idx === -1) return;
+      
+      const template = state.templates[idx];
+      if (!confirm(`Delete "${template.name}"? This action cannot be undone.`)) return;
+
+      state.templates.splice(idx, 1);
+      if (state.templates.length) {
+        state.currentId = state.templates[Math.max(0, idx - 1)].id;
+      } else {
+        state.currentId = null;
+      }
+
+      saveState();
+      renderAll();
+      updateStatus('Template deleted');
+    }
+
+    function saveTemplate() {
+      const idx = currentIndex();
+      if (idx === -1) return;
+      
+      const t = state.templates[idx];
+      t.name = templateName.value.trim() || 'Untitled Template';
+      t.subject = emailSubject.value.trim();
+      t.preheader = preheaderText.value.trim();
+      if (editor) {
+        t.html = editor.getData();
+      }
+      if (!Array.isArray(t.tags)) t.tags = [];
+      t.updatedAt = Date.now();
+
+      saveState();
+      renderList();
+      updatePreview();
+    }
+
+    function formatHtml() {
+      const src = editor.getData();
+      if (!src.trim()) return;
+      
+      try {
+        let formatted = src
+          .replace(/></g, '>\n<')
+          .replace(/^\s+|\s+$/gm, '')
+          .split('\n')
+          .filter(line => line.trim())
+          .map((line, i, arr) => {
+            const trimmed = line.trim();
+            const depth = getIndentDepth(trimmed, arr, i);
+            return '  '.repeat(Math.max(0, depth)) + trimmed;
+          })
+          .join('\n');
+
+        editor.setData(formatted);
+        setDirty(true);
+        updatePreview();
+        updateStatus('HTML formatted');
+      } catch (error) {
+        updateStatus('Format error: ' + error.message);
+      }
+    }
+
+    function getIndentDepth(line, lines, index) {
+      let depth = 0;
+      
+      for (let i = 0; i < index; i++) {
+        const prevLine = lines[i].trim();
+        const openTags = (prevLine.match(/<[^\/!][^>]*[^\/]>/g) || []).length;
+        const closeTags = (prevLine.match(/<\/[^>]+>/g) || []).length;
+        depth += openTags - closeTags;
+      }
+      
+      if (line.match(/^<\/[^>]+>/)) {
+        depth = Math.max(0, depth - 1);
+      }
+      
+      return depth;
+    }
+
+    // Event Handlers
+    newTemplateBtn.onclick = quickNew.onclick = newTemplate;
+    duplicateBtn.onclick = () => duplicateTemplate();
+    deleteBtn.onclick = () => deleteTemplate();
+    saveBtn.onclick = saveTemplate;
+    formatBtn.onclick = formatHtml;
+
+    favoriteBtn.onclick = () => {
+      const t = currentTemplate();
+      if (!t) return;
+      t.favorite = !t.favorite;
+      t.updatedAt = Date.now();
+      saveState();
+      renderAll();
+    };
+
+    copyHtmlBtn.onclick = async () => {
+      const t = currentTemplate();
+      if (!t || !editor) return;
+      try {
+        await navigator.clipboard.writeText(editor.getData());
+        updateStatus('HTML copied to clipboard');
+      } catch (err) {
+        updateStatus('Copy failed: ' + err.message);
+      }
+    };
+
+    downloadHtmlBtn.onclick = () => {
+      const t = currentTemplate();
+      if (!t || !editor) return;
+      const blob = new Blob([editor.getData()], { type: 'text/html;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = (t.name || 'template').replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.html';
+      a.click();
+      URL.revokeObjectURL(a.href);
+      updateStatus('HTML file downloaded');
+    };
+
+    // Tab switching
+    function setActiveTab(tab) {
+      tabCode.classList.toggle('active', tab === 'code');
+      tabPreview.classList.toggle('active', tab === 'preview');
+      tabSplit.classList.toggle('active', tab === 'split');
+      editorArea.classList.toggle('split', tab === 'split');
+      codePanel.style.display = (tab === 'code' || tab === 'split') ? 'flex' : 'none';
+      previewPanel.style.display = (tab === 'preview' || tab === 'split') ? 'flex' : 'none';
+    }
+
+    tabCode.onclick = () => setActiveTab('code');
+    tabPreview.onclick = () => setActiveTab('preview');
+    tabSplit.onclick = () => setActiveTab('split');
+
+    // Input handlers
+    templateName.addEventListener('input', () => setDirty(true));
+    emailSubject.addEventListener('input', () => setDirty(true));
+    preheaderText.addEventListener('input', () => {
+      setDirty(true);
+      throttledPreview();
+    });
+
+    tagInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const tag = tagInput.value.trim();
+        if (!tag) return;
+        const t = currentTemplate();
+        if (!t) return;
+        if (!Array.isArray(t.tags)) t.tags = [];
+        if (!t.tags.includes(tag)) {
+          t.tags.push(tag);
+          tagInput.value = '';
+          renderTagsEditor(t.tags);
+          renderFilters();
+          setDirty(true);
+          updateStatus('Tag added');
+        }
+      }
+
+      if (e.key === 'Backspace' && tagInput.value === '') {
+        const t = currentTemplate();
+        if (t && Array.isArray(t.tags) && t.tags.length > 0) {
+          t.tags.pop();
+          renderTagsEditor(t.tags);
+          renderFilters();
+          setDirty(true);
+          updateStatus('Tag removed');
+        }
+      }
+    });
+
+    // Device controls
+    desktopBtn.onclick = () => setDeviceWidth(720);
+    mobileBtn.onclick = () => setDeviceWidth(414);
+
+    toggleImagesBtn.onclick = () => {
+      state.blockImages = !state.blockImages;
+      toggleImagesBtn.setAttribute('aria-pressed', state.blockImages ? 'true' : 'false');
+      toggleImagesBtn.style.color = state.blockImages ? 'var(--destructive)' : 'var(--muted-foreground)';
+      updatePreview();
+      updateStatus(state.blockImages ? 'Images blocked' : 'Images enabled');
+    };
+
+    refreshPreviewBtn.onclick = () => {
+      updatePreview();
+      updateStatus('Preview refreshed');
+    };
+
+    // Import/Export
+    importBtn.onclick = () => importModal.showModal();
+    closeImportBtn.onclick = cancelImportBtn.onclick = () => importModal.close();
+
+    importFileBtn.onclick = () => fileInput.click();
+    fileInput.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        importTextarea.value = event.target.result;
+      };
+      reader.readAsText(file);
+    };
+
+    confirmImportBtn.onclick = () => {
+      try {
+        const data = JSON.parse(importTextarea.value);
+        if (!Array.isArray(data)) throw new Error('Invalid format: expected array');
+        
+        let imported = 0;
+        let updated = 0;
+        
+        data.forEach(t => {
+          if (!t.id) t.id = crypto.randomUUID();
+          const idx = state.templates.findIndex(x => x.id === t.id);
+          if (idx !== -1) {
+            state.templates[idx] = { ...state.templates[idx], ...t, updatedAt: Date.now() };
+            updated++;
+          } else {
+            state.templates.push({ ...t, createdAt: Date.now(), updatedAt: Date.now() });
+            imported++;
+          }
+        });
+        
+        saveState();
+        renderAll();
+        importModal.close();
+        importTextarea.value = '';
+        updateStatus(`Imported ${imported} new, updated ${updated} existing templates`);
+      } catch (err) {
+        alert('Import error: ' + err.message);
+      }
+    };
+
+    exportAllBtn.onclick = () => {
+      const dataStr = JSON.stringify(state.templates, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `email-templates-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+      updateStatus(`Exported ${state.templates.length} templates`);
+    };
+
+    // Theme toggle
+    themeToggle.onclick = () => {
+      const current = localStorage.getItem(THEME_KEY) || 'light';
+      const newTheme = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.classList.toggle('dark', newTheme === 'dark');
+      localStorage.setItem(THEME_KEY, newTheme);
+      themeToggle.innerHTML = newTheme === 'dark' 
+        ? '<i data-feather="sun"></i>' 
+        : '<i data-feather="moon"></i>';
+      feather.replace();
+    };
+
+    // Search
+    searchInput.addEventListener('input', () => {
+      state.filter.search = searchInput.value;
+      renderList();
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.ctrlKey || e.metaKey) {
+        switch (e.key) {
+          case 's':
+            e.preventDefault();
+            saveTemplate();
+            break;
+          case 'n':
+            e.preventDefault();
+            newTemplate();
+            break;
+          case 'd':
+            if (e.shiftKey) {
+              e.preventDefault();
+              duplicateTemplate();
+            }
+            break;
+        }
+      }
+    });
+
+    // Preview throttling
+    let previewTimeout;
+    function throttledPreview() {
+      clearTimeout(previewTimeout);
+      previewTimeout = setTimeout(updatePreview, 300);
+    }
+
+    // Utility functions
+    function escapeHtml(str) {
+      if (typeof str !== 'string') return '';
+      return str.replace(/[&<>"']/g, tag => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      }[tag]));
+    }
+
+    function timeAgo(ms) {
+      const now = Date.now();
+      const seconds = Math.floor((now - ms) / 1000);
+      const minutes = Math.floor(seconds / 60);
+      const hours = Math.floor(minutes / 60);
+      const days = Math.floor(hours / 24);
+
+      if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
+      if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+      if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+      return seconds < 10 ? 'Just now' : `${seconds} seconds ago`;
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      // Load theme
+      const savedTheme = localStorage.getItem(THEME_KEY) || 'light';
+      document.documentElement.classList.toggle('dark', savedTheme === 'dark');
+      themeToggle.innerHTML = savedTheme === 'dark'
+        ? '<i data-feather="sun"></i>'
+        : '<i data-feather="moon"></i>';
+
+      // Load state
+      loadState();
+
+      // Initialize CKEditor
+      ClassicEditor
+        .create(document.querySelector('#htmlEditor'), {
+          toolbar: {
+            items: [
+              'undo', 'redo',
+              '|',
+              'heading',
+              '|',
+              'fontFamily', 'fontSize', 'fontColor', 'fontBackgroundColor',
+              '|',
+              'bold', 'italic', 'underline',
+              '|',
+              'link', 'insertImage', 'insertTable',
+              '|',
+              'alignment', 'outdent', 'indent',
+              '|',
+              'bulletedList', 'numberedList',
+              '|',
+              'blockQuote',
+              '|',
+              'sourceEditing'
+            ],
+            shouldNotGroupWhenFull: true
+          },
+          fontSize: {
+            options: [9, 10, 11, 12, 13, 14, 15, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36]
+          },
+          fontFamily: {
+            options: [
+              'default',
+              'DM Sans, Arial, sans-serif',
+              'Arial, Helvetica, sans-serif',
+              'Georgia, serif',
+              'Times New Roman, serif',
+              'Courier New, monospace'
+            ]
+          },
+          heading: {
+            options: [
+              { model: 'paragraph', title: 'Paragraph', class: 'ck-heading_paragraph' },
+              { model: 'heading1', view: 'h1', title: 'Heading 1', class: 'ck-heading_heading1' },
+              { model: 'heading2', view: 'h2', title: 'Heading 2', class: 'ck-heading_heading2' },
+              { model: 'heading3', view: 'h3', title: 'Heading 3', class: 'ck-heading_heading3' }
+            ]
+          },
+          htmlSupport: {
+            allow: [
+              {
+                name: /.*/,
+                attributes: true,
+                classes: true,
+                styles: true
+              }
+            ]
+          },
+          htmlEmbed: {
+            showPreviews: true
+          }
+        })
+        .then(editorInstance => {
+          editor = editorInstance;
+          window.editor = editor;
+
+          editor.editing.view.document.on('paste', (evt, data) => {
+            const htmlData = data.dataTransfer.getData('text/html');
+            if (htmlData) {
+              // Clean up Outlook HTML but preserve structure
+              const cleanedHTML = cleanOutlookHTML(htmlData);
+              data.dataTransfer.setData('text/html', cleanedHTML);
+            }
+          }, { priority: 'high' });
+
+          editor.model.document.on('change:data', () => {
+            setDirty(true);
+            throttledPreview();
+          });
+
+          renderAll();
+          setDeviceWidth(720);
+          setActiveTab('split');
+          
+          updateStatus('Editor ready');
+        })
+        .catch(error => {
+          console.error('CKEditor initialization error:', error);
+          updateStatus('Editor initialization failed');
+        });
+
+    function cleanOutlookHTML(html) {
+      if (!html) return html;
+      
+      // Create a temporary div to manipulate the HTML
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = html;
+      
+      // Remove Outlook-specific namespaced elements that cause issues
+      const outlookElements = tempDiv.querySelectorAll('o\\:p, v\\:shape, v\\:imagedata');
+      outlookElements.forEach(el => el.remove());
+      
+      // Clean up Outlook-specific attributes but preserve content structure
+      const allElements = tempDiv.querySelectorAll('*');
+      allElements.forEach(el => {
+        // Remove problematic Outlook attributes
+        ['o:spid', 'v:shapes'].forEach(attr => {
+          el.removeAttribute(attr);
+        });
+        
+        // Convert MsoNormal classes to regular paragraphs but keep content
+        if (el.className && el.className.includes('MsoNormal')) {
+          el.removeAttribute('class');
+        }
+        
+        // Clean up excessive margin/padding from Outlook but preserve intentional indentation
+        const style = el.getAttribute('style');
+        if (style) {
+          let cleanedStyle = style
+            .replace(/mso-[^;]*;?/g, '') // Remove MSO-specific styles
+            .replace(/margin:\s*0[^;]*;?/g, '') // Remove zero margins
+            .replace(/padding:\s*0[^;]*;?/g, '') // Remove zero padding
+            .trim();
+          
+          if (cleanedStyle) {
+            el.setAttribute('style', cleanedStyle);
+          } else {
+            el.removeAttribute('style');
+          }
+        }
+      });
+      
+      // Ensure tables are properly formatted
+      const tables = tempDiv.querySelectorAll('table');
+      tables.forEach(table => {
+        if (!table.getAttribute('style')) {
+          table.setAttribute('style', 'border-collapse: collapse; width: 100%;');
+        }
+      });
+      
+      return tempDiv.innerHTML;
+    }
+
+      feather.replace();
+    });
+  </script>
+</body>
+</html>
