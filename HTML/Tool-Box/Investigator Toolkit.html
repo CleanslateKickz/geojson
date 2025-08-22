@@ -1,776 +1,778 @@
 <html lang="en" class="h-full bg-gray-50">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta http-equiv="Content-Security-Policy" content="frame-src 'self' https://www.privateeye.com;">
-  <title>Investigator Toolkit</title>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <meta http-equiv="Content-Security-Policy" content="frame-src 'self' https://www.privateeye.com;">
+        <title>Investigator Toolkit</title>
 
-  <!-- TailwindCSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Inter Font -->
-  <link rel="preconnect" href="https://rsms.me" />
-  <link rel="stylesheet" href="https://rsms.me/inter/inter.css"/>
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
-  <link rel="icon" type="image/x-icon" href="../../Images/detective1.png">
+        <!-- TailwindCSS -->
+        <script src="https://cdn.tailwindcss.com"></script>
+        <!-- Inter Font -->
+        <link rel="preconnect" href="https://rsms.me" />
+        <link rel="stylesheet" href="https://rsms.me/inter/inter.css"/>
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+        <link rel="icon" type="image/x-icon" href="../../Images/detective1.png">
 
-  <style>
-    html {
-      font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, 'Apple Color Emoji', 'Segoe UI Emoji';
-      --c-brand: #4f46e5;
-      --c-brand-600: #4f46e5;
-      --c-brand-700: #4338ca;
-      --c-brand-50: #eef2ff;
-      --ring: 0 0 0 3px rgba(79,70,229,.25);
-    }
+        <style>
+            html {
+                font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, 'Apple Color Emoji', 'Segoe UI Emoji';
+                --c-brand: #4f46e5;
+                --c-brand-600: #4f46e5;
+                --c-brand-700: #4338ca;
+                --c-brand-50: #eef2ff;
+                --ring: 0 0 0 3px rgba(79,70,229,.25);
+            }
 
-    /* Subtle glass panels for cards */
-    .panel {
-      background: rgba(255,255,255,.85);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-    }
+            /* Subtle glass panels for cards */
+            .panel {
+                background: rgba(255,255,255,.85);
+                backdrop-filter: blur(8px);
+                -webkit-backdrop-filter: blur(8px);
+            }
 
-    /* Tabs */
-    .tab-button {
-      transition: color .2s ease, transform .2s ease;
-      border-bottom: 2px solid transparent;
-    }
-    .tab-button.active {
-      color: var(--c-brand-600);
-      border-bottom-color: var(--c-brand-600);
-    }
-    .tab-button:focus-visible {
-      outline: none;
-      box-shadow: var(--ring);
-      border-radius: .375rem;
-    }
+            /* Tabs */
+            .tab-button {
+                transition: color .2s ease, transform .2s ease;
+                border-bottom: 2px solid transparent;
+            }
+            .tab-button.active {
+                color: var(--c-brand-600);
+                border-bottom-color: var(--c-brand-600);
+            }
+            .tab-button:focus-visible {
+                outline: none;
+                box-shadow: var(--ring);
+                border-radius: .375rem;
+            }
 
-    /* Tool cards */
-    .tool-card {
-      transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
-      border: 1px solid rgba(15,23,42,.06);
-    }
-    .tool-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 20px 35px -15px rgba(2,6,23,.25);
-      border-color: rgba(79,70,229,.25);
-    }
+            /* Tool cards */
+            .tool-card {
+                transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+                border: 1px solid rgba(15,23,42,.06);
+            }
+            .tool-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 20px 35px -15px rgba(2,6,23,.25);
+                border-color: rgba(79,70,229,.25);
+            }
+            
+            /* In your style section, update/add these styles */
 
-    /* Animated spinner helper */
-    .spinner { animation: spin 1s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
+            /* Main container */
+            .flex.flex-1.h-full.overflow-hidden {
+                width: 100%;
+                transition: all 0.3s ease;
+            }
 
-    /* Tab content visibility */
-    .tab-content { display: none; }
-    .tab-content.active { display: flex; }
+            /* Results container */
+            .flex-1.relative.bg-white {
+                flex: 1;
+                transition: all 0.3s ease;
+                min-width: 0; /* This is crucial for flex items */
+            }
 
-    /* Search history */
-    .history-item { transition: background .15s ease, border-color .15s ease; }
-    .history-item:hover {
-      background: var(--c-brand-50);
-      border-color: #c7d2fe;
-    }
+            /* Input panel */
+            #pe_inputPanel {
+                flex-shrink: 0; /* Prevent shrinking */
+                transition: all 0.3s ease;
+                width: 420px; /* Default width */
+            }
 
-    /* Input focus ring enhancement */
-    .f-input:focus {
-      outline: none;
-      box-shadow: var(--ring);
-      border-color: var(--c-brand-600);
-    }
+            /* When panel is closed */
+            #pe_inputPanel.-translate-x-full {
+                margin-left: -420px; /* Match panel width */
+            }
 
-    /* Responsive layout aids */
-    @media (max-width: 768px) {
-      #pe_inputPanel {
-        position: fixed;
-        inset: 0 auto 0 0;
-        max-width: 92vw;
-        width: 92vw;
-      }
-    }
 
-    /* Subtle gradient background */
-    .bg-grid {
-      background-image:
-        radial-gradient(circle at 1px 1px, rgba(79,70,229,.08) 1px, transparent 1px);
-      background-size: 24px 24px;
-    }
-  </style>
-</head>
-<body class="h-full flex flex-col overflow-hidden antialiased bg-gray-100">
+            /* Animated spinner helper */
+            .spinner { animation: spin 1s linear infinite; }
+            @keyframes spin { to { transform: rotate(360deg); } }
 
-  <!-- Top Header -->
-  <header class="bg-white/90 backdrop-blur border-b border-gray-200 px-3 sm:px-6 py-3 shadow-sm flex flex-col sm:flex-row justify-between items-center z-20 shrink-0 gap-3">
-    <div class="flex items-center gap-3">
-      <div class="bg-indigo-600 p-2.5 rounded-xl shadow-sm">
-        <i class="fa-solid fa-search text-white text-xl"></i>
-      </div>
-      <div>
-        <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-gray-900">Investigator Toolkit</h1>
-        <p class="text-xs text-gray-500">Skip tracing and property owner intelligence</p>
-      </div>
-    </div>
+            /* Tab content visibility */
+            .tab-content { display: none; }
+            .tab-content.active { display: flex; }
 
-    <!-- Primary Nav Tabs -->
-    <nav class="flex flex-wrap justify-center gap-2 sm:gap-4">
-      <button class="tab-button active text-gray-600 hover:text-indigo-600 px-4 sm:px-6 py-2 sm:py-3 text-sm font-semibold rounded-md" data-tab="private-eye">
-        <i class="fas fa-user-secret mr-2"></i>
-        Person Search
-      </button>
-      <button class="tab-button text-gray-600 hover:text-indigo-600 px-4 sm:px-6 py-2 sm:py-3 text-sm font-semibold rounded-md" data-tab="business-search">
-        <i class="fas fa-building mr-2"></i>
-        Business Search
-      </button>
-    </nav>
-  </header>
+            /* Search history */
+            .history-item { transition: background .15s ease, border-color .15s ease; }
+            .history-item:hover {
+                background: var(--c-brand-50);
+                border-color: #c7d2fe;
+            }
 
-  <!-- Main Content -->
-  <main class="flex-1 overflow-hidden bg-gradient-to-b from-indigo-50/60 via-gray-50 to-white relative">
-    <!-- Aesthetic background grid -->
-    <div class="absolute inset-0 bg-grid pointer-events-none"></div>
+            /* Input focus ring enhancement */
+            .f-input:focus {
+                outline: none;
+                box-shadow: var(--ring);
+                border-color: var(--c-brand-600);
+            }
 
-    <!-- Person Search Tab -->
-    <section id="private-eye-tab" class="tab-content active h-full flex-col relative">
-      <!-- Fixed Sub-header -->
-      <div class="bg-white/90 backdrop-blur border-b border-gray-200 px-3 sm:px-6 py-2 flex justify-between items-center shrink-0">
-        <div class="flex items-center gap-2">
-          <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600">
-            <i class="fa-solid fa-user"></i>
-          </span>
-          <h2 class="text-base sm:text-lg font-semibold text-gray-800">Person Search Tool</h2>
-        </div>
-        <button id="pe_togglePanelBtn" class="p-2 rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500" aria-expanded="true" aria-controls="pe_inputPanel">
-          <svg id="pe_toggleIcon" class="h-6 w-6 sm:h-7 sm:w-7 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-          </svg>
-          <span class="sr-only">Toggle Input Panel</span>
-        </button>
-      </div>
+            /* Responsive adjustments */
+            @media (max-width: 768px) {
+                #pe_inputPanel {
+                    position: fixed;
+                    inset: 0 auto 0 0;
+                    max-width: 92vw;
+                    width: 92vw;
+                    z-index: 30;
+                }
+            }
 
-      <!-- Body -->
-      <div class="flex flex-1 h-full overflow-hidden">
-        <!-- Input Panel -->
-        <aside id="pe_inputPanel" class="panel w-full md:w-[420px] lg:w-[460px] border-r border-gray-200 shadow-xl transition-transform duration-300 ease-in-out transform translate-x-0 flex flex-col md:relative z-30 h-full">
-          <div class="p-5 sm:p-6 overflow-y-auto">
-            <div class="flex items-center justify-between mb-5">
-              <h3 class="text-lg font-semibold text-gray-900">Search Parameters</h3>
-              <span class="text-[10px] uppercase tracking-wider text-gray-400">PrivateEye</span>
-            </div>
+            /* Subtle gradient background */
+            .bg-grid {
+                background-image:
+                    radial-gradient(circle at 1px 1px, rgba(79,70,229,.08) 1px, transparent 1px);
+                background-size: 24px 24px;
+            }
+        </style>
+    </head>
+    <body class="h-full flex flex-col overflow-hidden antialiased bg-gray-100">
 
-            <form id="pe_searchForm" class="space-y-6">
-              <div class="grid sm:grid-cols-1 gap-4">
-                <div>
-                  <label for="pe_name" class="block text-sm font-medium text-gray-900">
-                    <i class="fa-solid fa-user w-4 mr-2 text-gray-400"></i>Person's Name
-                  </label>
-                  <input id="pe_name" type="text" placeholder="e.g., Florian Davis" class="f-input mt-2 block w-full rounded-lg border border-gray-300 bg-white/80 py-2.5 px-3.5 text-gray-900 shadow-sm focus:border-indigo-600 focus:ring-0" autocomplete="name" />
-                </div>
-
-                <div>
-                  <label for="pe_address" class="block text-sm font-medium text-gray-900">
-                    <i class="fa-solid fa-location-dot w-4 mr-2 text-gray-400"></i>Address
-                  </label>
-                  <input id="pe_address" type="text" placeholder="123 Main St, Anytown, ST 12345" class="f-input mt-2 block w-full rounded-lg border border-gray-300 bg-white/80 py-2.5 px-3.5 text-gray-900 shadow-sm focus:border-indigo-600 focus:ring-0" inputmode="text" />
-                </div>
-
-                <div>
-                  <label for="pe_phone" class="block text-sm font-medium text-gray-900">
-                    <i class="fa-solid fa-phone w-4 mr-2 text-gray-400"></i>Phone Number
-                  </label>
-                  <input id="pe_phone" type="tel" placeholder="xxx-xxx-xxxx" class="f-input mt-2 block w-full rounded-lg border border-gray-300 bg-white/80 py-2.5 px-3.5 text-gray-900 shadow-sm focus:border-indigo-600 focus:ring-0" inputmode="tel" />
-                </div>
-              </div>
-
-              <div class="grid sm:grid-cols-1 gap-3 pt-2">
-                <button type="submit" data-search-type="name" class="search-btn inline-flex w-full items-center justify-center gap-x-2 rounded-lg bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
-                  <i class="fa-solid fa-user-plus"></i>
-                  <span>Search by Name & Address</span>
-                </button>
-
-                <button type="submit" data-search-type="address" class="search-btn inline-flex w-full items-center justify-center gap-x-2 rounded-lg bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
-                  <i class="fa-solid fa-map-location-dot"></i>
-                  <span>Search by Address</span>
-                </button>
-
-                <button type="submit" data-search-type="phone" class="search-btn inline-flex w-full items-center justify-center gap-x-2 rounded-lg bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
-                  <i class="fa-solid fa-square-phone"></i>
-                  <span>Search by Phone</span>
-                </button>
-              </div>
-            </form>
-
-            <div id="pe_messageArea" role="alert" class="text-sm mt-6 text-center p-3 rounded-md hidden"></div>
-          </div>
-
-          <!-- History -->
-          <div id="pe_historySection" class="mt-auto border-t border-gray-200 p-4 bg-gray-50/80">
-            <div class="flex items-center justify-between mb-2">
-              <h3 class="text-sm font-medium text-gray-700">
-                <i class="fa-solid fa-history mr-2"></i>Search History
-              </h3>
-              <button id="pe_clearHistoryBtn" class="text-xs text-indigo-600 hover:text-indigo-800 font-semibold hidden">
-                <i class="fa-solid fa-trash-can mr-1"></i>Clear All
-              </button>
-            </div>
-            <div id="pe_historyList" class="space-y-1.5 overflow-y-auto max-h-48"></div>
-          </div>
-        </aside>
-
-        <!-- Results Area -->
-        <div class="flex-1 relative bg-white">
-          <iframe id="pe_resultFrame" class="w-full h-full border-none absolute inset-0 hidden" title="Search Result"></iframe>
-
-          <!-- Welcome/Empty State -->
-          <div id="pe_welcomeMessage" class="absolute inset-0 flex items-center justify-center">
-            <div class="text-center text-gray-600 p-8 max-w-md">
-              <div class="mx-auto h-16 w-16 rounded-2xl bg-indigo-50 text-indigo-400 flex items-center justify-center shadow-sm">
-                <i class="fa-solid fa-magnifying-glass-location text-3xl"></i>
-              </div>
-              <h3 class="mt-4 text-lg font-semibold text-gray-900">Search Results Will Appear Here</h3>
-              <p class="mt-1.5 text-sm text-gray-500">Enter information in the panel and select a search type to begin.</p>
-              <div class="mt-6 flex items-center justify-center gap-2">
-                <button id="pe_clearAllBtn" class="inline-flex items-center gap-x-1.5 rounded-md bg-indigo-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
-                  <i class="fa-solid fa-plus -ml-0.5"></i>
-                  New Search
-                </button>
-                <button class="inline-flex items-center gap-x-1.5 rounded-md bg-white px-3.5 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" onclick="document.getElementById('pe_name').focus()">
-                  <i class="fa-regular fa-hand-pointer"></i>
-                  Start typing
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Bottom helper bar -->
-          <div class="absolute bottom-0 left-0 right-0 pointer-events-none">
-            <div class="mx-auto max-w-4xl px-4 pb-4">
-              <div class="pointer-events-auto panel rounded-xl border border-gray-200/70 shadow-md p-3 sm:p-4 flex flex-col sm:flex-row items-center gap-3">
-                <div class="flex items-center gap-2 text-sm text-gray-700">
-                  <i class="fa-solid fa-lightbulb text-amber-500"></i>
-                  Tip: Use full address and state abbreviation for best results.
-                </div>
-                <div class="flex-1"></div>
-                <div class="flex items-center gap-2 text-xs text-gray-500">
-                  <span class="hidden sm:inline">Keyboard:</span>
-                  <code class="px-2 py-1 rounded bg-gray-100 border text-gray-700">Enter</code>
-                  to submit
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Business Search Tab -->
-    <section id="business-search-tab" class="tab-content h-full overflow-auto p-4 sm:p-8 flex-col">
-      <div class="max-w-5xl mx-auto space-y-8 w-full">
-        <!-- Business Card -->
-        <div class="tool-card panel rounded-2xl p-6 sm:p-8">
-          <div class="flex items-center mb-6">
-            <div class="bg-indigo-600 rounded-xl p-3 mr-4 shadow">
-              <i class="fas fa-building text-white text-xl"></i>
+        <!-- Top Header -->
+        <header class="bg-white/90 backdrop-blur border-b border-gray-200 px-3 sm:px-6 py-3 shadow-sm flex justify-between items-center z-20 shrink-0">
+          <div class="flex items-center gap-3">
+            <div class="bg-indigo-600 p-2.5 rounded-xl shadow-sm">
+              <i class="fa-solid fa-search text-white text-xl"></i>
             </div>
             <div>
-              <h2 class="text-2xl font-bold text-gray-900">Business Entity Search</h2>
-              <p class="text-sm text-gray-500">Generate dynamic Secretary of State URLs based on address/state</p>
+              <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-gray-900">Investigator Toolkit</h1>
+              <p class="text-xs text-gray-500">Skip tracing and property owner intelligence</p>
             </div>
           </div>
 
-          <div class="grid lg:grid-cols-2 gap-6">
-            <div class="space-y-6">
-              <div>
-                <label for="bs_businessName" class="block text-sm font-medium text-gray-800 mb-1.5">
-                  <i class="fa-solid fa-briefcase w-4 mr-2 text-gray-400"></i>Business Name/Account
-                </label>
-                <input id="bs_businessName" type="text" placeholder="Enter business name or account" class="f-input w-full mt-1.5 px-4 py-3 rounded-lg border border-gray-300 bg-white/80 focus:border-indigo-500 focus:ring-0 transition"/>
-              </div>
-              <div>
-                <label for="bs_address" class="block text-sm font-medium text-gray-800 mb-1.5">
-                  <i class="fa-solid fa-location-dot w-4 mr-2 text-gray-400"></i>Business Address
-                </label>
-                <textarea id="bs_address" rows="4" placeholder="Enter full business address including state (e.g., 500 Market St, San Francisco, CA 94103)" class="f-input w-full mt-1.5 px-4 py-3 rounded-lg border border-gray-300 bg-white/80 focus:border-indigo-500 focus:ring-0 transition"></textarea>
-              </div>
-              <div class="flex items-center gap-3 pt-2">
-                <button id="bs_searchBtn" class="bg-indigo-600 text-white px-5 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition flex items-center shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
-                  <i class="fas fa-search mr-2"></i>Generate Search URL
-                </button>
-                <button id="bs_resetBtn" class="px-4 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition">
-                  <i class="fa-solid fa-rotate-left mr-2"></i>Reset
-                </button>
-              </div>
-              <div id="bs_messageArea" role="alert" class="text-sm mt-2 p-3 rounded-md hidden"></div>
+          <div class="flex items-center gap-4">
+            <!-- Add toggle button here -->
+            <button id="pe_togglePanelBtn" class="p-2 rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
+              <svg id="pe_toggleIcon" class="h-6 w-6 sm:h-7 sm:w-7 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+              </svg>
+              <span class="sr-only">Toggle Input Panel</span>
+            </button>
 
-              <!-- Quick States: speed dial -->
-              <div class="mt-4">
-                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Quick State Insert</p>
-                <div class="flex flex-wrap gap-2">
-                  <button data-state="CA" class="px-2.5 py-1.5 text-xs rounded-md border bg-white hover:bg-gray-50">CA</button>
-                  <button data-state="TX" class="px-2.5 py-1.5 text-xs rounded-md border bg-white hover:bg-gray-50">TX</button>
-                  <button data-state="FL" class="px-2.5 py-1.5 text-xs rounded-md border bg-white hover:bg-gray-50">FL</button>
-                  <button data-state="NY" class="px-2.5 py-1.5 text-xs rounded-md border bg-white hover:bg-gray-50">NY</button>
-                  <button data-state="AZ" class="px-2.5 py-1.5 text-xs rounded-md border bg-white hover:bg-gray-50">AZ</button>
-                  <button data-state="GA" class="px-2.5 py-1.5 text-xs rounded-md border bg-white hover:bg-gray-50">GA</button>
-                </div>
-              </div>
+            <!-- Primary Nav Tabs -->
+            <nav class="flex flex-wrap justify-center gap-2 sm:gap-4">
+                <button class="tab-button active text-gray-600 hover:text-indigo-600 px-4 sm:px-6 py-2 sm:py-3 text-sm font-semibold rounded-md" data-tab="private-eye">
+                    <i class="fas fa-user-secret mr-2"></i>
+                    Person Search
+                </button>
+                <button class="tab-button text-gray-600 hover:text-indigo-600 px-4 sm:px-6 py-2 sm:py-3 text-sm font-semibold rounded-md" data-tab="business-search">
+                    <i class="fas fa-building mr-2"></i>
+                    Business Search
+                </button>
+              </nav>
             </div>
+        </header>
 
-            <!-- Result Preview -->
-            <div class="space-y-4">
-              <div class="panel rounded-xl border p-4">
-                <div class="flex items-center gap-2 mb-3">
-                  <i class="fas fa-chart-line text-indigo-600"></i>
-                  <h3 class="text-base font-semibold text-gray-900">Result Preview</h3>
-                </div>
-                <div id="bs_resultContainer" class="hidden">
-                  <div class="mb-4 flex items-center p-3 bg-indigo-50 rounded-lg border border-indigo-100">
-                    <i class="fas fa-flag-usa text-indigo-500 mr-3 text-lg"></i>
-                    <span class="font-medium text-gray-700">Detected State:</span>
-                    <span id="bs_detectedState" class="ml-2 font-bold text-indigo-700 text-lg"></span>
-                  </div>
-                  <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                      <i class="fas fa-link text-indigo-500 mr-2"></i>Generated Secretary of State URL
-                    </label>
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                      <div class="flex-1 overflow-x-auto bg-white p-2.5 rounded-md border">
-                        <a id="bs_generatedUrl" href="#" target="_blank" rel="noopener" class="text-indigo-600 hover:text-indigo-800 break-all"></a>
-                      </div>
-                      <div class="flex items-center gap-2">
-                        <button id="bs_copyBtn" class="px-4 py-2 border border-indigo-500 text-indigo-600 rounded-lg font-medium whitespace-nowrap hover:bg-indigo-500 hover:text-white transition">
-                          <i class="far fa-copy mr-2"></i><span>Copy URL</span>
-                        </button>
-                        <button id="bs_openBtn" class="px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium whitespace-nowrap hover:bg-indigo-700 transition">
-                          <i class="fa-solid fa-up-right-from-square mr-2"></i>Open
-                        </button>
-                      </div>
+        <!-- Main Content -->
+        <main class="flex-1 overflow-hidden bg-gradient-to-b from-indigo-50/60 via-gray-50 to-white relative">
+            <!-- Aesthetic background grid -->
+            <div class="absolute inset-0 bg-grid pointer-events-none"></div>
+
+            <!-- Person Search Tab -->
+            <section id="private-eye-tab" class="tab-content active h-full flex-col relative">
+                <!-- Fixed Sub-header -->
+                
+
+                <!-- Body -->
+                <div class="flex flex-1 h-full overflow-hidden">
+                    <!-- Input Panel -->
+                    <aside id="pe_inputPanel" class="panel w-full md:w-[420px] lg:w-[460px] border-r border-gray-200 shadow-xl transition-transform duration-300 ease-in-out transform translate-x-0 flex flex-col md:relative z-30 h-full">
+                        <div class="p-5 sm:p-6 overflow-y-auto">
+                            <div class="flex items-center justify-between mb-5">
+                                <h3 class="text-lg font-semibold text-gray-900">Search Parameters</h3>
+                                <span class="text-[10px] uppercase tracking-wider text-gray-400">PrivateEye</span>
+                            </div>
+
+                            <form id="pe_searchForm" class="space-y-6">
+                                <div class="grid sm:grid-cols-1 gap-4">
+                                    <div>
+                                        <label for="pe_name" class="block text-sm font-medium text-gray-900">
+                                            <i class="fa-solid fa-user w-4 mr-2 text-gray-400"></i>Person's Name
+                                        </label>
+                                        <input id="pe_name" type="text" placeholder="e.g., Florian Davis" class="f-input mt-2 block w-full rounded-lg border border-gray-300 bg-white/80 py-2.5 px-3.5 text-gray-900 shadow-sm focus:border-indigo-600 focus:ring-0" autocomplete="name" />
+                                    </div>
+
+                                    <div>
+                                        <label for="pe_address" class="block text-sm font-medium text-gray-900">
+                                            <i class="fa-solid fa-location-dot w-4 mr-2 text-gray-400"></i>Address
+                                        </label>
+                                        <input id="pe_address" type="text" placeholder="123 Main St, Anytown, ST 12345" class="f-input mt-2 block w-full rounded-lg border border-gray-300 bg-white/80 py-2.5 px-3.5 text-gray-900 shadow-sm focus:border-indigo-600 focus:ring-0" inputmode="text" />
+                                    </div>
+
+                                    <div>
+                                        <label for="pe_phone" class="block text-sm font-medium text-gray-900">
+                                            <i class="fa-solid fa-phone w-4 mr-2 text-gray-400"></i>Phone Number
+                                        </label>
+                                        <input id="pe_phone" type="tel" placeholder="xxx-xxx-xxxx" class="f-input mt-2 block w-full rounded-lg border border-gray-300 bg-white/80 py-2.5 px-3.5 text-gray-900 shadow-sm focus:border-indigo-600 focus:ring-0" inputmode="tel" />
+                                    </div>
+                                </div>
+
+                                <div class="grid sm:grid-cols-1 gap-3 pt-2">
+                                    <button type="submit" data-search-type="name" class="search-btn inline-flex w-full items-center justify-center gap-x-2 rounded-lg bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
+                                        <i class="fa-solid fa-user-plus"></i>
+                                        <span>Search by Name & Address</span>
+                                    </button>
+
+                                    <button type="submit" data-search-type="address" class="search-btn inline-flex w-full items-center justify-center gap-x-2 rounded-lg bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                                        <i class="fa-solid fa-map-location-dot"></i>
+                                        <span>Search by Address</span>
+                                    </button>
+
+                                    <button type="submit" data-search-type="phone" class="search-btn inline-flex w-full items-center justify-center gap-x-2 rounded-lg bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                                        <i class="fa-solid fa-square-phone"></i>
+                                        <span>Search by Phone</span>
+                                    </button>
+                                </div>
+                            </form>
+
+                            <div id="pe_messageArea" role="alert" class="text-sm mt-6 text-center p-3 rounded-md hidden"></div>
+                        </div>
+
+                        <!-- History -->
+                        <div id="pe_historySection" class="mt-auto border-t border-gray-200 p-4 bg-gray-50/80">
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="text-sm font-medium text-gray-700">
+                                    <i class="fa-solid fa-history mr-2"></i>Search History
+                                </h3>
+                                <button id="pe_clearHistoryBtn" class="text-xs text-indigo-600 hover:text-indigo-800 font-semibold hidden">
+                                    <i class="fa-solid fa-trash-can mr-1"></i>Clear All
+                                </button>
+                            </div>
+                            <div id="pe_historyList" class="space-y-1.5 overflow-y-auto max-h-48"></div>
+                        </div>
+                    </aside>
+
+                    <!-- Results Area -->
+                    <div class="flex-1 relative bg-white">
+                        <iframe id="pe_resultFrame" class="w-full h-full border-none absolute inset-0 hidden" title="Search Result"></iframe>
+
+                        <!-- Welcome/Empty State -->
+                        <div id="pe_welcomeMessage" class="absolute inset-0 flex items-center justify-center">
+                            <div class="text-center text-gray-600 p-8 max-w-md">
+                                <div class="mx-auto h-16 w-16 rounded-2xl bg-indigo-50 text-indigo-400 flex items-center justify-center shadow-sm">
+                                    <i class="fa-solid fa-magnifying-glass-location text-3xl"></i>
+                                </div>
+                                <h3 class="mt-4 text-lg font-semibold text-gray-900">Search Results Will Appear Here</h3>
+                                <p class="mt-1.5 text-sm text-gray-500">Enter information in the panel and select a search type to begin.</p>
+                                <div class="mt-6 flex items-center justify-center gap-2">
+                                    <button id="pe_clearAllBtn" class="inline-flex items-center gap-x-1.5 rounded-md bg-indigo-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
+                                        <i class="fa-solid fa-plus -ml-0.5"></i>
+                                        New Search
+                                    </button>
+                                    <button class="inline-flex items-center gap-x-1.5 rounded-md bg-white px-3.5 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" onclick="document.getElementById('pe_name').focus()">
+                                        <i class="fa-regular fa-hand-pointer"></i>
+                                        Start typing
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                  </div>
-                  <p class="mt-4 text-xs text-gray-500 flex items-start gap-2">
-                    <i class="fas fa-info-circle text-indigo-500 mt-0.5"></i>
-                    Clicking the URL copies the business name to your clipboard for quick pasting on the state's site search field.
-                  </p>
                 </div>
+            </section>
 
-                <!-- Empty state before result -->
-                <div id="bs_empty" class="text-sm text-gray-500">
-                  No result yet. Enter details and Generate to preview the URL.
+            <!-- Business Search Tab -->
+            <section id="business-search-tab" class="tab-content h-full overflow-auto p-4 sm:p-8 flex-col">
+                <div class="max-w-5xl mx-auto space-y-8 w-full">
+                    <!-- Business Card -->
+                    <div class="tool-card panel rounded-2xl p-6 sm:p-8">
+                        <div class="flex items-center mb-6">
+                            <div class="bg-indigo-600 rounded-xl p-3 mr-4 shadow">
+                                <i class="fas fa-building text-white text-xl"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-2xl font-bold text-gray-900">Business Entity Search</h2>
+                                <p class="text-sm text-gray-500">Generate dynamic Secretary of State URLs based on address/state</p>
+                            </div>
+                        </div>
+
+                        <div class="grid lg:grid-cols-2 gap-6">
+                            <div class="space-y-6">
+                                <div>
+                                    <label for="bs_businessName" class="block text-sm font-medium text-gray-800 mb-1.5">
+                                        <i class="fa-solid fa-briefcase w-4 mr-2 text-gray-400"></i>Business Name/Account
+                                    </label>
+                                    <input id="bs_businessName" type="text" placeholder="Enter business name or account" class="f-input w-full mt-1.5 px-4 py-3 rounded-lg border border-gray-300 bg-white/80 focus:border-indigo-500 focus:ring-0 transition"/>
+                                </div>
+                                <div>
+                                    <label for="bs_address" class="block text-sm font-medium text-gray-800 mb-1.5">
+                                        <i class="fa-solid fa-location-dot w-4 mr-2 text-gray-400"></i>Business Address
+                                    </label>
+                                    <textarea id="bs_address" rows="4" placeholder="Enter full business address including state (e.g., 500 Market St, San Francisco, CA 94103)" class="f-input w-full mt-1.5 px-4 py-3 rounded-lg border border-gray-300 bg-white/80 focus:border-indigo-500 focus:ring-0 transition"></textarea>
+                                </div>
+                                <div class="flex items-center gap-3 pt-2">
+                                    <button id="bs_searchBtn" class="bg-indigo-600 text-white px-5 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition flex items-center shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
+                                        <i class="fas fa-search mr-2"></i>Generate Search URL
+                                    </button>
+                                    <button id="bs_resetBtn" class="px-4 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition">
+                                        <i class="fa-solid fa-rotate-left mr-2"></i>Reset
+                                    </button>
+                                </div>
+                                <div id="bs_messageArea" role="alert" class="text-sm mt-2 p-3 rounded-md hidden"></div>
+
+                                <!-- Quick States: speed dial -->
+                                <div class="mt-4">
+                                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Quick State Insert</p>
+                                    <div class="flex flex-wrap gap-2">
+                                        <button data-state="CA" class="px-2.5 py-1.5 text-xs rounded-md border bg-white hover:bg-gray-50">CA</button>
+                                        <button data-state="TX" class="px-2.5 py-1.5 text-xs rounded-md border bg-white hover:bg-gray-50">TX</button>
+                                        <button data-state="FL" class="px-2.5 py-1.5 text-xs rounded-md border bg-white hover:bg-gray-50">FL</button>
+                                        <button data-state="NY" class="px-2.5 py-1.5 text-xs rounded-md border bg-white hover:bg-gray-50">NY</button>
+                                        <button data-state="AZ" class="px-2.5 py-1.5 text-xs rounded-md border bg-white hover:bg-gray-50">AZ</button>
+                                        <button data-state="GA" class="px-2.5 py-1.5 text-xs rounded-md border bg-white hover:bg-gray-50">GA</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Result Preview -->
+                            <div class="space-y-4">
+                                <div class="panel rounded-xl border p-4">
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <i class="fas fa-chart-line text-indigo-600"></i>
+                                        <h3 class="text-base font-semibold text-gray-900">Result Preview</h3>
+                                    </div>
+                                    <div id="bs_resultContainer" class="hidden">
+                                        <div class="mb-4 flex items-center p-3 bg-indigo-50 rounded-lg border border-indigo-100">
+                                            <i class="fas fa-flag-usa text-indigo-500 mr-3 text-lg"></i>
+                                            <span class="font-medium text-gray-700">Detected State:</span>
+                                            <span id="bs_detectedState" class="ml-2 font-bold text-indigo-700 text-lg"></span>
+                                        </div>
+                                        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                                <i class="fas fa-link text-indigo-500 mr-2"></i>Generated Secretary of State URL
+                                            </label>
+                                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                                <div class="flex-1 overflow-x-auto bg-white p-2.5 rounded-md border">
+                                                    <a id="bs_generatedUrl" href="#" target="_blank" rel="noopener" class="text-indigo-600 hover:text-indigo-800 break-all"></a>
+                                                </div>
+                                                <div class="flex items-center gap-2">
+                                                    <button id="bs_copyBtn" class="px-4 py-2 border border-indigo-500 text-indigo-600 rounded-lg font-medium whitespace-nowrap hover:bg-indigo-500 hover:text-white transition">
+                                                        <i class="far fa-copy mr-2"></i><span>Copy URL</span>
+                                                    </button>
+                                                    <button id="bs_openBtn" class="px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium whitespace-nowrap hover:bg-indigo-700 transition">
+                                                        <i class="fa-solid fa-up-right-from-square mr-2"></i>Open
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <p class="mt-4 text-xs text-gray-500 flex items-start gap-2">
+                                            <i class="fas fa-info-circle text-indigo-500 mt-0.5"></i>
+                                            Clicking the URL copies the business name to your clipboard for quick pasting on the state's site search field.
+                                        </p>
+                                    </div>
+
+                                    <!-- Empty state before result -->
+                                    <div id="bs_empty" class="text-sm text-gray-500">
+                                        No result yet. Enter details and Generate to preview the URL.
+                                    </div>
+                                </div>
+
+                                <!-- Saved searches -->
+                                <div class="panel rounded-xl border p-4">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <h4 class="text-sm font-semibold text-gray-900"><i class="fa-regular fa-bookmark mr-2 text-indigo-600"></i>Saved Business Searches</h4>
+                                        <button id="bs_clearSaved" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 hidden">
+                                            <i class="fa-solid fa-trash-can mr-1"></i>Clear
+                                        </button>
+                                    </div>
+                                    <div id="bs_savedList" class="space-y-2 text-sm"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
+            </section>
+        </main>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                // Tabs
+                const tabs = document.querySelectorAll('.tab-button');
+                const tabContents = document.querySelectorAll('.tab-content');
+                tabs.forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        tabs.forEach(t => t.classList.remove('active'));
+                        tabContents.forEach(c => { c.classList.remove('active'); c.classList.add('hidden'); });
+                        tab.classList.add('active');
+                        const activeTab = document.getElementById(`${tab.dataset.tab}-tab`);
+                        activeTab.classList.remove('hidden');
+                        activeTab.classList.add('active');
+                    });
+                });
 
-              <!-- Saved searches -->
-              <div class="panel rounded-xl border p-4">
-                <div class="flex items-center justify-between mb-3">
-                  <h4 class="text-sm font-semibold text-gray-900"><i class="fa-regular fa-bookmark mr-2 text-indigo-600"></i>Saved Business Searches</h4>
-                  <button id="bs_clearSaved" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 hidden">
-                    <i class="fa-solid fa-trash-can mr-1"></i>Clear
-                  </button>
-                </div>
-                <div id="bs_savedList" class="space-y-2 text-sm"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
+                initPrivateEyeTool();
+                initBusinessSearchTool();
+            });
 
-  <!-- Footer -->
-  <footer class="border-t border-gray-200 bg-white/80 backdrop-blur py-3 text-center text-xs text-gray-500">
-    Built for investigators. Stay compliant with local and federal regulations when using third-party data.
-  </footer>
+            // Person Search (PrivateEye)
+            function initPrivateEyeTool() {
+                const ui = {
+                    inputPanel: document.getElementById('pe_inputPanel'),
+                    toggleBtn: document.getElementById('pe_togglePanelBtn'),
+                    toggleIcon: document.getElementById('pe_toggleIcon'),
+                    searchForm: document.getElementById('pe_searchForm'),
+                    messageArea: document.getElementById('pe_messageArea'),
+                    resultFrame: document.getElementById('pe_resultFrame'),
+                    welcomeMessage: document.getElementById('pe_welcomeMessage'),
+                    clearAllBtn: document.getElementById('pe_clearAllBtn'),
+                    history: { list: document.getElementById('pe_historyList'), clearBtn: document.getElementById('pe_clearHistoryBtn') },
+                    inputs: { name: document.getElementById('pe_name'), address: document.getElementById('pe_address'), phone: document.getElementById('pe_phone') },
+                    searchBtns: document.querySelectorAll('#private-eye-tab .search-btn')
+                };
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      // Tabs
-      const tabs = document.querySelectorAll('.tab-button');
-      const tabContents = document.querySelectorAll('.tab-content');
-      tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-          tabs.forEach(t => t.classList.remove('active'));
-          tabContents.forEach(c => { c.classList.remove('active'); c.classList.add('hidden'); });
-          tab.classList.add('active');
-          const activeTab = document.getElementById(`${tab.dataset.tab}-tab`);
-          activeTab.classList.remove('hidden');
-          activeTab.classList.add('active');
-        });
-      });
+                // Accessibility: link labels and inputs
+                Object.values(ui.inputs).forEach(inp => inp.setAttribute('aria-label', inp.previousElementSibling?.innerText || 'input'));
 
-      initPrivateEyeTool();
-      initBusinessSearchTool();
-    });
+                let isPanelOpen = window.innerWidth > 768;
+                let searchHistory = JSON.parse(localStorage.getItem('privateEyeHistory')) || [];
 
-    // Person Search (PrivateEye)
-    function initPrivateEyeTool() {
-      const ui = {
-        inputPanel: document.getElementById('pe_inputPanel'),
-        toggleBtn: document.getElementById('pe_togglePanelBtn'),
-        toggleIcon: document.getElementById('pe_toggleIcon'),
-        searchForm: document.getElementById('pe_searchForm'),
-        messageArea: document.getElementById('pe_messageArea'),
-        resultFrame: document.getElementById('pe_resultFrame'),
-        welcomeMessage: document.getElementById('pe_welcomeMessage'),
-        clearAllBtn: document.getElementById('pe_clearAllBtn'),
-        history: { list: document.getElementById('pe_historyList'), clearBtn: document.getElementById('pe_clearHistoryBtn') },
-        inputs: { name: document.getElementById('pe_name'), address: document.getElementById('pe_address'), phone: document.getElementById('pe_phone') },
-        searchBtns: document.querySelectorAll('#private-eye-tab .search-btn')
-      };
+                const showMessage = (text, type = 'error') => {
+                    ui.messageArea.textContent = text;
+                    ui.messageArea.className = `text-sm mt-4 text-center p-3 rounded-md ${type === 'error' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}`;
+                    ui.messageArea.classList.remove('hidden');
+                };
+                const clearMessage = () => ui.messageArea.classList.add('hidden');
 
-      // Accessibility: link labels and inputs
-      Object.values(ui.inputs).forEach(inp => inp.setAttribute('aria-label', inp.previousElementSibling?.innerText || 'input'));
+                const format = {
+                    name: (str) => {
+                        const p = str.trim().split(/\s+/);
+                        return (p.length < 2 || !p[0] || !p[p.length - 1]) ? null : { first: p[0].toLowerCase(), last: p[p.length - 1].toLowerCase() };
+                    },
+                    address: (str) => {
+                        // number, street, city, ST, zip (zip optional)
+                        const m = str.trim().match(/^\s*(\d+)\s+(.+?),\s*([^,]+?),\s*([A-Z]{2})(?:\s+(\d{5})(?:-\d{4})?)?\s*$/i);
+                        return m ? {
+                            number: m[1],
+                            street: m[2].trim().toLowerCase().replace(/\s+/g, '-'),
+                            city: m[3].trim().toLowerCase().replace(/\s+/g, '-'),
+                            state: m[4].toLowerCase()
+                        } : null;
+                    },
+                    phone: (str) => {
+                        const c = str.replace(/\D/g, '');
+                        if (c.length === 11 && c.startsWith('1')) { // Normalize US numbers with country code
+                            return c.slice(1).replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+                        }
+                        return c.length !== 10 ? null : c.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+                    }
+                };
 
-      let isPanelOpen = window.innerWidth > 768;
-      let searchHistory = JSON.parse(localStorage.getItem('privateEyeHistory')) || [];
+                const setPanelState = (open) => {
+                    isPanelOpen = open;
+                    ui.inputPanel.classList.toggle('-translate-x-full', !isPanelOpen);
+                    ui.inputPanel.classList.toggle('translate-x-0', isPanelOpen);
+                    if (isPanelOpen) ui.inputPanel.classList.remove('hidden');
+                    else if (window.innerWidth < 768) setTimeout(() => ui.inputPanel.classList.add('hidden'), 250);
+                    ui.toggleIcon.classList.toggle('rotate-180', !isPanelOpen);
+                    ui.toggleBtn.setAttribute('aria-expanded', String(isPanelOpen));
+                };
 
-      const showMessage = (text, type = 'error') => {
-        ui.messageArea.textContent = text;
-        ui.messageArea.className = `text-sm mt-4 text-center p-3 rounded-md ${type === 'error' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}`;
-        ui.messageArea.classList.remove('hidden');
-      };
-      const clearMessage = () => ui.messageArea.classList.add('hidden');
+                const setLoadingState = (isLoading, clickedBtn) => {
+                    ui.searchBtns.forEach(btn => {
+                        btn.disabled = isLoading;
+                        btn.classList.toggle('opacity-60', isLoading);
+                        const icon = btn.querySelector('i');
+                        const span = btn.querySelector('span');
+                        const defaultText = {
+                            name: 'Search by Name & Address',
+                            address: 'Search by Address',
+                            phone: 'Search by Phone'
+                        };
+                        icon.className = 'fa-solid';
+                        if (isLoading && btn === clickedBtn) {
+                            span.textContent = 'Searching...';
+                            icon.classList.add('fa-spinner', 'spinner');
+                        } else {
+                            span.textContent = defaultText[btn.dataset.searchType];
+                            const map = { name: 'fa-user-plus', address: 'fa-map-location-dot', phone: 'fa-square-phone' };
+                            icon.classList.add(map[btn.dataset.searchType]);
+                        }
+                    });
+                };
 
-      const format = {
-        name: (str) => {
-          const p = str.trim().split(/\s+/);
-          return (p.length < 2 || !p[0] || !p[p.length - 1]) ? null : { first: p[0].toLowerCase(), last: p[p.length - 1].toLowerCase() };
-        },
-        address: (str) => {
-          // number, street, city, ST, zip (zip optional)
-          const m = str.trim().match(/^\s*(\d+)\s+(.+?),\s*([^,]+?),\s*([A-Z]{2})(?:\s+(\d{5})(?:-\d{4})?)?\s*$/i);
-          return m ? {
-            number: m[1],
-            street: m[2].trim().toLowerCase().replace(/\s+/g, '-'),
-            city: m[3].trim().toLowerCase().replace(/\s+/g, '-'),
-            state: m[4].toLowerCase()
-          } : null;
-        },
-        phone: (str) => {
-          const c = str.replace(/\D/g, '');
-          if (c.length === 11 && c.startsWith('1')) { // Normalize US numbers with country code
-            return c.slice(1).replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
-          }
-          return c.length !== 10 ? null : c.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
-        }
-      };
+                const resetToInitialState = () => {
+                    ui.searchForm.reset();
+                    clearMessage();
+                    ui.resultFrame.src = 'about:blank';
+                    ui.resultFrame.classList.add('hidden');
+                    ui.welcomeMessage.classList.remove('hidden');
+                    setLoadingState(false);
+                    if (window.innerWidth < 768 && !isPanelOpen) setPanelState(true);
+                    ui.inputs.name.focus();
+                };
 
-      const setPanelState = (open) => {
-        isPanelOpen = open;
-        ui.inputPanel.classList.toggle('-translate-x-full', !isPanelOpen);
-        ui.inputPanel.classList.toggle('translate-x-0', isPanelOpen);
-        if (isPanelOpen) ui.inputPanel.classList.remove('hidden');
-        else if (window.innerWidth < 768) setTimeout(() => ui.inputPanel.classList.add('hidden'), 250);
-        ui.toggleIcon.classList.toggle('rotate-180', !isPanelOpen);
-        ui.toggleBtn.setAttribute('aria-expanded', String(isPanelOpen));
-      };
-
-      const setLoadingState = (isLoading, clickedBtn) => {
-        ui.searchBtns.forEach(btn => {
-          btn.disabled = isLoading;
-          btn.classList.toggle('opacity-60', isLoading);
-          const icon = btn.querySelector('i');
-          const span = btn.querySelector('span');
-          const defaultText = {
-            name: 'Search by Name & Address',
-            address: 'Search by Address',
-            phone: 'Search by Phone'
-          };
-          icon.className = 'fa-solid';
-          if (isLoading && btn === clickedBtn) {
-            span.textContent = 'Searching...';
-            icon.classList.add('fa-spinner', 'spinner');
-          } else {
-            span.textContent = defaultText[btn.dataset.searchType];
-            const map = { name: 'fa-user-plus', address: 'fa-map-location-dot', phone: 'fa-square-phone' };
-            icon.classList.add(map[btn.dataset.searchType]);
-          }
-        });
-      };
-
-      const resetToInitialState = () => {
-        ui.searchForm.reset();
-        clearMessage();
-        ui.resultFrame.src = 'about:blank';
-        ui.resultFrame.classList.add('hidden');
-        ui.welcomeMessage.classList.remove('hidden');
-        setLoadingState(false);
-        if (window.innerWidth < 768 && !isPanelOpen) setPanelState(true);
-        ui.inputs.name.focus();
-      };
-
-      const renderHistory = () => {
-        ui.history.list.innerHTML = '';
-        if (!searchHistory.length) {
-          ui.history.clearBtn.classList.add('hidden');
-          ui.history.list.innerHTML = '<p class="text-xs text-gray-400 text-center p-2">No recent searches.</p>';
-          return;
-        }
-        ui.history.clearBtn.classList.remove('hidden');
-        searchHistory.forEach(item => {
-          const btn = document.createElement('button');
-          btn.className = 'history-item w-full p-2.5 rounded-md text-sm text-gray-800 truncate text-left border border-transparent flex items-center justify-between';
-          btn.title = item.label;
-          btn.innerHTML =
-            `<div class="flex-1 truncate">
+                const renderHistory = () => {
+                    ui.history.list.innerHTML = '';
+                    if (!searchHistory.length) {
+                        ui.history.clearBtn.classList.add('hidden');
+                        ui.history.list.innerHTML = '<p class="text-xs text-gray-400 text-center p-2">No recent searches.</p>';
+                        return;
+                    }
+                    ui.history.clearBtn.classList.remove('hidden');
+                    searchHistory.forEach(item => {
+                        const btn = document.createElement('button');
+                        btn.className = 'history-item w-full p-2.5 rounded-md text-sm text-gray-800 truncate text-left border border-transparent flex items-center justify-between';
+                        btn.title = item.label;
+                        btn.innerHTML =
+                            `<div class="flex-1 truncate">
               <i class="fa-solid fa-search text-indigo-500 mr-2.5"></i>${item.label}
             </div>
             <div class="flex items-center gap-2 text-gray-400">
               <span class="text-[10px] uppercase">${item.type}</span>
               <i class="fa-solid fa-chevron-right"></i>
             </div>`;
-          btn.onclick = () => {
-            Object.keys(item.values).forEach(key => ui.inputs[key].value = item.values[key]);
-            const fakeSubmitter = document.querySelector(`#private-eye-tab button[data-search-type="${item.type}"]`);
-            handleSearch(new Event('submit'), fakeSubmitter);
-          };
-          ui.history.list.prepend(btn);
-        });
-      };
+                        btn.onclick = () => {
+                            Object.keys(item.values).forEach(key => ui.inputs[key].value = item.values[key]);
+                            const fakeSubmitter = document.querySelector(`#private-eye-tab button[data-search-type="${item.type}"]`);
+                            handleSearch(new Event('submit'), fakeSubmitter);
+                        };
+                        ui.history.list.prepend(btn);
+                    });
+                };
 
-      const addToHistory = (type, values, label) => {
-        const newEntry = { type, values, label, timestamp: Date.now() };
-        // Ensure uniqueness by label and type
-        searchHistory = [newEntry, ...searchHistory.filter(i => !(i.label === label && i.type === type))].slice(0, 12);
-        localStorage.setItem('privateEyeHistory', JSON.stringify(searchHistory));
-        renderHistory();
-      };
+                const addToHistory = (type, values, label) => {
+                    const newEntry = { type, values, label, timestamp: Date.now() };
+                    // Ensure uniqueness by label and type
+                    searchHistory = [newEntry, ...searchHistory.filter(i => !(i.label === label && i.type === type))].slice(0, 12);
+                    localStorage.setItem('privateEyeHistory', JSON.stringify(searchHistory));
+                    renderHistory();
+                };
 
-      const clearHistory = () => {
-        searchHistory = [];
-        localStorage.removeItem('privateEyeHistory');
-        renderHistory();
-      };
+                const clearHistory = () => {
+                    searchHistory = [];
+                    localStorage.removeItem('privateEyeHistory');
+                    renderHistory();
+                };
 
-      const handleSearch = (event, submitterOverride) => {
-        event.preventDefault();
-        clearMessage();
-        const submitter = submitterOverride || event.submitter;
-        const searchType = submitter?.dataset.searchType;
-        if (!searchType) return;
-        setLoadingState(true, submitter);
+                const handleSearch = (event, submitterOverride) => {
+                    event.preventDefault();
+                    clearMessage();
+                    const submitter = submitterOverride || event.submitter;
+                    const searchType = submitter?.dataset.searchType;
+                    if (!searchType) return;
+                    setLoadingState(true, submitter);
 
-        const values = {
-          name: ui.inputs.name.value.trim(),
-          address: ui.inputs.address.value.trim(),
-          phone: ui.inputs.phone.value.trim()
-        };
+                    const values = {
+                        name: ui.inputs.name.value.trim(),
+                        address: ui.inputs.address.value.trim(),
+                        phone: ui.inputs.phone.value.trim()
+                    };
 
-        let url = '';
-        let error = '';
-        let label = '';
+                    let url = '';
+                    let error = '';
+                    let label = '';
 
-        try {
-          if (searchType === 'name') {
-            const n = format.name(values.name);
-            const a = format.address(values.address);
-            if (!n || !a) throw new Error('Please provide a full name and a valid address (e.g., 123 Main St, City, ST 12345).');
-            url = `https://www.privateeye.com/name/${n.first}-${n.last}/${a.state}/${a.city}`;
-            label = `${values.name}, ${values.address}`;
-          } else if (searchType === 'address') {
-            const a = format.address(values.address);
-            if (!a) throw new Error('Please provide a valid address (e.g., 123 Main St, City, ST 12345).');
-            url = `https://www.privateeye.com/postal-address/${a.state}/${a.city}/${a.street}/${a.number}`;
-            label = values.address;
-          } else if (searchType === 'phone') {
-            const p = format.phone(values.phone);
-            if (!p) throw new Error('Please provide a valid US phone number.');
-            url = `https://www.privateeye.com/phone-number/${p}`;
-            label = values.phone;
-          }
-        } catch (e) {
-          error = e.message;
-        }
+                    try {
+                        if (searchType === 'name') {
+                            const n = format.name(values.name);
+                            const a = format.address(values.address);
+                            if (!n || !a) throw new Error('Please provide a full name and a valid address (e.g., 123 Main St, City, ST 12345).');
+                            url = `https://www.privateeye.com/name/${n.first}-${n.last}/${a.state}/${a.city}`;
+                            label = `${values.name}, ${values.address}`;
+                        } else if (searchType === 'address') {
+                            const a = format.address(values.address);
+                            if (!a) throw new Error('Please provide a valid address (e.g., 123 Main St, City, ST 12345).');
+                            url = `https://www.privateeye.com/postal-address/${a.state}/${a.city}/${a.street}/${a.number}`;
+                            label = values.address;
+                        } else if (searchType === 'phone') {
+                            const p = format.phone(values.phone);
+                            if (!p) throw new Error('Please provide a valid US phone number.');
+                            url = `https://www.privateeye.com/phone-number/${p}`;
+                            label = values.phone;
+                        }
+                    } catch (e) {
+                        error = e.message;
+                    }
 
-        if (error) {
-          showMessage(error, 'error');
-          setLoadingState(false);
-          return;
-        }
+                    if (error) {
+                        showMessage(error, 'error');
+                        setLoadingState(false);
+                        return;
+                    }
 
-        ui.welcomeMessage.classList.add('hidden');
-        ui.resultFrame.classList.remove('hidden');
-        ui.resultFrame.src = url;
+                    ui.welcomeMessage.classList.add('hidden');
+                    ui.resultFrame.classList.remove('hidden');
+                    ui.resultFrame.src = url;
 
-        // Because cross-origin prevents onload sometimes, show optimistic info
-        let didLoad = false;
-        ui.resultFrame.onload = () => {
-          didLoad = true;
-          showMessage(`Search for "${label}" complete.`, 'info');
-          setLoadingState(false);
-          addToHistory(searchType, values, label);
-        };
-        // Fallback timeout to re-enable UI even if onload isn't triggered
-        setTimeout(() => {
-          if (!didLoad) {
-            showMessage(`Opened results for "${label}".`, 'info');
-            setLoadingState(false);
-            addToHistory(searchType, values, label);
-          }
-        }, 2000);
+                    // Because cross-origin prevents onload sometimes, show optimistic info
+                    let didLoad = false;
+                    ui.resultFrame.onload = () => {
+                        didLoad = true;
+                        showMessage(`Search for "${label}" complete.`, 'info');
+                        setLoadingState(false);
+                        addToHistory(searchType, values, label);
+                    };
+                    // Fallback timeout to re-enable UI even if onload isn't triggered
+                    setTimeout(() => {
+                        if (!didLoad) {
+                            showMessage(`Opened results for "${label}".`, 'info');
+                            setLoadingState(false);
+                            addToHistory(searchType, values, label);
+                        }
+                    }, 2000);
 
-        if (window.innerWidth < 768 && isPanelOpen) setPanelState(false);
-      };
+                    if (window.innerWidth < 768 && isPanelOpen) setPanelState(false);
+                };
 
-      // Phone input mask (progressive enhancement)
-      ui.inputs.phone.addEventListener('input', (e) => {
-        const v = e.target.value.replace(/\D/g, '').slice(0, 10);
-        const parts = [];
-        if (v.length > 0) parts.push(v.slice(0, 3));
-        if (v.length >= 4) parts.push(v.slice(3, 6));
-        if (v.length >= 7) parts.push(v.slice(6, 10));
-        e.target.value = parts.join('-');
-      });
+                // Phone input mask (progressive enhancement)
+                ui.inputs.phone.addEventListener('input', (e) => {
+                    const v = e.target.value.replace(/\D/g, '').slice(0, 10);
+                    const parts = [];
+                    if (v.length > 0) parts.push(v.slice(0, 3));
+                    if (v.length >= 4) parts.push(v.slice(3, 6));
+                    if (v.length >= 7) parts.push(v.slice(6, 10));
+                    e.target.value = parts.join('-');
+                });
 
-      ui.toggleBtn.addEventListener('click', () => setPanelState(!isPanelOpen));
-      ui.searchForm.addEventListener('submit', handleSearch);
-      ui.clearAllBtn.addEventListener('click', resetToInitialState);
-      ui.history.clearBtn.addEventListener('click', clearHistory);
+                ui.toggleBtn.addEventListener('click', () => setPanelState(!isPanelOpen));
+                ui.searchForm.addEventListener('submit', handleSearch);
+                ui.clearAllBtn.addEventListener('click', resetToInitialState);
+                ui.history.clearBtn.addEventListener('click', clearHistory);
 
-      // Keyboard UX: Enter triggers sensible default (name if name+address provided; else address; else phone)
-      ui.searchForm.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          const name = ui.inputs.name.value.trim();
-          const addr = ui.inputs.address.value.trim();
-          const phone = ui.inputs.phone.value.trim();
-          let btn = null;
-          if (name && addr) btn = document.querySelector('#private-eye-tab button[data-search-type="name"]');
-          else if (addr) btn = document.querySelector('#private-eye-tab button[data-search-type="address"]');
-          else if (phone) btn = document.querySelector('#private-eye-tab button[data-search-type="phone"]');
-          if (btn) {
-            e.preventDefault();
-            handleSearch(new Event('submit'), btn);
-          }
-        }
-      });
+                // Keyboard UX: Enter triggers sensible default (name if name+address provided; else address; else phone)
+                ui.searchForm.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        const name = ui.inputs.name.value.trim();
+                        const addr = ui.inputs.address.value.trim();
+                        const phone = ui.inputs.phone.value.trim();
+                        let btn = null;
+                        if (name && addr) btn = document.querySelector('#private-eye-tab button[data-search-type="name"]');
+                        else if (addr) btn = document.querySelector('#private-eye-tab button[data-search-type="address"]');
+                        else if (phone) btn = document.querySelector('#private-eye-tab button[data-search-type="phone"]');
+                        if (btn) {
+                            e.preventDefault();
+                            handleSearch(new Event('submit'), btn);
+                        }
+                    }
+                });
 
-      // Initialize
-      setPanelState(isPanelOpen);
-      renderHistory();
-    }
+                // Initialize
+                setPanelState(isPanelOpen);
+                renderHistory();
+            }
 
-    // Business Search
-    function initBusinessSearchTool() {
-      const ui = {
-        businessName: document.getElementById('bs_businessName'),
-        address: document.getElementById('bs_address'),
-        searchBtn: document.getElementById('bs_searchBtn'),
-        resetBtn: document.getElementById('bs_resetBtn'),
-        messageArea: document.getElementById('bs_messageArea'),
-        resultContainer: document.getElementById('bs_resultContainer'),
-        detectedState: document.getElementById('bs_detectedState'),
-        generatedUrl: document.getElementById('bs_generatedUrl'),
-        copyBtn: document.getElementById('bs_copyBtn'),
-        openBtn: document.getElementById('bs_openBtn'),
-        empty: document.getElementById('bs_empty'),
-        savedList: document.getElementById('bs_savedList'),
-        clearSaved: document.getElementById('bs_clearSaved')
-      };
+            // Business Search
+            function initBusinessSearchTool() {
+                const ui = {
+                    businessName: document.getElementById('bs_businessName'),
+                    address: document.getElementById('bs_address'),
+                    searchBtn: document.getElementById('bs_searchBtn'),
+                    resetBtn: document.getElementById('bs_resetBtn'),
+                    messageArea: document.getElementById('bs_messageArea'),
+                    resultContainer: document.getElementById('bs_resultContainer'),
+                    detectedState: document.getElementById('bs_detectedState'),
+                    generatedUrl: document.getElementById('bs_generatedUrl'),
+                    copyBtn: document.getElementById('bs_copyBtn'),
+                    openBtn: document.getElementById('bs_openBtn'),
+                    empty: document.getElementById('bs_empty'),
+                    savedList: document.getElementById('bs_savedList'),
+                    clearSaved: document.getElementById('bs_clearSaved')
+                };
 
-      const stateUrls = {
-        'ALABAMA': { sosUrl: 'https://arc-sos.state.al.us/CGI/CORPNAME.MBR/INPUT' },
-        'ALASKA': { sosUrl: 'https://www.commerce.alaska.gov/cbp/main/search/entities' },
-        'ARIZONA': { sosUrl: 'https://ecorp.azcc.gov/EntitySearch/Index' },
-        'ARKANSAS': { sosUrl: 'https://www.sos.arkansas.gov/corps/search_all.php' },
-        'CALIFORNIA': { sosUrl: 'https://bizfileonline.sos.ca.gov/search/business' },
-        'COLORADO': { sosUrl: 'https://www.sos.state.co.us/biz/BusinessEntityCriteriaExt.do?resetTransTyp=Y' },
-        'CONNECTICUT': { sosUrl: 'https://service.ct.gov/business/s/onlinebusinesssearch?language=en_US' },
-        'DELAWARE': { sosUrl: 'https://icis.corp.delaware.gov/Ecorp/EntitySearch/NameSearch.aspx' },
-        'DISTRICT OF COLUMBIA': { sosUrl: 'https://corponline.dcra.dc.gov/Home.aspx' },
-        'FLORIDA': { sosUrl: 'http://search.sunbiz.org/Inquiry/CorporationSearch/ByName' },
-        'GEORGIA': { sosUrl: 'https://ecorp.sos.ga.gov/BusinessSearch' },
-        'HAWAII': { sosUrl: 'https://hbe.ehawaii.gov/documents/search.html' },
-        'IDAHO': { sosUrl: 'https://sosbiz.idaho.gov/search/business' },
-        'ILLINOIS': { sosUrl: 'https://www.ilsos.gov/corporatellc/' },
-        'INDIANA': { sosUrl: 'https://bsd.sos.in.gov/publicbusinesssearch' },
-        'IOWA': { sosUrl: 'https://sos.iowa.gov/search/business/search.aspx' },
-        'KANSAS': { sosUrl: 'https://www.kansas.gov/bess/flow/main?execution=e1s1' },
-        'KENTUCKY': { sosUrl: 'https://web.sos.ky.gov/ftsearch/' },
-        'LOUISIANA': { sosUrl: 'https://coraweb.sos.la.gov/CommercialSearch/CommercialSearch.aspx' },
-        'MAINE': { sosUrl: 'https://apps1.web.maine.gov/online/icrs/icrs_database_search/' },
-        'MARYLAND': { sosUrl: 'https://egov.maryland.gov/BusinessExpress/EntitySearch' },
-        'MASSACHUSETTS': { sosUrl: 'https://corp.sec.state.ma.us/corpweb/CorpSearch/CorpSearch.aspx' },
-        'MICHIGAN': { sosUrl: 'https://cofs.lara.state.mi.us/corpweb/CorpSearch/CorpSearch.aspx' },
-        'MINNESOTA': { sosUrl: 'https://mblsportal.sos.state.mn.us/Business/Search' },
-        'MISSISSIPPI': { sosUrl: 'https://corp.sos.ms.gov/corp/portal/c/page/corpBusinessIdSearch/portal.aspx' },
-        'MISSOURI': { sosUrl: 'https://bsd.sos.mo.gov/BusinessEntity/BESearch.aspx' },
-        'MONTANA': { sosUrl: 'https://biz.sosmt.gov/search/business' },
-        'NEBRASKA': { sosUrl: 'https://www.nebraska.gov/sos/corp/corpsearch.cgi?nav=search' },
-        'NEVADA': { sosUrl: 'https://esos.nv.gov/EntitySearch/OnlineEntitySearch' },
-        'NEW HAMPSHIRE': { sosUrl: 'https://quickstart.sos.nh.gov/online/BusinessInquire' },
-        'NEW JERSEY': { sosUrl: 'https://www.njportal.com/DOR/BusinessNameSearch/Search/BusinessName' },
-        'NEW MEXICO': { sosUrl: 'https://portal.sos.state.nm.us/BFS/online/Account/SearchBusiness' },
-        'NEW YORK': { sosUrl: 'https://apps.dos.ny.gov/publicInquiry/' },
-        'NORTH CAROLINA': { sosUrl: 'https://www.sosnc.gov/search/index/corp' },
-        'NORTH DAKOTA': { sosUrl: 'https://firststop.sos.nd.gov/search/business' },
-        'OHIO': { sosUrl: 'https://businesssearch.ohiosos.gov/' },
-        'OKLAHOMA': { sosUrl: 'https://www.sos.ok.gov/corp/corpinquiryfind.aspx' },
-        'OREGON': { sosUrl: 'https://egov.sos.state.or.us/br/pkg_web_name_srch_inq.do_name_srch' },
-        'PENNSYLVANIA': { sosUrl: 'https://file.dos.pa.gov/search/business' },
-        'RHODE ISLAND': { sosUrl: 'https://business.sos.ri.gov/CorpWeb/CorpSearch/CorpSearch.aspx' },
-        'SOUTH CAROLINA': { sosUrl: 'https://businessfilings.sc.gov/BusinessFiling/Entity/Search' },
-        'SOUTH DAKOTA': { sosUrl: 'https://sos.sd.gov/business-services/business-name-search.aspx' },
-        'TENNESSEE': { sosUrl: 'https://tnbear.tn.gov/ECommerce/FilingSearch.aspx' },
-        'TEXAS': { sosUrl: 'https://mycpa.cpa.state.tx.us/coa/' },
-        'UTAH': { sosUrl: 'https://secure.utah.gov/bes/' },
-        'VERMONT': { sosUrl: 'https://sos.vermont.gov/corporations/search/' },
-        'VIRGINIA': { sosUrl: 'https://cis.scc.virginia.gov/' },
-        'WASHINGTON': { sosUrl: 'https://ccfs.sos.wa.gov/#/Home' },
-        'WEST VIRGINIA': { sosUrl: 'https://apps.wv.gov/SOS/BusinessEntitySearch/' },
-        'WISCONSIN': { sosUrl: 'https://www.wdfi.org/apps/CorpSearch/Search.aspx' },
-        'WYOMING': { sosUrl: 'https://wyobiz.wyo.gov/Business/FilingSearch.aspx' }
-      };
+                const stateUrls = {
+                    'ALABAMA': { sosUrl: 'https://arc-sos.state.al.us/CGI/CORPNAME.MBR/INPUT' },
+                    'ALASKA': { sosUrl: 'https://www.commerce.alaska.gov/cbp/main/search/entities' },
+                    'ARIZONA': { sosUrl: 'https://ecorp.azcc.gov/EntitySearch/Index' },
+                    'ARKANSAS': { sosUrl: 'https://www.sos.arkansas.gov/corps/search_all.php' },
+                    'CALIFORNIA': { sosUrl: 'https://bizfileonline.sos.ca.gov/search/business' },
+                    'COLORADO': { sosUrl: 'https://www.sos.state.co.us/biz/BusinessEntityCriteriaExt.do?resetTransTyp=Y' },
+                    'CONNECTICUT': { sosUrl: 'https://service.ct.gov/business/s/onlinebusinesssearch?language=en_US' },
+                    'DELAWARE': { sosUrl: 'https://icis.corp.delaware.gov/Ecorp/EntitySearch/NameSearch.aspx' },
+                    'DISTRICT OF COLUMBIA': { sosUrl: 'https://corponline.dcra.dc.gov/Home.aspx' },
+                    'FLORIDA': { sosUrl: 'http://search.sunbiz.org/Inquiry/CorporationSearch/ByName' },
+                    'GEORGIA': { sosUrl: 'https://ecorp.sos.ga.gov/BusinessSearch' },
+                    'HAWAII': { sosUrl: 'https://hbe.ehawaii.gov/documents/search.html' },
+                    'IDAHO': { sosUrl: 'https://sosbiz.idaho.gov/search/business' },
+                    'ILLINOIS': { sosUrl: 'https://www.ilsos.gov/corporatellc/' },
+                    'INDIANA': { sosUrl: 'https://bsd.sos.in.gov/publicbusinesssearch' },
+                    'IOWA': { sosUrl: 'https://sos.iowa.gov/search/business/search.aspx' },
+                    'KANSAS': { sosUrl: 'https://www.kansas.gov/bess/flow/main?execution=e1s1' },
+                    'KENTUCKY': { sosUrl: 'https://web.sos.ky.gov/ftsearch/' },
+                    'LOUISIANA': { sosUrl: 'https://coraweb.sos.la.gov/CommercialSearch/CommercialSearch.aspx' },
+                    'MAINE': { sosUrl: 'https://apps1.web.maine.gov/online/icrs/icrs_database_search/' },
+                    'MARYLAND': { sosUrl: 'https://egov.maryland.gov/BusinessExpress/EntitySearch' },
+                    'MASSACHUSETTS': { sosUrl: 'https://corp.sec.state.ma.us/corpweb/CorpSearch/CorpSearch.aspx' },
+                    'MICHIGAN': { sosUrl: 'https://cofs.lara.state.mi.us/corpweb/CorpSearch/CorpSearch.aspx' },
+                    'MINNESOTA': { sosUrl: 'https://mblsportal.sos.state.mn.us/Business/Search' },
+                    'MISSISSIPPI': { sosUrl: 'https://corp.sos.ms.gov/corp/portal/c/page/corpBusinessIdSearch/portal.aspx' },
+                    'MISSOURI': { sosUrl: 'https://bsd.sos.mo.gov/BusinessEntity/BESearch.aspx' },
+                    'MONTANA': { sosUrl: 'https://biz.sosmt.gov/search/business' },
+                    'NEBRASKA': { sosUrl: 'https://www.nebraska.gov/sos/corp/corpsearch.cgi?nav=search' },
+                    'NEVADA': { sosUrl: 'https://esos.nv.gov/EntitySearch/OnlineEntitySearch' },
+                    'NEW HAMPSHIRE': { sosUrl: 'https://quickstart.sos.nh.gov/online/BusinessInquire' },
+                    'NEW JERSEY': { sosUrl: 'https://www.njportal.com/DOR/BusinessNameSearch/Search/BusinessName' },
+                    'NEW MEXICO': { sosUrl: 'https://portal.sos.state.nm.us/BFS/online/Account/SearchBusiness' },
+                    'NEW YORK': { sosUrl: 'https://apps.dos.ny.gov/publicInquiry/' },
+                    'NORTH CAROLINA': { sosUrl: 'https://www.sosnc.gov/search/index/corp' },
+                    'NORTH DAKOTA': { sosUrl: 'https://firststop.sos.nd.gov/search/business' },
+                    'OHIO': { sosUrl: 'https://businesssearch.ohiosos.gov/' },
+                    'OKLAHOMA': { sosUrl: 'https://www.sos.ok.gov/corp/corpinquiryfind.aspx' },
+                    'OREGON': { sosUrl: 'https://egov.sos.state.or.us/br/pkg_web_name_srch_inq.do_name_srch' },
+                    'PENNSYLVANIA': { sosUrl: 'https://file.dos.pa.gov/search/business' },
+                    'RHODE ISLAND': { sosUrl: 'https://business.sos.ri.gov/CorpWeb/CorpSearch/CorpSearch.aspx' },
+                    'SOUTH CAROLINA': { sosUrl: 'https://businessfilings.sc.gov/BusinessFiling/Entity/Search' },
+                    'SOUTH DAKOTA': { sosUrl: 'https://sos.sd.gov/business-services/business-name-search.aspx' },
+                    'TENNESSEE': { sosUrl: 'https://tnbear.tn.gov/ECommerce/FilingSearch.aspx' },
+                    'TEXAS': { sosUrl: 'https://mycpa.cpa.state.tx.us/coa/' },
+                    'UTAH': { sosUrl: 'https://secure.utah.gov/bes/' },
+                    'VERMONT': { sosUrl: 'https://sos.vermont.gov/corporations/search/' },
+                    'VIRGINIA': { sosUrl: 'https://cis.scc.virginia.gov/' },
+                    'WASHINGTON': { sosUrl: 'https://ccfs.sos.wa.gov/#/Home' },
+                    'WEST VIRGINIA': { sosUrl: 'https://apps.wv.gov/SOS/BusinessEntitySearch/' },
+                    'WISCONSIN': { sosUrl: 'https://www.wdfi.org/apps/CorpSearch/Search.aspx' },
+                    'WYOMING': { sosUrl: 'https://wyobiz.wyo.gov/Business/FilingSearch.aspx' }
+                };
 
-      const stateAbbreviations = {
-        'AL':'ALABAMA','AK':'ALASKA','AZ':'ARIZONA','AR':'ARKANSAS','CA':'CALIFORNIA','CO':'COLORADO','CT':'CONNECTICUT','DE':'DELAWARE','DC':'DISTRICT OF COLUMBIA','FL':'FLORIDA','GA':'GEORGIA','HI':'HAWAII','ID':'IDAHO','IL':'ILLINOIS','IN':'INDIANA','IA':'IOWA','KS':'KANSAS','KY':'KENTUCKY','LA':'LOUISIANA','ME':'MAINE','MD':'MARYLAND','MA':'MASSACHUSETTS','MI':'MICHIGAN','MN':'MINNESOTA','MS':'MISSISSIPPI','MO':'MISSOURI','MT':'MONTANA','NE':'NEBRASKA','NV':'NEVADA','NH':'NEW HAMPSHIRE','NJ':'NEW JERSEY','NM':'NEW MEXICO','NY':'NEW YORK','NC':'NORTH CAROLINA','ND':'NORTH DAKOTA','OH':'OHIO','OK':'OKLAHOMA','OR':'OREGON','PA':'PENNSYLVANIA','RI':'RHODE ISLAND','SC':'SOUTH CAROLINA','SD':'SOUTH DAKOTA','TN':'TENNESSEE','TX':'TEXAS','UT':'UTAH','VT':'VERMONT','VA':'VIRGINIA','WA':'WASHINGTON','WV':'WEST VIRGINIA','WI':'WISCONSIN','WY':'WYOMING'
-      };
+                const stateAbbreviations = {
+                    'AL':'ALABAMA','AK':'ALASKA','AZ':'ARIZONA','AR':'ARKANSAS','CA':'CALIFORNIA','CO':'COLORADO','CT':'CONNECTICUT','DE':'DELAWARE','DC':'DISTRICT OF COLUMBIA','FL':'FLORIDA','GA':'GEORGIA','HI':'HAWAII','ID':'IDAHO','IL':'ILLINOIS','IN':'INDIANA','IA':'IOWA','KS':'KANSAS','KY':'KENTUCKY','LA':'LOUISIANA','ME':'MAINE','MD':'MARYLAND','MA':'MASSACHUSETTS','MI':'MICHIGAN','MN':'MINNESOTA','MS':'MISSISSIPPI','MO':'MISSOURI','MT':'MONTANA','NE':'NEBRASKA','NV':'NEVADA','NH':'NEW HAMPSHIRE','NJ':'NEW JERSEY','NM':'NEW MEXICO','NY':'NEW YORK','NC':'NORTH CAROLINA','ND':'NORTH DAKOTA','OH':'OHIO','OK':'OKLAHOMA','OR':'OREGON','PA':'PENNSYLVANIA','RI':'RHODE ISLAND','SC':'SOUTH CAROLINA','SD':'SOUTH DAKOTA','TN':'TENNESSEE','TX':'TEXAS','UT':'UTAH','VT':'VERMONT','VA':'VIRGINIA','WA':'WASHINGTON','WV':'WEST VIRGINIA','WI':'WISCONSIN','WY':'WYOMING'
+                };
 
-      const showMessage = (text, type = 'error') => {
-        ui.messageArea.textContent = text;
-        ui.messageArea.className = `text-sm mt-2 p-3 rounded-md ${type === 'error' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}`;
-        ui.messageArea.classList.remove('hidden');
-      };
-      const clearMessage = () => ui.messageArea.classList.add('hidden');
+                const showMessage = (text, type = 'error') => {
+                    ui.messageArea.textContent = text;
+                    ui.messageArea.className = `text-sm mt-2 p-3 rounded-md ${type === 'error' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}`;
+                    ui.messageArea.classList.remove('hidden');
+                };
+                const clearMessage = () => ui.messageArea.classList.add('hidden');
 
-      function detectState(address) {
-        const upper = address.toUpperCase();
-        // full names
-        for (const state in stateUrls) {
-          if (upper.includes(state)) return state;
-        }
-        // abbreviations
-        for (const abbr in stateAbbreviations) {
-          const re = new RegExp(`\\b${abbr}\\b`);
-          if (re.test(upper)) return stateAbbreviations[abbr];
-        }
-        return null;
-      }
+                function detectState(address) {
+                    const upper = address.toUpperCase();
+                    // full names
+                    for (const state in stateUrls) {
+                        if (upper.includes(state)) return state;
+                    }
+                    // abbreviations
+                    for (const abbr in stateAbbreviations) {
+                        const re = new RegExp(`\\b${abbr}\\b`);
+                        if (re.test(upper)) return stateAbbreviations[abbr];
+                    }
+                    return null;
+                }
 
-      function generateSearchUrl(state, businessName) {
-        if (!state || !stateUrls[state]) return null;
-        const baseUrl = stateUrls[state].sosUrl;
-        const encodedName = encodeURIComponent(businessName.trim());
-        // Known custom patterns
-        if (state === 'FLORIDA') {
-          return `http://search.sunbiz.org/Inquiry/CorporationSearch/SearchResults/EntityName/${encodedName}/Page1`;
-        } else if (state === 'OREGON') {
-          return `https://egov.sos.state.or.us/br/pkg_web_name_srch_inq.do_name_srch?p_name=${encodedName}&p_regist_nbr=&p_srch=PHASE1&p_print=FALSE&p_entity_status=ACTINA`;
-        }
-        // Generic fallback
-        return baseUrl.includes('?') ? `${baseUrl}&search_term=${encodedName}` : `${baseUrl}?search_term=${encodedName}`;
-      }
+                function generateSearchUrl(state, businessName) {
+                    if (!state || !stateUrls[state]) return null;
+                    const baseUrl = stateUrls[state].sosUrl;
+                    const encodedName = encodeURIComponent(businessName.trim());
+                    // Known custom patterns
+                    if (state === 'FLORIDA') {
+                        return `http://search.sunbiz.org/Inquiry/CorporationSearch/SearchResults/EntityName/${encodedName}/Page1`;
+                    } else if (state === 'OREGON') {
+                        return `https://egov.sos.state.or.us/br/pkg_web_name_srch_inq.do_name_srch?p_name=${encodedName}&p_regist_nbr=&p_srch=PHASE1&p_print=FALSE&p_entity_status=ACTINA`;
+                    }
+                    // Generic fallback
+                    return baseUrl.includes('?') ? `${baseUrl}&search_term=${encodedName}` : `${baseUrl}?search_term=${encodedName}`;
+                }
 
-      function renderSaved() {
-        const items = JSON.parse(localStorage.getItem('businessSaved') || '[]');
-        ui.savedList.innerHTML = '';
-        if (!items.length) {
-          ui.clearSaved.classList.add('hidden');
-          ui.savedList.innerHTML = '<p class="text-xs text-gray-400">No saved searches yet.</p>';
-          return;
-        }
-        ui.clearSaved.classList.remove('hidden');
-        items.forEach(it => {
-          const row = document.createElement('div');
-          row.className = 'flex items-center justify-between gap-3 p-2 border rounded-md bg-white/70';
-          row.innerHTML = `
+                function renderSaved() {
+                    const items = JSON.parse(localStorage.getItem('businessSaved') || '[]');
+                    ui.savedList.innerHTML = '';
+                    if (!items.length) {
+                        ui.clearSaved.classList.add('hidden');
+                        ui.savedList.innerHTML = '<p class="text-xs text-gray-400">No saved searches yet.</p>';
+                        return;
+                    }
+                    ui.clearSaved.classList.remove('hidden');
+                    items.forEach(it => {
+                        const row = document.createElement('div');
+                        row.className = 'flex items-center justify-between gap-3 p-2 border rounded-md bg-white/70';
+                        row.innerHTML = `
             <div class="min-w-0">
               <div class="text-gray-900 font-medium truncate">${it.name}</div>
               <div class="text-[11px] text-gray-500 truncate">${it.state}</div>
@@ -778,129 +780,129 @@
             <div class="flex items-center gap-2 shrink-0">
               <a class="px-2.5 py-1.5 text-xs rounded-md border text-indigo-600 border-indigo-200 hover:bg-indigo-50" href="${it.url}" target="_blank" rel="noopener">
                 Open
-              </a>
+            </a>
               <button class="px-2.5 py-1.5 text-xs rounded-md border hover:bg-gray-50" data-url="${it.url}">
                 Copy
-              </button>
+            </button>
             </div>
           `;
-          row.querySelector('button[data-url]').addEventListener('click', (e) => {
-            navigator.clipboard.writeText(e.currentTarget.getAttribute('data-url'));
-            toast('URL copied');
-          });
-          ui.savedList.appendChild(row);
-        });
-      }
+                        row.querySelector('button[data-url]').addEventListener('click', (e) => {
+                            navigator.clipboard.writeText(e.currentTarget.getAttribute('data-url'));
+                            toast('URL copied');
+                        });
+                        ui.savedList.appendChild(row);
+                    });
+                }
 
-      function saveCurrent(name, state, url) {
-        const items = JSON.parse(localStorage.getItem('businessSaved') || '[]');
-        const entry = { name, state, url, ts: Date.now() };
-        // Deduplicate by name+state
-        const existing = items.filter(i => !(i.name === name && i.state === state));
-        const next = [entry, ...existing].slice(0, 12);
-        localStorage.setItem('businessSaved', JSON.stringify(next));
-        renderSaved();
-      }
+                function saveCurrent(name, state, url) {
+                    const items = JSON.parse(localStorage.getItem('businessSaved') || '[]');
+                    const entry = { name, state, url, ts: Date.now() };
+                    // Deduplicate by name+state
+                    const existing = items.filter(i => !(i.name === name && i.state === state));
+                    const next = [entry, ...existing].slice(0, 12);
+                    localStorage.setItem('businessSaved', JSON.stringify(next));
+                    renderSaved();
+                }
 
-      function toast(msg) {
-        const n = document.createElement('div');
-        n.textContent = msg;
-        n.className = 'fixed bottom-4 right-4 bg-gray-900 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity duration-300';
-        document.body.appendChild(n);
-        setTimeout(() => { n.classList.add('opacity-0'); n.addEventListener('transitionend', () => n.remove()); }, 1600);
-      }
+                function toast(msg) {
+                    const n = document.createElement('div');
+                    n.textContent = msg;
+                    n.className = 'fixed bottom-4 right-4 bg-gray-900 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity duration-300';
+                    document.body.appendChild(n);
+                    setTimeout(() => { n.classList.add('opacity-0'); n.addEventListener('transitionend', () => n.remove()); }, 1600);
+                }
 
-      // Quick state buttons
-      document.querySelectorAll('[data-state]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const state = btn.getAttribute('data-state');
-          const val = ui.address.value.trim();
-          if (!val) {
-            ui.address.value = `, ${state}`;
-          } else if (!new RegExp(`\\b${state}\\b`).test(val)) {
-            ui.address.value = `${val.replace(/\s+$/, '')} ${val.endsWith(',') ? '' : ','} ${state}`;
-          }
-          ui.address.focus();
-        });
-      });
+                // Quick state buttons
+                document.querySelectorAll('[data-state]').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const state = btn.getAttribute('data-state');
+                        const val = ui.address.value.trim();
+                        if (!val) {
+                            ui.address.value = `, ${state}`;
+                        } else if (!new RegExp(`\\b${state}\\b`).test(val)) {
+                            ui.address.value = `${val.replace(/\s+$/, '')} ${val.endsWith(',') ? '' : ','} ${state}`;
+                        }
+                        ui.address.focus();
+                    });
+                });
 
-      ui.searchBtn.addEventListener('click', () => {
-        clearMessage();
-        const businessName = ui.businessName.value.trim();
-        const address = ui.address.value.trim();
+                ui.searchBtn.addEventListener('click', () => {
+                    clearMessage();
+                    const businessName = ui.businessName.value.trim();
+                    const address = ui.address.value.trim();
 
-        if (!businessName || !address) {
-          showMessage('Please enter both business name and address.', 'error');
-          return;
-        }
-        const state = detectState(address);
-        if (!state) {
-          showMessage('Could not detect state from address. Use a full state name or 2-letter abbreviation.', 'error');
-          return;
-        }
-        const url = generateSearchUrl(state, businessName);
-        if (!url) {
-          showMessage('Could not generate search URL for the detected state.', 'error');
-          return;
-        }
+                    if (!businessName || !address) {
+                        showMessage('Please enter both business name and address.', 'error');
+                        return;
+                    }
+                    const state = detectState(address);
+                    if (!state) {
+                        showMessage('Could not detect state from address. Use a full state name or 2-letter abbreviation.', 'error');
+                        return;
+                    }
+                    const url = generateSearchUrl(state, businessName);
+                    if (!url) {
+                        showMessage('Could not generate search URL for the detected state.', 'error');
+                        return;
+                    }
 
-        ui.detectedState.textContent = state;
-        ui.generatedUrl.textContent = url;
-        ui.generatedUrl.href = url;
-        ui.generatedUrl.dataset.businessName = businessName;
-        ui.resultContainer.classList.remove('hidden');
-        ui.empty.classList.add('hidden');
+                    ui.detectedState.textContent = state;
+                    ui.generatedUrl.textContent = url;
+                    ui.generatedUrl.href = url;
+                    ui.generatedUrl.dataset.businessName = businessName;
+                    ui.resultContainer.classList.remove('hidden');
+                    ui.empty.classList.add('hidden');
 
-        // Save this search
-        saveCurrent(businessName, state, url);
+                    // Save this search
+                    saveCurrent(businessName, state, url);
 
-        // Reset copy button state
-        const copySpan = ui.copyBtn.querySelector('span');
-        const copyIcon = ui.copyBtn.querySelector('i');
-        copySpan.textContent = 'Copy URL';
-        copyIcon.className = 'far fa-copy mr-2';
-      });
+                    // Reset copy button state
+                    const copySpan = ui.copyBtn.querySelector('span');
+                    const copyIcon = ui.copyBtn.querySelector('i');
+                    copySpan.textContent = 'Copy URL';
+                    copyIcon.className = 'far fa-copy mr-2';
+                });
 
-      ui.resetBtn.addEventListener('click', () => {
-        ui.businessName.value = '';
-        ui.address.value = '';
-        ui.resultContainer.classList.add('hidden');
-        ui.empty.classList.remove('hidden');
-        clearMessage();
-        ui.businessName.focus();
-      });
+                ui.resetBtn.addEventListener('click', () => {
+                    ui.businessName.value = '';
+                    ui.address.value = '';
+                    ui.resultContainer.classList.add('hidden');
+                    ui.empty.classList.remove('hidden');
+                    clearMessage();
+                    ui.businessName.focus();
+                });
 
-      ui.generatedUrl.addEventListener('click', (e) => {
-        const name = e.currentTarget.dataset.businessName;
-        if (name) {
-          navigator.clipboard.writeText(name).then(() => toast('Business name copied'));
-        }
-      });
+                ui.generatedUrl.addEventListener('click', (e) => {
+                    const name = e.currentTarget.dataset.businessName;
+                    if (name) {
+                        navigator.clipboard.writeText(name).then(() => toast('Business name copied'));
+                    }
+                });
 
-      ui.copyBtn.addEventListener('click', () => {
-        const url = ui.generatedUrl.href;
-        if (!url) return;
-        navigator.clipboard.writeText(url).then(() => {
-          const copySpan = ui.copyBtn.querySelector('span');
-          const copyIcon = ui.copyBtn.querySelector('i');
-          copySpan.textContent = 'Copied!';
-          copyIcon.className = 'fas fa-check mr-2';
-          setTimeout(() => { copySpan.textContent = 'Copy URL'; copyIcon.className = 'far fa-copy mr-2'; }, 1600);
-        });
-      });
+                ui.copyBtn.addEventListener('click', () => {
+                    const url = ui.generatedUrl.href;
+                    if (!url) return;
+                    navigator.clipboard.writeText(url).then(() => {
+                        const copySpan = ui.copyBtn.querySelector('span');
+                        const copyIcon = ui.copyBtn.querySelector('i');
+                        copySpan.textContent = 'Copied!';
+                        copyIcon.className = 'fas fa-check mr-2';
+                        setTimeout(() => { copySpan.textContent = 'Copy URL'; copyIcon.className = 'far fa-copy mr-2'; }, 1600);
+                    });
+                });
 
-      ui.openBtn.addEventListener('click', () => {
-        if (ui.generatedUrl.href) window.open(ui.generatedUrl.href, '_blank', 'noopener');
-      });
+                ui.openBtn.addEventListener('click', () => {
+                    if (ui.generatedUrl.href) window.open(ui.generatedUrl.href, '_blank', 'noopener');
+                });
 
-      ui.clearSaved.addEventListener('click', () => {
-        localStorage.removeItem('businessSaved');
-        renderSaved();
-        toast('Saved searches cleared');
-      });
+                ui.clearSaved.addEventListener('click', () => {
+                    localStorage.removeItem('businessSaved');
+                    renderSaved();
+                    toast('Saved searches cleared');
+                });
 
-      renderSaved();
-    }
-  </script>
-</body>
+                renderSaved();
+            }
+        </script>
+    </body>
 </html>
