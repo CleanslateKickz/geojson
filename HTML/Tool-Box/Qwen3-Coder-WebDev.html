@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Qwen3-Coder-WebDev</title>
+<style>
+
+</style>
+</head>
+<body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRE Tools Directory</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #7f8c8d;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .search-container {
+            max-width: 600px;
+            margin: 30px auto;
+            position: relative;
+        }
+        
+        #search {
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 50px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        #search:focus {
+            outline: none;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.15);
+        }
+        
+        .search-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #95a5a6;
+        }
+        
+        .categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+        
+        .category {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .category:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+        
+        .category-header {
+            background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
+            color: white;
+            padding: 20px;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+        
+        .tools-list {
+            padding: 20px;
+        }
+        
+        .tool {
+            padding: 15px;
+            border-bottom: 1px solid #ecf0f1;
+            transition: background 0.2s ease;
+        }
+        
+        .tool:last-child {
+            border-bottom: none;
+        }
+        
+        .tool:hover {
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .tool a {
+            text-decoration: none;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .tool-icon {
+            width: 40px;
+            height: 40px;
+            background: #e1f0fa;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #3498db;
+            font-size: 1.2rem;
+        }
+        
+        .tool-info {
+            flex: 1;
+        }
+        
+        .tool-name {
+            font-weight: 600;
+            margin-bottom: 3px;
+            font-size: 1.05rem;
+        }
+        
+        .tool-url {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .categories {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>CRE Tools Directory</h1>
+            <p class="subtitle">A curated collection of essential tools and resources for commercial real estate professionals</p>
+            
+            <div class="search-container">
+                <input type="text" id="search" placeholder="Search tools...">
+                <i class="fas fa-search search-icon"></i>
+            </div>
+        </header>
+        
+        <div class="categories">
+            <!-- Property Management -->
+            <div class="category">
+                <div class="category-header">
+                    <i class="fas fa-building"></i> Property Management
+                </div>
+                <div class="tools-list">
+                    <div class="tool">
+                        <a href="https://tenant-profiles.netlify.app/" target="_blank">
+                            <div class="tool-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="tool-info">
+                                <div class="tool-name">Tenants Application</div>
+                                <div class="tool-url">tenant-profiles.netlify.app</div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="tool">
+                        <a href="https://tenant-locations-matcher.netlify.app/" target="_blank">
+                            <div class="tool-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div class="tool-info">
+                                <div class="tool-name">Tenant Location Matcher</div>
+                                <div class="tool-url">tenant-locations-matcher.netlify.app</div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="tool">
+                        <a href="https://property-email-generator.netlify.app/" target="_blank">
+                            <div class="tool-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div class="tool-info">
+                                <div class="tool-name">Property Email Generator</div>
+                                <div class="tool-url">property-email-generator.netlify.app</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Listings & Market Data -->
+            <div class="category">
+                <div class="category-header">
+                    <i class="fas fa-chart-line"></i> Listings & Market Data
+                </div>
+                <div class="tools-list">
+                    <div class="tool">
+                        <a href="https://cleanslatekickz.github.io/geojson/Widgets/Embed/Grist - Listings Embed.html" target="_blank">
+                            <div class="tool-icon">
+                                <i class="fas fa-list"></i>
+                            </div>
+                            <div class="tool-info">
+                                <div class="tool-name">Commercial Property Listings</div>
+                                <div class="tool-url">grist-listings-embed.html</div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="tool">
+                        <a href="https://docs.google.com/spreadsheets/d/1riRrrOpueRWEaHs34YeSuNq8EQ1sXb33jSHM93oP6Hc/edit?usp=sharing" target="_blank">
+                            <div class="tool-icon">
+                                <i class="fas fa-file-excel"></i>
+                            </div>
+                            <div class="tool-info">
+                                <div class="tool-name">Listings and Comps Generator</div>
+                                <div class="tool-url">Google Sheets</div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="tool">
+                        <a href="https://cleanslatekickz.github.io/geojson/HTML/Deepsite/CRE-Resources.html" target="_blank">
+                            <div class="tool-icon">
+                                <i class="fas fa-book"></i>
+                            </div>
+                            <div class="tool-info">
+                                <div class="tool-name">CRE Resources</div>
+                                <div class="tool-url">cre-resources.html</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Calculators & Analysis -->
+            <div class="category">
+                <div class="category-header">
+                    <i class="fas fa-calculator"></i> Calculators & Analysis
+                </div>
+                <div class="tools-list">
+                    <div class="tool">
+                        <a href="https://cleanslatekickz.github.io/geojson/HTML/Tool-Box/Cap-Rate-Calculator.html" target="_blank">
+                            <div class="tool-icon">
+                                <i class="fas fa-percentage"></i>
+                            </div>
+                            <div class="tool-info">
+                                <div class="tool-name">Cap Rate Calculator</div>
+                                <div class="tool-url">cap-rate-calculator.html</div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="tool">
+                        <a href="https://cleanslatekickz.github.io/geojson/retailstat/Sales-Per-SF Report.html" target="_blank">
+                            <div class="tool-icon">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                            <div class="tool-info">
+                                <div class="tool-name">Sales Per Square Foot Report</div>
+                                <div class="tool-url">sales-per-sf-report.html</div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="tool">
+                        <a href="https://cleanslatekickz.github.io/geojson/retailstat/1Q Retail Update.html" target="_blank">
+                            <div class="tool-icon">
+                                <i class="fas fa-store"></i>
+                            </div>
+                            <div class="tool-info">
+                                <div class="tool-name">RetailStat - Sales/SF</div>
+                                <div class="tool-url">1q-retail-update.html</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Communication Tools -->
+            <div class="category">
+                <div class="category-header">
+                    <i class="fas fa-comments"></i> Communication Tools
+                </div>
+                <div class="tools-list">
+                    <div class="tool">
+                        <a href="https://open-dialer.netlify.app/" target="_blank">
+                            <div class="tool-icon">
+                                <i class="fas fa-phone"></i>
+                            </div>
+                            <div class="tool-info">
+                                <div class="tool-name">OpenDialer Pro</div>
+                                <div class="tool-url">open-dialer.netlify.app</div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="tool">
+                        <a href="https://email-sms-templates.netlify.app/" target="_blank">
+                            <div class="tool-icon">
+                                <i class="fas fa-sms"></i>
+                            </div>
+                            <div class="tool-info">
+                                <div class="tool-name">Email & SMS Template</div>
+                                <div class="tool-url">email-sms-templates.netlify.app</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Legal & Compliance -->
+            <div class="category">
+                <div class="category-header">
+                    <i class="fas fa-gavel"></i> Legal & Compliance
+                </div>
+                <div class="tools-list">
+                    <div class="tool">
+                        <a href="https://cleanslatekickz.github.io/geojson/HTML/Big-Beautiful-Bill.html" target="_blank">
+                            <div class="tool-icon">
+                                <i class="fas fa-file-contract"></i>
+                            </div>
+                            <div class="tool-info">
+                                <div class="tool-name">Big Beautiful Bill Act</div>
+                                <div class="tool-url">big-beautiful-bill.html</div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="tool">
+                        <a href="https://cleanslatekickz.github.io/geojson/HTML/1031-Exchange/Claude-OR-1031.html" target="_blank">
+                            <div class="tool-icon">
+                                <i class="fas fa-exchange-alt"></i>
+                            </div>
+                            <div class="tool-info">
+                                <div class="tool-name">OR 1031 Exchanges</div>
+                                <div class="tool-url">claude-or-1031.html</div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="tool">
+                        <a href="https://cleanslatekickz.github.io/geojson/HTML/1031-Exchange/OR-Contractors.html" target="_blank">
+                            <div class="tool-icon">
+                                <i class="fas fa-hard-hat"></i>
+                            </div>
+                            <div class="tool-info">
+                                <div class="tool-name">Senate Bill 426</div>
+                                <div class="tool-url">or-contractors.html</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Research & Investigation -->
+            <div class="category">
+                <div class="category-header">
+                    <i class="fas fa-search"></i> Research & Investigation
+                </div>
+                <div class="tools-list">
+                    <div class="tool">
+                        <a href="https://cleanslatekickz.github.io/geojson/HTML/Tool-Box/Investigator Toolkit.html" target="_blank">
+                            <div class="tool-icon">
+                                <i class="fas fa-user-secret"></i>
+                            </div>
+                            <div class="tool-info">
+                                <div class="tool-name">Investigator Toolkit</div>
+                                <div class="tool-url">investigator-toolkit.html</div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="tool">
+                        <a href="https://cleanslatekickz.github.io/geojson/HTML/Activity Review/leads_frontend.html" target="_blank">
+                            <div class="tool-icon">
+                                <i class="fas fa-user-friends"></i>
+                            </div>
+                            <div class="tool-info">
+                                <div class="tool-name">Owner Leads – Deal Room</div>
+                                <div class="tool-url">leads_frontend.html</div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="tool">
+                        <a href="https://cleanslatekickz.github.io/geojson/HTML/Oregon vs. Washington.html" target="_blank">
+                            <div class="tool-icon">
+                                <i class="fas fa-balance-scale"></i>
+                            </div>
+                            <div class="tool-info">
+                                <div class="tool-name">Oregon vs. Washington</div>
+                                <div class="tool-url">oregon-vs-washington.html</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Team Resources -->
+            <div class="category">
+                <div class="category-header">
+                    <i class="fas fa-users"></i> Team Resources
+                </div>
+                <div class="tools-list">
+                    <div class="tool">
+                        <a href="https://lacey-retail-center.netlify.app/" target="_blank">
+                            <div class="tool-icon">
+                                <i class="fas fa-store-alt"></i>
+                            </div>
+                            <div class="tool-info">
+                                <div class="tool-name">Lacey Retail Center</div>
+                                <div class="tool-url">lacey-retail-center.netlify.app</div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="tool">
+                        <a href="https://pdx-retail-report.pages.dev/" target="_blank">
+                            <div class="tool-icon">
+                                <i class="fas fa-file-pdf"></i>
+                            </div>
+                            <div class="tool-info">
+                                <div class="tool-name">PDX Retail Report 2025</div>
+                                <div class="tool-url">pdx-retail-report.pages.dev</div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="tool">
+                        <a href="https://on-markets.pages.dev/" target="_blank">
+                            <div class="tool-icon">
+                                <i class="fas fa-shopping-cart"></i>
+                            </div>
+                            <div class="tool-info">
+                                <div class="tool-name">Shopping Center Report '24</div>
+                                <div class="tool-url">on-markets.pages.dev</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Toolkits -->
+            <div class="category">
+                <div class="category-header">
+                    <i class="fas fa-toolbox"></i> Toolkits
+                </div>
+                <div class="tools-list">
+                    <div class="tool">
+                        <a href="https://cleanslatekickz.github.io/geojson/HTML/Deepsite/CommercialToolkit.html" target="_blank">
+                            <div class="tool-icon">
+                                <i class="fas fa-wrench"></i>
+                            </div>
+                            <div class="tool-info">
+                                <div class="tool-name">CRE Toolkit & Utility Widgets</div>
+                                <div class="tool-url">commercial-toolkit.html</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Organized directory of essential CRE tools • Updated regularly</p>
+        </footer>
+    </div>
+    
+    <script>
+        document.getElementById('search').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const tools = document.querySelectorAll('.tool');
+            
+            tools.forEach(tool => {
+                const toolName = tool.querySelector('.tool-name').textContent.toLowerCase();
+                const toolUrl = tool.querySelector('.tool-url').textContent.toLowerCase();
+                
+                if (toolName.includes(searchTerm) || toolUrl.includes(searchTerm)) {
+                    tool.style.display = 'block';
+                } else {
+                    tool.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+<script>
+
+</script>
+</body>
+</html>
