@@ -84,13 +84,13 @@
     </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        
+
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f8fafc;
             color: #1e293b;
         }
-        
+
         /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
@@ -106,22 +106,22 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
-        
+
         /* Tab content styling */
         .tab-content {
             display: none;
         }
-        
+
         .tab-content.active {
             display: block;
             animation: fadeIn 0.3s ease-out;
         }
-        
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(5px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        
+
         /* Toast animation */
         @keyframes fadeInOut {
             0% { opacity: 0; transform: translate(-50%, 10px); }
@@ -129,36 +129,36 @@
             85% { opacity: 1; }
             100% { opacity: 0; transform: translate(-50%, -10px); }
         }
-        
+
         /* Custom input focus styles */
         .custom-input:focus {
             box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
             border-color: #0ea5e9;
         }
-        
+
         /* Custom button hover effect */
         .btn-hover:hover {
             transform: translateY(-1px);
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
-        
+
         /* Custom card hover effect */
         .card-hover:hover {
             transform: translateY(-2px);
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
-        
+
         /* Leaflet map container */
         #map {
             border-radius: 0.5rem;
             box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
         }
-        
+
         /* Custom tab underline animation */
         .tab-underline {
             position: relative;
         }
-        
+
         .tab-underline::after {
             content: '';
             position: absolute;
@@ -170,603 +170,792 @@
             transform: scaleX(0);
             transition: transform 0.3s ease;
         }
-        
+
         .tab-underline.active::after {
             transform: scaleX(1);
         }
     </style>
-</head>
-<body class="min-h-screen bg-gray-50">
-    <div class="container mx-auto px-4 py-8 max-w-7xl">
-        <!-- Header Section -->
-        <header class="text-center mb-10">
-            <div class="inline-block bg-gradient-to-r from-primary-600 to-primary-400 p-1 rounded-lg mb-6">
-                <div class="bg-white px-4 py-2 rounded-md">
-                    <h1 class="text-3xl md:text-4xl font-bold text-gray-800">Commercial Real Estate Toolkit</h1>
+    </head>
+    <body class="min-h-screen bg-gray-50">
+        <div class="container mx-auto px-4 py-8 max-w-7xl">
+            <!-- Header Section -->
+            <header class="text-center mb-10">
+                <div class="inline-block bg-gradient-to-r from-primary-600 to-primary-400 p-1 rounded-lg mb-6">
+                    <div class="bg-white px-4 py-2 rounded-md">
+                        <h1 class="text-3xl md:text-4xl font-bold text-gray-800">Commercial Real Estate Toolkit</h1>
+                    </div>
                 </div>
-            </div>
-            <p class="text-lg text-gray-600 max-w-3xl mx-auto">
-                A comprehensive suite of professional tools for STNL, multi-tenant analysis, and daily workflow optimization.
-            </p>
-        </header>
-        
-        <!-- Main Content -->
-        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-            <!-- Tab Navigation -->
-            <div class="border-b border-gray-200">
-                <nav class="flex overflow-x-auto -mb-px">
-                    <button class="tab-btn tab-underline px-6 py-4 text-sm font-medium text-gray-500 hover:text-primary-600 whitespace-nowrap active" data-tab="utilities-tab">
-                        <i class="fas fa-tools mr-2"></i>Utilities
-                    </button>
-                    <button class="tab-btn tab-underline px-6 py-4 text-sm font-medium text-gray-500 hover:text-primary-600 whitespace-nowrap" data-tab="seller-analysis">
-                        <i class="fas fa-chart-line mr-2"></i>Seller's Analysis
-                    </button>
-                    <button class="tab-btn tab-underline px-6 py-4 text-sm font-medium text-gray-500 hover:text-primary-600 whitespace-nowrap" data-tab="quick-calcs">
-                        <i class="fas fa-calculator mr-2"></i>Quick Calculators
-                    </button>
-                    <button class="tab-btn tab-underline px-6 py-4 text-sm font-medium text-gray-500 hover:text-primary-600 whitespace-nowrap" data-tab="investment-analysis">
-                        <i class="fas fa-chart-pie mr-2"></i>Investment Analysis
-                    </button>
-                </nav>
-            </div>
-            
-            <!-- Tab Contents -->
-            <div class="p-6">
-                <!-- TAB 1: Utilities -->
-                <div id="utilities-tab" class="tab-content active space-y-8">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Phone Call Widget -->
+                <p class="text-lg text-gray-600 max-w-3xl mx-auto">
+                    A comprehensive suite of professional tools for STNL, multi-tenant analysis, and daily workflow optimization.
+                </p>
+            </header>
+
+            <!-- Main Content -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <!-- Tab Navigation -->
+                <div class="border-b border-gray-200">
+                    <nav class="flex overflow-x-auto -mb-px">
+                        <button class="tab-btn tab-underline px-6 py-4 text-sm font-medium text-gray-500 hover:text-primary-600 whitespace-nowrap active" data-tab="utilities-tab">
+                            <i class="fas fa-tools mr-2"></i>Utilities
+                        </button>
+                        <button class="tab-btn tab-underline px-6 py-4 text-sm font-medium text-gray-500 hover:text-primary-600 whitespace-nowrap" data-tab="seller-analysis">
+                            <i class="fas fa-chart-line mr-2"></i>Seller's Analysis
+                        </button>
+                        <button class="tab-btn tab-underline px-6 py-4 text-sm font-medium text-gray-500 hover:text-primary-600 whitespace-nowrap" data-tab="quick-calcs">
+                            <i class="fas fa-calculator mr-2"></i>Quick Calculators
+                        </button>
+                        <button class="tab-btn tab-underline px-6 py-4 text-sm font-medium text-gray-500 hover:text-primary-600 whitespace-nowrap" data-tab="investment-analysis">
+                            <i class="fas fa-chart-pie mr-2"></i>Investment Analysis
+                        </button>
+                        <button class="tab-btn tab-underline px-6 py-4 text-sm font-medium text-gray-500 hover:text-primary-600 whitespace-nowrap" data-tab="exchange-tab">
+                            <i class="fas fa-exchange-alt mr-2"></i>1031 Exchange
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- Tab Contents -->
+                <div class="p-6">
+                    <!-- TAB 1: Utilities -->
+                    <div id="utilities-tab" class="tab-content active space-y-8">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Phone Call Widget -->
+                            <div class="bg-white rounded-lg shadow-md p-6 border border-gray-100 card-hover transition-all duration-200">
+                                <div class="flex items-center mb-4">
+                                    <div class="bg-primary-100 p-2 rounded-full mr-3">
+                                        <i class="fas fa-phone text-primary-600"></i>
+                                    </div>
+                                    <h3 class="text-lg font-semibold text-gray-800">Quick Call</h3>
+                                </div>
+
+                                <div class="relative mb-4">
+                                    <input type="tel" id="phoneInput" placeholder="(123) 456-7890" inputmode="numeric" autocomplete="tel"
+                                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                    <button id="pasteBtn" class="absolute inset-y-0 right-0 px-3 text-gray-500 hover:text-primary-600" title="Paste from clipboard">
+                                        <i class="fas fa-paste"></i>
+                                    </button>
+                                </div>
+
+                                <div class="flex space-x-2 mb-2">
+                                    <a id="webexButton" class="flex-1 bg-gray-300 text-white px-4 py-2 rounded-lg cursor-not-allowed flex items-center justify-center" title="Call using Webex" tabindex="-1" disabled>
+                                        <i class="fas fa-video mr-2"></i>Webex
+                                    </a>
+                                    <a id="phoneLinkButton" class="flex-1 bg-gray-300 text-white px-4 py-2 rounded-lg cursor-not-allowed flex items-center justify-center" title="Call using Phone Link" tabindex="-1" disabled>
+                                        <i class="fas fa-phone mr-2"></i>Phone
+                                    </a>
+                                    <button id="copyBtn" class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg flex items-center justify-center" disabled title="Copy number">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+
+                                <p class="text-xs text-gray-500 text-center">Paste or enter a US number to call or copy</p>
+                            </div>
+
+                            <!-- Acres to Sqft Converter -->
+                            <div class="bg-white rounded-lg shadow-md p-6 border border-gray-100 card-hover transition-all duration-200">
+                                <div class="flex items-center mb-4">
+                                    <div class="bg-primary-100 p-2 rounded-full mr-3">
+                                        <i class="fas fa-ruler-combined text-primary-600"></i>
+                                    </div>
+                                    <h3 class="text-lg font-semibold text-gray-800">Acres to Sqft</h3>
+                                </div>
+
+                                <div class="mb-4">
+                                    <input type="text" id="acresInput" placeholder="Enter acres (e.g. 2.5)"
+                                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                </div>
+
+                                <button onclick="convertAcres()" type="button" class="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 btn-hover">
+                                    Convert
+                                </button>
+
+                                <div class="result mt-4 bg-gray-50 rounded-lg p-3 text-center cursor-pointer hover:bg-gray-100 transition" id="result" onclick="copyResult()" title="Click to copy sqft value"></div>
+                            </div>
+                        </div>
+
+                        <!-- Geo Coordinates Widget -->
                         <div class="bg-white rounded-lg shadow-md p-6 border border-gray-100 card-hover transition-all duration-200">
                             <div class="flex items-center mb-4">
                                 <div class="bg-primary-100 p-2 rounded-full mr-3">
-                                    <i class="fas fa-phone text-primary-600"></i>
+                                    <i class="fas fa-map-marker-alt text-primary-600"></i>
                                 </div>
-                                <h3 class="text-lg font-semibold text-gray-800">Quick Call</h3>
+                                <h3 class="text-lg font-semibold text-gray-800">Geo Coordinates</h3>
                             </div>
-                            
-                            <div class="relative mb-4">
-                                <input type="tel" id="phoneInput" placeholder="(123) 456-7890" inputmode="numeric" autocomplete="tel"
-                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                                <button id="pasteBtn" class="absolute inset-y-0 right-0 px-3 text-gray-500 hover:text-primary-600" title="Paste from clipboard">
-                                    <i class="fas fa-paste"></i>
+
+                            <div class="flex mb-4">
+                                <input type="text" id="addressInput" placeholder="Enter address..."
+                                       class="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                <button onclick="searchAddress()" type="button" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-r-lg transition duration-200 btn-hover">
+                                    Search
                                 </button>
                             </div>
-                            
-                            <div class="flex space-x-2 mb-2">
-                                <a id="webexButton" class="flex-1 bg-gray-300 text-white px-4 py-2 rounded-lg cursor-not-allowed flex items-center justify-center" title="Call using Webex" tabindex="-1" disabled>
-                                    <i class="fas fa-video mr-2"></i>Webex
-                                </a>
-                                <a id="phoneLinkButton" class="flex-1 bg-gray-300 text-white px-4 py-2 rounded-lg cursor-not-allowed flex items-center justify-center" title="Call using Phone Link" tabindex="-1" disabled>
-                                    <i class="fas fa-phone mr-2"></i>Phone
-                                </a>
-                                <button id="copyBtn" class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg flex items-center justify-center" disabled title="Copy number">
-                                    <i class="fas fa-copy"></i>
-                                </button>
+
+                            <div id="map" class="w-full h-64 mb-4"></div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div class="bg-gray-50 rounded-lg p-3 flex items-center">
+                                    <span class="text-gray-700 font-medium mr-2">Lat:</span>
+                                    <button class="coordinate-value flex-1 text-left bg-transparent border-none outline-none truncate" onclick="copyCoordinate('lat')" id="latValue">-</button>
+                                    <button class="copy-btn bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1 rounded text-sm ml-2 transition" onclick="copyCoordinate('lat')" type="button">
+                                        Copy
+                                    </button>
+                                    <span class="copied-feedback text-success-600 text-sm ml-2 opacity-0" id="latFeedback">✓ Copied</span>
+                                </div>
+
+                                <div class="bg-gray-50 rounded-lg p-3 flex items-center">
+                                    <span class="text-gray-700 font-medium mr-2">Lng:</span>
+                                    <button class="coordinate-value flex-1 text-left bg-transparent border-none outline-none truncate" onclick="copyCoordinate('lng')" id="lngValue">-</button>
+                                    <button class="copy-btn bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1 rounded text-sm ml-2 transition" onclick="copyCoordinate('lng')" type="button">
+                                        Copy
+                                    </button>
+                                    <span class="copied-feedback text-success-600 text-sm ml-2 opacity-0" id="lngFeedback">✓ Copied</span>
+                                </div>
                             </div>
-                            
-                            <p class="text-xs text-gray-500 text-center">Paste or enter a US number to call or copy</p>
                         </div>
-                        
-                        <!-- Acres to Sqft Converter -->
-                        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-100 card-hover transition-all duration-200">
+
+                        <div id="toast" class="fixed bottom-5 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg hidden">Copied!</div>
+                    </div>
+
+                    <!-- TAB 2: Seller's Analysis -->
+                    <div id="seller-analysis" class="tab-content">
+                        <div class="text-center mb-8">
+                            <h2 class="text-2xl font-bold text-gray-800 mb-2">Seller's Historical Performance & Break-Even</h2>
+                            <p class="text-gray-600">Analyze the seller's position based on historical purchase data and rental income</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <!-- Inputs Card -->
+                            <div class="bg-white rounded-lg shadow-md p-6 border border-gray-100">
+                                <div class="flex items-center mb-4">
+                                    <div class="bg-primary-100 p-2 rounded-full mr-3">
+                                        <i class="fas fa-edit text-primary-600"></i>
+                                    </div>
+                                    <h3 class="text-lg font-semibold text-gray-800">Inputs</h3>
+                                </div>
+
+                                <div class="space-y-4">
+                                    <div>
+                                        <label for="sa-purchase-price" class="block text-sm font-medium text-gray-700 mb-1">Original Purchase Price ($)</label>
+                                        <input type="text" inputmode="decimal" class="input-currency w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500" id="sa-purchase-price" placeholder="1,500,000" value="1,500,000">
+                                    </div>
+
+                                    <div>
+                                        <label for="sa-purchase-date" class="block text-sm font-medium text-gray-700 mb-1">Original Purchase Date</label>
+                                        <input type="date" id="sa-purchase-date" value="2018-01-01" autocomplete="off" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                    </div>
+
+                                    <div>
+                                        <label for="sa-annual-rent" class="block text-sm font-medium text-gray-700 mb-1">Initial Annual Rent ($)</label>
+                                        <input type="text" inputmode="decimal" class="input-currency w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500" id="sa-annual-rent" placeholder="90,000" value="90,000">
+                                    </div>
+
+                                    <div>
+                                        <label for="sa-rent-increase" class="block text-sm font-medium text-gray-700 mb-1">Annual Rent Increase (%)</label>
+                                        <input type="number" id="sa-rent-increase" placeholder="2" value="2" class="w-full max-w-[100px] px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                    </div>
+
+                                    <button id="sa-calculate-btn" class="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg mt-4 transition duration-200 btn-hover">
+                                        Analyze Seller's Position
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Key Insights Card -->
+                            <div class="bg-white rounded-lg shadow-md p-6 border border-gray-100">
+                                <div class="flex items-center mb-4">
+                                    <div class="bg-primary-100 p-2 rounded-full mr-3">
+                                        <i class="fas fa-lightbulb text-primary-600"></i>
+                                    </div>
+                                    <h3 class="text-lg font-semibold text-gray-800">Key Insights</h3>
+                                </div>
+
+                                <div id="sa-summary-metrics" class="space-y-3">
+                                    <div class="bg-gray-50 rounded-lg p-3 flex justify-between items-center">
+                                        <span class="text-sm font-medium text-gray-600">Analysis Period</span>
+                                        <span class="text-lg font-bold text-primary-600" id="sa-years-held">-</span>
+                                    </div>
+
+                                    <div class="bg-gray-50 rounded-lg p-3 flex justify-between items-center">
+                                        <span class="text-sm font-medium text-gray-600">Total Net Cash Flow</span>
+                                        <span class="text-lg font-bold" id="sa-total-cf">-</span>
+                                    </div>
+
+                                    <div class="bg-gray-50 rounded-lg p-3 flex justify-between items-center">
+                                        <span class="text-sm font-medium text-gray-600">Cash Basis</span>
+                                        <span class="text-lg font-bold" id="sa-basis">-</span>
+                                    </div>
+
+                                    <div class="bg-gray-50 rounded-lg p-3 flex justify-between items-center">
+                                        <span class="text-sm font-medium text-gray-600">Break-Even Sale Price</span>
+                                        <span class="text-lg font-bold" id="sa-break-even">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="sa-results-container" class="mt-8 hidden">
+                            <!-- Chart Section -->
+                            <div class="bg-white rounded-lg shadow-md p-6 border border-gray-100 mb-6">
+                                <div class="flex items-center mb-4">
+                                    <div class="bg-primary-100 p-2 rounded-full mr-3">
+                                        <i class="fas fa-chart-bar text-primary-600"></i>
+                                    </div>
+                                    <h3 class="text-lg font-semibold text-gray-800">Cumulative Cash Flow Over Time</h3>
+                                </div>
+
+                                <div class="chart-wrapper h-80">
+                                    <canvas id="sa-chart"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- Table Section -->
+                            <div class="bg-white rounded-lg shadow-md border border-gray-100 overflow-hidden">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-gray-200">
+                                        <thead class="bg-gray-800">
+                                            <tr>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Year</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Annual Rent</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Net Cash Flow</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Cumulative Cash Flow</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-gray-200" id="sa-table-body"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 3: Quick Calculators -->
+                    <div id="quick-calcs" class="tab-content">
+                        <div class="text-center mb-8">
+                            <h2 class="text-2xl font-bold text-gray-800 mb-2">Quick Calculators</h2>
+                            <p class="text-gray-600">Essential tools for fast commercial real estate calculations</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <!-- Lease Date Calculator -->
+                            <div class="bg-white rounded-lg shadow-md p-6 border border-gray-100">
+                                <div class="flex items-center mb-4">
+                                    <div class="bg-primary-100 p-2 rounded-full mr-3">
+                                        <i class="far fa-calendar-alt text-primary-600"></i>
+                                    </div>
+                                    <h3 class="text-lg font-semibold text-gray-800">Lease Start & End Date</h3>
+                                </div>
+
+                                <div class="space-y-4">
+                                    <div>
+                                        <label for="qc-start-date" class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                                        <input type="date" id="qc-start-date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500" autocomplete="off">
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label for="qc-months" class="block text-sm font-medium text-gray-700 mb-1"># of Months</label>
+                                            <input type="number" id="qc-months" placeholder="63" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                        </div>
+
+                                        <div>
+                                            <label for="qc-years" class="block text-sm font-medium text-gray-700 mb-1"># of Years</label>
+                                            <input type="number" id="qc-years" placeholder="5" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label for="qc-end-date" class="block text-sm font-medium text-gray-700 mb-1">Expiration Date</label>
+                                        <input type="text" id="qc-end-date" readonly class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 font-medium">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Cap Rate Calculator -->
+                            <div class="bg-white rounded-lg shadow-md p-6 border border-gray-100">
+                                <div class="flex items-center mb-4">
+                                    <div class="bg-primary-100 p-2 rounded-full mr-3">
+                                        <i class="fas fa-percent text-primary-600"></i>
+                                    </div>
+                                    <h3 class="text-lg font-semibold text-gray-800">Solve for Cap Rate</h3>
+                                </div>
+
+                                <div class="space-y-4">
+                                    <div>
+                                        <label for="qc-noi-cap" class="block text-sm font-medium text-gray-700 mb-1">NOI ($)</label>
+                                        <input type="text" inputmode="decimal" class="input-currency w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500" id="qc-noi-cap" placeholder="250,000">
+                                    </div>
+
+                                    <div>
+                                        <label for="qc-price-cap" class="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
+                                        <input type="text" inputmode="decimal" class="input-currency w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500" id="qc-price-cap" placeholder="4,166,667">
+                                    </div>
+
+                                    <div>
+                                        <label for="qc-cap-rate" class="block text-sm font-medium text-gray-700 mb-1">Cap Rate (%)</label>
+                                        <input type="text" id="qc-cap-rate" readonly class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 font-medium">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Price Calculator -->
+                            <div class="bg-white rounded-lg shadow-md p-6 border border-gray-100">
+                                <div class="flex items-center mb-4">
+                                    <div class="bg-primary-100 p-2 rounded-full mr-3">
+                                        <i class="fas fa-dollar-sign text-primary-600"></i>
+                                    </div>
+                                    <h3 class="text-lg font-semibold text-gray-800">Solve for Total Price</h3>
+                                </div>
+
+                                <div class="space-y-4">
+                                    <div>
+                                        <label for="qc-noi-price" class="block text-sm font-medium text-gray-700 mb-1">NOI ($)</label>
+                                        <input type="text" inputmode="decimal" class="input-currency w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500" id="qc-noi-price" placeholder="250,000">
+                                    </div>
+
+                                    <div>
+                                        <label for="qc-cap-rate-price" class="block text-sm font-medium text-gray-700 mb-1">Cap Rate (%)</label>
+                                        <input type="number" id="qc-cap-rate-price" placeholder="6.00" class="w-full max-w-[100px] px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                    </div>
+
+                                    <div>
+                                        <label for="qc-price" class="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
+                                        <input type="text" id="qc-price" readonly class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 font-medium">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 4: Investment Analysis -->
+                    <div id="investment-analysis" class="tab-content">
+                        <div class="text-center mb-8">
+                            <h2 class="text-2xl font-bold text-gray-800 mb-2">Investment Analysis</h2>
+                            <p class="text-gray-600">Comprehensive tools for evaluating commercial real estate investments</p>
+                        </div>
+
+                        <!-- Cash Flow Inputs -->
+                        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-100 mb-8">
                             <div class="flex items-center mb-4">
                                 <div class="bg-primary-100 p-2 rounded-full mr-3">
-                                    <i class="fas fa-ruler-combined text-primary-600"></i>
+                                    <i class="fas fa-money-bill-wave text-primary-600"></i>
                                 </div>
-                                <h3 class="text-lg font-semibold text-gray-800">Acres to Sqft</h3>
+                                <h3 class="text-lg font-semibold text-gray-800">Cash Flow Inputs</h3>
                             </div>
-                            
-                            <div class="mb-4">
-                                <input type="text" id="acresInput" placeholder="Enter acres (e.g. 2.5)"
-                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                            </div>
-                            
-                            <button onclick="convertAcres()" type="button" class="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 btn-hover">
-                                Convert
-                            </button>
-                            
-                            <div class="result mt-4 bg-gray-50 rounded-lg p-3 text-center cursor-pointer hover:bg-gray-100 transition" id="result" onclick="copyResult()" title="Click to copy sqft value"></div>
-                        </div>
-                    </div>
-                    
-                    <!-- Geo Coordinates Widget -->
-                    <div class="bg-white rounded-lg shadow-md p-6 border border-gray-100 card-hover transition-all duration-200">
-                        <div class="flex items-center mb-4">
-                            <div class="bg-primary-100 p-2 rounded-full mr-3">
-                                <i class="fas fa-map-marker-alt text-primary-600"></i>
-                            </div>
-                            <h3 class="text-lg font-semibold text-gray-800">Geo Coordinates</h3>
-                        </div>
-                        
-                        <div class="flex mb-4">
-                            <input type="text" id="addressInput" placeholder="Enter address..."
-                                class="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                            <button onclick="searchAddress()" type="button" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-r-lg transition duration-200 btn-hover">
-                                Search
-                            </button>
-                        </div>
-                        
-                        <div id="map" class="w-full h-64 mb-4"></div>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div class="bg-gray-50 rounded-lg p-3 flex items-center">
-                                <span class="text-gray-700 font-medium mr-2">Lat:</span>
-                                <button class="coordinate-value flex-1 text-left bg-transparent border-none outline-none truncate" onclick="copyCoordinate('lat')" id="latValue">-</button>
-                                <button class="copy-btn bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1 rounded text-sm ml-2 transition" onclick="copyCoordinate('lat')" type="button">
-                                    Copy
-                                </button>
-                                <span class="copied-feedback text-success-600 text-sm ml-2 opacity-0" id="latFeedback">✓ Copied</span>
-                            </div>
-                            
-                            <div class="bg-gray-50 rounded-lg p-3 flex items-center">
-                                <span class="text-gray-700 font-medium mr-2">Lng:</span>
-                                <button class="coordinate-value flex-1 text-left bg-transparent border-none outline-none truncate" onclick="copyCoordinate('lng')" id="lngValue">-</button>
-                                <button class="copy-btn bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1 rounded text-sm ml-2 transition" onclick="copyCoordinate('lng')" type="button">
-                                    Copy
-                                </button>
-                                <span class="copied-feedback text-success-600 text-sm ml-2 opacity-0" id="lngFeedback">✓ Copied</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div id="toast" class="fixed bottom-5 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg hidden">Copied!</div>
-                </div>
-                
-                <!-- TAB 2: Seller's Analysis -->
-                <div id="seller-analysis" class="tab-content">
-                    <div class="text-center mb-8">
-                        <h2 class="text-2xl font-bold text-gray-800 mb-2">Seller's Historical Performance & Break-Even</h2>
-                        <p class="text-gray-600">Analyze the seller's position based on historical purchase data and rental income</p>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <!-- Inputs Card -->
-                        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-100">
-                            <div class="flex items-center mb-4">
-                                <div class="bg-primary-100 p-2 rounded-full mr-3">
-                                    <i class="fas fa-edit text-primary-600"></i>
-                                </div>
-                                <h3 class="text-lg font-semibold text-gray-800">Inputs</h3>
-                            </div>
-                            
+
                             <div class="space-y-4">
                                 <div>
-                                    <label for="sa-purchase-price" class="block text-sm font-medium text-gray-700 mb-1">Original Purchase Price ($)</label>
-                                    <input type="text" inputmode="decimal" class="input-currency w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500" id="sa-purchase-price" placeholder="1,500,000" value="1,500,000">
+                                    <label for="ia-investment" class="block text-sm font-medium text-gray-700 mb-1">Initial Investment (Year 0)</label>
+                                    <input type="text" inputmode="decimal" class="input-currency w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500" id="ia-investment" placeholder="Must be a negative number" value="-100,000">
                                 </div>
-                                
-                                <div>
-                                    <label for="sa-purchase-date" class="block text-sm font-medium text-gray-700 mb-1">Original Purchase Date</label>
-                                    <input type="date" id="sa-purchase-date" value="2018-01-01" autocomplete="off" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+
+                                <div id="cashFlowInputsContainer" class="space-y-3">
+                                    <!-- Dynamic cash flow inputs will be added here -->
                                 </div>
-                                
-                                <div>
-                                    <label for="sa-annual-rent" class="block text-sm font-medium text-gray-700 mb-1">Initial Annual Rent ($)</label>
-                                    <input type="text" inputmode="decimal" class="input-currency w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500" id="sa-annual-rent" placeholder="90,000" value="90,000">
-                                </div>
-                                
-                                <div>
-                                    <label for="sa-rent-increase" class="block text-sm font-medium text-gray-700 mb-1">Annual Rent Increase (%)</label>
-                                    <input type="number" id="sa-rent-increase" placeholder="2" value="2" class="w-full max-w-[100px] px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                                </div>
-                                
-                                <button id="sa-calculate-btn" class="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg mt-4 transition duration-200 btn-hover">
-                                    Analyze Seller's Position
+
+                                <button id="addCashFlowBtn" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg mt-4 transition duration-200 btn-hover">
+                                    <i class="fas fa-plus mr-2"></i>Add Cash Flow Year
                                 </button>
                             </div>
                         </div>
-                        
-                        <!-- Key Insights Card -->
-                        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-100">
-                            <div class="flex items-center mb-4">
-                                <div class="bg-primary-100 p-2 rounded-full mr-3">
-                                    <i class="fas fa-lightbulb text-primary-600"></i>
+
+                        <h3 class="text-xl font-semibold text-gray-800 mb-6">Analysis Tools</h3>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                            <!-- NPV & MIRR Calculator -->
+                            <div class="bg-white rounded-lg shadow-md p-6 border border-gray-100">
+                                <div class="flex items-center mb-4">
+                                    <div class="bg-primary-100 p-2 rounded-full mr-3">
+                                        <i class="fas fa-chart-line text-primary-600"></i>
+                                    </div>
+                                    <h3 class="text-lg font-semibold text-gray-800">NPV & MIRR</h3>
                                 </div>
-                                <h3 class="text-lg font-semibold text-gray-800">Key Insights</h3>
+
+                                <div class="space-y-4">
+                                    <div>
+                                        <label for="ia-discount-rate" class="block text-sm font-medium text-gray-700 mb-1">Discount Rate (%)</label>
+                                        <input type="number" id="ia-discount-rate" placeholder="10" value="10" class="w-full max-w-[100px] px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                    </div>
+
+                                    <div>
+                                        <label for="ia-reinvest-rate" class="block text-sm font-medium text-gray-700 mb-1">Reinvestment Rate (%)</label>
+                                        <input type="number" id="ia-reinvest-rate" placeholder="8" value="8" class="w-full max-w-[100px] px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                    </div>
+
+                                    <div>
+                                        <label for="ia-finance-rate" class="block text-sm font-medium text-gray-700 mb-1">Financing Rate (%)</label>
+                                        <input type="number" id="ia-finance-rate" placeholder="6" value="6" class="w-full max-w-[100px] px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                    </div>
+
+                                    <div class="bg-gray-50 rounded-lg p-3 flex justify-between items-center mt-4">
+                                        <span class="text-sm font-medium text-gray-600">Net Present Value (NPV)</span>
+                                        <span class="text-lg font-bold" id="ia-npv-result">-</span>
+                                    </div>
+
+                                    <div class="bg-gray-50 rounded-lg p-3 flex justify-between items-center">
+                                        <span class="text-sm font-medium text-gray-600">Modified IRR (MIRR)</span>
+                                        <span class="text-lg font-bold" id="ia-mirr-result">-</span>
+                                    </div>
+                                </div>
                             </div>
-                            
-                            <div id="sa-summary-metrics" class="space-y-3">
-                                <div class="bg-gray-50 rounded-lg p-3 flex justify-between items-center">
-                                    <span class="text-sm font-medium text-gray-600">Analysis Period</span>
-                                    <span class="text-lg font-bold text-primary-600" id="sa-years-held">-</span>
+
+                            <!-- IRR & Cash on Cash Calculator -->
+                            <div class="bg-white rounded-lg shadow-md p-6 border border-gray-100">
+                                <div class="flex items-center mb-4">
+                                    <div class="bg-primary-100 p-2 rounded-full mr-3">
+                                        <i class="fas fa-chart-pie text-primary-600"></i>
+                                    </div>
+                                    <h3 class="text-lg font-semibold text-gray-800">IRR & Cash on Cash</h3>
                                 </div>
-                                
-                                <div class="bg-gray-50 rounded-lg p-3 flex justify-between items-center">
-                                    <span class="text-sm font-medium text-gray-600">Total Net Cash Flow</span>
-                                    <span class="text-lg font-bold" id="sa-total-cf">-</span>
-                                </div>
-                                
-                                <div class="bg-gray-50 rounded-lg p-3 flex justify-between items-center">
-                                    <span class="text-sm font-medium text-gray-600">Cash Basis</span>
-                                    <span class="text-lg font-bold" id="sa-basis">-</span>
-                                </div>
-                                
-                                <div class="bg-gray-50 rounded-lg p-3 flex justify-between items-center">
-                                    <span class="text-sm font-medium text-gray-600">Break-Even Sale Price</span>
-                                    <span class="text-lg font-bold" id="sa-break-even">-</span>
+
+                                <div class="space-y-4">
+                                    <div>
+                                        <label for="ia-total-cash" class="block text-sm font-medium text-gray-700 mb-1">Total Cash Invested ($)</label>
+                                        <input type="text" inputmode="decimal" class="input-currency w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500" id="ia-total-cash" placeholder="300,000" value="300,000">
+                                    </div>
+
+                                    <div>
+                                        <label for="ia-cfbt" class="block text-sm font-medium text-gray-700 mb-1">Annual Pre-Tax Cash Flow (Year 1)</label>
+                                        <input type="text" inputmode="decimal" class="input-currency w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500" id="ia-cfbt" placeholder="25,000" value="25,000">
+                                    </div>
+
+                                    <div class="bg-gray-50 rounded-lg p-3 flex justify-between items-center mt-4">
+                                        <span class="text-sm font-medium text-gray-600">Internal Rate of Return (IRR)</span>
+                                        <span class="text-lg font-bold" id="ia-irr-result">-</span>
+                                    </div>
+
+                                    <div class="bg-gray-50 rounded-lg p-3 flex justify-between items-center">
+                                        <span class="text-sm font-medium text-gray-600">Cash on Cash Return</span>
+                                        <span class="text-lg font-bold" id="ia-coc-result">-</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div id="sa-results-container" class="mt-8 hidden">
-                        <!-- Chart Section -->
-                        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-100 mb-6">
-                            <div class="flex items-center mb-4">
-                                <div class="bg-primary-100 p-2 rounded-full mr-3">
-                                    <i class="fas fa-chart-bar text-primary-600"></i>
-                                </div>
-                                <h3 class="text-lg font-semibold text-gray-800">Cumulative Cash Flow Over Time</h3>
-                            </div>
-                            
-                            <div class="chart-wrapper h-80">
-                                <canvas id="sa-chart"></canvas>
-                            </div>
-                        </div>
-                        
-                        <!-- Table Section -->
+
+                        <!-- Cash Flow Table -->
                         <div class="bg-white rounded-lg shadow-md border border-gray-100 overflow-hidden">
                             <div class="overflow-x-auto">
                                 <table class="min-w-full divide-y divide-gray-200">
                                     <thead class="bg-gray-800">
                                         <tr>
-                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Year</th>
-                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Annual Rent</th>
-                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Net Cash Flow</th>
-                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Cumulative Cash Flow</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Period</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Cash Flow</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">PV of Cash Flow (for NPV)</th>
                                         </tr>
                                     </thead>
-                                    <tbody class="bg-white divide-y divide-gray-200" id="sa-table-body"></tbody>
+                                    <tbody class="bg-white divide-y divide-gray-200" id="ia-table-body"></tbody>
                                 </table>
                             </div>
                         </div>
                     </div>
-                </div>
-                
-                <!-- TAB 3: Quick Calculators -->
-                <div id="quick-calcs" class="tab-content">
-                    <div class="text-center mb-8">
-                        <h2 class="text-2xl font-bold text-gray-800 mb-2">Quick Calculators</h2>
-                        <p class="text-gray-600">Essential tools for fast commercial real estate calculations</p>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <!-- Lease Date Calculator -->
-                        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-100">
-                            <div class="flex items-center mb-4">
-                                <div class="bg-primary-100 p-2 rounded-full mr-3">
-                                    <i class="far fa-calendar-alt text-primary-600"></i>
-                                </div>
-                                <h3 class="text-lg font-semibold text-gray-800">Lease Start & End Date</h3>
+                    <!-- Add this after your last tab-content div -->
+                    <!-- Place this inside your main tab content container -->
+                    <div id="exchange-tab" class="tab-content active py-8">
+                        <div class="max-w-6xl mx-auto">
+                            <div class="text-center mb-10">
+                                <h2 class="text-3xl font-bold text-gray-800 mb-2">1031 Exchange Toolkit</h2>
+                                <p class="text-gray-600">Deadlines & Capital Gain Estimator for 1031 Exchanges</p>
                             </div>
-                            
-                            <div class="space-y-4">
-                                <div>
-                                    <label for="qc-start-date" class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-                                    <input type="date" id="qc-start-date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500" autocomplete="off">
-                                </div>
-                                
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label for="qc-months" class="block text-sm font-medium text-gray-700 mb-1"># of Months</label>
-                                        <input type="number" id="qc-months" placeholder="63" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                <!-- Exchange Deadline Calculator -->
+                                <div class="bg-white rounded-xl shadow-md p-8 border border-gray-100 card-hover">
+                                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Exchange Deadline Calculator</h3>
+                                    <hr class="mb-4">
+                                    <label class="block text-md font-medium text-gray-800 mb-2">Enter The Closing Date For The Relinquished Property:</label>
+                                    <div class="grid grid-cols-3 gap-4 mb-4">
+                                        <div>
+                                            <label for="ex-month" class="block text-xs text-gray-600 mb-1">Month:</label>
+                                            <select id="ex-month" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500"></select>
+                                        </div>
+                                        <div>
+                                            <label for="ex-day" class="block text-xs text-gray-600 mb-1">Day:</label>
+                                            <select id="ex-day" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500"></select>
+                                        </div>
+                                        <div>
+                                            <label for="ex-year" class="block text-xs text-gray-600 mb-1">Year:</label>
+                                            <select id="ex-year" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500"></select>
+                                        </div>
                                     </div>
-                                    
-                                    <div>
-                                        <label for="qc-years" class="block text-sm font-medium text-gray-700 mb-1"># of Years</label>
-                                        <input type="number" id="qc-years" placeholder="5" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                    <button type="button" id="ex-calc-btn" class="bg-primary-700 hover:bg-primary-800 text-white font-bold py-2 px-5 rounded-lg transition mb-4">
+                                        Calculate
+                                    </button>
+                                    <div class="space-y-3 mt-4">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-700 text-sm">45 Day Calculator<br><span class="text-xs text-gray-500">Identification Period (45 days) ends:</span></span>
+                                            <span class="font-semibold text-primary-600" id="ex-45-result">-</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-700 text-sm">180 Day Calculator<br><span class="text-xs text-gray-500">Exchange Period (180 days) ends:</span></span>
+                                            <span class="font-semibold text-primary-700" id="ex-180-result">-</span>
+                                        </div>
                                     </div>
                                 </div>
-                                
-                                <div>
-                                    <label for="qc-end-date" class="block text-sm font-medium text-gray-700 mb-1">Expiration Date</label>
-                                    <input type="text" id="qc-end-date" readonly class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 font-medium">
+                                <!-- Capital Gain Estimator -->
+                                <div class="bg-white rounded-xl shadow-md p-8 border border-gray-100 card-hover">
+                                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Capital Gain Estimator</h3>
+                                    <hr class="mb-4">
+                                    <form id="cge-form" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                                        <div>
+                                            <label for="cge-purchase" class="block text-sm font-medium text-gray-700 mb-1">Original purchase price</label>
+                                            <input type="text" id="cge-purchase" class="input-currency w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="800000">
+                                        </div>
+                                        <div>
+                                            <label for="cge-improvements" class="block text-sm font-medium text-gray-700 mb-1">Capital improvements</label>
+                                            <input type="text" id="cge-improvements" class="input-currency w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="100000">
+                                        </div>
+                                        <div>
+                                            <label for="cge-depreciation" class="block text-sm font-medium text-gray-700 mb-1">Accumulated depreciation</label>
+                                            <input type="text" id="cge-depreciation" class="input-currency w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="150000">
+                                        </div>
+                                        <div>
+                                            <label for="cge-saleprice" class="block text-sm font-medium text-gray-700 mb-1">Sales price</label>
+                                            <input type="text" id="cge-saleprice" class="input-currency w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="1250000">
+                                        </div>
+                                        <div>
+                                            <label for="cge-expenses" class="block text-sm font-medium text-gray-700 mb-1">Selling expenses</label>
+                                            <input type="text" id="cge-expenses" class="input-currency w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="75000">
+                                        </div>
+                                        <div>
+                                            <label for="cge-loansale" class="block text-sm font-medium text-gray-700 mb-1">Loan balances at sale</label>
+                                            <input type="text" id="cge-loansale" class="input-currency w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="500000">
+                                        </div>
+                                        <div>
+                                            <label for="cge-staterate" class="block text-sm font-medium text-gray-700 mb-1">State capital gain tax rate (%)</label>
+                                            <input type="number" id="cge-staterate" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="8" value="8" min="0">
+                                        </div>
+                                    </form>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                                        <div>
+                                            <label class="block text-xs text-gray-600 mb-1">Gain from appreciation in value subject to capital gain *</label>
+                                            <input type="text" id="cge-gain-appreciation" class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-100 font-semibold" readonly>
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs text-gray-600 mb-1">Gain from depreciation allowed subject to depreciation recapture **</label>
+                                            <input type="text" id="cge-gain-dep" class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-100 font-semibold" readonly>
+                                        </div>
+                                        <div class="md:col-span-2">
+                                            <label class="block text-xs text-gray-600 mb-1">Gain subject to state capital gain ***</label>
+                                            <input type="text" id="cge-gain-state" class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-100 font-semibold" readonly>
+                                        </div>
+                                    </div>
+                                    <button type="button" id="cge-calc-btn" class="bg-primary-700 hover:bg-primary-800 text-white font-bold py-2 px-5 rounded-lg transition mb-6">
+                                        Estimate Capital Gains
+                                    </button>
+                                    <!-- Scenario Outputs -->
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                        <!-- 1031 Exchange -->
+                                        <div class="bg-primary-800 text-white rounded-lg p-6 flex-1 min-w-[220px]">
+                                            <h4 class="font-bold text-lg mb-2">1031 Exchange</h4>
+                                            <div class="mb-1">
+                                                <label class="block text-xs font-medium mb-1">Tax capital gain *</label>
+                                                <input type="text" id="cge-ex-tax-cap" class="w-full px-2 py-1 rounded bg-primary-900 font-semibold text-white border-none mb-1" readonly>
+                                            </div>
+                                            <div class="mb-1">
+                                                <label class="block text-xs font-medium mb-1">Tax on depreciation recapture **</label>
+                                                <input type="text" id="cge-ex-tax-dep" class="w-full px-2 py-1 rounded bg-primary-900 font-semibold text-white border-none mb-1" readonly>
+                                            </div>
+                                            <div class="mb-1">
+                                                <label class="block text-xs font-medium mb-1">State tax capital gain ***</label>
+                                                <input type="text" id="cge-ex-tax-state" class="w-full px-2 py-1 rounded bg-primary-900 font-semibold text-white border-none mb-1" readonly>
+                                            </div>
+                                            <div class="mb-1">
+                                                <label class="block text-xs font-medium mb-1">NII tax</label>
+                                                <input type="text" id="cge-ex-tax-nii" class="w-full px-2 py-1 rounded bg-primary-900 font-semibold text-white border-none mb-1" readonly>
+                                            </div>
+                                            <div class="mb-1 font-bold text-red-400">
+                                                Total hypothetical taxes
+                                                <div id="cge-ex-tax-total">-</div>
+                                            </div>
+                                            <div class="mb-1 font-bold text-green-400">
+                                                Net amount for Reinvestment
+                                                <div id="cge-ex-net">-</div>
+                                            </div>
+                                        </div>
+                                        <!-- Hypothetical Taxpayer 1 -->
+                                        <div class="bg-gray-900 text-white rounded-lg p-6 flex-1 min-w-[220px]">
+                                            <h4 class="font-bold text-lg mb-2">Hypothetical Taxpayer 1</h4>
+                                            <p class="text-xs mb-2">15% cap gain, 25% dep recapture, state tax, 0% NII</p>
+                                            <div class="mb-1">
+                                                <label class="block text-xs font-medium mb-1">15% tax capital gain *</label>
+                                                <input type="text" id="cge-hyp1-tax-cap" class="w-full px-2 py-1 rounded bg-gray-800 font-semibold text-white border-none mb-1" readonly>
+                                            </div>
+                                            <div class="mb-1">
+                                                <label class="block text-xs font-medium mb-1">25% tax on depreciation recapture **</label>
+                                                <input type="text" id="cge-hyp1-tax-dep" class="w-full px-2 py-1 rounded bg-gray-800 font-semibold text-white border-none mb-1" readonly>
+                                            </div>
+                                            <div class="mb-1">
+                                                <label class="block text-xs font-medium mb-1">State tax capital gain ***</label>
+                                                <input type="text" id="cge-hyp1-tax-state" class="w-full px-2 py-1 rounded bg-gray-800 font-semibold text-white border-none mb-1" readonly>
+                                            </div>
+                                            <div class="mb-1">
+                                                <label class="block text-xs font-medium mb-1">0% NII tax</label>
+                                                <input type="text" id="cge-hyp1-tax-nii" class="w-full px-2 py-1 rounded bg-gray-800 font-semibold text-white border-none mb-1" readonly>
+                                            </div>
+                                            <div class="mb-1 font-bold text-red-400">
+                                                Total hypothetical taxes
+                                                <div id="cge-hyp1-tax-total">-</div>
+                                            </div>
+                                            <div class="mb-1 font-bold text-green-400">
+                                                Net amount for Reinvestment
+                                                <div id="cge-hyp1-net">-</div>
+                                            </div>
+                                        </div>
+                                        <!-- Hypothetical Taxpayer 2 -->
+                                        <div class="bg-gray-900 text-white rounded-lg p-6 flex-1 min-w-[220px]">
+                                            <h4 class="font-bold text-lg mb-2">Hypothetical Taxpayer 2</h4>
+                                            <p class="text-xs mb-2">20% cap gain, 25% dep recapture, state tax, 3.8% NII</p>
+                                            <div class="mb-1">
+                                                <label class="block text-xs font-medium mb-1">20% tax capital gain *</label>
+                                                <input type="text" id="cge-hyp2-tax-cap" class="w-full px-2 py-1 rounded bg-gray-800 font-semibold text-white border-none mb-1" readonly>
+                                            </div>
+                                            <div class="mb-1">
+                                                <label class="block text-xs font-medium mb-1">25% tax on depreciation recapture **</label>
+                                                <input type="text" id="cge-hyp2-tax-dep" class="w-full px-2 py-1 rounded bg-gray-800 font-semibold text-white border-none mb-1" readonly>
+                                            </div>
+                                            <div class="mb-1">
+                                                <label class="block text-xs font-medium mb-1">State tax capital gain ***</label>
+                                                <input type="text" id="cge-hyp2-tax-state" class="w-full px-2 py-1 rounded bg-gray-800 font-semibold text-white border-none mb-1" readonly>
+                                            </div>
+                                            <div class="mb-1">
+                                                <label class="block text-xs font-medium mb-1">3.8% NII tax</label>
+                                                <input type="text" id="cge-hyp2-tax-nii" class="w-full px-2 py-1 rounded bg-gray-800 font-semibold text-white border-none mb-1" readonly>
+                                            </div>
+                                            <div class="mb-1 font-bold text-red-400">
+                                                Total hypothetical taxes
+                                                <div id="cge-hyp2-tax-total">-</div>
+                                            </div>
+                                            <div class="mb-1 font-bold text-green-400">
+                                                Net amount for Reinvestment
+                                                <div id="cge-hyp2-net">-</div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        
-                        <!-- Cap Rate Calculator -->
-                        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-100">
-                            <div class="flex items-center mb-4">
-                                <div class="bg-primary-100 p-2 rounded-full mr-3">
-                                    <i class="fas fa-percent text-primary-600"></i>
-                                </div>
-                                <h3 class="text-lg font-semibold text-gray-800">Solve for Cap Rate</h3>
-                            </div>
-                            
-                            <div class="space-y-4">
-                                <div>
-                                    <label for="qc-noi-cap" class="block text-sm font-medium text-gray-700 mb-1">NOI ($)</label>
-                                    <input type="text" inputmode="decimal" class="input-currency w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500" id="qc-noi-cap" placeholder="250,000">
-                                </div>
-                                
-                                <div>
-                                    <label for="qc-price-cap" class="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
-                                    <input type="text" inputmode="decimal" class="input-currency w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500" id="qc-price-cap" placeholder="4,166,667">
-                                </div>
-                                
-                                <div>
-                                    <label for="qc-cap-rate" class="block text-sm font-medium text-gray-700 mb-1">Cap Rate (%)</label>
-                                    <input type="text" id="qc-cap-rate" readonly class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 font-medium">
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Price Calculator -->
-                        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-100">
-                            <div class="flex items-center mb-4">
-                                <div class="bg-primary-100 p-2 rounded-full mr-3">
-                                    <i class="fas fa-dollar-sign text-primary-600"></i>
-                                </div>
-                                <h3 class="text-lg font-semibold text-gray-800">Solve for Total Price</h3>
-                            </div>
-                            
-                            <div class="space-y-4">
-                                <div>
-                                    <label for="qc-noi-price" class="block text-sm font-medium text-gray-700 mb-1">NOI ($)</label>
-                                    <input type="text" inputmode="decimal" class="input-currency w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500" id="qc-noi-price" placeholder="250,000">
-                                </div>
-                                
-                                <div>
-                                    <label for="qc-cap-rate-price" class="block text-sm font-medium text-gray-700 mb-1">Cap Rate (%)</label>
-                                    <input type="number" id="qc-cap-rate-price" placeholder="6.00" class="w-full max-w-[100px] px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                                </div>
-                                
-                                <div>
-                                    <label for="qc-price" class="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
-                                    <input type="text" id="qc-price" readonly class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 font-medium">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- TAB 4: Investment Analysis -->
-                <div id="investment-analysis" class="tab-content">
-                    <div class="text-center mb-8">
-                        <h2 class="text-2xl font-bold text-gray-800 mb-2">Investment Analysis</h2>
-                        <p class="text-gray-600">Comprehensive tools for evaluating commercial real estate investments</p>
-                    </div>
-                    
-                    <!-- Cash Flow Inputs -->
-                    <div class="bg-white rounded-lg shadow-md p-6 border border-gray-100 mb-8">
-                        <div class="flex items-center mb-4">
-                            <div class="bg-primary-100 p-2 rounded-full mr-3">
-                                <i class="fas fa-money-bill-wave text-primary-600"></i>
-                            </div>
-                            <h3 class="text-lg font-semibold text-gray-800">Cash Flow Inputs</h3>
-                        </div>
-                        
-                        <div class="space-y-4">
-                            <div>
-                                <label for="ia-investment" class="block text-sm font-medium text-gray-700 mb-1">Initial Investment (Year 0)</label>
-                                <input type="text" inputmode="decimal" class="input-currency w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500" id="ia-investment" placeholder="Must be a negative number" value="-100,000">
-                            </div>
-                            
-                            <div id="cashFlowInputsContainer" class="space-y-3">
-                                <!-- Dynamic cash flow inputs will be added here -->
-                            </div>
-                            
-                            <button id="addCashFlowBtn" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg mt-4 transition duration-200 btn-hover">
-                                <i class="fas fa-plus mr-2"></i>Add Cash Flow Year
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <h3 class="text-xl font-semibold text-gray-800 mb-6">Analysis Tools</h3>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                        <!-- NPV & MIRR Calculator -->
-                        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-100">
-                            <div class="flex items-center mb-4">
-                                <div class="bg-primary-100 p-2 rounded-full mr-3">
-                                    <i class="fas fa-chart-line text-primary-600"></i>
-                                </div>
-                                <h3 class="text-lg font-semibold text-gray-800">NPV & MIRR</h3>
-                            </div>
-                            
-                            <div class="space-y-4">
-                                <div>
-                                    <label for="ia-discount-rate" class="block text-sm font-medium text-gray-700 mb-1">Discount Rate (%)</label>
-                                    <input type="number" id="ia-discount-rate" placeholder="10" value="10" class="w-full max-w-[100px] px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                                </div>
-                                
-                                <div>
-                                    <label for="ia-reinvest-rate" class="block text-sm font-medium text-gray-700 mb-1">Reinvestment Rate (%)</label>
-                                    <input type="number" id="ia-reinvest-rate" placeholder="8" value="8" class="w-full max-w-[100px] px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                                </div>
-                                
-                                <div>
-                                    <label for="ia-finance-rate" class="block text-sm font-medium text-gray-700 mb-1">Financing Rate (%)</label>
-                                    <input type="number" id="ia-finance-rate" placeholder="6" value="6" class="w-full max-w-[100px] px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                                </div>
-                                
-                                <div class="bg-gray-50 rounded-lg p-3 flex justify-between items-center mt-4">
-                                    <span class="text-sm font-medium text-gray-600">Net Present Value (NPV)</span>
-                                    <span class="text-lg font-bold" id="ia-npv-result">-</span>
-                                </div>
-                                
-                                <div class="bg-gray-50 rounded-lg p-3 flex justify-between items-center">
-                                    <span class="text-sm font-medium text-gray-600">Modified IRR (MIRR)</span>
-                                    <span class="text-lg font-bold" id="ia-mirr-result">-</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- IRR & Cash on Cash Calculator -->
-                        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-100">
-                            <div class="flex items-center mb-4">
-                                <div class="bg-primary-100 p-2 rounded-full mr-3">
-                                    <i class="fas fa-chart-pie text-primary-600"></i>
-                                </div>
-                                <h3 class="text-lg font-semibold text-gray-800">IRR & Cash on Cash</h3>
-                            </div>
-                            
-                            <div class="space-y-4">
-                                <div>
-                                    <label for="ia-total-cash" class="block text-sm font-medium text-gray-700 mb-1">Total Cash Invested ($)</label>
-                                    <input type="text" inputmode="decimal" class="input-currency w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500" id="ia-total-cash" placeholder="300,000" value="300,000">
-                                </div>
-                                
-                                <div>
-                                    <label for="ia-cfbt" class="block text-sm font-medium text-gray-700 mb-1">Annual Pre-Tax Cash Flow (Year 1)</label>
-                                    <input type="text" inputmode="decimal" class="input-currency w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500" id="ia-cfbt" placeholder="25,000" value="25,000">
-                                </div>
-                                
-                                <div class="bg-gray-50 rounded-lg p-3 flex justify-between items-center mt-4">
-                                    <span class="text-sm font-medium text-gray-600">Internal Rate of Return (IRR)</span>
-                                    <span class="text-lg font-bold" id="ia-irr-result">-</span>
-                                </div>
-                                
-                                <div class="bg-gray-50 rounded-lg p-3 flex justify-between items-center">
-                                    <span class="text-sm font-medium text-gray-600">Cash on Cash Return</span>
-                                    <span class="text-lg font-bold" id="ia-coc-result">-</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Cash Flow Table -->
-                    <div class="bg-white rounded-lg shadow-md border border-gray-100 overflow-hidden">
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-800">
-                                    <tr>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Period</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Cash Flow</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">PV of Cash Flow (for NPV)</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200" id="ia-table-body"></tbody>
-                            </table>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        
-        <!-- Footer -->
-        <footer class="mt-12 text-center text-gray-500 text-sm">
-            <p>Commercial Real Estate Toolkit v2.0 • © 2023 All Rights Reserved</p>
-        </footer>
-    </div>
 
-    <script>
-        /* --- Widget JS (from consolidated-widgets.html) --- */ 
-        // Phone Call Widget Logic
-        const phoneInput = document.getElementById('phoneInput');
-        const webexButton = document.getElementById('webexButton');
-        const phoneLinkButton = document.getElementById('phoneLinkButton');
-        const copyBtn = document.getElementById('copyBtn');
-        const pasteBtn = document.getElementById('pasteBtn');
-        const toast = document.getElementById('toast');
-        
-        function formatPhoneNumber(val) {
-            if (!val) return '';
-            const nums = val.replace(/\D/g, '');
-            const m = nums.match(/^(\d{0,3})(\d{0,3})(\d{0,4})$/);
-            if (!m) return '';
-            return !m[2] ? m[1] : `(${m[1]}) ${m[2]}${m[3] ? `-${m[3]}` : ''}`;
-        }
-        
-        function validatePhone(n) { return n.replace(/\D/g, '').length === 10; }
-        
-        phoneInput.addEventListener('input', (e) => {
-            const formatted = formatPhoneNumber(e.target.value);
-            e.target.value = formatted;
-            const raw = formatted.replace(/\D/g, '');
-            const valid = validatePhone(raw);
-            
-            [webexButton, phoneLinkButton].forEach(btn => {
+            <!-- Footer -->
+            <footer class="mt-12 text-center text-gray-500 text-sm">
+                <p>Commercial Real Estate Toolkit v2.0 • © 2023 All Rights Reserved</p>
+            </footer>
+        </div>
+
+        <script>
+            /* --- Widget JS (from consolidated-widgets.html) --- */
+            // Phone Call Widget Logic
+            const phoneInput = document.getElementById('phoneInput');
+            const webexButton = document.getElementById('webexButton');
+            const phoneLinkButton = document.getElementById('phoneLinkButton');
+            const copyBtn = document.getElementById('copyBtn');
+            const pasteBtn = document.getElementById('pasteBtn');
+            const toast = document.getElementById('toast');
+
+            function formatPhoneNumber(val) {
+                if (!val) return '';
+                const nums = val.replace(/\D/g, '');
+                const m = nums.match(/^(\d{0,3})(\d{0,3})(\d{0,4})$/);
+                if (!m) return '';
+                return !m[2] ? m[1] : `(${m[1]}) ${m[2]}${m[3] ? `-${m[3]}` : ''}`;
+            }
+
+            function validatePhone(n) { return n.replace(/\D/g, '').length === 10; }
+
+            phoneInput.addEventListener('input', (e) => {
+                const formatted = formatPhoneNumber(e.target.value);
+                e.target.value = formatted;
+                const raw = formatted.replace(/\D/g, '');
+                const valid = validatePhone(raw);
+
+                [webexButton, phoneLinkButton].forEach(btn => {
+                    if (valid) {
+                        btn.classList.remove('bg-gray-300', 'cursor-not-allowed');
+                        btn.classList.add('bg-primary-600', 'hover:bg-primary-700');
+                        btn.removeAttribute('disabled');
+                        btn.setAttribute('tabindex', '0');
+                    } else {
+                        btn.classList.add('bg-gray-300', 'cursor-not-allowed');
+                        btn.classList.remove('bg-primary-600', 'hover:bg-primary-700');
+                        btn.setAttribute('disabled', 'true');
+                        btn.setAttribute('tabindex', '-1');
+                    }
+                });
+
                 if (valid) {
-                    btn.classList.remove('bg-gray-300', 'cursor-not-allowed');
-                    btn.classList.add('bg-primary-600', 'hover:bg-primary-700');
-                    btn.removeAttribute('disabled');
-                    btn.setAttribute('tabindex', '0');
+                    webexButton.href = `sip:${raw}`;
+                    phoneLinkButton.href = `tel:${raw}`;
+                    copyBtn.disabled = false;
+                    copyBtn.classList.remove('bg-gray-100');
+                    copyBtn.classList.add('bg-primary-100', 'hover:bg-primary-200');
                 } else {
-                    btn.classList.add('bg-gray-300', 'cursor-not-allowed');
-                    btn.classList.remove('bg-primary-600', 'hover:bg-primary-700');
-                    btn.setAttribute('disabled', 'true');
-                    btn.setAttribute('tabindex', '-1');
+                    webexButton.removeAttribute('href');
+                    phoneLinkButton.removeAttribute('href');
+                    copyBtn.disabled = true;
+                    copyBtn.classList.add('bg-gray-100');
+                    copyBtn.classList.remove('bg-primary-100', 'hover:bg-primary-200');
                 }
             });
-            
-            if (valid) {
-                webexButton.href = `sip:${raw}`;
-                phoneLinkButton.href = `tel:${raw}`;
-                copyBtn.disabled = false;
-                copyBtn.classList.remove('bg-gray-100');
-                copyBtn.classList.add('bg-primary-100', 'hover:bg-primary-200');
-            } else {
-                webexButton.removeAttribute('href');
-                phoneLinkButton.removeAttribute('href');
-                copyBtn.disabled = true;
-                copyBtn.classList.add('bg-gray-100');
-                copyBtn.classList.remove('bg-primary-100', 'hover:bg-primary-200');
-            }
-        });
-        
-        pasteBtn.addEventListener('click', async () => {
-            try {
-                const txt = await navigator.clipboard.readText();
-                phoneInput.value = formatPhoneNumber(txt);
+
+            pasteBtn.addEventListener('click', async () => {
+                try {
+                    const txt = await navigator.clipboard.readText();
+                    phoneInput.value = formatPhoneNumber(txt);
+                    phoneInput.dispatchEvent(new Event('input'));
+                    phoneInput.focus();
+                } catch {}
+            });
+
+            copyBtn.addEventListener('click', () => {
+                const raw = phoneInput.value.replace(/\D/g, '');
+                if (raw.length === 10) {
+                    navigator.clipboard.writeText(raw).then(showToast);
+                }
+            });
+
+            phoneInput.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const pasted = (e.clipboardData || window.clipboardData).getData('text');
+                phoneInput.value = formatPhoneNumber(pasted);
                 phoneInput.dispatchEvent(new Event('input'));
-                phoneInput.focus();
-            } catch {}
-        });
-        
-        copyBtn.addEventListener('click', () => {
-            const raw = phoneInput.value.replace(/\D/g, '');
-            if (raw.length === 10) {
-                navigator.clipboard.writeText(raw).then(showToast);
+            });
+
+            function showToast(msg = "Copied!") {
+                toast.textContent = msg;
+                toast.style.display = 'block';
+                setTimeout(() => { toast.style.display = 'none'; }, 2000);
             }
-        });
-        
-        phoneInput.addEventListener('paste', (e) => {
-            e.preventDefault();
-            const pasted = (e.clipboardData || window.clipboardData).getData('text');
-            phoneInput.value = formatPhoneNumber(pasted);
-            phoneInput.dispatchEvent(new Event('input'));
-        });
-        
-        function showToast(msg = "Copied!") {
-            toast.textContent = msg;
-            toast.style.display = 'block';
-            setTimeout(() => { toast.style.display = 'none'; }, 2000);
-        }
-        
-        // Acres Converter
-        function convertAcres() {
-            const input = document.getElementById('acresInput').value;
-            const acresValue = input.match(/(\d+\.?\d*)/);
-            const sqftPerAcre = 43560;
-            const resultElement = document.getElementById('result');
-            
-            if (acresValue) {
-                const acres = parseFloat(acresValue[0]);
-                const squareFeet = acres * sqftPerAcre;
-                const roundedSqft = Math.round(squareFeet);
-                resultElement.dataset.value = roundedSqft;
-                resultElement.innerHTML = `${acres.toLocaleString()} acre${acres !== 1 ? 's' : ''} =<br><b class="text-primary-600">${roundedSqft.toLocaleString()} sqft</b>`;
-                resultElement.classList.remove('text-red-500');
-                resultElement.classList.add('text-gray-800');
-                resultElement.style.cursor = "pointer";
-            } else {
-                resultElement.innerHTML = "Please enter a valid acre value";
-                resultElement.classList.remove('text-gray-800');
-                resultElement.classList.add('text-red-500');
-                resultElement.style.cursor = "default";
-                delete resultElement.dataset.value;
+
+            // Acres Converter
+            function convertAcres() {
+                const input = document.getElementById('acresInput').value;
+                const acresValue = input.match(/(\d+\.?\d*)/);
+                const sqftPerAcre = 43560;
+                const resultElement = document.getElementById('result');
+
+                if (acresValue) {
+                    const acres = parseFloat(acresValue[0]);
+                    const squareFeet = acres * sqftPerAcre;
+                    const roundedSqft = Math.round(squareFeet);
+                    resultElement.dataset.value = roundedSqft;
+                    resultElement.innerHTML = `${acres.toLocaleString()} acre${acres !== 1 ? 's' : ''} =<br><b class="text-primary-600">${roundedSqft.toLocaleString()} sqft</b>`;
+                    resultElement.classList.remove('text-red-500');
+                    resultElement.classList.add('text-gray-800');
+                    resultElement.style.cursor = "pointer";
+                } else {
+                    resultElement.innerHTML = "Please enter a valid acre value";
+                    resultElement.classList.remove('text-gray-800');
+                    resultElement.classList.add('text-red-500');
+                    resultElement.style.cursor = "default";
+                    delete resultElement.dataset.value;
+                }
             }
-        }
-        
-        function copyResult() {
-            const resultElement = document.getElementById('result');
-            const value = resultElement.dataset.value;
-            
-            if (value) {
-                navigator.clipboard.writeText(value)
-                    .then(() => {
+
+            function copyResult() {
+                const resultElement = document.getElementById('result');
+                const value = resultElement.dataset.value;
+
+                if (value) {
+                    navigator.clipboard.writeText(value)
+                        .then(() => {
                         resultElement.classList.add('bg-primary-100', 'text-primary-800');
                         showToast("Sqft copied!");
                         setTimeout(() => {
@@ -774,614 +963,671 @@
                             resultElement.classList.add('bg-gray-50');
                         }, 850);
                     });
-            }
-        }
-        
-        document.getElementById('acresInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') convertAcres();
-        });
-        
-        // Geo Coordinates Widget
-        let map, marker;
-        
-        function initMap() {
-            map = L.map('map').setView([39.5, -98.35], 4);
-            // Use Google base layer as requested
-            L.tileLayer('http://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}', { attribution:"" }).addTo(map);
-            marker = L.marker([39.5, -98.35], { draggable: true, autoPan: true }).addTo(map);
-            
-            marker.on('dragend', function(e) {
-                const { lat, lng } = e.target.getLatLng();
-                updateCoordinates(lat, lng);
-            });
-            
-            setTimeout(()=>map.invalidateSize(), 100);
-        }
-        
-        window.addEventListener('DOMContentLoaded', () => {
-            initMap();
-            phoneInput.focus();
-        });
-        
-        async function searchAddress() {
-            const address = document.getElementById('addressInput').value;
-            if (!address) return;
-            
-            try {
-                const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`);
-                const data = await resp.json();
-                
-                if (data.length > 0) {
-                    const { lat, lon } = data[0];
-                    map.setView([lat, lon], 16);
-                    marker.setLatLng([lat, lon]);
-                    updateCoordinates(lat, lon);
                 }
-            } catch {}
-        }
-        
-        function updateCoordinates(lat, lng) {
-            document.getElementById('latValue').textContent = Number(lat).toFixed(6);
-            document.getElementById('lngValue').textContent = Number(lng).toFixed(6);
-        }
-        
-        function copyCoordinate(type) {
-            const value = document.getElementById(`${type}Value`).textContent;
-            const feedback = document.getElementById(`${type}Feedback`);
-            
-            navigator.clipboard.writeText(value).then(() => {
-                feedback.style.opacity = '1';
-                showToast(`${type === 'lat' ? "Latitude" : "Longitude"} copied!`);
-                setTimeout(() => feedback.style.opacity = '0', 1100);
+            }
+
+            document.getElementById('acresInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') convertAcres();
             });
-        }
-        
-        document.getElementById('addressInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') searchAddress();
-        });
-        
-        /* --- CRE Toolkit JS --- */
-        const SUCCESS_GREEN = '#22c55e';
-        const DANGER_RED = '#ef4444';
-        
-        function formatCurrency(val, digits = 0, raw = false) {
-            if (isNaN(val) || val === null) return '-';
-            let n = Math.abs(val);
-            let parts = n.toFixed(digits).split(".");
-            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-            let out = (val < 0 ? "-" : "") + parts[0];
-            if (digits > 0) out += "." + parts[1];
-            if (!raw) out = "$" + out;
-            return out;
-        }
-        
-        function parseCurrency(str) {
-            if (typeof str === "number") return str;
-            if (!str) return 0;
-            return parseFloat(String(str).replace(/[^0-9.-]+/g,"")) || 0;
-        }
-        
-        const formatPercent = (val, digits = 2) => {
-            if (isNaN(val) || val === null) return '-';
-            return new Intl.NumberFormat('en-US', { style: 'percent', minimumFractionDigits: digits, maximumFractionDigits: digits }).format(val);
-        }
-        
-        // --- Tabs Navigation ---
-        function setupTabs() {
-            document.querySelectorAll('.tab-btn').forEach(tab => {
-                tab.addEventListener('click', () => {
-                    // Remove active classes from all tabs
-                    document.querySelectorAll('.tab-btn').forEach(item => {
-                        item.classList.remove('active');
-                        item.classList.remove('text-primary-600');
-                        item.classList.add('text-gray-500');
-                    });
-                    
-                    // Add active class to clicked tab
-                    tab.classList.add('active');
-                    tab.classList.add('text-primary-600');
-                    tab.classList.remove('text-gray-500');
-                    
-                    // Hide all tab contents
-                    document.querySelectorAll('.tab-content').forEach(content => {
-                        content.classList.remove('active');
-                    });
-                    
-                    // Show selected tab content
-                    const tabId = tab.dataset.tab;
-                    document.getElementById(tabId).classList.add('active');
-                    
-                    // On tab switch: fix map size for leaflet
-                    if(tabId === "utilities-tab" && map) setTimeout(()=>map.invalidateSize(), 200);
+
+            // Geo Coordinates Widget
+            let map, marker;
+
+            function initMap() {
+                map = L.map('map').setView([39.5, -98.35], 4);
+                // Use Google base layer as requested
+                L.tileLayer('http://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}', { attribution:"" }).addTo(map);
+                marker = L.marker([39.5, -98.35], { draggable: true, autoPan: true }).addTo(map);
+
+                marker.on('dragend', function(e) {
+                    const { lat, lng } = e.target.getLatLng();
+                    updateCoordinates(lat, lng);
                 });
+
+                setTimeout(()=>map.invalidateSize(), 100);
+            }
+
+            window.addEventListener('DOMContentLoaded', () => {
+                initMap();
+                phoneInput.focus();
             });
-            
-            // Activate first tab by default
-            const firstTab = document.querySelector('.tab-btn');
-            if (firstTab) {
-                firstTab.click();
-            }
-        }
-        
-        // Initialize tabs when DOM is loaded
-        document.addEventListener('DOMContentLoaded', setupTabs);
-        
-        let chartInstances = {};
-        
-        // --- Date Paste Support ---
-        function parseClipboardDate(str) {
-            if (!str) return null;
-            let date;
-            date = new Date(str);
-            if (!isNaN(date.getTime())) return date;
-            
-            let m = str.match(/^([A-Za-z]+)\s+(\d{1,2}),\s*(\d{4})$/);
-            if (m) {
-                date = new Date(`${m[1]} ${m[2]}, ${m[3]}`);
-                if (!isNaN(date.getTime())) return date;
-            }
-            
-            m = str.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-            if (m) {
-                date = new Date(`${m[1]}-${m[2]}-${m[3]}`);
-                if (!isNaN(date.getTime())) return date;
-            }
-            
-            m = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-            if (m) {
-                date = new Date(`${m[3]}-${m[1].padStart(2,'0')}-${m[2].padStart(2,'0')}`);
-                if (!isNaN(date.getTime())) return date;
-            }
-            
-            return null;
-        }
-        
-        function dateToYMD(date) {
-            return date.toISOString().slice(0,10);
-        }
-        
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('input[type="date"]').forEach(dateInput => {
-                dateInput.addEventListener('paste', function(e) {
-                    let text = (e.clipboardData || window.clipboardData).getData('text');
-                    let parsed = parseClipboardDate(text);
-                    if (parsed) {
-                        e.preventDefault();
-                        this.value = dateToYMD(parsed);
-                        this.dispatchEvent(new Event('input', {bubbles:true}));
+
+            async function searchAddress() {
+                const address = document.getElementById('addressInput').value;
+                if (!address) return;
+
+                try {
+                    const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`);
+                    const data = await resp.json();
+
+                    if (data.length > 0) {
+                        const { lat, lon } = data[0];
+                        map.setView([lat, lon], 16);
+                        marker.setLatLng([lat, lon]);
+                        updateCoordinates(lat, lon);
                     }
+                } catch {}
+            }
+
+            function updateCoordinates(lat, lng) {
+                document.getElementById('latValue').textContent = Number(lat).toFixed(6);
+                document.getElementById('lngValue').textContent = Number(lng).toFixed(6);
+            }
+
+            function copyCoordinate(type) {
+                const value = document.getElementById(`${type}Value`).textContent;
+                const feedback = document.getElementById(`${type}Feedback`);
+
+                navigator.clipboard.writeText(value).then(() => {
+                    feedback.style.opacity = '1';
+                    showToast(`${type === 'lat' ? "Latitude" : "Longitude"} copied!`);
+                    setTimeout(() => feedback.style.opacity = '0', 1100);
+                });
+            }
+
+            document.getElementById('addressInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') searchAddress();
+            });
+
+            /* --- CRE Toolkit JS --- */
+            const SUCCESS_GREEN = '#22c55e';
+            const DANGER_RED = '#ef4444';
+
+            function formatCurrency(val, digits = 0, raw = false) {
+                if (isNaN(val) || val === null) return '-';
+                let n = Math.abs(val);
+                let parts = n.toFixed(digits).split(".");
+                parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                let out = (val < 0 ? "-" : "") + parts[0];
+                if (digits > 0) out += "." + parts[1];
+                if (!raw) out = "$" + out;
+                return out;
+            }
+
+            function parseCurrency(str) {
+                if (typeof str === "number") return str;
+                if (!str) return 0;
+                return parseFloat(String(str).replace(/[^0-9.-]+/g,"")) || 0;
+            }
+
+            const formatPercent = (val, digits = 2) => {
+                if (isNaN(val) || val === null) return '-';
+                return new Intl.NumberFormat('en-US', { style: 'percent', minimumFractionDigits: digits, maximumFractionDigits: digits }).format(val);
+            }
+
+            // --- Tabs Navigation ---
+            function setupTabs() {
+                document.querySelectorAll('.tab-btn').forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        // Remove active classes from all tabs
+                        document.querySelectorAll('.tab-btn').forEach(item => {
+                            item.classList.remove('active');
+                            item.classList.remove('text-primary-600');
+                            item.classList.add('text-gray-500');
+                        });
+
+                        // Add active class to clicked tab
+                        tab.classList.add('active');
+                        tab.classList.add('text-primary-600');
+                        tab.classList.remove('text-gray-500');
+
+                        // Hide all tab contents
+                        document.querySelectorAll('.tab-content').forEach(content => {
+                            content.classList.remove('active');
+                        });
+
+                        // Show selected tab content
+                        const tabId = tab.dataset.tab;
+                        document.getElementById(tabId).classList.add('active');
+
+                        // On tab switch: fix map size for leaflet
+                        if(tabId === "utilities-tab" && map) setTimeout(()=>map.invalidateSize(), 200);
+                    });
+                });
+
+                // Activate first tab by default
+                const firstTab = document.querySelector('.tab-btn');
+                if (firstTab) {
+                    firstTab.click();
+                }
+            }
+
+            // Initialize tabs when DOM is loaded
+            document.addEventListener('DOMContentLoaded', setupTabs);
+
+            let chartInstances = {};
+
+            // --- Date Paste Support ---
+            function parseClipboardDate(str) {
+                if (!str) return null;
+                let date;
+                date = new Date(str);
+                if (!isNaN(date.getTime())) return date;
+
+                let m = str.match(/^([A-Za-z]+)\s+(\d{1,2}),\s*(\d{4})$/);
+                if (m) {
+                    date = new Date(`${m[1]} ${m[2]}, ${m[3]}`);
+                    if (!isNaN(date.getTime())) return date;
+                }
+
+                m = str.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+                if (m) {
+                    date = new Date(`${m[1]}-${m[2]}-${m[3]}`);
+                    if (!isNaN(date.getTime())) return date;
+                }
+
+                m = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+                if (m) {
+                    date = new Date(`${m[3]}-${m[1].padStart(2,'0')}-${m[2].padStart(2,'0')}`);
+                    if (!isNaN(date.getTime())) return date;
+                }
+
+                return null;
+            }
+
+            function dateToYMD(date) {
+                return date.toISOString().slice(0,10);
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                document.querySelectorAll('input[type="date"]').forEach(dateInput => {
+                    dateInput.addEventListener('paste', function(e) {
+                        let text = (e.clipboardData || window.clipboardData).getData('text');
+                        let parsed = parseClipboardDate(text);
+                        if (parsed) {
+                            e.preventDefault();
+                            this.value = dateToYMD(parsed);
+                            this.dispatchEvent(new Event('input', {bubbles:true}));
+                        }
+                    });
                 });
             });
-        });
-        
-        // --- Currency Formatting for Inputs ---
-        function attachCurrencyFormat(input) {
-            input.addEventListener('blur', function() {
-                let n = parseCurrency(this.value);
-                this.value = n ? formatCurrency(n, 0, true) : "";
-            });
-            
-            input.addEventListener('focus', function() {
-                let n = parseCurrency(this.value);
-                this.value = n ? n : "";
-            });
-            
-            input.addEventListener('input', function() {
-                let raw = this.value.replace(/[^0-9.,-]/g,"");
-                raw = raw.replace(/,/g,"");
-                this.value = raw;
-            });
-            
-            input.addEventListener('paste', function(e) {
-                setTimeout(() => {
+
+            // --- Currency Formatting for Inputs ---
+            function attachCurrencyFormat(input) {
+                input.addEventListener('blur', function() {
                     let n = parseCurrency(this.value);
                     this.value = n ? formatCurrency(n, 0, true) : "";
-                }, 0);
-            });
-        }
-        
-        document.addEventListener('DOMContentLoaded', function () {
-            document.querySelectorAll('.input-currency').forEach(input => {
-                attachCurrencyFormat(input);
-                let n = parseCurrency(input.value);
-                input.value = n ? formatCurrency(n, 0, true) : "";
-            });
-            
-            // --- TAB 2: SELLER'S ANALYSIS ---
-            const saPurchasePrice = document.getElementById('sa-purchase-price');
-            const saPurchaseDate = document.getElementById('sa-purchase-date');
-            const saAnnualRent = document.getElementById('sa-annual-rent');
-            const saRentIncrease = document.getElementById('sa-rent-increase');
-            const saCalculateBtn = document.getElementById('sa-calculate-btn');
-            const saYearsHeldEl = document.getElementById('sa-years-held');
-            const saTotalCfEl = document.getElementById('sa-total-cf');
-            const saBasisEl = document.getElementById('sa-basis');
-            const saBreakEvenEl = document.getElementById('sa-break-even');
-            const saResultsContainer = document.getElementById('sa-results-container');
-            const saTableBody = document.getElementById('sa-table-body');
-            
-            saCalculateBtn.addEventListener('click', () => {
-                const purchasePrice = parseCurrency(saPurchasePrice.value);
-                const purchaseDate = new Date(saPurchaseDate.value);
-                let annualRent = parseCurrency(saAnnualRent.value);
-                const rentIncrease = parseFloat(saRentIncrease.value) / 100;
-                
-                if (isNaN(purchasePrice) || isNaN(purchaseDate.getTime()) || isNaN(annualRent)) {
-                    alert("Please fill in all seller analysis inputs correctly.");
-                    return;
-                }
-                
-                const today = new Date();
-                let yearsHeld = today.getFullYear() - purchaseDate.getFullYear();
-                const m = today.getMonth() - purchaseDate.getMonth();
-                
-                if (m < 0 || (m === 0 && today.getDate() < purchaseDate.getDate())) {
-                    yearsHeld--;
-                }
-                
-                let tableHtml = '';
-                let cumulativeCF = 0;
-                let chartLabels = ['Start'];
-                let chartData = [0];
-                
-                for (let i = 1; i <= yearsHeld; i++) {
-                    if (i > 1) {
-                        annualRent *= (1 + rentIncrease);
+                });
+
+                input.addEventListener('focus', function() {
+                    let n = parseCurrency(this.value);
+                    this.value = n ? n : "";
+                });
+
+                input.addEventListener('input', function() {
+                    let raw = this.value.replace(/[^0-9.,-]/g,"");
+                    raw = raw.replace(/,/g,"");
+                    this.value = raw;
+                });
+
+                input.addEventListener('paste', function(e) {
+                    setTimeout(() => {
+                        let n = parseCurrency(this.value);
+                        this.value = n ? formatCurrency(n, 0, true) : "";
+                    }, 0);
+                });
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                document.querySelectorAll('.input-currency').forEach(input => {
+                    attachCurrencyFormat(input);
+                    let n = parseCurrency(input.value);
+                    input.value = n ? formatCurrency(n, 0, true) : "";
+                });
+
+                // --- TAB 2: SELLER'S ANALYSIS ---
+                const saPurchasePrice = document.getElementById('sa-purchase-price');
+                const saPurchaseDate = document.getElementById('sa-purchase-date');
+                const saAnnualRent = document.getElementById('sa-annual-rent');
+                const saRentIncrease = document.getElementById('sa-rent-increase');
+                const saCalculateBtn = document.getElementById('sa-calculate-btn');
+                const saYearsHeldEl = document.getElementById('sa-years-held');
+                const saTotalCfEl = document.getElementById('sa-total-cf');
+                const saBasisEl = document.getElementById('sa-basis');
+                const saBreakEvenEl = document.getElementById('sa-break-even');
+                const saResultsContainer = document.getElementById('sa-results-container');
+                const saTableBody = document.getElementById('sa-table-body');
+
+                saCalculateBtn.addEventListener('click', () => {
+                    const purchasePrice = parseCurrency(saPurchasePrice.value);
+                    const purchaseDate = new Date(saPurchaseDate.value);
+                    let annualRent = parseCurrency(saAnnualRent.value);
+                    const rentIncrease = parseFloat(saRentIncrease.value) / 100;
+
+                    if (isNaN(purchasePrice) || isNaN(purchaseDate.getTime()) || isNaN(annualRent)) {
+                        alert("Please fill in all seller analysis inputs correctly.");
+                        return;
                     }
-                    
-                    cumulativeCF += annualRent;
-                    chartLabels.push(`Year ${i}`);
-                    chartData.push(cumulativeCF);
-                    
-                    tableHtml += `
+
+                    const today = new Date();
+                    let yearsHeld = today.getFullYear() - purchaseDate.getFullYear();
+                    const m = today.getMonth() - purchaseDate.getMonth();
+
+                    if (m < 0 || (m === 0 && today.getDate() < purchaseDate.getDate())) {
+                        yearsHeld--;
+                    }
+
+                    let tableHtml = '';
+                    let cumulativeCF = 0;
+                    let chartLabels = ['Start'];
+                    let chartData = [0];
+
+                    for (let i = 1; i <= yearsHeld; i++) {
+                        if (i > 1) {
+                            annualRent *= (1 + rentIncrease);
+                        }
+
+                        cumulativeCF += annualRent;
+                        chartLabels.push(`Year ${i}`);
+                        chartData.push(cumulativeCF);
+
+                        tableHtml += `
                         <tr class="${i % 2 === 0 ? 'bg-gray-50' : 'bg-white'}">
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${i}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatCurrency(annualRent)}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-success-600">${formatCurrency(annualRent)}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm ${cumulativeCF >= 0 ? 'text-success-600' : 'text-danger-600'}">${formatCurrency(cumulativeCF)}</td>
-                        </tr>
+            </tr>
                     `;
-                }
-                
-                const basis = purchasePrice - cumulativeCF;
-                const breakEven = Math.max(0, basis);
-                
-                saYearsHeldEl.textContent = `${yearsHeld} Years`;
-                saTotalCfEl.textContent = formatCurrency(cumulativeCF);
-                saTotalCfEl.className = `text-lg font-bold ${cumulativeCF >= 0 ? 'text-success-600' : 'text-danger-600'}`;
-                saBasisEl.textContent = formatCurrency(basis);
-                saBasisEl.className = `text-lg font-bold ${basis >= 0 ? 'text-success-600' : 'text-danger-600'}`;
-                saBreakEvenEl.textContent = formatCurrency(breakEven);
-                saBreakEvenEl.className = `text-lg font-bold ${breakEven >= 0 ? 'text-success-600' : 'text-danger-600'}`;
-                
-                saTableBody.innerHTML = tableHtml;
-                saResultsContainer.style.display = 'block';
-                
-                if (chartInstances.sellerAnalysis) chartInstances.sellerAnalysis.destroy();
-                
-                chartInstances.sellerAnalysis = new Chart(document.getElementById('sa-chart').getContext('2d'), {
-                    type: 'line',
-                    data: {
-                        labels: chartLabels,
-                        datasets: [{
-                            label: 'Cumulative Cash Flow',
-                            data: chartData,
-                            borderColor: SUCCESS_GREEN,
-                            backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                            fill: true,
-                            tension: 0.3,
-                            borderWidth: 2,
-                            pointBackgroundColor: '#fff',
-                            pointBorderColor: SUCCESS_GREEN,
-                            pointBorderWidth: 2,
-                            pointRadius: 4,
-                            pointHoverRadius: 6
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { 
-                            legend: { display: false },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        return formatCurrency(context.raw);
+                    }
+
+                    const basis = purchasePrice - cumulativeCF;
+                    const breakEven = Math.max(0, basis);
+
+                    saYearsHeldEl.textContent = `${yearsHeld} Years`;
+                    saTotalCfEl.textContent = formatCurrency(cumulativeCF);
+                    saTotalCfEl.className = `text-lg font-bold ${cumulativeCF >= 0 ? 'text-success-600' : 'text-danger-600'}`;
+                    saBasisEl.textContent = formatCurrency(basis);
+                    saBasisEl.className = `text-lg font-bold ${basis >= 0 ? 'text-success-600' : 'text-danger-600'}`;
+                    saBreakEvenEl.textContent = formatCurrency(breakEven);
+                    saBreakEvenEl.className = `text-lg font-bold ${breakEven >= 0 ? 'text-success-600' : 'text-danger-600'}`;
+
+                    saTableBody.innerHTML = tableHtml;
+                    saResultsContainer.style.display = 'block';
+
+                    if (chartInstances.sellerAnalysis) chartInstances.sellerAnalysis.destroy();
+
+                    chartInstances.sellerAnalysis = new Chart(document.getElementById('sa-chart').getContext('2d'), {
+                        type: 'line',
+                        data: {
+                            labels: chartLabels,
+                            datasets: [{
+                                label: 'Cumulative Cash Flow',
+                                data: chartData,
+                                borderColor: SUCCESS_GREEN,
+                                backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                                fill: true,
+                                tension: 0.3,
+                                borderWidth: 2,
+                                pointBackgroundColor: '#fff',
+                                pointBorderColor: SUCCESS_GREEN,
+                                pointBorderWidth: 2,
+                                pointRadius: 4,
+                                pointHoverRadius: 6
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return formatCurrency(context.raw);
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    ticks: {
+                                        callback: (val) => formatCurrency(val)
+                                    },
+                                    grid: {
+                                        color: 'rgba(0, 0, 0, 0.05)'
+                                    }
+                                },
+                                x: {
+                                    grid: {
+                                        display: false
                                     }
                                 }
                             }
-                        },
-                        scales: { 
-                            y: { 
-                                ticks: { 
-                                    callback: (val) => formatCurrency(val) 
-                                },
-                                grid: {
-                                    color: 'rgba(0, 0, 0, 0.05)'
-                                }
-                            },
-                            x: {
-                                grid: {
-                                    display: false
-                                }
-                            }
                         }
-                    }
+                    });
                 });
-            });
-            
-            // --- TAB 3: QUICK CALCULATORS ---
-            const qcStartDate = document.getElementById('qc-start-date');
-            const qcMonths = document.getElementById('qc-months');
-            const qcYears = document.getElementById('qc-years');
-            const qcEndDate = document.getElementById('qc-end-date');
-            const qcNoiCap = document.getElementById('qc-noi-cap');
-            const qcPriceCap = document.getElementById('qc-price-cap');
-            const qcCapRate = document.getElementById('qc-cap-rate');
-            const qcNoiPrice = document.getElementById('qc-noi-price');
-            const qcCapRatePrice = document.getElementById('qc-cap-rate-price');
-            const qcPrice = document.getElementById('qc-price');
-            
-            function calculateLeaseEnd() {
-                const startDateVal = qcStartDate.value;
-                if (!startDateVal) {
-                    qcEndDate.value = '';
-                    return;
+
+                // --- TAB 3: QUICK CALCULATORS ---
+                const qcStartDate = document.getElementById('qc-start-date');
+                const qcMonths = document.getElementById('qc-months');
+                const qcYears = document.getElementById('qc-years');
+                const qcEndDate = document.getElementById('qc-end-date');
+                const qcNoiCap = document.getElementById('qc-noi-cap');
+                const qcPriceCap = document.getElementById('qc-price-cap');
+                const qcCapRate = document.getElementById('qc-cap-rate');
+                const qcNoiPrice = document.getElementById('qc-noi-price');
+                const qcCapRatePrice = document.getElementById('qc-cap-rate-price');
+                const qcPrice = document.getElementById('qc-price');
+
+                function calculateLeaseEnd() {
+                    const startDateVal = qcStartDate.value;
+                    if (!startDateVal) {
+                        qcEndDate.value = '';
+                        return;
+                    }
+
+                    const startDate = new Date(startDateVal + "T00:00:00");
+                    const months = parseInt(qcMonths.value) || 0;
+                    const years = parseInt(qcYears.value) || 0;
+                    const totalMonths = months + (years * 12);
+
+                    if (totalMonths === 0) {
+                        qcEndDate.value = '';
+                        return;
+                    }
+
+                    startDate.setMonth(startDate.getMonth() + totalMonths);
+                    qcEndDate.value = startDate.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
                 }
-                
-                const startDate = new Date(startDateVal + "T00:00:00");
-                const months = parseInt(qcMonths.value) || 0;
-                const years = parseInt(qcYears.value) || 0;
-                const totalMonths = months + (years * 12);
-                
-                if (totalMonths === 0) {
-                    qcEndDate.value = '';
-                    return;
+
+                qcMonths.addEventListener('input', () => {
+                    qcYears.value = '';
+                    calculateLeaseEnd();
+                });
+
+                qcYears.addEventListener('input', () => {
+                    qcMonths.value = '';
+                    calculateLeaseEnd();
+                });
+
+                qcStartDate.addEventListener('input', calculateLeaseEnd);
+
+                [qcNoiCap, qcPriceCap, qcNoiPrice].forEach(input => attachCurrencyFormat(input));
+
+                function calculateCapRate() {
+                    const noi = parseCurrency(qcNoiCap.value);
+                    const price = parseCurrency(qcPriceCap.value);
+
+                    if (noi > 0 && price > 0) {
+                        const capRate = (noi / price);
+                        qcCapRate.value = formatPercent(capRate, 2);
+                    } else {
+                        qcCapRate.value = '';
+                    }
                 }
-                
-                startDate.setMonth(startDate.getMonth() + totalMonths);
-                qcEndDate.value = startDate.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
-            }
-            
-            qcMonths.addEventListener('input', () => { 
-                qcYears.value = ''; 
-                calculateLeaseEnd(); 
-            });
-            
-            qcYears.addEventListener('input', () => { 
-                qcMonths.value = ''; 
-                calculateLeaseEnd(); 
-            });
-            
-            qcStartDate.addEventListener('input', calculateLeaseEnd);
-            
-            [qcNoiCap, qcPriceCap, qcNoiPrice].forEach(input => attachCurrencyFormat(input));
-            
-            function calculateCapRate() {
-                const noi = parseCurrency(qcNoiCap.value);
-                const price = parseCurrency(qcPriceCap.value);
-                
-                if (noi > 0 && price > 0) {
-                    const capRate = (noi / price);
-                    qcCapRate.value = formatPercent(capRate, 2);
-                } else {
-                    qcCapRate.value = '';
+
+                [qcNoiCap, qcPriceCap].forEach(el => el.addEventListener('input', calculateCapRate));
+
+                function calculatePrice() {
+                    const noi = parseCurrency(qcNoiPrice.value);
+                    const capRate = parseFloat(qcCapRatePrice.value) / 100;
+
+                    if (noi > 0 && capRate > 0) {
+                        const price = noi / capRate;
+                        qcPrice.value = formatCurrency(price);
+                    } else {
+                        qcPrice.value = '';
+                    }
                 }
-            }
-            
-            [qcNoiCap, qcPriceCap].forEach(el => el.addEventListener('input', calculateCapRate));
-            
-            function calculatePrice() {
-                const noi = parseCurrency(qcNoiPrice.value);
-                const capRate = parseFloat(qcCapRatePrice.value) / 100;
-                
-                if (noi > 0 && capRate > 0) {
-                    const price = noi / capRate;
-                    qcPrice.value = formatCurrency(price);
-                } else {
-                    qcPrice.value = '';
-                }
-            }
-            
-            [qcNoiPrice, qcCapRatePrice].forEach(el => el.addEventListener('input', calculatePrice));
-            
-            // --- TAB 4: INVESTMENT ANALYSIS ---
-            const iaInvestment = document.getElementById('ia-investment');
-            const cashFlowInputsContainer = document.getElementById('cashFlowInputsContainer');
-            const addCashFlowBtn = document.getElementById('addCashFlowBtn');
-            const iaDiscountRate = document.getElementById('ia-discount-rate');
-            const iaReinvestRate = document.getElementById('ia-reinvest-rate');
-            const iaFinanceRate = document.getElementById('ia-finance-rate');
-            const iaTotalCash = document.getElementById('ia-total-cash');
-            const iaCfbt = document.getElementById('ia-cfbt');
-            const iaNpvResult = document.getElementById('ia-npv-result');
-            const iaMirrResult = document.getElementById('ia-mirr-result');
-            const iaIrrResult = document.getElementById('ia-irr-result');
-            const iaCocResult = document.getElementById('ia-coc-result');
-            const iaTableBody = document.getElementById('ia-table-body');
-            
-            let cashFlowCounter = 0;
-            
-            function addCashFlowInput(value = '') {
-                cashFlowCounter++;
-                const div = document.createElement('div');
-                div.className = 'flex items-center gap-3';
-                
-                div.innerHTML = `
+
+                [qcNoiPrice, qcCapRatePrice].forEach(el => el.addEventListener('input', calculatePrice));
+
+                // --- TAB 4: INVESTMENT ANALYSIS ---
+                const iaInvestment = document.getElementById('ia-investment');
+                const cashFlowInputsContainer = document.getElementById('cashFlowInputsContainer');
+                const addCashFlowBtn = document.getElementById('addCashFlowBtn');
+                const iaDiscountRate = document.getElementById('ia-discount-rate');
+                const iaReinvestRate = document.getElementById('ia-reinvest-rate');
+                const iaFinanceRate = document.getElementById('ia-finance-rate');
+                const iaTotalCash = document.getElementById('ia-total-cash');
+                const iaCfbt = document.getElementById('ia-cfbt');
+                const iaNpvResult = document.getElementById('ia-npv-result');
+                const iaMirrResult = document.getElementById('ia-mirr-result');
+                const iaIrrResult = document.getElementById('ia-irr-result');
+                const iaCocResult = document.getElementById('ia-coc-result');
+                const iaTableBody = document.getElementById('ia-table-body');
+
+                let cashFlowCounter = 0;
+
+                function addCashFlowInput(value = '') {
+                    cashFlowCounter++;
+                    const div = document.createElement('div');
+                    div.className = 'flex items-center gap-3';
+
+                    div.innerHTML = `
                     <label for="cf-${cashFlowCounter}" class="text-sm font-medium text-gray-700 flex-shrink-0">Year ${cashFlowInputsContainer.children.length + 1} CF</label>
                     <input type="text" inputmode="decimal" class="cash-flow-input input-currency flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500" id="cf-${cashFlowCounter}" placeholder="20,000" value="${formatCurrency(parseCurrency(value),0,true)}">
                     <button type="button" class="remove-cf-btn bg-danger-600 hover:bg-danger-700 text-white font-bold w-6 h-6 rounded-full flex items-center justify-center transition duration-200" title="Remove">×</button>
                 `;
-                
-                let input = div.querySelector('input');
-                attachCurrencyFormat(input);
-                cashFlowInputsContainer.appendChild(div);
-                
-                div.querySelector('.remove-cf-btn').addEventListener('click', () => {
-                    div.remove();
-                    updateCashFlowLabels();
+
+                    let input = div.querySelector('input');
+                    attachCurrencyFormat(input);
+                    cashFlowInputsContainer.appendChild(div);
+
+                    div.querySelector('.remove-cf-btn').addEventListener('click', () => {
+                        div.remove();
+                        updateCashFlowLabels();
+                        recalculateInvestmentAnalysis();
+                    });
+
+                    input.addEventListener('input', recalculateInvestmentAnalysis);
+                }
+
+                function updateCashFlowLabels() {
+                    const labels = cashFlowInputsContainer.querySelectorAll('label');
+                    labels.forEach((label, index) => {
+                        label.textContent = `Year ${index + 1} CF`;
+                    });
+                }
+
+                addCashFlowBtn.addEventListener('click', () => {
+                    addCashFlowInput();
                     recalculateInvestmentAnalysis();
                 });
-                
-                input.addEventListener('input', recalculateInvestmentAnalysis);
-            }
-            
-            function updateCashFlowLabels() {
-                const labels = cashFlowInputsContainer.querySelectorAll('label');
-                labels.forEach((label, index) => {
-                    label.textContent = `Year ${index + 1} CF`;
-                });
-            }
-            
-            addCashFlowBtn.addEventListener('click', () => {
-                addCashFlowInput();
-                recalculateInvestmentAnalysis();
-            });
-            
-            // Add initial cash flow inputs
-            [20000, 22000, 24000, 26000, 150000].forEach(cf => addCashFlowInput(cf));
-            
-            function getCashFlows() {
-                const initialInvestment = parseCurrency(iaInvestment.value) || 0;
-                const subsequentFlows = Array.from(document.querySelectorAll('.cash-flow-input')).map(input => parseCurrency(input.value) || 0);
-                return [initialInvestment, ...subsequentFlows];
-            }
-            
-            function calculateNPV(cashFlows, discountRate) {
-                if(isNaN(discountRate)) return 0;
-                let npv = 0;
-                
-                for (let t = 0; t < cashFlows.length; t++) {
-                    npv += cashFlows[t] / Math.pow(1 + discountRate, t);
+
+                // Add initial cash flow inputs
+                [20000, 22000, 24000, 26000, 150000].forEach(cf => addCashFlowInput(cf));
+
+                function getCashFlows() {
+                    const initialInvestment = parseCurrency(iaInvestment.value) || 0;
+                    const subsequentFlows = Array.from(document.querySelectorAll('.cash-flow-input')).map(input => parseCurrency(input.value) || 0);
+                    return [initialInvestment, ...subsequentFlows];
                 }
-                
-                return npv;
-            }
-            
-            function calculateIRR(cashFlows, maxIterations = 100, tolerance = 1e-7) {
-                if (cashFlows.length === 0 || cashFlows[0] >= 0) return null;
-                
-                let lowerBound = -0.99;
-                let upperBound = 1.0;
-                let npvAtLower = calculateNPV(cashFlows, lowerBound);
-                let npvAtUpper = calculateNPV(cashFlows, upperBound);
-                
-                for(let i = 0; i < 10; i++){
-                    if(npvAtLower * npvAtUpper < 0) break;
-                    upperBound += 1.0;
-                    npvAtUpper = calculateNPV(cashFlows, upperBound);
-                }
-                
-                if(npvAtLower * npvAtUpper > 0) return null; // No bracket found
-                
-                let midRate, npv;
-                
-                for (let i = 0; i < maxIterations; i++) {
-                    midRate = (lowerBound + upperBound) / 2;
-                    npv = calculateNPV(cashFlows, midRate);
-                    
-                    if (Math.abs(npv) < tolerance) {
-                        return midRate;
+
+                function calculateNPV(cashFlows, discountRate) {
+                    if(isNaN(discountRate)) return 0;
+                    let npv = 0;
+
+                    for (let t = 0; t < cashFlows.length; t++) {
+                        npv += cashFlows[t] / Math.pow(1 + discountRate, t);
                     }
-                    
-                    if (calculateNPV(cashFlows, lowerBound) * npv < 0) {
-                        upperBound = midRate;
+
+                    return npv;
+                }
+
+                function calculateIRR(cashFlows, maxIterations = 100, tolerance = 1e-7) {
+                    if (cashFlows.length === 0 || cashFlows[0] >= 0) return null;
+
+                    let lowerBound = -0.99;
+                    let upperBound = 1.0;
+                    let npvAtLower = calculateNPV(cashFlows, lowerBound);
+                    let npvAtUpper = calculateNPV(cashFlows, upperBound);
+
+                    for(let i = 0; i < 10; i++){
+                        if(npvAtLower * npvAtUpper < 0) break;
+                        upperBound += 1.0;
+                        npvAtUpper = calculateNPV(cashFlows, upperBound);
+                    }
+
+                    if(npvAtLower * npvAtUpper > 0) return null; // No bracket found
+
+                    let midRate, npv;
+
+                    for (let i = 0; i < maxIterations; i++) {
+                        midRate = (lowerBound + upperBound) / 2;
+                        npv = calculateNPV(cashFlows, midRate);
+
+                        if (Math.abs(npv) < tolerance) {
+                            return midRate;
+                        }
+
+                        if (calculateNPV(cashFlows, lowerBound) * npv < 0) {
+                            upperBound = midRate;
+                        } else {
+                            lowerBound = midRate;
+                        }
+                    }
+
+                    return null; // Did not converge
+                }
+
+                function calculateMIRR(cashFlows, financeRate, reinvestRate) {
+                    if (cashFlows.length < 2 || isNaN(financeRate) || isNaN(reinvestRate)) return null;
+
+                    const n = cashFlows.length - 1;
+                    let fv_pos_flows = 0;
+                    let pv_neg_flows = 0;
+
+                    for (let t = 0; t < cashFlows.length; t++) {
+                        if (cashFlows[t] > 0) {
+                            fv_pos_flows += cashFlows[t] * Math.pow(1 + reinvestRate, n - t);
+                        } else {
+                            pv_neg_flows += cashFlows[t] / Math.pow(1 + financeRate, t);
+                        }
+                    }
+
+                    pv_neg_flows = Math.abs(pv_neg_flows);
+                    if (pv_neg_flows === 0) return null;
+
+                    return Math.pow(fv_pos_flows / pv_neg_flows, 1 / n) - 1;
+                }
+                
+                
+
+                function recalculateInvestmentAnalysis() {
+                    const cashFlows = getCashFlows();
+                    const discountRate = parseFloat(iaDiscountRate.value) / 100;
+                    const reinvestRate = parseFloat(iaReinvestRate.value) / 100;
+                    const financeRate = parseFloat(iaFinanceRate.value) / 100;
+                    const totalCash = parseCurrency(iaTotalCash.value);
+                    const firstYearCF = parseCurrency(iaCfbt.value);
+
+                    // NPV
+                    const npv = calculateNPV(cashFlows, discountRate);
+                    iaNpvResult.textContent = formatCurrency(npv);
+                    iaNpvResult.className = `text-lg font-bold ${npv >= 0 ? 'text-success-600' : 'text-danger-600'}`;
+
+                    // IRR
+                    const irr = calculateIRR(cashFlows);
+                    iaIrrResult.textContent = irr !== null ? formatPercent(irr) : 'N/A';
+                    iaIrrResult.className = `text-lg font-bold ${irr !== null && irr >= 0 ? 'text-success-600' : 'text-danger-600'}`;
+
+                    // MIRR
+                    const mirr = calculateMIRR(cashFlows, financeRate, reinvestRate);
+                    iaMirrResult.textContent = mirr !== null ? formatPercent(mirr) : 'N/A';
+                    iaMirrResult.className = `text-lg font-bold ${mirr !== null && mirr >= 0 ? 'text-success-600' : 'text-danger-600'}`;
+
+                    // Cash on Cash
+                    if (totalCash > 0 && !isNaN(firstYearCF)) {
+                        const coc = firstYearCF / totalCash;
+                        iaCocResult.textContent = formatPercent(coc);
+                        iaCocResult.className = `text-lg font-bold ${coc >= 0 ? 'text-success-600' : 'text-danger-600'}`;
                     } else {
-                        lowerBound = midRate;
+                        iaCocResult.textContent = '-';
+                        iaCocResult.className = 'text-lg font-bold';
                     }
-                }
-                
-                return null; // Did not converge
-            }
-            
-            function calculateMIRR(cashFlows, financeRate, reinvestRate) {
-                if (cashFlows.length < 2 || isNaN(financeRate) || isNaN(reinvestRate)) return null;
-                
-                const n = cashFlows.length - 1;
-                let fv_pos_flows = 0;
-                let pv_neg_flows = 0;
-                
-                for (let t = 0; t < cashFlows.length; t++) {
-                    if (cashFlows[t] > 0) {
-                        fv_pos_flows += cashFlows[t] * Math.pow(1 + reinvestRate, n - t);
-                    } else {
-                        pv_neg_flows += cashFlows[t] / Math.pow(1 + financeRate, t);
-                    }
-                }
-                
-                pv_neg_flows = Math.abs(pv_neg_flows);
-                if (pv_neg_flows === 0) return null;
-                
-                return Math.pow(fv_pos_flows / pv_neg_flows, 1 / n) - 1;
-            }
-            
-            function recalculateInvestmentAnalysis() {
-                const cashFlows = getCashFlows();
-                const discountRate = parseFloat(iaDiscountRate.value) / 100;
-                const reinvestRate = parseFloat(iaReinvestRate.value) / 100;
-                const financeRate = parseFloat(iaFinanceRate.value) / 100;
-                const totalCash = parseCurrency(iaTotalCash.value);
-                const firstYearCF = parseCurrency(iaCfbt.value);
-                
-                // NPV
-                const npv = calculateNPV(cashFlows, discountRate);
-                iaNpvResult.textContent = formatCurrency(npv);
-                iaNpvResult.className = `text-lg font-bold ${npv >= 0 ? 'text-success-600' : 'text-danger-600'}`;
-                
-                // IRR
-                const irr = calculateIRR(cashFlows);
-                iaIrrResult.textContent = irr !== null ? formatPercent(irr) : 'N/A';
-                iaIrrResult.className = `text-lg font-bold ${irr !== null && irr >= 0 ? 'text-success-600' : 'text-danger-600'}`;
-                
-                // MIRR
-                const mirr = calculateMIRR(cashFlows, financeRate, reinvestRate);
-                iaMirrResult.textContent = mirr !== null ? formatPercent(mirr) : 'N/A';
-                iaMirrResult.className = `text-lg font-bold ${mirr !== null && mirr >= 0 ? 'text-success-600' : 'text-danger-600'}`;
-                
-                // Cash on Cash
-                if (totalCash > 0 && !isNaN(firstYearCF)) {
-                    const coc = firstYearCF / totalCash;
-                    iaCocResult.textContent = formatPercent(coc);
-                    iaCocResult.className = `text-lg font-bold ${coc >= 0 ? 'text-success-600' : 'text-danger-600'}`;
-                } else {
-                    iaCocResult.textContent = '-';
-                    iaCocResult.className = 'text-lg font-bold';
-                }
-                
-                // Update table
-                let tableHtml = '';
-                
-                if (!isNaN(discountRate)) {
-                    cashFlows.forEach((cf, year) => {
-                        const pv = cf / Math.pow(1 + discountRate, year);
-                        
-                        tableHtml += `
+
+                    // Update table
+                    let tableHtml = '';
+
+                    if (!isNaN(discountRate)) {
+                        cashFlows.forEach((cf, year) => {
+                            const pv = cf / Math.pow(1 + discountRate, year);
+
+                            tableHtml += `
                             <tr class="${year % 2 === 0 ? 'bg-gray-50' : 'bg-white'}">
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${year}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm ${cf >= 0 ? 'text-success-600' : 'text-danger-600'}">${formatCurrency(cf, 2)}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatCurrency(pv, 2)}</td>
-                            </tr>
+            </tr>
                         `;
-                    });
+                        });
+                    }
+
+                    iaTableBody.innerHTML = tableHtml;
                 }
-                
-                iaTableBody.innerHTML = tableHtml;
-            }
-            
-            [
-                iaInvestment, iaDiscountRate, iaReinvestRate, iaFinanceRate, iaTotalCash, iaCfbt
-            ].forEach(el => {
-                el.addEventListener('input', recalculateInvestmentAnalysis);
+
+                [
+                    iaInvestment, iaDiscountRate, iaReinvestRate, iaFinanceRate, iaTotalCash, iaCfbt
+                ].forEach(el => {
+                    el.addEventListener('input', recalculateInvestmentAnalysis);
+                });
+
+                [iaInvestment, iaTotalCash, iaCfbt].forEach(input => {
+                    attachCurrencyFormat(input);
+                    let n = parseCurrency(input.value);
+                    input.value = n ? formatCurrency(n, 0, true) : "";
+                });
+
+                recalculateInvestmentAnalysis();
             });
             
-            [iaInvestment, iaTotalCash, iaCfbt].forEach(input => {
-                attachCurrencyFormat(input);
-                let n = parseCurrency(input.value);
-                input.value = n ? formatCurrency(n, 0, true) : "";
+            document.addEventListener('DOMContentLoaded', function() {
+                // ------- Exchange Deadline Calculator Dropdowns -------
+                const monthNames = [
+                    "January","February","March","April","May","June",
+                    "July","August","September","October","November","December"
+                ];
+                const exMonth = document.getElementById('ex-month');
+                const exDay = document.getElementById('ex-day');
+                const exYear = document.getElementById('ex-year');
+                // Fill months
+                monthNames.forEach((m, i) => {
+                    let opt = document.createElement('option');
+                    opt.value = i;
+                    opt.textContent = m;
+                    exMonth.appendChild(opt);
+                });
+                // Fill days
+                for (let d=1; d<=31; d++) {
+                    let opt = document.createElement('option');
+                    opt.value = d;
+                    opt.textContent = d;
+                    exDay.appendChild(opt);
+                }
+                // Fill years: current year +/- 2
+                const nowY = new Date().getFullYear();
+                for (let y=nowY-2; y<=nowY+2; y++) {
+                    let opt = document.createElement('option');
+                    opt.value = y;
+                    opt.textContent = y;
+                    exYear.appendChild(opt);
+                }
+                // Set defaults to today
+                const today = new Date();
+                exMonth.value = today.getMonth();
+                exDay.value = today.getDate();
+                exYear.value = today.getFullYear();
+
+                document.getElementById('ex-calc-btn').addEventListener('click', function() {
+                    const m = parseInt(exMonth.value,10);
+                    const d = parseInt(exDay.value,10);
+                    const y = parseInt(exYear.value,10);
+                    const date = new Date(y, m, d);
+                    if (isNaN(date.getTime())) {
+                        document.getElementById('ex-45-result').textContent = "Invalid date";
+                        document.getElementById('ex-180-result').textContent = "Invalid date";
+                        return;
+                    }
+                    // 45 & 180 days
+                    const identDate = new Date(date.getTime() + 45*24*60*60*1000);
+                    const exchDate = new Date(date.getTime() + 180*24*60*60*1000);
+                    document.getElementById('ex-45-result').textContent = identDate.toLocaleDateString();
+                    document.getElementById('ex-180-result').textContent = exchDate.toLocaleDateString();
+                });
             });
-            
-            recalculateInvestmentAnalysis();
-        });
-    </script>
-</body>
+        </script>
+    </body>
 </html>
