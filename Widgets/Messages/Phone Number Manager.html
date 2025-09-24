@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phone Number Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+    <style>
+        /* --- General Styles --- */
+        :root {
+            --brand-color: #3498db;
+            --brand-color-dark: #2980b9;
+            --border-color: #e0e6ed;
+            --text-light: #6b7280;
+            --text-dark: #2c3e50;
+            --bg-light: #f8f9fa;
+            --bg-widget: #ffffff;
+            --btn-bg: #f8f9fa;
+            --btn-bg-hover: #f1f3f5;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 16px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        #phone-widget-container {
+            background-color: var(--bg-widget);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            padding: 16px;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-shrink: 0;
+        }
+        .header h2 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        .header .icon {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+        .info-box {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        /* --- Phone Widget Specific Styles --- */
+        .phone-cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 8px;
+        }
+        .phone-card {
+            background-color: #f8f9fa;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+        .phone-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        .phone-number {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            flex: 1;
+        }
+        .phone-link {
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+            text-decoration: none;
+        }
+        .phone-note {
+            color: #6b7280;
+            font-size: 11px;
+        }
+        .phone-note p {
+            margin: 0;
+        }
+        .phone-actions {
+            display: flex;
+            gap: 4px;
+        }
+        .phone-action-btn {
+            background-color: #fff;
+            border: 1px solid #e1e5e9;
+            border-radius: 4px;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .phone-action-btn:hover {
+            background-color: #e9ecef;
+            transform: translateY(-1px);
+        }
+        .phone-action-btn a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .action-icon {
+            width: 16px;
+            height: 16px;
+            object-fit: contain;
+        }
+        .wrong-phone {
+            background-color: #fee2e2;
+            border-color: #fecaca;
+        }
+        .wrong-phone-label {
+            color: #b91c1c;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .no-data-msg {
+            color: #6b7280;
+            font-style: italic;
+            text-align: center;
+            padding: 16px;
+            grid-column: 1 / -1;
+        }
+
+        /* Inline dialer styles */
+        .dialer-container {
+            border-top: 1px solid #e5e7eb;
+            padding-top: 8px;
+            margin-top: 8px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .dialer-input {
+            flex-grow: 1;
+            padding: 6px 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 14px;
+            background: #fff;
+        }
+        .dialer-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+        .dialer-actions {
+            display: flex;
+            gap: 4px;
+        }
+        .dialer-btn {
+            width: 32px;
+            height: 32px;
+            border: 1px solid #e1e5e9;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        .dialer-btn:hover {
+            background-color: #f3f4f6;
+            transform: translateY(-1px);
+        }
+        .dialer-btn img {
+            width: 18px;
+            height: 18px;
+            object-fit: contain;
+        }
+
+        /* Check Potential Phone Section */
+        .check-container {
+            border-top: 1px solid #e5e7eb;
+            padding-top: 8px;
+            margin-top: 8px;
+        }
+        .check-container h3 {
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+        .check-input-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .check-input-group input {
+            flex: 1 1 150px;
+        }
+        .check-btn {
+            padding: 6px 12px;
+            background-color: var(--brand-color);
+            color: white;
+            font-weight: 500;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+        .check-btn:hover {
+            background-color: var(--brand-color-dark);
+        }
+        .result-box {
+            background-color: #f8f9fa;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 8px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin-top: 8px;
+            min-height: 40px;
+        }
+        .add-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .add-btn {
+            padding: 4px 8px;
+            background-color: var(--brand-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .add-btn:hover {
+            background-color: var(--brand-color-dark);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .phone-cards-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="phone-widget-container">
+        <div class="header">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M2 3.5A1.5 1.5 0 013.5 2h1.148a1.5 1.5 0 011.465 1.175l.716 3.223a1.5 1.5 0 01-1.052 1.767l-.933.267c-.41.117-.643.555-.48.95a11.542 11.542 0 006.254 6.254c.395.163.833-.07.95-.48l.267-.933a1.5 1.5 0 011.767-1.052l3.223.716A1.5 1.5 0 0118 15.352V16.5a1.5 1.5 0 01-1.5 1.5h-1.528a13.528 13.528 0 01-11.472-11.472H2A1.5 1.5 0 012 3.5z" clip-rule="evenodd" />
+            </svg>
+            <h2>Phone Numbers</h2>
+        </div>
+        <div id="phone-container" class="phone-cards-container">
+            <div class="no-data-msg">Please select a record to see phone numbers.</div>
+        </div>
+
+        <!-- Inline dialer -->
+        <div class="dialer-container">
+            <input type="text" id="dialer-input" class="dialer-input" placeholder="Enter phone number...">
+            <div class="dialer-actions">
+                <button class="dialer-btn" id="dialer-webex-btn" title="Call with Webex">
+                    <img src="https://img.icons8.com/fluent/512/webex.png" alt="Webex">
+                </button>
+                <button class="dialer-btn" id="dialer-tel-btn" title="Call with Phone Link">
+                    <img src="https://static.wikia.nocookie.net/logopedia/images/b/b2/Microsoft_Phone_Link_%282022%29.svg" alt="Phone Link">
+                </button>
+                <button class="dialer-btn" id="dialer-sms-btn" title="Message with SMS">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/IMessage_logo.svg/1024px-IMessage_logo.svg.png" alt="SMS">
+                </button>
+            </div>
+        </div>
+
+        <!-- Check Potential Phone -->
+        <div class="check-container">
+            <h3>Check Potential Phone</h3>
+            <div class="check-input-group">
+                <input type="text" id="check-phone" class="dialer-input" placeholder="Enter phone number...">
+                <input type="text" id="check-note" class="dialer-input" placeholder="Optional note...">
+                <button id="check-btn" class="check-btn">Check</button>
+            </div>
+            <div id="check-result" class="result-box"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- SHARED ELEMENTS & STATE ---
+            let g_currentOwnerRecord = null;
+            const PHONE_COLUMN_KEYS = ['Phone', 'Phone_2', 'Phone_3', 'Phone_4'];
+            const PHONE_FIELDS = [
+                { phone: 'Phone', notes: 'Phone_1_Notes' },
+                { phone: 'Phone_2', notes: 'Phone_2_Notes' },
+                { phone: 'Phone_3', notes: 'Phone_3_Notes' },
+                { phone: 'Phone_4', notes: 'Phone_4_Notes' }
+            ];
+
+            // --- PHONE WIDGET ELEMENTS ---
+            const PHONE_ELS = {
+                container: document.getElementById('phone-container'),
+            };
+
+            // Dialer elements
+            const DIALER = {
+                input: document.getElementById('dialer-input'),
+                webexBtn: document.getElementById('dialer-webex-btn'),
+                telBtn: document.getElementById('dialer-tel-btn'),
+                smsBtn: document.getElementById('dialer-sms-btn'),
+            };
+
+            // Check elements
+            const CHECK = {
+                phoneInput: document.getElementById('check-phone'),
+                noteInput: document.getElementById('check-note'),
+                btn: document.getElementById('check-btn'),
+                result: document.getElementById('check-result'),
+            };
+
+            // --- HELPER FUNCTIONS ---
+            const sanitizePhone = (phone) => (phone && typeof phone === 'string') ? phone.replace(/\D/g, '') : '';
+            function formatPhoneNumber(phoneStr) {
+                if (!phoneStr) return '';
+                const cleaned = ('' + phoneStr).replace(/\D/g, '');
+                const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+                if (match) {
+                    return `(${match[1]}) ${match[2]}-${match[3]}`;
+                }
+                return phoneStr;
+            }
+            function parseWrongPhones(str) {
+                if (!str) return [];
+                const items = str.split(';').map(s => s.trim()).filter(s => s);
+                return items.map(item => {
+                    const parenIndex = item.lastIndexOf(' (');
+                    let number, note;
+                    if (parenIndex !== -1 && item.endsWith(')')) {
+                        number = item.substring(0, parenIndex).trim();
+                        note = item.substring(parenIndex + 2, item.length - 1).trim();
+                    } else {
+                        number = item;
+                        note = '';
+                    }
+                    return {number, note};
+                });
+            }
+
+            // --- RENDER FUNCTIONS ---
+            function renderPhoneCard(phoneVal, notesVal, isWrong, field = null) {
+                const formattedPhone = formatPhoneNumber(phoneVal);
+                const formattedPhoneDigits = sanitizePhone(phoneVal);
+                const notesDisplay = notesVal ? `<div class="phone-note">${marked.parseInline(notesVal)}</div>` : '';
+                let actions = '';
+                if (isWrong) {
+                    actions = `
+                        <div class="phone-actions">
+                            <button class="phone-action-btn remove-wrong" data-number="${phoneVal}" data-note="${notesVal || ''}" title="Remove">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="action-icon">
+                                    <path d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"/>
+                                </svg>
+                            </button>
+                        </div>`;
+                } else {
+                    actions = `
+                        <div class="phone-actions">
+                            <button class="phone-action-btn" title="Call with Webex">
+                                <a href="sip:${formattedPhoneDigits}">
+                                    <img src="https://img.icons8.com/fluent/512/webex.png" alt="Webex" class="action-icon">
+                                </a>
+                            </button>
+                            <button class="phone-action-btn" title="Call with Phone Link">
+                                <a href="tel:${formattedPhoneDigits}">
+                                    <img src="https://static.wikia.nocookie.net/logopedia/images/b/b2/Microsoft_Phone_Link_%282022%29.svg" alt="Phone Link" class="action-icon">
+                                </a>
+                            </button>
+                            <button class="phone-action-btn" title="Message with SMS">
+                                <a href="sms:${formattedPhoneDigits}">
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/IMessage_logo.svg/1024px-IMessage_logo.svg.png" alt="SMS" class="action-icon">
+                                </a>
+                            </button>`;
+                    if (field) {
+                        actions += `
+                            <button class="phone-action-btn mark-wrong" data-field="${field}" title="Mark as Wrong">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="action-icon">
+                                    <path d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"/>
+                                </svg>
+                            </button>`;
+                    }
+                    actions += `</div>`;
+                }
+                const cardClass = isWrong ? 'phone-card wrong-phone' : 'phone-card';
+                const labelClass = isWrong ? 'wrong-phone-label' : 'phone-link';
+                const labelContent = isWrong ? `${formattedPhone}${notesVal ? ` (${notesVal})` : ''}` : formattedPhone;
+                const link = isWrong ? `<span class="${labelClass}">${labelContent}</span>` : `<a href="tel:${formattedPhoneDigits}" class="${labelClass}">${labelContent}</a>`;
+                return `
+                    <div class="${cardClass}">
+                        <div class="phone-number">
+                            ${link}
+                            ${isWrong ? '' : notesDisplay}
+                        </div>
+                        ${actions}
+                    </div>`;
+            }
+
+            function renderPhoneWidget() {
+                if (!g_currentOwnerRecord) {
+                    PHONE_ELS.container.innerHTML = `<div class="no-data-msg">Please select a record to see phone numbers.</div>`;
+                    return;
+                }
+                let content = '';
+                let hasPhones = false;
+                PHONE_FIELDS.forEach(field => {
+                    const phoneVal = g_currentOwnerRecord[field.phone];
+                    if (phoneVal && String(phoneVal).trim()) {
+                        const notesVal = field.notes ? g_currentOwnerRecord[field.notes] : null;
+                        content += renderPhoneCard(phoneVal, notesVal, false, field.phone);
+                        hasPhones = true;
+                    }
+                });
+                const wrongStr = g_currentOwnerRecord.Wrong_Phone;
+                if (wrongStr && String(wrongStr).trim()) {
+                    const wrongList = parseWrongPhones(wrongStr);
+                    wrongList.forEach(wrong => {
+                        content += renderPhoneCard(wrong.number, wrong.note, true);
+                        hasPhones = true;
+                    });
+                }
+                PHONE_ELS.container.innerHTML = hasPhones ? content : `<div class="no-data-msg">No phone numbers found for this record.</div>`;
+                attachActionListeners();
+            }
+
+            function attachActionListeners() {
+                document.querySelectorAll('.mark-wrong').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        const field = btn.dataset.field;
+                        const phone = g_currentOwnerRecord[field];
+                        const noteField = field === 'Phone' ? 'Phone_1_Notes' : field + '_Notes';
+                        const oldNote = g_currentOwnerRecord[noteField] || '';
+                        const newNote = prompt('Reason for marking as wrong?', oldNote);
+                        if (newNote === null) return;
+                        const entry = formatPhoneNumber(phone) + (newNote ? ` (${newNote})` : '') + '; ';
+                        const newWrong = (g_currentOwnerRecord.Wrong_Phone || '') + entry;
+                        const updates = { [field]: null, [noteField]: null, Wrong_Phone: newWrong };
+                        await grist.docApi.applyUserActions([['UpdateRecord', 'Owners', g_currentOwnerRecord.id, updates]]);
+                        g_currentOwnerRecord[field] = null;
+                        g_currentOwnerRecord[noteField] = null;
+                        g_currentOwnerRecord.Wrong_Phone = newWrong;
+                        renderPhoneWidget();
+                    });
+                });
+                document.querySelectorAll('.remove-wrong').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        const number = btn.dataset.number;
+                        const note = btn.dataset.note;
+                        let wrongs = parseWrongPhones(g_currentOwnerRecord.Wrong_Phone);
+                        wrongs = wrongs.filter(w => !(w.number === number && w.note === note));
+                        const newWrong = wrongs.map(w => w.number + (w.note ? ` (${w.note})` : '')).join('; ');
+                        await grist.docApi.applyUserActions([['UpdateRecord', 'Owners', g_currentOwnerRecord.id, {Wrong_Phone: newWrong}]]);
+                        g_currentOwnerRecord.Wrong_Phone = newWrong;
+                        renderPhoneWidget();
+                    });
+                });
+            }
+
+            // --- DIALER HANDLERS ---
+            function handleDial(action) {
+                const raw = (DIALER.input.value || '').trim();
+                if (!raw) return;
+                const digits = sanitizePhone(raw);
+                if (digits.length < 10) {
+                    alert('Please enter a valid 10-digit phone number');
+                    return;
+                }
+                const num = `${digits}`;
+                if (action === 'webex') window.open(`sip:${num}`, '_blank');
+                if (action === 'tel') window.open(`tel:${num}`, '_blank');
+                if (action === 'sms') window.open(`sms:${num}`, '_blank');
+            }
+            DIALER.webexBtn.addEventListener('click', () => handleDial('webex'));
+            DIALER.telBtn.addEventListener('click', () => handleDial('tel'));
+            DIALER.smsBtn.addEventListener('click', () => handleDial('sms'));
+
+            // --- CHECK HANDLERS ---
+            function formatPhoneInput(e) {
+                const input = e.target;
+                let val = input.value.replace(/\D/g, '').slice(0, 10);
+                let formatted = '';
+                if (val.length > 0) formatted = '(' + val.slice(0, 3);
+                if (val.length > 3) formatted += ') ' + val.slice(3, 6);
+                if (val.length > 6) formatted += '-' + val.slice(6);
+                input.value = formatted;
+            }
+            CHECK.phoneInput.addEventListener('input', formatPhoneInput);
+            DIALER.input.addEventListener('input', formatPhoneInput);
+
+            CHECK.btn.addEventListener('click', async () => {
+                const phone = CHECK.phoneInput.value.trim();
+                if (!phone) {
+                    CHECK.result.innerHTML = 'Please enter a phone number.';
+                    return;
+                }
+                const normalized = sanitizePhone(phone);
+                if (normalized.length < 10) {
+                    CHECK.result.innerHTML = 'Please enter a valid 10-digit phone number.';
+                    return;
+                }
+                const savedPhones = [];
+                PHONE_COLUMN_KEYS.forEach(key => {
+                    const p = g_currentOwnerRecord[key];
+                    if (p) {
+                        const noteField = key === 'Phone' ? 'Phone_1_Notes' : key + '_Notes';
+                        savedPhones.push({norm: sanitizePhone(p), orig: p, field: key, note: g_currentOwnerRecord[noteField] || '' });
+                    }
+                });
+                const wrongPhones = parseWrongPhones(g_currentOwnerRecord.Wrong_Phone || '').map(w => ({
+                    norm: sanitizePhone(w.number), orig: w.number, note: w.note
+                }));
+                const matches = [];
+                savedPhones.forEach(s => {
+                    if (s.norm === normalized) matches.push(`Already saved in ${s.field}${s.note ? `: ${s.note}` : ''}`);
+                });
+                wrongPhones.forEach(w => {
+                    if (w.norm === normalized) matches.push(`Wrong number${w.note ? `: ${w.note}` : ''}`);
+                });
+                if (matches.length > 0) {
+                    CHECK.result.innerHTML = matches.join('<br>');
+                } else {
+                    const formatted = formatPhoneNumber(phone);
+                    const note = CHECK.noteInput.value.trim();
+                    let html = renderPhoneCard(formatted, note, false, null);
+                    html += '<div class="add-buttons">';
+                    const available = PHONE_COLUMN_KEYS.find(key => !g_currentOwnerRecord[key]);
+                    if (available) {
+                        html += `<button class="add-btn" id="add-saved-btn">Add to ${available}</button>`;
+                    } else {
+                        html += 'No available saved slots.<br>';
+                    }
+                    html += `<button class="add-btn" id="add-wrong-btn">Add as Wrong</button></div>`;
+                    CHECK.result.innerHTML = html;
+                    document.getElementById('add-saved-btn')?.addEventListener('click', async () => {
+                        const updates = { [available]: formatted };
+                        const noteField = available === 'Phone' ? 'Phone_1_Notes' : available + '_Notes';
+                        if (note) updates[noteField] = note;
+                        await grist.docApi.applyUserActions([['UpdateRecord', 'Owners', g_currentOwnerRecord.id, updates]]);
+                        g_currentOwnerRecord[available] = formatted;
+                        if (note) g_currentOwnerRecord[noteField] = note;
+                        CHECK.phoneInput.value = '';
+                        CHECK.noteInput.value = '';
+                        CHECK.result.innerHTML = 'Added to saved.';
+                        renderPhoneWidget();
+                    });
+                    document.getElementById('add-wrong-btn')?.addEventListener('click', async () => {
+                        const entry = formatted + (note ? ` (${note})` : '') + '; ';
+                        const newWrong = (g_currentOwnerRecord.Wrong_Phone || '') + entry;
+                        await grist.docApi.applyUserActions([['UpdateRecord', 'Owners', g_currentOwnerRecord.id, {Wrong_Phone: newWrong}]]);
+                        g_currentOwnerRecord.Wrong_Phone = newWrong;
+                        CHECK.phoneInput.value = '';
+                        CHECK.noteInput.value = '';
+                        CHECK.result.innerHTML = 'Added as wrong.';
+                        renderPhoneWidget();
+                    });
+                }
+            });
+
+            // --- INITIALIZATION ---
+            function initializeWidget() {
+                grist.ready({ requiredAccess: 'full' });
+                grist.onRecord((record) => {
+                    g_currentOwnerRecord = record ? { id: record.id, ...record } : null;
+                    renderPhoneWidget();
+                });
+            }
+
+            initializeWidget();
+        });
+    </script>
+</body>
+</html>
