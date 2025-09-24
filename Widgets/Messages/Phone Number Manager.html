@@ -262,12 +262,16 @@
     </style>
 </head>
 <body>
-    <div id="phone-widget-container">
-        <div class="header">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M2 3.5A1.5 1.5 0 013.5 2h1.148a1.5 1.5 0 011.465 1.175l.716 3.223a1.5 1.5 0 01-1.052 1.767l-.933.267c-.41.117-.643.555-.48.95a11.542 11.542 0 006.254 6.254c.395.163.833-.07.95-.48l.267-.933a1.5 1.5 0 011.767-1.052l3.223.716A1.5 1.5 0 0118 15.352V16.5a1.5 1.5 0 01-1.5 1.5h-1.528a13.528 13.528 0 01-11.472-11.472H2A1.5 1.5 0 012 3.5z" clip-rule="evenodd" />
-            </svg>
-            <h2>Phone Numbers</h2>
+    <div id="phone-widget-container">        
+        <!-- Check Potential Phone -->
+        <div class="check-container">
+            <h3>Check Potential Phone</h3>
+            <div class="check-input-group">
+                <input type="text" id="check-phone" class="dialer-input" placeholder="Enter phone number...">
+                <input type="text" id="check-note" class="dialer-input" placeholder="Optional note...">
+                <button id="check-btn" class="check-btn">Check</button>
+            </div>
+            <div id="check-result" class="result-box"></div>
         </div>
         <div id="phone-container" class="phone-cards-container">
             <div class="no-data-msg">Please select a record to see phone numbers.</div>
@@ -287,17 +291,6 @@
                     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/IMessage_logo.svg/1024px-IMessage_logo.svg.png" alt="SMS">
                 </button>
             </div>
-        </div>
-
-        <!-- Check Potential Phone -->
-        <div class="check-container">
-            <h3>Check Potential Phone</h3>
-            <div class="check-input-group">
-                <input type="text" id="check-phone" class="dialer-input" placeholder="Enter phone number...">
-                <input type="text" id="check-note" class="dialer-input" placeholder="Optional note...">
-                <button id="check-btn" class="check-btn">Check</button>
-            </div>
-            <div id="check-result" class="result-box"></div>
         </div>
     </div>
 
