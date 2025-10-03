@@ -380,6 +380,9 @@
             cursor: pointer;
             transition: all 0.3s ease;
             border-left: 4px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         .project-list-item:hover {
@@ -410,6 +413,15 @@
             border-radius: 12px;
             font-size: 0.75rem;
             font-weight: 600;
+        }
+
+        .project-list-text { flex: 1; }
+        .project-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            object-fit: cover;
+            border: 1px solid #e9ecef;
         }
 
         .project-details {
@@ -456,6 +468,15 @@
             justify-content: space-between;
             align-items: flex-start;
             margin-bottom: 15px;
+        }
+
+        .detail-logo {
+            width: 50px;
+            height: 50px;
+            border-radius: 6px;
+            object-fit: cover;
+            border: 1px solid #e9ecef;
+            margin-left: 10px;
         }
 
         .project-title {
@@ -859,6 +880,7 @@
                                 <h3 class="project-title" id="detail-project-title">Project Title</h3>
                                 <span class="project-brand" id="detail-project-brand">Brand</span>
                             </div>
+                            <img id="detail-logo" class="detail-logo" alt="Logo" style="display:none;" />
                             <button class="btn btn-primary" id="edit-project-btn">
                                 <i class="fas fa-edit"></i> Edit
                             </button>
@@ -957,6 +979,10 @@
                         <h3><i class="fas fa-edit"></i> Edit Project</h3>
                         <form id="project-edit-form">
                             <div class="form-group">
+                                <label for="edit-logo-url">Logo URL (optional)</label>
+                                <input type="url" id="edit-logo-url" name="logoUrl" placeholder="https://example.com/logo.png">
+                            </div>
+                            <div class="form-group">
                                 <label for="edit-project-title">Project Title</label>
                                 <input type="text" id="edit-project-title" name="Project Title" required>
                             </div>
@@ -1042,10 +1068,7 @@
                                 <label for="edit-construction-details">Construction Details</label>
                                 <textarea id="edit-construction-details" name="Construction Details"></textarea>
                             </div>
-                            <div class="form-group">
-                                <label for="edit-logo-url">Logo URL (optional)</label>
-                                <input type="url" id="edit-logo-url" name="logoUrl" placeholder="https://example.com/logo.png">
-                            </div>
+                            
                             <div class="form-actions">
                                 <button type="button" class="btn btn-secondary" id="cancel-edit">
                                     <i class="fas fa-times"></i> Cancel
@@ -1095,7 +1118,7 @@
             map = L.map('map').setView([47.0, -120.0], 7);
 
             // Add Google Maps Hybrid tile layer
-            L.tileLayer('http://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}', {
+            L.tileLayer('https://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}', {
                 attribution: '&copy; <a href="https://www.google.com/maps">Google Maps</a>',
                 maxZoom: 20
             }).addTo(map);
@@ -1105,23 +1128,28 @@
             map.on('zoomend', updateProjectList);
         }
 
-        // Create custom icons
+        // Create custom icons: use specific images like BaseMap and allow per-project logo
         function createCustomIcon(phase, logoUrl) {
+            // If a property has a logo URL, use it as the marker icon
             if (logoUrl) {
-                return L.divIcon({
-                    className: 'custom-marker-logo',
-                    html: `<img src="${logoUrl}" style="width: 30px; height: 30px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); object-fit: cover;">`,
+                return L.icon({
+                    iconUrl: logoUrl,
                     iconSize: [30, 30],
-                    iconAnchor: [15, 15]
+                    iconAnchor: [15, 15],
+                    popupAnchor: [0, -15]
                 });
             }
-            
-            const color = phaseColors[phase] || '#3498db';
-            return L.divIcon({
-                className: 'custom-marker',
-                html: `<div style="background-color: ${color}; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
-                iconSize: [20, 20],
-                iconAnchor: [10, 10]
+
+            // Default icons (match BaseMap-withoutProperties.html)
+            const completedIconUrl = 'https://cleanslatekickz.github.io/geojson/Images/Completed.png';
+            const dodgeIconUrl = 'https://cleanslatekickz.github.io/geojson/Images/Dodge.png';
+            const isCompleted = (phase || '').toLowerCase() === 'completed';
+
+            return L.icon({
+                iconUrl: isCompleted ? completedIconUrl : dodgeIconUrl,
+                iconSize: [30, 30],
+                iconAnchor: [15, 15],
+                popupAnchor: [0, -15]
             });
         }
 
@@ -1159,22 +1187,25 @@
             filteredMarkers = [];
 
             projects.forEach(project => {
-                if (project.Latitude && project.Longitude) {
-                    const marker = L.marker([project.Latitude, project.Longitude], {
-                        icon: createCustomIcon(project.Phase, project.logo_url)
+                if (project.latitude && project.longitude) {
+                    const marker = L.marker([project.latitude, project.longitude], {
+                        icon: createCustomIcon(project.phase, project.logo_url)
                     }).addTo(map);
 
                     marker.projectData = project;
+                    // add helper methods for visibility toggling
+                    marker.show = function() { if (!map.hasLayer(marker)) marker.addTo(map); };
+                    marker.hide = function() { if (map.hasLayer(marker)) map.removeLayer(marker); };
                     markers.push(marker);
                     filteredMarkers.push(marker);
 
                     // Add popup with basic info
                     marker.bindPopup(`
                         <div style="min-width: 200px;">
-                            <h3 style="margin-bottom: 5px; font-weight: 600;">${project["Project Title"]}</h3>
-                            <p style="margin-bottom: 5px;"><strong>Brand:</strong> ${project.Brands}</p>
-                            <p style="margin-bottom: 5px;"><strong>Phase:</strong> ${project.Phase}</p>
-                            <p style="margin-bottom: 0;"><strong>Address:</strong> ${project["Project Address"]}</p>
+                            <h3 style="margin-bottom: 5px; font-weight: 600;">${project.project_title || ''}</h3>
+                            <p style="margin-bottom: 5px;"><strong>Brand:</strong> ${project.brands || ''}</p>
+                            <p style="margin-bottom: 5px;"><strong>Phase:</strong> ${project.phase || ''}</p>
+                            <p style="margin-bottom: 0;"><strong>Address:</strong> ${project.project_address || ''}</p>
                         </div>
                     `);
 
@@ -1184,12 +1215,13 @@
                     });
                 }
             });
+            console.log(`Added ${markers.length} markers to the map from ${projects.length} projects`);
         }
 
         // Update filter options
         function updateFilterOptions(projects) {
-            const brands = [...new Set(projects.map(p => p.Brands).filter(Boolean))];
-            const counties = [...new Set(projects.map(p => p.County).filter(Boolean))];
+            const brands = [...new Set(projects.map(p => p.brands).filter(Boolean))];
+            const counties = [...new Set(projects.map(p => p.county).filter(Boolean))];
 
             const brandFilter = document.getElementById('brand-filter');
             const countyFilter = document.getElementById('county-filter');
@@ -1216,9 +1248,9 @@
         // Update statistics
         function updateStatistics(projects) {
             const total = projects.length;
-            const completed = projects.filter(p => p.Phase === 'Completed').length;
-            const inProgress = projects.filter(p => ['Planning', 'Underway', 'Bidding', 'Final Planning', 'Pre-Planning'].includes(p.Phase)).length;
-            const planning = projects.filter(p => p.Phase === 'Planning').length;
+            const completed = projects.filter(p => p.phase === 'Completed').length;
+            const inProgress = projects.filter(p => ['Planning', 'Underway', 'Bidding', 'Final Planning', 'Pre-Planning'].includes(p.phase)).length;
+            const planning = projects.filter(p => p.phase === 'Planning').length;
 
             document.getElementById('total-projects').textContent = total;
             document.getElementById('completed-projects').textContent = completed;
@@ -1238,6 +1270,7 @@
                     visibleProjects.push(marker.projectData);
                 }
             });
+            console.log(`Visible projects in bounds: ${visibleProjects.length}`);
 
             // Clear existing list
             projectList.innerHTML = '';
@@ -1262,12 +1295,15 @@
                 }
 
                 listItem.innerHTML = `
-                    <h4>${project["Project Title"]}</h4>
-                    <p>${project.Brands}</p>
-                    <p>${project["Project Address"]}</p>
-                    <span class="phase-badge phase-${project.Phase.toLowerCase().replace(' ', '-')}">${project.Phase}</span>
+                    <div class="project-list-text">
+                        <h4>${project.project_title || ''}</h4>
+                        <p>${project.brands || ''}</p>
+                        <p>${project.project_address || ''}</p>
+                        <span class="phase-badge phase-${(project.phase || '').toLowerCase().replace(' ', '-')}">${project.phase || ''}</span>
+                    </div>
+                    ${project.logo_url ? `<img class="project-logo" src="${project.logo_url}" alt="Logo" />` : ''}
                 `;
-
+                
                 listItem.addEventListener('click', function() {
                     showProjectDetails(project);
                 });
@@ -1288,23 +1324,32 @@
             document.getElementById('project-details').classList.add('active');
 
             // Update project details
-            document.getElementById('detail-project-title').textContent = project["Project Title"];
-            document.getElementById('detail-project-brand').textContent = project.Brands;
-            document.getElementById('detail-project-address').textContent = project["Project Address"];
-            document.getElementById('detail-property-type').textContent = project["Property Type - Sub-type"];
-            document.getElementById('detail-phase').innerHTML = `<span class="phase-badge phase-${project.Phase.toLowerCase().replace(' ', '-')}">${project.Phase}</span>`;
-            document.getElementById('detail-county').textContent = project.County;
-            document.getElementById('detail-public-private').textContent = project["Public / Private"];
-            document.getElementById('detail-cost').textContent = project["Construction - Cost ($ m)"] || 'N/A';
-            document.getElementById('detail-rba').textContent = project.RBA || 'N/A';
-            document.getElementById('detail-buildings').textContent = project["# of Buildings"] || 'N/A';
-            document.getElementById('detail-floors').textContent = project["# of Floors"] || 'N/A';
-            document.getElementById('detail-start-date').textContent = project["Target Dates - Start"] || 'N/A';
-            document.getElementById('detail-completion-date').textContent = project["Target Dates - Completion"] || 'N/A';
-            document.getElementById('detail-owner').textContent = project["Primary Owner - Name"] || 'N/A';
-            document.getElementById('detail-architect').textContent = project["Primary Architect - Name"] || 'N/A';
-            document.getElementById('detail-notes').textContent = project.Notes || 'No notes available';
-            document.getElementById('detail-construction-details').textContent = project["Construction Details"] || 'No construction details available';
+            document.getElementById('detail-project-title').textContent = project.project_title || 'Unknown';
+            document.getElementById('detail-project-brand').textContent = project.brands || 'N/A';
+            document.getElementById('detail-project-address').textContent = project.project_address || 'N/A';
+            document.getElementById('detail-property-type').textContent = project.property_type_subtype || 'N/A';
+            const phase = project.phase || 'N/A';
+            document.getElementById('detail-phase').innerHTML = `<span class="phase-badge phase-${phase.toLowerCase().replace(' ', '-')}">${phase}</span>`;
+            document.getElementById('detail-county').textContent = project.county || 'N/A';
+            document.getElementById('detail-public-private').textContent = project.public_private || 'N/A';
+            document.getElementById('detail-cost').textContent = project.construction_cost_m ?? 'N/A';
+            document.getElementById('detail-rba').textContent = project.rba ?? 'N/A';
+            document.getElementById('detail-buildings').textContent = project.num_buildings ?? 'N/A';
+            document.getElementById('detail-floors').textContent = project.num_floors ?? 'N/A';
+            document.getElementById('detail-start-date').textContent = project.target_start_date ?? 'N/A';
+            document.getElementById('detail-completion-date').textContent = project.target_completion_date ?? 'N/A';
+            document.getElementById('detail-owner').textContent = project.primary_owner_name || 'N/A';
+            document.getElementById('detail-architect').textContent = project.primary_architect_name || 'N/A';
+            document.getElementById('detail-notes').textContent = project.notes || 'No notes available';
+            document.getElementById('detail-construction-details').textContent = project.construction_details || 'No construction details available';
+
+            const detailLogo = document.getElementById('detail-logo');
+            if (project.logo_url) {
+                detailLogo.src = project.logo_url;
+                detailLogo.style.display = 'block';
+            } else {
+                detailLogo.style.display = 'none';
+            }
         }
 
         // Show edit form
@@ -1316,25 +1361,25 @@
             document.getElementById('edit-form').style.display = 'block';
             
             // Populate form with project data
-            document.getElementById('edit-project-title').value = project["Project Title"] || '';
-            document.getElementById('edit-brands').value = project.Brands || '';
-            document.getElementById('edit-project-address').value = project["Project Address"] || '';
-            document.getElementById('edit-latitude').value = project.Latitude || '';
-            document.getElementById('edit-longitude').value = project.Longitude || '';
-            document.getElementById('edit-property-type').value = project["Property Type - Sub-type"] || '';
-            document.getElementById('edit-phase').value = project.Phase || '';
-            document.getElementById('edit-county').value = project.County || '';
-            document.getElementById('edit-public-private').value = project["Public / Private"] || '';
-            document.getElementById('edit-cost').value = project["Construction - Cost ($ m)"] || '';
-            document.getElementById('edit-rba').value = project.RBA || '';
-            document.getElementById('edit-buildings').value = project["# of Buildings"] || '';
-            document.getElementById('edit-floors').value = project["# of Floors"] || '';
-            document.getElementById('edit-start-date').value = project["Target Dates - Start"] || '';
-            document.getElementById('edit-completion-date').value = project["Target Dates - Completion"] || '';
-            document.getElementById('edit-owner').value = project["Primary Owner - Name"] || '';
-            document.getElementById('edit-architect').value = project["Primary Architect - Name"] || '';
-            document.getElementById('edit-notes').value = project.Notes || '';
-            document.getElementById('edit-construction-details').value = project["Construction Details"] || '';
+            document.getElementById('edit-project-title').value = project.project_title || '';
+            document.getElementById('edit-brands').value = project.brands || '';
+            document.getElementById('edit-project-address').value = project.project_address || '';
+            document.getElementById('edit-latitude').value = project.latitude || '';
+            document.getElementById('edit-longitude').value = project.longitude || '';
+            document.getElementById('edit-property-type').value = project.property_type_subtype || '';
+            document.getElementById('edit-phase').value = project.phase || '';
+            document.getElementById('edit-county').value = project.county || '';
+            document.getElementById('edit-public-private').value = project.public_private || '';
+            document.getElementById('edit-cost').value = project.construction_cost_m ?? '';
+            document.getElementById('edit-rba').value = project.rba ?? '';
+            document.getElementById('edit-buildings').value = project.num_buildings ?? '';
+            document.getElementById('edit-floors').value = project.num_floors ?? '';
+            document.getElementById('edit-start-date').value = project.target_start_date ?? '';
+            document.getElementById('edit-completion-date').value = project.target_completion_date ?? '';
+            document.getElementById('edit-owner').value = project.primary_owner_name || '';
+            document.getElementById('edit-architect').value = project.primary_architect_name || '';
+            document.getElementById('edit-notes').value = project.notes || '';
+            document.getElementById('edit-construction-details').value = project.construction_details || '';
             document.getElementById('edit-logo-url').value = project.logo_url || '';
         }
 
@@ -1352,9 +1397,30 @@
             if (!currentEditingProject) return;
             
             const formData = new FormData(event.target);
+            const formDataObj = Object.fromEntries(formData);
+            // map form fields to API schema keys
             const updatedProject = {
                 ...currentEditingProject,
-                ...Object.fromEntries(formData)
+                project_title: formDataObj['Project Title'] || currentEditingProject.project_title,
+                brands: formDataObj['Brands'] || currentEditingProject.brands,
+                project_address: formDataObj['Project Address'] || currentEditingProject.project_address,
+                latitude: formDataObj['Latitude'] ? parseFloat(formDataObj['Latitude']) : currentEditingProject.latitude,
+                longitude: formDataObj['Longitude'] ? parseFloat(formDataObj['Longitude']) : currentEditingProject.longitude,
+                property_type_subtype: formDataObj['Property Type - Sub-type'] || currentEditingProject.property_type_subtype,
+                phase: formDataObj['Phase'] || currentEditingProject.phase,
+                county: formDataObj['County'] || currentEditingProject.county,
+                public_private: formDataObj['Public / Private'] || currentEditingProject.public_private,
+                construction_cost_m: formDataObj['Construction - Cost ($ m)'] ? parseFloat(formDataObj['Construction - Cost ($ m)']) : currentEditingProject.construction_cost_m,
+                rba: formDataObj['RBA'] ? parseInt(formDataObj['RBA']) : currentEditingProject.rba,
+                num_buildings: formDataObj['# of Buildings'] ? parseInt(formDataObj['# of Buildings']) : currentEditingProject.num_buildings,
+                num_floors: formDataObj['# of Floors'] ? parseInt(formDataObj['# of Floors']) : currentEditingProject.num_floors,
+                target_start_date: formDataObj['Target Dates - Start'] || currentEditingProject.target_start_date,
+                target_completion_date: formDataObj['Target Dates - Completion'] || currentEditingProject.target_completion_date,
+                primary_owner_name: formDataObj['Primary Owner - Name'] || currentEditingProject.primary_owner_name,
+                primary_architect_name: formDataObj['Primary Architect - Name'] || currentEditingProject.primary_architect_name,
+                notes: formDataObj['Notes'] || currentEditingProject.notes,
+                construction_details: formDataObj['Construction Details'] || currentEditingProject.construction_details,
+                logo_url: formDataObj['logoUrl'] || currentEditingProject.logo_url
             };
             updatedProject.id = currentEditingProject.id;
             
@@ -1437,36 +1503,36 @@
                 .then(response => response.json())
                 .then(projects => {
                     const headers = [
-                        'ID', 'Project Title', 'Brands', 'Project Address', 'Latitude', 'Longitude',
-                        'Property Type - Sub-type', 'Phase', 'County', 'Public / Private',
-                        'Construction - Cost ($ m)', 'RBA', '# of Buildings', '# of Floors',
-                        'Target Dates - Start', 'Target Dates - Completion', 'Primary Owner - Name',
-                        'Primary Architect - Name', 'Notes', 'Construction Details', 'Logo URL'
+                        'id', 'project_title', 'brands', 'project_address', 'latitude', 'longitude',
+                        'property_type_subtype', 'phase', 'county', 'public_private',
+                        'construction_cost_m', 'rba', 'num_buildings', 'num_floors',
+                        'target_start_date', 'target_completion_date', 'primary_owner_name',
+                        'primary_architect_name', 'notes', 'construction_details', 'logo_url'
                     ];
                     
                     const csvContent = [
                         headers.join(','),
                         ...projects.map(project => [
                             project.id,
-                            `"${project["Project Title"] || ''}"`,
-                            `"${project.Brands || ''}"`,
-                            `"${project["Project Address"] || ''}"`,
-                            project.Latitude || '',
-                            project.Longitude || '',
-                            `"${project["Property Type - Sub-type"] || ''}"`,
-                            `"${project.Phase || ''}"`,
-                            `"${project.County || ''}"`,
-                            `"${project["Public / Private"] || ''}"`,
-                            project["Construction - Cost ($ m)"] || '',
-                            project.RBA || '',
-                            project["# of Buildings"] || '',
-                            project["# of Floors"] || '',
-                            project["Target Dates - Start"] || '',
-                            project["Target Dates - Completion"] || '',
-                            `"${project["Primary Owner - Name"] || ''}"`,
-                            `"${project["Primary Architect - Name"] || ''}"`,
-                            `"${project.Notes || ''}"`,
-                            `"${project["Construction Details"] || ''}"`,
+                            `"${project.project_title || ''}"`,
+                            `"${project.brands || ''}"`,
+                            `"${project.project_address || ''}"`,
+                            project.latitude || '',
+                            project.longitude || '',
+                            `"${project.property_type_subtype || ''}"`,
+                            `"${project.phase || ''}"`,
+                            `"${project.county || ''}"`,
+                            `"${project.public_private || ''}"`,
+                            project.construction_cost_m || '',
+                            project.rba || '',
+                            project.num_buildings || '',
+                            project.num_floors || '',
+                            project.target_start_date || '',
+                            project.target_completion_date || '',
+                            `"${project.primary_owner_name || ''}"`,
+                            `"${project.primary_architect_name || ''}"`,
+                            `"${project.notes || ''}"`,
+                            `"${project.construction_details || ''}"`,
                             `"${project.logo_url || ''}"`
                         ].join(','))
                     ].join('\n');
@@ -1504,7 +1570,8 @@
                         const values = lines[i].split(',');
                         const project = {};
                         headers.forEach((header, index) => {
-                            project[header.trim()] = values[index] ? values[index].replace(/"/g, '') : '';
+                            const key = header.trim().toLowerCase().replace(/\s+/g, '_').replace(/[-()]/g, '');
+                            project[key] = values[index] ? values[index].replace(/"/g, '') : '';
                         });
                         projects.push(project);
                     }
@@ -1582,13 +1649,20 @@
             filteredMarkers = markers.filter(marker => {
                 const project = marker.projectData;
                 
-                if (phase !== 'all' && project.Phase !== phase) return false;
-                if (county !== 'all' && project.County !== county) return false;
-                if (brand !== 'all' && project.Brands !== brand) return false;
+                const projPhase = project.phase;
+                const projCounty = project.county;
+                const projBrand = project.brands;
+                const projTitle = project.project_title;
+                const projAddress = project.project_address;
+                const projOwner = project.primary_owner_name;
+
+                if (phase !== 'all' && projPhase !== phase) return false;
+                if (county !== 'all' && projCounty !== county) return false;
+                if (brand !== 'all' && projBrand !== brand) return false;
                 if (search && !(
-                    (project["Project Title"] && project["Project Title"].toLowerCase().includes(search.toLowerCase())) ||
-                    (project["Project Address"] && project["Project Address"].toLowerCase().includes(search.toLowerCase())) ||
-                    (project["Primary Owner - Name"] && project["Primary Owner - Name"].toLowerCase().includes(search.toLowerCase()))
+                    (projTitle && projTitle.toLowerCase().includes(search.toLowerCase())) ||
+                    (projAddress && projAddress.toLowerCase().includes(search.toLowerCase())) ||
+                    (projOwner && projOwner.toLowerCase().includes(search.toLowerCase()))
                 )) return false;
                 
                 return true;
