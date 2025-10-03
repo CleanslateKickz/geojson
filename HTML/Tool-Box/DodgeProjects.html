@@ -1069,7 +1069,8 @@
 
     <script>
         // API Configuration
-        const API_BASE_URL = '/api/properties';
+        const API_BASE = 'https://dodge-report.vercel.app/api';
+        const STORAGE_KEY = 'dodge_projects';
         
         // Global variables
         let map;
@@ -1127,15 +1128,26 @@
         // Load projects from API
         async function loadProjects() {
             try {
-                const response = await fetch(API_BASE_URL);
+                const response = await fetch(`${API_BASE}/properties`);
                 if (!response.ok) throw new Error('Failed to load projects');
                 const projects = await response.json();
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(projects)); // Cache to localStorage
                 addMarkersToMap(projects);
                 updateFilterOptions(projects);
                 updateStatistics(projects);
-            } catch (error) {
-                console.error('Error loading projects:', error);
-                showToast('Error loading projects: ' + error.message, 'error');
+                showToast('Projects loaded from database');
+            } catch (err) {
+                console.error('Load error:', err);
+                // Fallback to localStorage
+                const projects = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+                if (projects.length === 0) {
+                    showToast('No projects available (API unavailable)');
+                } else {
+                    addMarkersToMap(projects);
+                    updateFilterOptions(projects);
+                    updateStatistics(projects);
+                    showToast('Using cached projects (API unavailable)');
+                }
             }
         }
 
@@ -1340,15 +1352,16 @@
             if (!currentEditingProject) return;
             
             const formData = new FormData(event.target);
-            const updatedProject = {};
-            
-            // Convert FormData to object
-            for (let [key, value] of formData.entries()) {
-                updatedProject[key] = value;
-            }
+            const updatedProject = {
+                ...currentEditingProject,
+                ...Object.fromEntries(formData)
+            };
+            updatedProject.id = currentEditingProject.id;
             
             try {
-                const response = await fetch(`${API_BASE_URL}/${currentEditingProject.id}`, {
+                const id = currentEditingProject.id;
+                const url = `${API_BASE}/properties?id=${id}`;
+                const response = await fetch(url, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1358,18 +1371,29 @@
                 
                 if (!response.ok) throw new Error('Failed to update project');
                 
-                const updatedData = await response.json();
-                showToast('Project updated successfully!');
+                await loadProjects();  // Reload to sync
+                showToast('Project updated successfully');
                 
                 // Hide edit form and show updated details
                 hideEditForm();
-                showProjectDetails(updatedData);
+                showProjectDetails(updatedProject);
+            } catch (err) {
+                console.error('Update error:', err);
+                // Fallback: update localStorage
+                let projects = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+                const index = projects.findIndex(p => p.id === currentEditingProject.id);
+                if (index > -1) {
+                    projects[index] = updatedProject;
+                }
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+                addMarkersToMap(projects);
+                updateFilterOptions(projects);
+                updateStatistics(projects);
+                showToast('Project updated locally (API unavailable)');
                 
-                // Reload markers to reflect changes
-                loadProjects();
-            } catch (error) {
-                console.error('Error updating project:', error);
-                showToast('Error updating project: ' + error.message, 'error');
+                // Hide edit form and show updated details
+                hideEditForm();
+                showProjectDetails(updatedProject);
             }
         }
 
@@ -1378,29 +1402,38 @@
             if (!confirm('Are you sure you want to delete this project?')) return;
             
             try {
-                const response = await fetch(`${API_BASE_URL}/${projectId}`, {
+                const response = await fetch(`${API_BASE}/properties?id=${projectId}`, {
                     method: 'DELETE'
                 });
                 
                 if (!response.ok) throw new Error('Failed to delete project');
                 
-                showToast('Project deleted successfully!');
+                await loadProjects();
+                showToast('Project deleted successfully');
                 
                 // Hide project details and show list
                 document.getElementById('project-details').classList.remove('active');
                 document.getElementById('project-list').style.display = 'block';
+            } catch (err) {
+                console.error('Delete error:', err);
+                // Fallback: delete from localStorage
+                let projects = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+                projects = projects.filter(p => p.id !== projectId);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+                addMarkersToMap(projects);
+                updateFilterOptions(projects);
+                updateStatistics(projects);
+                showToast('Project deleted locally (API unavailable)');
                 
-                // Reload markers to reflect changes
-                loadProjects();
-            } catch (error) {
-                console.error('Error deleting project:', error);
-                showToast('Error deleting project: ' + error.message, 'error');
+                // Hide project details and show list
+                document.getElementById('project-details').classList.remove('active');
+                document.getElementById('project-list').style.display = 'block';
             }
         }
 
         // Export data to CSV
         function exportToCSV() {
-            fetch(API_BASE_URL)
+            fetch(`${API_BASE}/properties`)
                 .then(response => response.json())
                 .then(projects => {
                     const headers = [
@@ -1493,22 +1526,36 @@
             }
             
             const batch = projects.slice(startIndex, startIndex + 10);
-            const promises = batch.map(project =>
-                fetch(API_BASE_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(project)
-                })
-            );
+            const promises = batch.map(async (project) => {
+                try {
+                    const id = project.id || Date.now() + Math.random(); // Generate ID if new
+                    project.id = id;
+                    const response = await fetch(`${API_BASE}/properties`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(project)
+                    });
+                    if (!response.ok) throw new Error('Failed to import project');
+                } catch (err) {
+                    console.error('Import error for project:', project, err);
+                    // Even if API fails, add to local cache
+                    let cachedProjects = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+                    if (!cachedProjects.find(p => p.id === project.id)) {
+                        cachedProjects.push(project);
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(cachedProjects));
+                    }
+                }
+            });
             
             try {
                 await Promise.all(promises);
                 importProjectsBatch(projects, startIndex + 10);
             } catch (error) {
                 console.error('Error importing projects:', error);
-                showToast('Error importing projects: ' + error.message, 'error');
+                showToast('Some projects imported locally (API issues)');
+                loadProjects(); // Reload with cached data
             }
         }
 
