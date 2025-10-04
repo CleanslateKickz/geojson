@@ -552,6 +552,37 @@
         }
         .popup-brand { display: inline-block; }
 
+        /* Responsive layout: tablet and mobile */
+        @media (max-width: 1024px) {
+            .left-sidebar { width: 260px; }
+            .right-sidebar { width: 360px; }
+            .project-list-item h4 { font-size: 0.95rem; }
+            .project-list-item p { font-size: 0.8rem; }
+        }
+        @media (max-width: 768px) {
+            .app-container { flex-direction: column; }
+            .left-sidebar, .right-sidebar {
+                width: 100%;
+                box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+            }
+            .left-sidebar.collapsed { transform: translateY(-110%); }
+            .right-sidebar.collapsed { transform: translateY(110%); }
+            .toggle-left-sidebar { right: 10px; top: 10px; }
+            .toggle-right-sidebar { left: 10px; top: 10px; }
+            .map-container { order: 1; height: 60vh; }
+            .left-sidebar { order: 2; }
+            .right-sidebar { order: 3; }
+            .project-details, .project-list { padding: 12px; }
+            .project-header { flex-wrap: wrap; gap: 8px; }
+            .detail-logo { width: 42px; height: 42px; }
+        }
+        @media (max-width: 480px) {
+            .popup-card { min-width: 0; max-width: 85vw; }
+            .popup-title { font-size: 0.9rem; }
+            .project-card { padding: 14px; }
+            .right-sidebar-header h2 { font-size: 1.1rem; }
+        }
+
         .project-title {
             font-size: 1.2rem;
             font-weight: 600;
@@ -1416,7 +1447,7 @@
                                 <div class="popup-title">${project.project_title || ''}</div>
                                 ${project.logo_url ? `<img class="popup-logo" src="${project.logo_url}" alt="Logo">` : ''}
                             </div>
-                            ${project.brands ? `<span class="badge phase-badge" style="background:#0d6efd;">${project.brands}</span>` : ''}
+                            ${project.brands ? `<span class="badge phase-badge" style="background:#3498db;">${project.brands}</span>` : ''}
                             <div style="margin-top:6px; font-size:0.9rem;">
                                 <div><strong>Phase:</strong> ${project.phase || ''}</div>
                                 <div><strong>Address:</strong> ${project.project_address || ''}</div>
