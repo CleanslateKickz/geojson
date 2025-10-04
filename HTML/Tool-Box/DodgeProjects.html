@@ -479,6 +479,79 @@
             margin-left: 10px;
         }
 
+        /* Edit form styles: make edit mode look like details card */
+        .edit-form {
+            background-color: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 16px;
+        }
+        .edit-form h3 {
+            margin: 0 0 12px;
+            font-size: 1.1rem;
+            color: var(--secondary-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .edit-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+        @media (max-width: 1200px) {
+            .edit-grid { grid-template-columns: 1fr; }
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .form-group label {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+        .edit-form input,
+        .edit-form select,
+        .edit-form textarea {
+            width: 100%;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 8px 10px;
+            font-size: 0.95rem;
+        }
+        .edit-form textarea { min-height: 76px; }
+        .form-actions {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        /* Popup card improvements */
+        .popup-card { min-width: 240px; }
+        .popup-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+        .popup-title {
+            font-weight: 600;
+            color: var(--secondary-color);
+            font-size: 0.95rem;
+        }
+        .popup-logo {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            object-fit: cover;
+            border: 1px solid #e9ecef;
+        }
+        .popup-brand { display: inline-block; }
+
         .project-title {
             font-size: 1.2rem;
             font-weight: 600;
@@ -837,6 +910,9 @@
                         <button class="btn btn-secondary" id="import-data">
                             <i class="fas fa-upload"></i> Import CSV
                         </button>
+                        <button class="btn btn-warning" id="apply-logos">
+                            <i class="fas fa-image"></i> Apply Logos
+                        </button>
                     </div>
                     <input type="file" id="csv-file" accept=".csv" style="display: none;">
                 </div>
@@ -978,6 +1054,7 @@
                     <div class="edit-form" id="edit-form" style="display: none;">
                         <h3><i class="fas fa-edit"></i> Edit Project</h3>
                         <form id="project-edit-form">
+                            <div class="edit-grid">
                             <div class="form-group">
                                 <label for="edit-logo-url">Logo URL (optional)</label>
                                 <input type="url" id="edit-logo-url" name="logoUrl" placeholder="https://example.com/logo.png">
@@ -1068,6 +1145,7 @@
                                 <label for="edit-construction-details">Construction Details</label>
                                 <textarea id="edit-construction-details" name="Construction Details"></textarea>
                             </div>
+                            </div>
                             
                             <div class="form-actions">
                                 <button type="button" class="btn btn-secondary" id="cancel-edit">
@@ -1112,6 +1190,134 @@
             'Final Planning': '#e74c3c',
             'Pre-Planning': '#7f8c8d'
         };
+
+        // Global projects cache
+        let allProjects = [];
+
+        // Brand -> Logo URL map
+        const BRAND_LOGOS = {
+            '7-Eleven': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/7-Eleven.png',
+            "Arby's": 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Arby%27s.png',
+            'AutoZone': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/AutoZone.png',
+            'CarMax': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/CarMax.png',
+            'Cardenas Market': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Cardenas%20Market.png',
+            'Chipotle': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Chipotle.png',
+            'Circle K': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Circle-K.png',
+            'Costco': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Costco.png',
+            'Dairy Queen': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Dairy-Queen.png',
+            "Dave's Hot Chicken": 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Dave%27s%20Hot%20Chicken.png',
+            "Dick's Sporting Goods": 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Dick%27s%20Sporting%20Goods.png',
+            'Discount Tire': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Discount%20Tire.png',
+            'Dollar General': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Dollar%20General.png',
+            'Dollar Tree': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Dollar-Tree.png',
+            "Domino's": 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Domino%27s.png',
+            'Dutch Bros': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Dutch-Bros.png',
+            'Floor & Décor': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Floor%20%26%20D%C3%A9cor.png',
+            'Ford': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Ford.png',
+            'Goodwill': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Goodwill.png',
+            'Grocery Outlet': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Grocery%20Outlet.png',
+            'Harbor Freight Tools': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Harbor%20Freight%20Tools.png',
+            'Home Depot': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Home-Depot.png',
+            'Hyundai Dealership': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Hyundai%20Dealership.png',
+            'IHOP': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/IHOP.png',
+            'In-N-Out': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/In-N-Out.png',
+            "Jersey Mike's": 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Jersey%20Mike%27s.png',
+            'Jollibee': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Jollibee.png',
+            'KFC': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/KFC.png',
+            'Kia Dealership': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Kia%20Dealership.png',
+            'Lamborghini': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Lamborghini.png',
+            'Lexus Dealership': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Lexus%20Dealership.png',
+            "Love's Country Store": 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Love%27s%20Country%20Store.png',
+            'Maverik': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Maverik.png',
+            'Mazda Dealership': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Mazda%20Dealership.png',
+            "McDonald's": 'https://cleanslatekickz.github.io/geojson/Images/Dodge/McDonald%27s.png',
+            'Mercedes-Benz': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Mercedes-Benz.png',
+            "O'Reilly": 'https://cleanslatekickz.github.io/geojson/Images/Dodge/O%27Reilly.png',
+            'Panda Express': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Panda%20Express.png',
+            'Panera Bread': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Panera%20Bread.png',
+            'Pape': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Pape.png',
+            'Pilot Travel Center': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Pilot%20Travel%20Center.png',
+            'Planet Fitness': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Planet%20Fitness.png',
+            "Popeye's Chicken": 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Popeye%27s%20Chicken.png',
+            'Qdoba Mexican Grill': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Qdoba%20Mexican%20Grill.png',
+            "Raising Cane's": 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Raising_Cane%27s.png',
+            'Safeway': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Safeway.png',
+            'Scooters Coffee': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Scooters%20Coffee.png',
+            'Sonic': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Sonic.png',
+            'Starbucks': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Starbucks.png',
+            'Subaru': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Subaru.png',
+            'Taco Bell': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Taco%20Bell.png',
+            'Taco Time': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Taco%20Time.png',
+            'Texas Roadhouse': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Texas%20Roadhouse.png',
+            'Thriftway': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Thriftway.png',
+            'Toyota': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Toyota.png',
+            'Tractor Supply': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Tractor%20Supply.png',
+            'US Market': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/US%20Market.png',
+            'Walgreens': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Walgreens.png',
+            'Wendys': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Wendys.png',
+            'Whole Foods': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Whole%20Foods.png',
+            'Wienerschnitzel': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Wienerschnitzel.png',
+            'Winco': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/Winco.png',
+            'ampm': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/ampm.png',
+            'Burger King': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/burger-king.png',
+            'Cabela\'s': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/cabelas.png',
+            'Chick-fil-A': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/chick-fil-a.png',
+            'Market of Choice': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/market-of-choice.png',
+            'Nissan': 'https://cleanslatekickz.github.io/geojson/Images/Dodge/nissan.png'
+        };
+
+        function normalizeBrandName(str) {
+            if (!str) return '';
+            return String(str)
+                .toLowerCase()
+                .replace(/&/g, 'and')
+                .replace(/[_-]/g, ' ')
+                .replace(/[^a-z0-9 ]/g, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
+        function findLogoUrlForProject(project) {
+            const candidates = [project.brands, project.project_title];
+            for (const candidate of candidates) {
+                const cNorm = normalizeBrandName(candidate);
+                if (!cNorm) continue;
+                for (const brand of Object.keys(BRAND_LOGOS)) {
+                    if (cNorm.includes(normalizeBrandName(brand))) {
+                        return BRAND_LOGOS[brand];
+                    }
+                }
+            }
+            return null;
+        }
+
+        async function autoApplyBrandLogos(projects) {
+            const updates = [];
+            for (const p of projects) {
+                if (!p.logo_url) {
+                    const url = findLogoUrlForProject(p);
+                    if (url) {
+                        p.logo_url = url; // update locally for UI immediately
+                        updates.push({ id: p.id, logo_url: url });
+                    }
+                }
+            }
+            if (updates.length === 0) {
+                showToast('No logo updates needed');
+                return;
+            }
+            const results = await Promise.allSettled(updates.map(u => fetch(`${API_BASE}/properties?id=${u.id}` , {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ logo_url: u.logo_url })
+            })));
+            const success = results.filter(r => r.status === 'fulfilled').length;
+            const failed = updates.length - success;
+            showToast(`Applied logos to ${success} projects${failed ? `, ${failed} failed` : ''}`);
+            // Refresh UI
+            addMarkersToMap(projects);
+            updateProjectList();
+        }
 
         // Initialize the map
         function initializeMap() {
@@ -1159,21 +1365,25 @@
                 const response = await fetch(`${API_BASE}/properties`);
                 if (!response.ok) throw new Error('Failed to load projects');
                 const projects = await response.json();
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(projects)); // Cache to localStorage
-                addMarkersToMap(projects);
-                updateFilterOptions(projects);
-                updateStatistics(projects);
+                allProjects = projects;
+                // Auto-apply logos for known brands (idempotent)
+                await autoApplyBrandLogos(allProjects);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(allProjects)); // Cache to localStorage
+                addMarkersToMap(allProjects);
+                updateFilterOptions(allProjects);
+                updateStatistics(allProjects);
                 showToast('Projects loaded from database');
             } catch (err) {
                 console.error('Load error:', err);
                 // Fallback to localStorage
                 const projects = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-                if (projects.length === 0) {
+                allProjects = projects;
+                if (allProjects.length === 0) {
                     showToast('No projects available (API unavailable)');
                 } else {
-                    addMarkersToMap(projects);
-                    updateFilterOptions(projects);
-                    updateStatistics(projects);
+                    addMarkersToMap(allProjects);
+                    updateFilterOptions(allProjects);
+                    updateStatistics(allProjects);
                     showToast('Using cached projects (API unavailable)');
                 }
             }
@@ -1199,13 +1409,18 @@
                     markers.push(marker);
                     filteredMarkers.push(marker);
 
-                    // Add popup with basic info
+                    // Add popup with improved UI
                     marker.bindPopup(`
-                        <div style="min-width: 200px;">
-                            <h3 style="margin-bottom: 5px; font-weight: 600;">${project.project_title || ''}</h3>
-                            <p style="margin-bottom: 5px;"><strong>Brand:</strong> ${project.brands || ''}</p>
-                            <p style="margin-bottom: 5px;"><strong>Phase:</strong> ${project.phase || ''}</p>
-                            <p style="margin-bottom: 0;"><strong>Address:</strong> ${project.project_address || ''}</p>
+                        <div class="popup-card">
+                            <div class="popup-header">
+                                <div class="popup-title">${project.project_title || ''}</div>
+                                ${project.logo_url ? `<img class="popup-logo" src="${project.logo_url}" alt="Logo">` : ''}
+                            </div>
+                            ${project.brands ? `<span class="badge phase-badge" style="background:#0d6efd;">${project.brands}</span>` : ''}
+                            <div style="margin-top:6px; font-size:0.9rem;">
+                                <div><strong>Phase:</strong> ${project.phase || ''}</div>
+                                <div><strong>Address:</strong> ${project.project_address || ''}</div>
+                            </div>
                         </div>
                     `);
 
@@ -1750,6 +1965,10 @@
             document.getElementById('export-data').addEventListener('click', exportToCSV);
             document.getElementById('import-data').addEventListener('click', function() {
                 document.getElementById('csv-file').click();
+            });
+            // Apply logos (manual trigger)
+            document.getElementById('apply-logos').addEventListener('click', function(){
+                autoApplyBrandLogos(allProjects);
             });
             
             document.getElementById('csv-file').addEventListener('change', importCSV);
