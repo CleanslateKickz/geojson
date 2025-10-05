@@ -44,6 +44,7 @@
         .app-container {
             display: flex;
             height: 100vh;
+            overflow: hidden; /* prevent layout scrollbars when sidebars slide */
         }
 
         /* Left Sidebar */
@@ -60,6 +61,9 @@
 
         .left-sidebar.collapsed {
             transform: translateX(-100%);
+            position: absolute;
+            left: 0;
+            top: 0;
         }
 
         .left-sidebar-header {
@@ -77,22 +81,55 @@
         }
 
         .toggle-left-sidebar {
-            position: absolute;
-            right: -40px;
-            top: 20px;
-            background-color: var(--secondary-color);
+            background-color: var(--primary-color);
             color: white;
             border: none;
-            border-radius: 0 var(--border-radius) var(--border-radius) 0;
-            padding: 10px;
+            border-radius: var(--border-radius);
+            padding: 6px 10px;
             cursor: pointer;
-            z-index: 1001;
             display: flex;
             align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
+            gap: 6px;
         }
+        .left-sidebar-header .toggle-left-sidebar { position: static; box-shadow: var(--shadow); }
+
+        /* Compact icon button for cleaner headers */
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: #ffffff;
+            color: var(--secondary-color);
+            box-shadow: var(--shadow);
+            cursor: pointer;
+        }
+        .btn-icon:hover { background: #f3f4f6; }
+        .btn-icon i { font-size: 16px; }
+
+        /* Right sidebar header tightening */
+        .project-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .project-header > div { flex: 1; min-width: 0; }
+        .project-header .detail-logo { flex-shrink: 0; }
+
+        /* Left sidebar section polish */
+        .left-sidebar .sidebar-section {
+            background: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 12px;
+            margin: 10px 12px;
+        }
+        .left-sidebar .section-title { margin-bottom: 8px; }
 
         /* Map Container */
         .map-container {
@@ -104,6 +141,44 @@
             height: 100%;
             width: 100%;
         }
+
+        /* Top-centered address search over map */
+        .map-search {
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1200;
+            display: flex;
+            gap: 8px;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            padding: 6px;
+            align-items: center;
+        }
+        .map-search input {
+            width: 380px;
+            max-width: 48vw;
+            border: none;
+            outline: none;
+            padding: 8px 10px;
+            font-size: 0.95rem;
+        }
+        .map-search button {
+            height: 34px;
+            padding: 0 12px;
+            border: none;
+            border-radius: 8px;
+            background: var(--primary-color);
+            color: #fff;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .map-search button:hover { background: #2563eb; }
 
         /* Right Sidebar */
         .right-sidebar {
@@ -119,6 +194,9 @@
 
         .right-sidebar.collapsed {
             transform: translateX(100%);
+            position: absolute;
+            right: 0;
+            top: 0;
         }
 
         .right-sidebar-header {
@@ -157,11 +235,15 @@
         .left-sidebar-content {
             flex: 1;
             overflow-y: auto;
-            padding: 15px;
+            overflow-x: hidden;
+            padding: 12px;
         }
+        /* Hide scrollbars visually but keep scrolling */
+        .left-sidebar-content::-webkit-scrollbar { width: 0; height: 0; }
+        .left-sidebar-content { scrollbar-width: none; -ms-overflow-style: none; }
 
         .sidebar-section {
-            margin-bottom: 20px;
+            margin-bottom: 14px;
         }
 
         .sidebar-section:last-child {
@@ -169,14 +251,45 @@
         }
 
         .section-title {
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 600;
             color: var(--secondary-color);
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Collapsible section */
+        .collapsible {
+            border-radius: var(--border-radius);
+            background: #fff;
+            box-shadow: var(--shadow);
+        }
+        .collapsible-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            cursor: pointer;
+            color: var(--secondary-color);
+            font-weight: 600;
+        }
+        .collapsible-header .label {
             display: flex;
             align-items: center;
             gap: 8px;
         }
+        .collapsible-header .chevron {
+            transition: transform 0.2s ease;
+        }
+        .collapsible.collapsed .chevron { transform: rotate(-90deg); }
+        .collapsible-body {
+            display: none;
+            padding: 10px 12px 12px;
+            border-top: 1px solid #eee;
+        }
+        .collapsible:not(.collapsed) .collapsible-body { display: block; }
 
         .search-box {
             display: flex;
@@ -565,8 +678,8 @@
                 width: 100%;
                 box-shadow: 0 6px 16px rgba(0,0,0,0.08);
             }
-            .left-sidebar.collapsed { transform: translateY(-110%); }
-            .right-sidebar.collapsed { transform: translateY(110%); }
+            .left-sidebar.collapsed { transform: translateX(-110%); }
+            .right-sidebar.collapsed { transform: translateX(110%); }
             .toggle-left-sidebar { right: 10px; top: 10px; }
             .toggle-right-sidebar { left: 10px; top: 10px; }
             .map-container { order: 1; height: 60vh; }
@@ -787,6 +900,52 @@
             background-color: var(--danger-color);
         }
 
+        /* Base layer controls */
+        .base-layer-controls {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+        .btn-light {
+            background-color: #f1f3f5;
+            color: #333;
+        }
+        .btn-light:hover { background-color: #e9ecef; }
+
+        /* Popup brand badge: ensure white text */
+        .popup-brand {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #fff;
+            background: #3b82f6; /* lighter blue for readability */
+            margin-top: 6px;
+        }
+
+        /* Collapsed left reopen button */
+        .collapsed-left-btn {
+            position: fixed;
+            left: 8px;
+            top: 16px;
+            z-index: 1100;
+            display: none;
+            width: 38px;
+            height: 38px;
+            border: none;
+            border-radius: 8px;
+            background: var(--secondary-color);
+            color: #fff;
+            box-shadow: var(--shadow);
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        /* Show reopen button when left sidebar is collapsed */
+        .left-sidebar.collapsed ~ .collapsed-left-btn { display: flex; }
+
         @media (max-width: 768px) {
             .left-sidebar, .right-sidebar {
                 width: 100%;
@@ -800,13 +959,18 @@
     <div class="app-container">
         <!-- Left Sidebar -->
         <div class="left-sidebar" id="left-sidebar">
-            <button class="toggle-left-sidebar" id="toggle-left-sidebar">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-
             <div class="left-sidebar-header">
                 <h2>Map Controls</h2>
-                <i class="fas fa-sliders-h"></i>
+                <div style="display:flex; gap:8px; align-items:center;">
+                    <button class="btn btn-light" id="edit-mode-toggle" title="Enable marker editing">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="toggle-left-sidebar" id="toggle-left-sidebar" title="Hide sidebar">
+                        <i class="fas fa-chevron-left"></i>
+                        <span></span>
+                    </button>
+                    <i class="fas fa-sliders-h"></i>
+                </div>
             </div>
 
             <div class="left-sidebar-content">
@@ -821,11 +985,25 @@
                     </div>
                 </div>
 
-                <!-- Filters Section -->
+                <!-- Base Layers Section -->
                 <div class="sidebar-section">
                     <div class="section-title">
-                        <i class="fas fa-filter"></i> Filters
+                        <i class="fas fa-layer-group"></i> Base Layers
                     </div>
+                    <div class="base-layer-controls">
+                        <button class="btn btn-light" id="layer-google"><i class="fas fa-map"></i> Google Hybrid</button>
+                        <button class="btn btn-light" id="layer-satellite"><i class="fas fa-satellite"></i> Raw Satellite</button>
+                        <button class="btn btn-light" id="layer-jawg"><i class="fas fa-road"></i> Jawg Streets</button>
+                    </div>
+                </div>
+
+                <!-- Filters Section (Collapsible, hidden by default) -->
+                <div class="sidebar-section collapsible collapsed" id="filters-section">
+                    <div class="collapsible-header" id="filters-toggle">
+                        <div class="label"><i class="fas fa-filter"></i> Filters</div>
+                        <i class="fas fa-chevron-down chevron"></i>
+                    </div>
+                    <div class="collapsible-body">
                     <div class="filter-group">
                         <label for="brand-filter">Brand:</label>
                         <select id="brand-filter">
@@ -860,6 +1038,7 @@
                         <button class="btn btn-secondary" id="reset-filters">
                             <i class="fas fa-redo"></i> Reset
                         </button>
+                    </div>
                     </div>
                 </div>
 
@@ -950,9 +1129,21 @@
             </div>
         </div>
 
+        <!-- Collapsed Left Sidebar Reopen Button -->
+        <button class="collapsed-left-btn" id="collapsed-left-btn" title="Open Controls">
+            <i class="fas fa-bars"></i>
+        </button>
+
         <!-- Map Container -->
         <div class="map-container">
             <div id="map"></div>
+            <div class="map-search" id="map-search">
+                <input type="text" id="global-address-search" placeholder="Search address or paste to go..." aria-label="Search address">
+                <button id="global-address-go" title="Go to address">
+                    <i class="fas fa-location-arrow"></i>
+                    <span>Go</span>
+                </button>
+            </div>
         </div>
 
         <!-- Right Sidebar -->
@@ -988,8 +1179,8 @@
                                 <span class="project-brand" id="detail-project-brand">Brand</span>
                             </div>
                             <img id="detail-logo" class="detail-logo" alt="Logo" style="display:none;" />
-                            <button class="btn btn-primary" id="edit-project-btn">
-                                <i class="fas fa-edit"></i> Edit
+                            <button class="btn-icon" id="edit-project-btn" title="Edit">
+                                <i class="fas fa-edit"></i>
                             </button>
                         </div>
 
@@ -1354,15 +1545,98 @@
         function initializeMap() {
             map = L.map('map').setView([47.0, -120.0], 7);
 
-            // Add Google Maps Hybrid tile layer
-            L.tileLayer('https://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}', {
-                attribution: '&copy; <a href="https://www.google.com/maps">Google Maps</a>',
-                maxZoom: 20
-            }).addTo(map);
+            // Define base layers
+            window.baseLayers = {
+                googleHybrid: L.tileLayer('https://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}', {
+                    attribution: '&copy; Google', maxZoom: 20
+                }),
+                rawSatellite: L.tileLayer('https://api.maptiler.com/tiles/satellite-v2/{z}/{x}/{y}.jpg?key=TbsQ5qLxJHC20Jv4Th7E', {
+                    attribution: '&copy; MapTiler', maxZoom: 20
+                }),
+                jawgStreets: L.tileLayer('https://tile.jawg.io/jawg-streets/{z}/{x}/{y}{r}.png?access-token=bs12XjUq7hHD2pgakKp7AcM1Y3Dk7BkLvf162PpbLxMsvgyclXR5HLnYEnI2Zkoa', {
+                    attribution: '&copy; Jawg', maxZoom: 20
+                })
+            };
+
+            // Helper to set base layer (expose globally for UI buttons)
+            window.currentBaseLayer = null;
+            window.setBaseLayer = function(name) {
+                const layer = window.baseLayers[name];
+                if (!layer) return;
+                if (window.currentBaseLayer) {
+                    map.removeLayer(window.currentBaseLayer);
+                }
+                window.currentBaseLayer = layer.addTo(map);
+            };
+
+            // Default base layer
+            setBaseLayer('googleHybrid');
 
             // Add event listeners
             map.on('moveend', updateProjectList);
             map.on('zoomend', updateProjectList);
+        }
+
+        // Edit mode state and helpers
+        window.editMode = false;
+        function setEditMode(enabled) {
+            window.editMode = !!enabled;
+            const btn = document.getElementById('edit-mode-toggle');
+            if (btn) {
+                if (window.editMode) {
+                    btn.classList.add('active');
+                    btn.innerHTML = '<i class="fas fa-edit"></i> Editing';
+                } else {
+                    btn.classList.remove('active');
+                    btn.innerHTML = '<i class="fas fa-edit"></i>';
+                }
+            }
+            // Toggle dragging on existing markers
+            markers.forEach(m => {
+                if (m.dragging) {
+                    window.editMode ? m.dragging.enable() : m.dragging.disable();
+                }
+            });
+        }
+
+        async function saveProjectCoordinates(project, lat, lng) {
+            try {
+                const body = {
+                    "Project Title": project.project_title || null,
+                    Brands: project.brands || null,
+                    "Project Address": project.project_address || null,
+                    Latitude: lat,
+                    Longitude: lng,
+                    "Property Type - Sub-type": project["Property Type - Sub-type"] || project.property_type || null,
+                    Phase: project.phase || null,
+                    County: project.county || null,
+                    "Public / Private": project["Public / Private"] || project.public_private || null,
+                    "Construction - Cost ($ m)": project["Construction - Cost ($ m)"] || project.construction_cost || null,
+                    RBA: project.rba || null,
+                    "# of Buildings": project["# of Buildings"] || project.num_buildings || null,
+                    "# of Floors": project["# of Floors"] || project.num_floors || null,
+                    "Target Dates - Start": project["Target Dates - Start"] || project.target_start || null,
+                    "Target Dates - Completion": project["Target Dates - Completion"] || project.target_completion || null,
+                    "Primary Owner - Name": project["Primary Owner - Name"] || project.owner_name || null,
+                    "Primary Architect - Name": project["Primary Architect - Name"] || project.architect_name || null,
+                    Notes: project.notes || null,
+                    "Construction Details": project["Construction Details"] || project.construction_details || null,
+                    logoUrl: project.logo_url || null
+                };
+                const resp = await fetch(`${API_BASE}/properties?id=${project.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                if (!resp.ok) throw new Error(`Save failed: ${resp.status}`);
+                const saved = await resp.json();
+                project.latitude = saved.Latitude || lat;
+                project.longitude = saved.Longitude || lng;
+                showToast('Coordinates saved');
+            } catch (err) {
+                console.error('Save error:', err);
+                showToast('Could not save coordinates (API unavailable)');
+            }
         }
 
         // Create custom icons: use specific images like BaseMap and allow per-project logo
@@ -1430,7 +1704,8 @@
             projects.forEach(project => {
                 if (project.latitude && project.longitude) {
                     const marker = L.marker([project.latitude, project.longitude], {
-                        icon: createCustomIcon(project.phase, project.logo_url)
+                        icon: createCustomIcon(project.phase, project.logo_url),
+                        draggable: window.editMode
                     }).addTo(map);
 
                     marker.projectData = project;
@@ -1447,7 +1722,7 @@
                                 <div class="popup-title">${project.project_title || ''}</div>
                                 ${project.logo_url ? `<img class="popup-logo" src="${project.logo_url}" alt="Logo">` : ''}
                             </div>
-                            ${project.brands ? `<span class="badge phase-badge" style="background:#3498db;">${project.brands}</span>` : ''}
+                            ${project.brands ? `<span class="popup-brand">${project.brands}</span>` : ''}
                             <div style="margin-top:6px; font-size:0.9rem;">
                                 <div><strong>Phase:</strong> ${project.phase || ''}</div>
                                 <div><strong>Address:</strong> ${project.project_address || ''}</div>
@@ -1458,6 +1733,14 @@
                     // Add click event to show details in sidebar
                     marker.on('click', function() {
                         showProjectDetails(project);
+                    });
+
+                    // Enable coordinate updates on drag end when in edit mode
+                    marker.on('dragend', async function(e) {
+                        const ll = e.target.getLatLng();
+                        project.latitude = ll.lat;
+                        project.longitude = ll.lng;
+                        await saveProjectCoordinates(project, ll.lat, ll.lng);
                     });
                 }
             });
@@ -1634,6 +1917,40 @@
             document.querySelector('.project-card').style.display = 'block';
             document.getElementById('edit-form').style.display = 'none';
             currentEditingProject = null;
+        }
+
+        // Address geocoding using Nominatim and fly-to result
+        let currentSearchMarker = null;
+        async function geocodeAddress(query) {
+            if (!query || query.trim().length < 3) {
+                try { showToast('Please enter a valid address'); } catch {}
+                return;
+            }
+            try {
+                const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`;
+                const res = await fetch(url, { headers: { 'Accept-Language': 'en-US' } });
+                if (!res.ok) throw new Error('Geocoding request failed');
+                const data = await res.json();
+                if (Array.isArray(data) && data.length) {
+                    const { lat, lon, display_name } = data[0];
+                    const latlng = [parseFloat(lat), parseFloat(lon)];
+                    if (currentSearchMarker) { map.removeLayer(currentSearchMarker); }
+                    const pulseIcon = L.divIcon({
+                        className: 'search-marker',
+                        html: '<div style="width:14px;height:14px;border-radius:50%;background:#3b82f6;box-shadow:0 0 0 10px rgba(59,130,246,0.25);"></div>',
+                        iconSize: [20, 20],
+                        iconAnchor: [10, 10]
+                    });
+                    currentSearchMarker = L.marker(latlng, { icon: pulseIcon }).addTo(map);
+                    map.flyTo(latlng, 16);
+                    try { showToast(`Zoomed to: ${display_name}`); } catch {}
+                } else {
+                    try { showToast('No results found'); } catch {}
+                }
+            } catch (err) {
+                console.error(err);
+                try { showToast('Search failed. Please try again.'); } catch {}
+            }
         }
 
         // Save project changes
@@ -1956,7 +2273,17 @@
         function initializeEventListeners() {
             // Sidebar toggles
             document.getElementById('toggle-left-sidebar').addEventListener('click', function() {
-                document.getElementById('left-sidebar').classList.toggle('collapsed');
+                const left = document.getElementById('left-sidebar');
+                left.classList.toggle('collapsed');
+                // flip icon to indicate current state
+                this.innerHTML = left.classList.contains('collapsed')
+                    ? '<i class="fas fa-chevron-right"></i>'
+                    : '<i class="fas fa-chevron-left"></i>';
+                setTimeout(() => map.invalidateSize(), 350);
+            });
+            // Reopen left when collapsed button is visible
+            document.getElementById('collapsed-left-btn').addEventListener('click', function() {
+                document.getElementById('left-sidebar').classList.remove('collapsed');
                 setTimeout(() => map.invalidateSize(), 350);
             });
             
@@ -1991,6 +2318,22 @@
             
             // Toggle markers button
             document.getElementById('toggle-markers').addEventListener('click', toggleMarkers);
+
+            // Global address search handlers
+            const addrInput = document.getElementById('global-address-search');
+            const addrGo = document.getElementById('global-address-go');
+            if (addrInput && addrGo) {
+                addrGo.addEventListener('click', () => geocodeAddress(addrInput.value));
+                addrInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        geocodeAddress(addrInput.value);
+                    }
+                });
+                addrInput.addEventListener('paste', () => {
+                    setTimeout(() => geocodeAddress(addrInput.value), 0);
+                });
+            }
             
             // Data management buttons
             document.getElementById('export-data').addEventListener('click', exportToCSV);
@@ -2011,6 +2354,26 @@
                     applyFilters();
                 }, 300);
             });
+
+            // Base layer toggle buttons
+            const googleBtn = document.getElementById('layer-google');
+            const satelliteBtn = document.getElementById('layer-satellite');
+            const jawgBtn = document.getElementById('layer-jawg');
+            if (googleBtn) googleBtn.addEventListener('click', () => window.setBaseLayer('googleHybrid'));
+            if (satelliteBtn) satelliteBtn.addEventListener('click', () => window.setBaseLayer('rawSatellite'));
+            if (jawgBtn) jawgBtn.addEventListener('click', () => window.setBaseLayer('jawgStreets'));
+
+            // Filters collapsible (hidden by default)
+            const filtersSection = document.getElementById('filters-section');
+            const filtersToggle = document.getElementById('filters-toggle');
+            if (filtersSection && filtersToggle) {
+                filtersSection.classList.add('collapsed');
+                filtersToggle.addEventListener('click', () => filtersSection.classList.toggle('collapsed'));
+            }
+
+            // Edit mode toggle
+            const editToggle = document.getElementById('edit-mode-toggle');
+            if (editToggle) editToggle.addEventListener('click', () => setEditMode(!window.editMode));
         }
 
         // Initialize the application
