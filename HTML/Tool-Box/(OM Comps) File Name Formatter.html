@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OM Comps File Name Formatter</title>
+<style>
+
+</style>
+</head>
+<body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Property Formatter</title>
+  <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.20.15/babel.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(to bottom right, #e0f2fe, #e0e7ff);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Arial', sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    function App() {
+      const [tenantName, setTenantName] = React.useState('');
+      const [address, setAddress] = React.useState('');
+
+      const formatAddress = (input) => {
+        // Remove ZIP code (5 digits or 5+4 format) at the end
+        const cleaned = input.replace(/\s*\b\d{5}(-\d{4})?\b\s*$/, '').trim();
+        // Standardize by removing extra spaces and ensuring proper comma usage
+        return cleaned.replace(/\s{2,}/g, ' ').replace(/,+/g, ',').replace(/,\s*$/, '');
+      };
+
+      const formatOutput = () => {
+        if (tenantName && address) {
+          const formattedAddress = formatAddress(address);
+          return `(${tenantName}) ${formattedAddress}`;
+        }
+        return '';
+      };
+
+      const output = formatOutput();
+
+      React.useEffect(() => {
+        if (output) {
+          navigator.clipboard.writeText(output).catch(err => console.error('Failed to copy: ', err));
+        }
+      }, [output]);
+
+      const handleCopy = () => {
+        if (output) {
+          navigator.clipboard.writeText(output).then(() => {
+            alert('Copied to clipboard!');
+          }).catch(err => console.error('Failed to copy: ', err));
+        }
+      };
+
+      return (
+        <div className="max-w-md w-full mx-auto p-6 bg-white rounded-xl shadow-lg">
+          <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">Property Formatter</h1>
+          <div className="space-y-4">
+            <input
+              type="text"
+              placeholder="Tenant or Property Name"
+              value={tenantName}
+              onChange={(e) => setTenantName(e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+            <input
+              type="text"
+              placeholder="Address (e.g., 123 Main St, Anytown, CA 12345)"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+            <div 
+              className="mt-4 p-4 bg-gray-50 rounded-lg text-gray-800 font-medium text-center cursor-pointer hover:bg-gray-100"
+              onClick={handleCopy}
+            >
+              {output || 'Enter details to see formatted output'}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
+<script>
+
+</script>
+</body>
+</html>
