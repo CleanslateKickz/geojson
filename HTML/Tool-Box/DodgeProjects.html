@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dodge Construction Projects Map</title>
+    <link rel="icon" type="image/x-icon" href="../../../../Pictures/ico — png/Dodge.png">
     
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -1247,6 +1248,11 @@
                             </div>
                         </div>
 
+                        <div class="detail-section" id="images-section">
+                            <h4><i class="fas fa-image"></i> Images</h4>
+                            <div id="image-carousel" class="image-carousel" aria-live="polite"></div>
+                        </div>
+
                         <div class="detail-section">
                             <h4><i class="fas fa-users"></i> Contacts</h4>
                             <div class="detail-grid">
@@ -1280,6 +1286,15 @@
                             <div class="form-group">
                                 <label for="edit-logo-url">Logo URL (optional)</label>
                                 <input type="url" id="edit-logo-url" name="logoUrl" placeholder="https://example.com/logo.png">
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-image-urls">Image URLs (space-separated)</label>
+                                <input type="text" id="edit-image-urls" name="imageUrls" placeholder="https://example.com/a.jpg https://example.com/b.png">
+                                <small>Or upload images below</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-image-files">Upload Images</label>
+                                <input type="file" id="edit-image-files" name="imageFiles" accept="image/*" multiple>
                             </div>
                             <div class="form-group">
                                 <label for="edit-project-title">Project Title</label>
@@ -1528,7 +1543,7 @@
                 showToast('No logo updates needed');
                 return;
             }
-            const results = await Promise.allSettled(updates.map(u => fetch(`${API_BASE}/properties?id=${u.id}` , {
+            const results = await Promise.allSettled(updates.map(u => fetch(`${API_BASE}/projects?id=${u.id}` , {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ logo_url: u.logo_url })
@@ -1623,7 +1638,7 @@
                     "Construction Details": project["Construction Details"] || project.construction_details || null,
                     logoUrl: project.logo_url || null
                 };
-                const resp = await fetch(`${API_BASE}/properties?id=${project.id}`, {
+                const resp = await fetch(`${API_BASE}/projects?id=${project.id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(body)
@@ -1667,7 +1682,7 @@
         // Load projects from API
         async function loadProjects() {
             try {
-                const response = await fetch(`${API_BASE}/properties`);
+                const response = await fetch(`${API_BASE}/projects`);
                 if (!response.ok) throw new Error('Failed to load projects');
                 const projects = await response.json();
                 allProjects = projects;
@@ -1879,6 +1894,9 @@
             } else {
                 detailLogo.style.display = 'none';
             }
+
+            // Render image carousel
+            renderImageCarousel(project);
         }
 
         // Show edit form
@@ -1910,6 +1928,47 @@
             document.getElementById('edit-notes').value = project.notes || '';
             document.getElementById('edit-construction-details').value = project.construction_details || '';
             document.getElementById('edit-logo-url').value = project.logo_url || '';
+            document.getElementById('edit-image-urls').value = Array.isArray(project.image_urls) ? project.image_urls.join(' ') : (project.imageUrls ? project.imageUrls.join(' ') : '');
+        }
+
+        // Render image carousel in details view
+        function renderImageCarousel(project) {
+            const container = document.getElementById('image-carousel');
+            const section = document.getElementById('images-section');
+            if (!container || !section) return;
+
+            const images = Array.isArray(project.image_urls) ? project.image_urls
+                : (Array.isArray(project.imageUrls) ? project.imageUrls : []);
+            if (!images.length) {
+                section.style.display = 'none';
+                container.innerHTML = '';
+                return;
+            }
+            section.style.display = 'block';
+            window.currentCarouselImages = images;
+            window.carouselIndex = 0;
+
+            const render = () => {
+                const idx = window.carouselIndex || 0;
+                const total = window.currentCarouselImages.length;
+                const safeIdx = ((idx % total) + total) % total;
+                const imgUrl = window.currentCarouselImages[safeIdx];
+                container.innerHTML = `
+                    <div class="carousel">
+                        <div class="carousel-controls" style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                            <button class="btn btn-secondary" onclick="carouselPrev()" aria-label="Previous image">◀</button>
+                            <span id="carousel-count" style="font-size:0.9rem;">${safeIdx + 1} / ${total}</span>
+                            <button class="btn btn-secondary" onclick="carouselNext()" aria-label="Next image">▶</button>
+                        </div>
+                        <div class="carousel-frame" style="width:100%;max-height:300px;display:flex;justify-content:center;align-items:center;overflow:hidden;border-radius:8px;background:#f3f4f6;">
+                            <img src="${imgUrl}" alt="Project image ${safeIdx + 1}" style="max-width:100%;max-height:300px;object-fit:contain;"/>
+                        </div>
+                    </div>
+                `;
+            };
+            window.carouselPrev = () => { window.carouselIndex = (window.carouselIndex || 0) - 1; render(); };
+            window.carouselNext = () => { window.carouselIndex = (window.carouselIndex || 0) + 1; render(); };
+            render();
         }
 
         // Hide edit form
@@ -1961,6 +2020,23 @@
             
             const formData = new FormData(event.target);
             const formDataObj = Object.fromEntries(formData);
+            const fileInput = document.getElementById('edit-image-files');
+            const readFilesAsDataUrls = async (files) => {
+                const readers = [];
+                for (const file of files) {
+                    readers.push(new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = () => resolve(reader.result);
+                        reader.onerror = reject;
+                        reader.readAsDataURL(file);
+                    }));
+                }
+                return Promise.all(readers);
+            };
+            const typedUrls = (formDataObj['imageUrls'] || '').trim();
+            const urlList = typedUrls ? typedUrls.split(/\s+/).filter(Boolean) : [];
+            const uploadedList = fileInput && fileInput.files && fileInput.files.length ? await readFilesAsDataUrls(fileInput.files) : [];
+            const combinedImages = [...urlList, ...uploadedList];
             // map form fields to API schema keys
             const updatedProject = {
                 ...currentEditingProject,
@@ -1983,13 +2059,14 @@
                 primary_architect_name: formDataObj['Primary Architect - Name'] || currentEditingProject.primary_architect_name,
                 notes: formDataObj['Notes'] || currentEditingProject.notes,
                 construction_details: formDataObj['Construction Details'] || currentEditingProject.construction_details,
-                logo_url: formDataObj['logoUrl'] || currentEditingProject.logo_url
+                logoUrl: formDataObj['logoUrl'] || currentEditingProject.logo_url,
+                imageUrls: combinedImages.length ? combinedImages : (currentEditingProject.image_urls || null)
             };
             updatedProject.id = currentEditingProject.id;
             
             try {
                 const id = currentEditingProject.id;
-                const url = `${API_BASE}/properties?id=${id}`;
+                const url = `${API_BASE}/projects?id=${id}`;
                 const response = await fetch(url, {
                     method: 'PUT',
                     headers: {
@@ -2031,7 +2108,7 @@
             if (!confirm('Are you sure you want to delete this project?')) return;
             
             try {
-                const response = await fetch(`${API_BASE}/properties?id=${projectId}`, {
+                const response = await fetch(`${API_BASE}/projects?id=${projectId}`, {
                     method: 'DELETE'
                 });
                 
@@ -2062,7 +2139,7 @@
 
         // Export data to CSV
         function exportToCSV() {
-            fetch(`${API_BASE}/properties`)
+            fetch(`${API_BASE}/projects`)
                 .then(response => response.json())
                 .then(projects => {
                     const headers = [
@@ -2160,7 +2237,7 @@
                 try {
                     const id = project.id || Date.now() + Math.random(); // Generate ID if new
                     project.id = id;
-                    const response = await fetch(`${API_BASE}/properties`, {
+                    const response = await fetch(`${API_BASE}/projects`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
