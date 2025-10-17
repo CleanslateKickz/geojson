@@ -1,0 +1,2825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Business Opportunities Explorer - Enhanced</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root {
+    --primary: #4f46e5;
+    --primary-dark: #4338ca;
+    --secondary: #06b6d4;
+    --accent: #f59e0b;
+    --success: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --dark: #1f2937;
+    --light: #f9fafb;
+    --gray: #6b7280;
+    --gray-light: #e5e7eb;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --radius: 0.5rem;
+    --transition: all 0.3s ease;
+}
+
+[data-theme="dark"] {
+    --primary: #6366f1;
+    --primary-dark: #4f46e5;
+    --secondary: #22d3ee;
+    --accent: #fbbf24;
+    --dark: #f9fafb;
+    --light: #111827;
+    --gray: #9ca3af;
+    --gray-light: #374151;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background-color: var(--light);
+    color: var(--dark);
+    min-height: 100vh;
+    transition: var(--transition);
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* Header Styles */
+.header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    padding: 2rem 0;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    overflow: hidden;
+}
+
+.header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,138.7C960,139,1056,117,1152,112C1248,107,1344,117,1392,122.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom;
+    background-size: cover;
+}
+
+.header-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.header p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.theme-toggle {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Navigation Tabs */
+.nav-tabs {
+    display: flex;
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin: 2rem 0 1rem;
+    overflow: hidden;
+}
+
+.nav-tab {
+    flex: 1;
+    padding: 1rem;
+    text-align: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--gray);
+    transition: var(--transition);
+    position: relative;
+}
+
+.nav-tab.active {
+    color: var(--primary);
+}
+
+.nav-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--primary);
+}
+
+.nav-tab:hover:not(.active) {
+    background: rgba(79, 70, 229, 0.05);
+}
+
+/* Controls Section */
+.controls {
+    background: white;
+    padding: 1.5rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 2rem;
+}
+
+.controls-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: end;
+}
+
+.control-group {
+    flex: 1;
+    min-width: 200px;
+}
+
+.control-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--dark);
+    font-size: 0.9rem;
+}
+
+.control-group input,
+.control-group select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--gray-light);
+    border-radius: var(--radius);
+    font-size: 1rem;
+    transition: var(--transition);
+}
+
+.control-group input:focus,
+.control-group select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: var(--radius);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.btn-secondary {
+    background: var(--secondary);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #0891b2;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--primary);
+    border: 1px solid var(--primary);
+}
+
+.btn-outline:hover {
+    background: var(--primary);
+    color: white;
+}
+
+/* Stats Section */
+.stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    text-align: center;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+.stat-card .number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+}
+
+.stat-card .label {
+    color: var(--gray);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Tab Content - Fixed display issue */
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Property Grid */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.card {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: var(--transition);
+    position: relative;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+.card-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    background-color: var(--gray-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gray);
+    position: relative;
+}
+
+.card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.card-favorite {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.8);
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.card-favorite:hover {
+    background: white;
+    transform: scale(1.1);
+}
+
+.card-favorite.active {
+    color: var(--danger);
+}
+
+.card-content {
+    padding: 1.5rem;
+}
+
+.card-header {
+    margin-bottom: 1rem;
+}
+
+.card-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.badges {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge-active {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+}
+
+.badge-pending {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--warning);
+}
+
+.badge-under-contract {
+    background: rgba(6, 182, 212, 0.1);
+    color: var(--secondary);
+}
+
+.badge-sold {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger);
+}
+
+.badge-real-estate {
+    background: rgba(79, 70, 229, 0.1);
+    color: var(--primary);
+}
+
+.badge-address {
+    background: rgba(107, 114, 128, 0.1);
+    color: var(--gray);
+}
+
+.badge-costar {
+    background: rgba(6, 182, 212, 0.1);
+    color: var(--secondary);
+}
+
+.price {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 1rem;
+}
+
+.card-info {
+    margin-bottom: 1rem;
+}
+
+.info-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--gray-light);
+}
+
+.info-row:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.info-label {
+    font-weight: 600;
+    color: var(--gray);
+    min-width: 80px;
+    font-size: 0.9rem;
+}
+
+.info-value {
+    color: var(--dark);
+    flex: 1;
+}
+
+.card-footer {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.card-footer .btn {
+    flex: 1;
+    min-width: 100px;
+    justify-content: center;
+}
+
+/* Dashboard Styles */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.dashboard-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+.dashboard-card h3 {
+    margin-bottom: 1rem;
+    color: var(--dark);
+}
+
+.chart-container {
+    height: 300px;
+    position: relative;
+}
+
+/* Comparison Styles */
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+.comparison-table th,
+.comparison-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--gray-light);
+}
+
+.comparison-table th {
+    background: var(--primary);
+    color: white;
+    font-weight: 600;
+}
+
+.comparison-table tr:last-child td {
+    border-bottom: none;
+}
+
+.comparison-actions {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    animation: fadeIn 0.3s ease;
+}
+
+.modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background-color: white;
+    border-radius: var(--radius);
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    animation: slideIn 0.3s ease;
+}
+
+.modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--gray-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    color: var(--dark);
+    font-size: 1.5rem;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--gray);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.modal-close:hover {
+    background: var(--gray-light);
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-footer {
+    padding: 1.5rem;
+    border-top: 1px solid var(--gray-light);
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+/* Form Styles */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--dark);
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--gray-light);
+    border-radius: var(--radius);
+    font-size: 1rem;
+    transition: var(--transition);
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.form-group .checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Notification Styles */
+.notification-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 2000;
+}
+
+.notification {
+    background: white;
+    padding: 1rem 1.5rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-width: 300px;
+    animation: slideInRight 0.3s ease;
+}
+
+.notification.success {
+    border-left: 4px solid var(--success);
+}
+
+.notification.error {
+    border-left: 4px solid var(--danger);
+}
+
+.notification.warning {
+    border-left: 4px solid var(--warning);
+}
+
+.notification.info {
+    border-left: 4px solid var(--primary);
+}
+
+.notification-icon {
+    font-size: 1.25rem;
+}
+
+.notification.success .notification-icon {
+    color: var(--success);
+}
+
+.notification.error .notification-icon {
+    color: var(--danger);
+}
+
+.notification.warning .notification-icon {
+    color: var(--warning);
+}
+
+.notification.info .notification-icon {
+    color: var(--primary);
+}
+
+.notification-content {
+    flex: 1;
+}
+
+.notification-title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.notification-message {
+    font-size: 0.9rem;
+    color: var(--gray);
+}
+
+.notification-close {
+    background: none;
+    border: none;
+    color: var(--gray);
+    cursor: pointer;
+    font-size: 1.25rem;
+}
+
+/* Tour Guide Styles */
+.tour-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 3000;
+    display: none;
+}
+
+.tour-overlay.active {
+    display: block;
+}
+
+.tour-highlight {
+    position: relative;
+    z-index: 3001;
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.7);
+    border-radius: var(--radius);
+}
+
+.tour-tooltip {
+    position: absolute;
+    background: white;
+    padding: 1.5rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    z-index: 3002;
+    max-width: 300px;
+}
+
+.tour-tooltip h3 {
+    margin-bottom: 0.5rem;
+    color: var(--dark);
+}
+
+.tour-tooltip p {
+    margin-bottom: 1rem;
+    color: var(--gray);
+}
+
+.tour-actions {
+    display: flex;
+    justify-content: space-between;
+}
+
+/* Loading Spinner */
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--gray-light);
+    border-top: 4px solid var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .header h1 {
+        font-size: 1.8rem;
+    }
+
+    .header-content {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+
+    .controls-row {
+        flex-direction: column;
+    }
+
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-content {
+        width: 95%;
+        margin: 1rem;
+    }
+
+    .comparison-table {
+        font-size: 0.9rem;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+        padding: 0.5rem;
+    }
+
+    .nav-tabs {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats {
+        grid-template-columns: 1fr;
+    }
+
+    .card-footer {
+        flex-direction: column;
+    }
+
+    .card-footer .btn {
+        width: 100%;
+    }
+}
+</style>
+</head>
+<body>
+<div class="header">
+    <div class="container">
+        <div class="header-content">
+            <div>
+                <h1>🏪 Business Opportunities Explorer</h1>
+                <p>Discover Your Next Investment Opportunity</p>
+            </div>
+            <div class="header-actions">
+                <button class="theme-toggle" id="themeToggle" title="Toggle dark mode">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="btn btn-outline" id="tourBtn" title="Start tour">
+                    <i class="fas fa-question-circle"></i> Tour
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="nav-tabs">
+        <button class="nav-tab active" data-tab="properties">
+            <i class="fas fa-building"></i> Properties
+        </button>
+        <button class="nav-tab" data-tab="dashboard">
+            <i class="fas fa-chart-line"></i> Dashboard
+        </button>
+        <button class="nav-tab" data-tab="comparison">
+            <i class="fas fa-balance-scale"></i> Comparison
+        </button>
+        <button class="nav-tab" data-tab="favorites">
+            <i class="fas fa-heart"></i> Favorites
+        </button>
+    </div>
+
+    <div class="controls">
+        <div class="controls-row">
+            <div class="control-group">
+                <label for="searchInput">🔍 Search Properties</label>
+                <input type="text" id="searchInput" placeholder="Search by name, area, or price...">
+            </div>
+            <div class="control-group">
+                <label for="areaFilter">📍 Filter by Area</label>
+                <select id="areaFilter">
+                    <option value="">All Areas</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="statusFilter">📊 Filter by Status</label>
+                <select id="statusFilter">
+                    <option value="">All Statuses</option>
+                    <option value="active">Active</option>
+                    <option value="pending">Pending</option>
+                    <option value="under-contract">Under Contract</option>
+                    <option value="sold">Sold</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="priceRangeFilter">💰 Price Range</label>
+                <select id="priceRangeFilter">
+                    <option value="">All Prices</option>
+                    <option value="0-1000000">Under $1M</option>
+                    <option value="1000000-5000000">$1M - $5M</option>
+                    <option value="5000000-10000000">$5M - $10M</option>
+                    <option value="10000000-999999999">Over $10M</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="sortSelect">🔄 Sort By</label>
+                <select id="sortSelect">
+                    <option value="price-high">Price: High to Low</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="name">Name: A to Z</option>
+                    <option value="area">Area: A to Z</option>
+                    <option value="status">Status</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>&nbsp;</label>
+                <button class="btn btn-primary" id="addPropertyBtn">
+                    <i class="fas fa-plus"></i> Add Property
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Properties Tab -->
+    <div class="tab-content properties active">
+        <div class="stats" id="stats"></div>
+        <div class="grid" id="propertyGrid"></div>
+    </div>
+
+    <!-- Dashboard Tab -->
+    <div class="tab-content dashboard">
+        <div class="dashboard-grid">
+            <div class="dashboard-card">
+                <h3>Price Distribution</h3>
+                <div class="chart-container">
+                    <canvas id="priceChart"></canvas>
+                </div>
+            </div>
+            <div class="dashboard-card">
+                <h3>Properties by Area</h3>
+                <div class="chart-container">
+                    <canvas id="areaChart"></canvas>
+                </div>
+            </div>
+            <div class="dashboard-card">
+                <h3>Status Overview</h3>
+                <div class="chart-container">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+            <div class="dashboard-card">
+                <h3>Market Insights</h3>
+                <div id="marketInsights">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comparison Tab -->
+    <div class="tab-content comparison">
+        <div class="comparison-header">
+            <h2>Property Comparison</h2>
+            <p>Select properties to compare side by side</p>
+        </div>
+        <div class="comparison-table-container">
+            <table class="comparison-table" id="comparisonTable">
+                <thead>
+                    <tr>
+                        <th>Property</th>
+                        <th>Price</th>
+                        <th>Area</th>
+                        <th>Status</th>
+                        <th>Real Estate</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="comparisonTableBody">
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 2rem;">
+                            No properties selected for comparison. Go to the Properties tab and select properties to compare.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="comparison-actions">
+            <button class="btn btn-secondary" id="exportComparison">
+                <i class="fas fa-download"></i> Export Comparison
+            </button>
+            <button class="btn btn-outline" id="clearComparison">
+                <i class="fas fa-times"></i> Clear All
+            </button>
+        </div>
+    </div>
+
+    <!-- Favorites Tab -->
+    <div class="tab-content favorites">
+        <div class="favorites-header">
+            <h2>Your Favorite Properties</h2>
+            <p>Properties you've saved for later</p>
+        </div>
+        <div class="grid" id="favoritesGrid">
+            <div class="no-results">
+                <i class="fas fa-heart" style="font-size: 3rem; color: var(--gray-light); margin-bottom: 1rem;"></i>
+                <p>No favorite properties yet. Click the heart icon on any property to add it to your favorites.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Property Detail Modal -->
+<div id="propertyModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle">Property Details</h2>
+            <button class="modal-close" id="closePropertyModal">&times;</button>
+        </div>
+        <div class="modal-body" id="propertyModalBody">
+            <!-- Property details will be loaded here -->
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" id="closePropertyModalBtn">Close</button>
+            <button class="btn btn-primary" id="viewOriginalListing">View Original Listing</button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="editModalTitle">Edit Property Details</h2>
+            <button class="modal-close" id="closeEditModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="editForm">
+                <input type="hidden" id="editIndex">
+                <div class="form-group">
+                    <label for="editTitle">Property Name:</label>
+                    <input type="text" id="editTitle" placeholder="Enter property name">
+                </div>
+                <div class="form-group">
+                    <label for="editArea">Area:</label>
+                    <input type="text" id="editArea" placeholder="Enter area (city, county, state)">
+                </div>
+                <div class="form-group">
+                    <label for="editAddress">Address:</label>
+                    <input type="text" id="editAddress" placeholder="Enter full address">
+                </div>
+                <div class="form-group">
+                    <label for="editPrice">Asking Price:</label>
+                    <input type="text" id="editPrice" placeholder="Enter price (e.g., $1,000,000)">
+                </div>
+                <div class="form-group">
+                    <label for="editUrl">URL:</label>
+                    <input type="text" id="editUrl" placeholder="Enter property URL">
+                </div>
+                <div class="form-group">
+                    <label for="editRealEstate">Real Estate Included:</label>
+                    <input type="text" id="editRealEstate" placeholder="Enter real estate details">
+                </div>
+                <div class="form-group">
+                    <label for="editImageUrl">Image URL:</label>
+                    <input type="text" id="editImageUrl" placeholder="https://example.com/image.jpg">
+                </div>
+                <div class="form-group">
+                    <label for="editExternalUrls">External URLs (one per line):</label>
+                    <textarea id="editExternalUrls" rows="4" placeholder="https://example.com/listing1
+https://example.com/listing2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="editStatus">Property Status:</label>
+                    <select id="editStatus">
+                        <option value="active">Active</option>
+                        <option value="pending">Pending</option>
+                        <option value="under-contract">Under Contract</option>
+                        <option value="sold">Sold</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editCostar">Costar Status:</label>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="editCostar">
+                        <label for="editCostar">Listed on Costar</label>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" id="cancelEdit">Cancel</button>
+            <button class="btn btn-primary" id="saveEdit">Save Changes</button>
+        </div>
+    </div>
+</div>
+
+<!-- Notification Container -->
+<div class="notification-container" id="notificationContainer"></div>
+
+<!-- Tour Guide Overlay -->
+<div class="tour-overlay" id="tourOverlay">
+    <div class="tour-tooltip" id="tourTooltip">
+        <h3 id="tourTitle">Welcome to Business Opportunities Explorer</h3>
+        <p id="tourMessage">Let's take a quick tour of the main features.</p>
+        <div class="tour-actions">
+            <button class="btn btn-outline" id="tourSkip">Skip</button>
+            <button class="btn btn-primary" id="tourNext">Next</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Updated property data from the user with image URLs
+    const propertyData = [
+        {
+            "Property Name": "Gas Station/Grocery/Carwash/Property",
+            "Area": "Cowlitz County, Washington",
+            "Asking Price": "$4,495,000",
+            "URL": "https://www.bizquest.com/business-for-sale/gas-station-grocery-carwash-property/BW2359650/",
+            "Real Estate": "*Real Estate included in asking price",
+            "Address": "1055 Tennant Way, Longview, WA 98632"
+        },
+        {
+            "Property Name": "Grocery & Texaco Gas Station",
+            "Area": "",
+            "Asking Price": "$5,000,000",
+            "URL": "https://product.costar.com/detail/all-properties/9831127/sale",
+            "Real Estate": "",
+            "Address": "1221 Rose Valley Rd, Kelso, WA 98626",
+            "imageUrl": "https://ahprd1cdn.csgpimgs.com/i2/LB3F1dkZH23s-WchJCk-7C3dlVcZZ0i4OpiGNrG7vgs/116/image.jpg"
+        },
+        {
+            "Property Name": "Gas Grocery in Adams Cty. WA",
+            "Area": "",
+            "Asking Price": "$14,950,000",
+            "URL": "https://fortuneco.com/gas-stations/gas-grocery-in-adams-cty-wa/",
+            "Real Estate": "",
+            "Address": "1235 S 1st Ave, Othello, WA 99344",
+            "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AC9h4nqCceZczAbSe5bbVrMWw-PmGewzJKHgCLOOgumKq6FIppY9YPHcC7FA-m9c-JBcB3cr-6VRZjg6ZTDFnn0EK5MhKzs_UCCslJVEIX5YaqxOxk58B7RAz80untfTko-PEuI_AQsl=w408-h307-k-no"
+        },
+        {
+            "Property Name": "Gas Grocery in Washington Cty. OR",
+            "Area": "",
+            "Asking Price": "$3,250,000",
+            "URL": "https://fortuneco.com/properties/gas-grocery-in-washington-cty-or/",
+            "Real Estate": "",
+            "Address": "2355 NE Town Center Dr, Hillsboro, OR 97006",
+            "imageUrl": "https://fortuneco.com/wp-content/uploads/2023/08/PHOTO-TO-USE-2-2048x1536.jpg"
+        },
+        {
+            "Property Name": "Gas Grocery in Grant Cty. WA",
+            "Area": "",
+            "Asking Price": "$7,300,000",
+            "URL": "https://fortuneco.com/gas-stations/gas-grocery-in-grant-cty-wa/",
+            "Real Estate": "",
+            "Address": "5219 Patton Blvd NE, Moses Lake, WA 98837",
+            "imageUrl": "https://fortuneco.com/wp-content/uploads/2025/01/PHOTO-2025-01-13-15-12-13-768x576.jpg"
+        },
+        {
+            "Property Name": "Gas Station/Grocery/Property",
+            "Area": "Kitsap County, Washington",
+            "Asking Price": "",
+            "URL": "https://www.loopnet.com/biz/business-opportunity/gas-station-grocery-property/2392675/",
+            "Real Estate": "* Real Estate included in asking price",
+            "Address": "Seller is willing to carry a contract on the sale at 6% interest"
+        },
+        {
+            "Property Name": "PENDING Gas Station with Real Estate",
+            "Area": "Grays Harbor County, Washington",
+            "Asking Price": "$5,100,000",
+            "URL": "https://www.bizquest.com/real-estate-for-sale/pending-gas-station-with-real-estate/BW2386174/",
+            "Real Estate": "",
+            "Address": ""
+        },
+        {
+            "Property Name": "Excellent Location, Big Land + 3 Rental Incomes + Branded Gas Station SBA LOAN APPROVED WITH 25% DOWN.",
+            "Area": "Kennewick, Washington",
+            "Asking Price": "$5,400,000",
+            "URL": "https://www.bizquest.com/business-for-sale/excellent-location-big-land-3-rental-incomes-branded-gas-station/BW2421312/",
+            "Real Estate": "Included in asking price",
+            "Address": ""
+        },
+        {
+            "Property Name": "High-Volume 76 just outside of Tacoma, WA",
+            "Area": "Tacoma, WA",
+            "Asking Price": "$6,150,000",
+            "URL": "https://www.bizquest.com/real-estate-for-sale/high-volume-76-just-outside-of-tacoma-wa/BW2379528/",
+            "Real Estate": "Steilacoom, WA",
+            "Address": "3040 Steilacoom Blvd SW, Steilacoom, WA 98388"
+        },
+        {
+            "Property Name": "High Volume Gas Station with Property",
+            "Area": "Thurston County, Washington",
+            "Asking Price": "$9,200,000",
+            "URL": "https://www.bizquest.com/real-estate-for-sale/high-volume-gas-station-with-property/BW2376046/",
+            "Real Estate": "",
+            "Address": ""
+        },
+        {
+            "Property Name": "High Volume Gas Station Site For Sale In North Puget Sound Area!!",
+            "Area": "Washington",
+            "Asking Price": "$12,695,000",
+            "URL": "https://www.bizquest.com/business-for-sale/high-volume-gas-station-site-for-sale-in-north-puget-sound-area/BW2348910/",
+            "Real Estate": "Included in asking price",
+            "Address": ""
+        },
+        {
+            "Property Name": "Well established Branded gas station in Skagit County WA 13M",
+            "Area": "Skagit County, Washington",
+            "Asking Price": "$13,000,000",
+            "URL": "https://www.bizquest.com/real-estate-for-sale/well-established-branded-gas-station-in-skagit-county-wa-13m/BW2397169/",
+            "Real Estate": "",
+            "Address": ""
+        },
+        {
+            "Property Name": "Gas Station/ Unbranded /No Contract â€“ Prime Loc. GP: $840K/Yr",
+            "Area": "",
+            "Asking Price": "$4,400,000",
+            "URL": "https://www.bizquest.com/business-for-sale/gas-station-unbranded-no-contract-prime-loc-gp-840k-yr/BW2371695/",
+            "Real Estate": "Not included in asking price",
+            "Address": ""
+        },
+        {
+            "Property Name": "Gas Station G.P $745K Yeary /",
+            "Area": "Thurston County, Washington",
+            "Asking Price": "$4,300,000",
+            "URL": "https://www.bizquest.com/business-for-sale/gas-station-g-p-745k-yeary/BW2359191/",
+            "Real Estate": "Not included in asking price",
+            "Address": ""
+        },
+        {
+            "Property Name": "Branded Mini-Mart/Gas/Real Estate For Sale!!",
+            "Area": "Walla Walla County , Washington",
+            "Asking Price": "$4,295,000",
+            "URL": "https://www.bizquest.com/business-for-sale/branded-mini-mart-gas-real-estate-for-sale/BW2407815/",
+            "Real Estate": "Included in asking price",
+            "Address": ""
+        },
+        {
+            "Property Name": "Chevron Gas Station",
+            "Area": "Yakima County , Washington",
+            "Asking Price": "$4,250,000",
+            "URL": "https://www.bizquest.com/business-for-sale/chevron-gas-station/BW2254631/",
+            "Real Estate": "Not included in asking price",
+            "Address": ""
+        },
+        {
+            "Property Name": "Dual Income Opportunity â€“ Gas Station & Grocery Store two Properties",
+            "Area": "Yakima County , Washington",
+            "Asking Price": "$4,250,000",
+            "URL": "https://www.bizquest.com/business-for-sale/dual-income-opportunity-gas-station-and-grocery-store-two-properties/BW2410461/",
+            "Real Estate": "Not included in asking price",
+            "Address": ""
+        },
+        {
+            "Property Name": "Gas Station / 2024 Year $960,000 Gross Profit",
+            "Area": "Grays Harbor County , Washington",
+            "Asking Price": "$4,200,000",
+            "URL": "https://www.bizquest.com/real-estate-for-sale/gas-station-2024-year-960-000-gross-profit/BW2370304/",
+            "Real Estate": "",
+            "Address": ""
+        },
+        {
+            "Property Name": "Gas Station/Foodmart",
+            "Area": "Snohomish County , Washington",
+            "Asking Price": "$4,200,000",
+            "URL": "https://www.bizquest.com/business-for-sale/gas-station-foodmart/BW2308663/",
+            "Real Estate": "Not included in asking price",
+            "Address": ""
+        },
+        {
+            "Property Name": "Gas Station, Convenience Store and U-Haul",
+            "Area": "Marysville , Washington ( Snohomish County )",
+            "Asking Price": "$3,895,000",
+            "URL": "https://www.bizquest.com/real-estate-for-sale/gas-station-convenience-store-and-u-haul/BW2399171/",
+            "Real Estate": "",
+            "Address": ""
+        },
+        {
+            "Property Name": "Major Brand gas station with C-store",
+            "Area": "",
+            "Asking Price": "$3,890,000",
+            "URL": "https://www.bizquest.com/business-for-sale/major-brand-gas-station-with-c-store/BW1843325/",
+            "Real Estate": "Included in asking price",
+            "Address": ""
+        },
+        {
+            "Property Name": "Gas Station/Grocery/Property",
+            "Area": "Okanogan County , Washington",
+            "Asking Price": "$3,750,000",
+            "URL": "https://www.bizquest.com/business-for-sale/gas-station-grocery-property/BW2365735/",
+            "Real Estate": "*Real Estate included in asking price",
+            "Address": ""
+        },
+        {
+            "Property Name": "Established Gas Station with C-store",
+            "Area": "Snohomish County , Washington",
+            "Asking Price": "$3,290,000",
+            "URL": "https://www.bizquest.com/business-for-sale/established-gas-station-with-c-store/BW2009869/",
+            "Real Estate": "Included in asking price",
+            "Address": ""
+        },
+        {
+            "Property Name": "Gas contract ended!!!!!!",
+            "Area": "Seaview , Washington ( Pacific County )",
+            "Asking Price": "$3,000,000",
+            "URL": "https://www.bizquest.com/real-estate-for-sale/gas-contract-ended/BW2327678/",
+            "Real Estate": "3,000,000 plus Inventory",
+            "Address": ""
+        },
+        {
+            "Property Name": "Grocery with property (Snohomish county $2.8M)",
+            "Area": "Snohomish County , Washington",
+            "Asking Price": "$2,800,000",
+            "URL": "https://www.bizquest.com/real-estate-for-sale/grocery-with-property-snohomish-county-2-8m/BW2423277/",
+            "Real Estate": "",
+            "Address": ""
+        },
+        {
+            "Property Name": "Convenience Store with Property",
+            "Area": "Snohomish County , Washington",
+            "Asking Price": "$2,800,000",
+            "URL": "https://www.bizquest.com/real-estate-for-sale/convenience-store-with-property/BW2386176/",
+            "Real Estate": "",
+            "Address": ""
+        },
+        {
+            "Property Name": "Building Supply & Home Improvement Center (Eastern Washington)",
+            "Area": "",
+            "Asking Price": "$2,700,000",
+            "URL": "https://www.bizquest.com/business-for-sale/building-supply-and-home-improvement-center-eastern-washington/BW2418792/",
+            "Real Estate": "Not included in asking price",
+            "Address": ""
+        },
+        {
+            "Property Name": "Shoreline Family Auto",
+            "Area": "Shoreline , Washington ( King County )",
+            "Asking Price": "$6,400,000",
+            "URL": "https://www.bizquest.com/business-for-sale/retirement-sale-local-family-run-auto-care-in-shoreline/BW2142796/",
+            "Real Estate": "Included in asking price",
+            "Address": ""
+        },
+        {
+            "Property Name": "Gas Station/C-Store/Real Property For Sale!!",
+            "Area": "Snohomish County , Washington",
+            "Asking Price": "$2,695,000",
+            "URL": "https://www.bizquest.com/business-for-sale/gas-station-c-store-real-property-for-sale/BW2381669/",
+            "Real Estate": "Included in asking price",
+            "Address": ""
+        },
+        {
+            "Property Name": "Gross Profit $46,000 Monthly, No Gas Contract",
+            "Area": "Pierce County , Washington",
+            "Asking Price": "$2,500,000",
+            "URL": "https://www.bizquest.com/business-for-sale/gross-profit-46-000-monthly-no-gas-contract/BW2422473/",
+            "Real Estate": "Included Proerty and Business",
+            "Address": ""
+        },
+        {
+            "Property Name": "Long History of Success Restaurant Business & Real Estate for Sale",
+            "Area": "Newport , Washington ( Pend Oreille County )",
+            "Asking Price": "$1,950,000",
+            "URL": "https://www.bizquest.com/business-for-sale/long-history-of-success-restaurant-business-and-real-estate-for-sale/BW2136616/",
+            "Real Estate": "Included in asking price",
+            "Address": ""
+        },
+        {
+            "Property Name": "I-90 Corridor Gas station",
+            "Area": "Grant County , Washington",
+            "Asking Price": "$1,950,000",
+            "URL": "https://www.bizquest.com/business-for-sale/i-90-corridor-gas-station/BW2400072/",
+            "Real Estate": "Not included in asking price",
+            "Address": ""
+        },
+        {
+            "Property Name": "Gas contract ended!!!!!!",
+            "Area": "Seaview , Washington ( Pacific County )",
+            "Asking Price": "$3,000,000",
+            "URL": "https://www.bizquest.com/real-estate-for-sale/gas-contract-ended/BW2327678/",
+            "Real Estate": "",
+            "Address": ""
+        },
+        {
+            "Property Name": "1-5 Gas Station Lot",
+            "Area": "Lewis County , Washington",
+            "Asking Price": "$1,900,000",
+            "URL": "https://www.bizquest.com/real-estate-for-sale/1-5-gas-station-lot/BW2291704/",
+            "Real Estate": "",
+            "Address": ""
+        },
+        {
+            "Property Name": "Gas Station/Grocery/Property",
+            "Area": "Clallam County , Washington",
+            "Asking Price": "$1,850,000",
+            "URL": "https://www.bizquest.com/business-for-sale/gas-station-grocery-property/BW2422359/",
+            "Real Estate": "Included in asking price",
+            "Address": ""
+        },
+        {
+            "Property Name": "Well established branded gas station for sale in Grant County WA 1.7M",
+            "Area": "Grant County WA",
+            "Asking Price": "$1,700,000",
+            "URL": "https://www.bizquest.com/business-for-sale/well-established-branded-gas-station-for-sale-in-grant-county-wa-1-7m/BW2371357/",
+            "Real Estate": "Gas Station with Property.",
+            "Address": ""
+        },
+        {
+            "Property Name": "Exxon Gas Station",
+            "Area": "Spokane , Washington ( Spokane County )",
+            "Asking Price": "$1,600,000",
+            "URL": "https://www.bizquest.com/real-estate-for-sale/exxon-gas-station/BW2380992/",
+            "Real Estate": "Profitable Gas Station for sale or lease.",
+            "Address": "10/9/25"
+        },
+        {
+            "Property Name": "Turnkey newly renovated gas station & convenience store",
+            "Area": "Walla Walla , Washington ( Walla Walla County )",
+            "Asking Price": "$1,500,000",
+            "URL": "https://www.bizquest.com/real-estate-for-sale/turnkey-newly-renovated-gas-station-and-convenience-store/BW2340534/",
+            "Real Estate": "",
+            "Address": ""
+        },
+        {
+            "Property Name": "Grocery with property",
+            "Area": "Pierce County , Washington",
+            "Asking Price": "$1,500,000",
+            "URL": "https://www.bizquest.com/business-for-sale/grocery-with-property/BW2308701/",
+            "Real Estate": "Sale Pending",
+            "Address": ""
+        },
+        {
+            "Property Name": "High Traffic Mexican Restaurant â€“ Land, Business, Building",
+            "Area": "King County , Washington",
+            "Asking Price": "$1,600,000",
+            "URL": "https://www.bizquest.com/business-for-sale/high-traffic-mexican-restaurant-land-business-building/BW2340576/",
+            "Real Estate": "Included in asking price",
+            "Address": ""
+        },
+        {
+            "Property Name": "Eric's Rv",
+            "Area": "Sequim , Washington ( Clallam County )",
+            "Asking Price": "$1,650,000",
+            "URL": "https://www.bizquest.com/business-for-sale/erics-rv/BW2373339/",
+            "Real Estate": "Included in asking price",
+            "Address": ""
+        },
+        {
+            "Property Name": "Downtown Multi Tenant & Commercial Building Opportunity",
+            "Area": "Moses Lake , Washington ( Grant County )",
+            "Asking Price": "$1,750,000",
+            "URL": "https://www.bizquest.com/business-for-sale/downtown-multi-tenant-and-commercial-building-opportunity/BW2316492/",
+            "Real Estate": "Included in asking price",
+            "Address": ""
+        },
+        {
+            "Property Name": "Gas Station/Grocery/Property",
+            "Area": "Grant County WA",
+            "Asking Price": "$1,950,000",
+            "URL": "https://www.bizquest.com/business-for-sale/gas-station-grocery-property/BW2392714/",
+            "Real Estate": "Included in asking price",
+            "Address": ""
+        },
+        {
+            "Property Name": "Grocery/Gas Station/Property",
+            "Area": "Clark County , Washington",
+            "Asking Price": "$2,495,000",
+            "URL": "https://www.bizquest.com/business-for-sale/grocery-gas-station-property/BW2382212/",
+            "Real Estate": "Sale Pending",
+            "Address": ""
+        },
+        {
+            "Property Name": "Established Arcade and Entertainment Center",
+            "Area": "",
+            "Asking Price": "$2,500,000",
+            "URL": "https://www.bizquest.com/business-for-sale/established-arcade-and-entertainment-center/BW2409203/",
+            "Real Estate": "819 South 72nd Avenue, Yakima, WA 98908",
+            "Address": "https://aaifg.com/wp-content/uploads/2025/09/OM-Amusement-Center.pdf"
+        },
+        {
+            "Property Name": "Gas Station / 2024 Year $960,000 Gross Profit",
+            "Area": "Grays Harbor County , Washington",
+            "Asking Price": "$4,200,000",
+            "URL": "https://www.bizquest.com/real-estate-for-sale/gas-station-2024-year-960-000-gross-profit/BW2370304/",
+            "Real Estate": "",
+            "Address": ""
+        },
+        {
+            "Property Name": "Well established Unbranded gas station in Skagit County WA 4.6M",
+            "Area": "Skagit County , Washington",
+            "Asking Price": "$4,600,000",
+            "URL": "https://www.bizquest.com/real-estate-for-sale/well-established-unbranded-gas-station-in-skagit-county-wa-4-6m/BW2397175/",
+            "Real Estate": "",
+            "Address": ""
+        },
+        {
+            "Property Name": "Grocery with property(Snohomish)$3.6M",
+            "Area": "Snohomish County , Washington",
+            "Asking Price": "",
+            "URL": "https://www.bizquest.com/real-estate-for-sale/grocery-with-property-snohomish-3-6m/BW2384401/",
+            "Real Estate": "",
+            "Address": "(Coffee stand, restaurant, Laundromat)"
+        },
+        {
+            "Property Name": "Gas station with property(Pending $1.4M)",
+            "Area": "Lewis County , Washington",
+            "Asking Price": "$1,400,000",
+            "URL": "https://www.bizquest.com/real-estate-for-sale/gas-station-with-property-pending-1-4m/BW2415993/",
+            "Real Estate": "",
+            "Address": ""
+        },
+        {
+            "Property Name": "Turnkey newly renovated gas station & convenience store",
+            "Area": "Walla Walla , Washington ( Walla Walla County )",
+            "Asking Price": "$1,500,000",
+            "URL": "https://www.bizquest.com/real-estate-for-sale/turnkey-newly-renovated-gas-station-and-convenience-store/BW2340534/",
+            "Real Estate": "",
+            "Address": ""
+        },
+        {
+            "Property Name": "Neighborhood Market with Gas Station, Waterfront Home and Dock",
+            "Area": "Gig Harbor , Washington ( Pierce County )",
+            "Asking Price": "$1,250,000",
+            "URL": "https://www.bizquest.com/real-estate-for-sale/neighborhood-market-with-gas-station-waterfront-home-and-dock/BW2295043/",
+            "Real Estate": "",
+            "Address": ""
+        },
+        {
+            "Property Name": "Prime Sequim Mixed Use Real Esate",
+            "Area": "Sequim , Washington ( Clallam County )",
+            "Asking Price": "$1,050,000",
+            "URL": "https://www.bizquest.com/real-estate-for-sale/prime-sequim-mixed-use-real-esate/BW2391079/",
+            "Real Estate": "",
+            "Address": ""
+        },
+        {
+            "Property Name": "Turnkey Smoke Shop with Property in Prime Mixed-Use Building",
+            "Area": "Kitsap County , Washington",
+            "Asking Price": "$1,000,000",
+            "URL": "https://www.bizquest.com/real-estate-for-sale/turnkey-smoke-shop-with-property-in-prime-mixed-use-building/BW2368541/",
+            "Real Estate": "",
+            "Address": ""
+        },
+        {
+            "Property Name": "Grocery with property(Yakima $90K",
+            "Area": "Yakima County , Washington",
+            "Asking Price": "$900,000",
+            "URL": "https://www.bizquest.com/real-estate-for-sale/grocery-with-property-yakima-90k/BW2397577/",
+            "Real Estate": "200 E Mountain View Ave, Ellensburg, WA 98926 416 N Pine St, Ellensburg, WA 98926",
+            "Address": ""
+        },
+        {
+            "Property Name": "Grocery with property(sale pending $800K)",
+            "Area": "Pierce County , Washington",
+            "Asking Price": "$800,000",
+            "URL": "https://www.bizquest.com/real-estate-for-sale/grocery-with-property-sale-pending-800k/BW2397450/",
+            "Real Estate": "",
+            "Address": ""
+        },
+        {
+            "Property Name": "Restaurant $ grocery with property(Skagit County $700K)",
+            "Area": "Skagit County , Washington",
+            "Asking Price": "$700,000",
+            "URL": "https://www.bizquest.com/real-estate-for-sale/restaurant-grocery-with-property-skagit-county-700k/BW2410718/",
+            "Real Estate": "",
+            "Address": ""
+        },
+        {
+            "Property Name": "Restaurant Building for sale",
+            "Area": "Bellingham , Washington ( Whatcom County )",
+            "Asking Price": "$675,000",
+            "URL": "https://www.bizquest.com/real-estate-for-sale/restaurant-building-for-sale/BW2278510/",
+            "Real Estate": "",
+            "Address": ""
+        },
+        {
+            "Property Name": "Pizza Business/Restaurant",
+            "Area": "Gold Bar , Washington ( Snohomish County )",
+            "Asking Price": "$550,000",
+            "URL": "https://www.bizquest.com/real-estate-for-sale/pizza-business-restaurant/BW2328753/",
+            "Real Estate": "",
+            "Address": ""
+        },
+        {
+            "Property Name": "Olympia neighborhood Convenience store",
+            "Area": "Olympia , Washington ( Thurston County )",
+            "Asking Price": "$450,000",
+            "URL": "https://www.bizquest.com/real-estate-for-sale/olympia-neighborhood-convenience-store/BW2415954/",
+            "Real Estate": "",
+            "Address": ""
+        }
+    ];
+
+    // Load data from localStorage or use default data
+    function loadData() {
+        const savedData = localStorage.getItem('properties');
+        if (savedData) {
+            try {
+                return JSON.parse(savedData);
+            } catch (e) {
+                console.error('Error parsing saved data:', e);
+                // Fall back to default data if parsing fails
+                return initializeProperties();
+            }
+        } else {
+            return initializeProperties();
+        }
+    }
+
+    // Initialize properties with custom fields
+    function initializeProperties() {
+        return propertyData.map(property => ({
+            ...property,
+            imageUrl: property.imageUrl || '',
+            externalUrls: property.externalUrls || [],
+            costar: property.costar || false,
+            status: 'active',
+            description: property.description || '',
+            favorite: false,
+            compare: false
+        }));
+    }
+
+    // Save data to localStorage
+    function saveData() {
+        try {
+            localStorage.setItem('properties', JSON.stringify(properties));
+            return true;
+        } catch (e) {
+            console.error('Error saving data:', e);
+            showNotification('error', 'Save Failed', 'There was an error saving your data. Please try again.');
+            return false;
+        }
+    }
+
+    // Initialize data
+    let properties = loadData();
+    let filteredProperties = [...properties];
+    let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+    let comparisonList = JSON.parse(localStorage.getItem('comparisonList')) || [];
+
+    // Utility functions
+    function extractPrice(priceStr) {
+        if (!priceStr) return 0;
+        return parseInt(priceStr.replace(/[$,]/g, '')) || 0;
+    }
+
+    function isPending(name) {
+        return name && (name.toLowerCase().includes('pending') || name.toLowerCase().includes('under contract'));
+    }
+
+    function hasRealEstate(property) {
+        return property['Real Estate'] && property['Real Estate'].toLowerCase().includes('real estate');
+    }
+
+    function hasAddress(property) {
+        return property['Address'] && property['Address'].trim() !== '';
+    }
+
+    // Theme management
+    function initTheme() {
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        updateThemeIcon(savedTheme);
+    }
+
+    function toggleTheme() {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateThemeIcon(newTheme);
+    }
+
+    function updateThemeIcon(theme) {
+        const icon = document.querySelector('#themeToggle i');
+        icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+    }
+
+    // Tab management
+    function initTabs() {
+        const tabs = document.querySelectorAll('.nav-tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabName = tab.getAttribute('data-tab');
+                
+                // Update active tab
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // Update active content
+                tabContents.forEach(content => {
+                    content.classList.remove('active');
+                    if (content.classList.contains(tabName)) {
+                        content.classList.add('active');
+                    }
+                });
+
+                // Load specific tab content
+                if (tabName === 'dashboard') {
+                    loadDashboard();
+                } else if (tabName === 'comparison') {
+                    loadComparison();
+                } else if (tabName === 'favorites') {
+                    loadFavorites();
+                }
+            });
+        });
+    }
+
+    // Populate area filter
+    function populateAreaFilter() {
+        const areas = [...new Set(properties.map(p => p.Area))].sort();
+        const select = document.getElementById('areaFilter');
+        
+        // Clear existing options except the first one
+        while (select.options.length > 1) {
+            select.remove(1);
+        }
+        
+        areas.forEach(area => {
+            const option = document.createElement('option');
+            option.value = area || '';
+            option.textContent = area || 'Unknown Area';
+            select.appendChild(option);
+        });
+    }
+
+    // Update statistics
+    function updateStats() {
+        const total = filteredProperties.length;
+        const avgPrice = Math.round(filteredProperties.reduce((sum, p) => sum + extractPrice(p['Asking Price']), 0) / (total || 1));
+        const withAddresses = filteredProperties.filter(hasAddress).length;
+        const onCostar = filteredProperties.filter(p => p.costar).length;
+
+        const statsHTML = `
+            <div class="stat-card">
+                <div class="number">${total}</div>
+                <div class="label">Properties</div>
+            </div>
+            <div class="stat-card">
+                <div class="number">$${(avgPrice / 1000000).toFixed(1)}M</div>
+                <div class="label">Avg Price</div>
+            </div>
+            <div class="stat-card">
+                <div class="number">${withAddresses}</div>
+                <div class="label">With Address</div>
+            </div>
+            <div class="stat-card">
+                <div class="number">${onCostar}</div>
+                <div class="label">On Costar</div>
+            </div>
+        `;
+        document.getElementById('stats').innerHTML = statsHTML;
+    }
+
+    // Render properties
+    function renderProperties() {
+        const grid = document.getElementById('propertyGrid');
+
+        if (filteredProperties.length === 0) {
+            grid.innerHTML = '<div class="no-results">No properties found matching your criteria.</div>';
+            return;
+        }
+
+        grid.innerHTML = filteredProperties.map((property, index) => {
+            const pending = isPending(property['Property Name']);
+            const realEstate = hasRealEstate(property);
+            const address = hasAddress(property);
+            const hasImage = property.imageUrl && property.imageUrl.trim() !== '';
+            const onCostar = property.costar;
+            const status = property.status || 'active';
+            const isFavorite = favorites.includes(index);
+            const isComparing = comparisonList.includes(index);
+
+            // Determine status badge
+            let statusBadge = '';
+            if (status === 'pending') {
+                statusBadge = '<span class="badge badge-pending">⏳ Pending</span>';
+            } else if (status === 'under-contract') {
+                statusBadge = '<span class="badge badge-under-contract">📝 Under Contract</span>';
+            } else if (status === 'sold') {
+                statusBadge = '<span class="badge badge-sold">❌ Sold</span>';
+            } else {
+                statusBadge = '<span class="badge badge-active">✅ Active</span>';
+            }
+
+            return `
+                <div class="card">
+                    <div class="card-image">
+                        ${hasImage ? `<img src="${property.imageUrl}" alt="${property['Property Name']}" onerror="this.onerror=null;this.parentElement.innerHTML='<i class=\\'fas fa-image\\' style=\\'font-size: 3rem; color: var(--gray);\\'></i>';">` : '<i class="fas fa-image" style="font-size: 3rem; color: var(--gray);"></i>'}
+                        <button class="card-favorite ${isFavorite ? 'active' : ''}" onclick="toggleFavorite(${index})" title="Add to favorites">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <h3 class="card-title">${property['Property Name'] || 'Unnamed Property'}</h3>
+                            <div class="badges">
+                                ${statusBadge}
+                                ${realEstate ? '<span class="badge badge-real-estate">🏠 Real Estate</span>' : ''}
+                                ${address ? '<span class="badge badge-address">📍 Address</span>' : ''}
+                                ${onCostar ? '<span class="badge badge-costar">📊 Costar</span>' : ''}
+                            </div>
+                        </div>
+                        <div class="price">${property['Asking Price'] || 'Price not available'}</div>
+                        <div class="card-info">
+                            <div class="info-row">
+                                <span class="info-label">📍 Area:</span>
+                                <span class="info-value">${property.Area || 'Area not specified'}</span>
+                            </div>
+                            ${address ? `
+                                <div class="info-row">
+                                    <span class="info-label">🏢 Address:</span>
+                                    <span class="info-value">${property.Address}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-primary" onclick="viewProperty(${index})">
+                                <i class="fas fa-eye"></i> View
+                            </button>
+                            <button class="btn btn-secondary" onclick="searchAddress('${encodeURIComponent(property['Property Name'] || '')}', '${encodeURIComponent(property.Area || '')}')">
+                                <i class="fas fa-search"></i> Find
+                            </button>
+                            <button class="btn btn-outline ${isComparing ? 'active' : ''}" onclick="toggleComparison(${index})" title="Add to comparison">
+                                <i class="fas fa-balance-scale"></i> Compare
+                            </button>
+                            <button class="btn btn-outline" onclick="openEditModal(${index})">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        updateStats();
+    }
+
+    // View property details
+    function viewProperty(index) {
+        const property = properties[index];
+        const modal = document.getElementById('propertyModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalBody = document.getElementById('propertyModalBody');
+        
+        modalTitle.textContent = property['Property Name'] || 'Property Details';
+        
+        const hasImage = property.imageUrl && property.imageUrl.trim() !== '';
+        const pending = isPending(property['Property Name']);
+        const realEstate = hasRealEstate(property);
+        const address = hasAddress(property);
+        const onCostar = property.costar;
+        const status = property.status || 'active';
+        
+        // Determine status badge
+        let statusBadge = '';
+        if (status === 'pending') {
+            statusBadge = '<span class="badge badge-pending">⏳ Pending</span>';
+        } else if (status === 'under-contract') {
+            statusBadge = '<span class="badge badge-under-contract">📝 Under Contract</span>';
+        } else if (status === 'sold') {
+            statusBadge = '<span class="badge badge-sold">❌ Sold</span>';
+        } else {
+            statusBadge = '<span class="badge badge-active">✅ Active</span>';
+        }
+        
+        modalBody.innerHTML = `
+            <div class="property-detail">
+                ${hasImage ? `<img src="${property.imageUrl}" alt="${property['Property Name']}" style="width: 100%; height: 300px; object-fit: cover; border-radius: var(--radius); margin-bottom: 1.5rem;">` : ''}
+                <div class="badges" style="margin-bottom: 1.5rem;">
+                    ${statusBadge}
+                    ${realEstate ? '<span class="badge badge-real-estate">🏠 Real Estate</span>' : ''}
+                    ${address ? '<span class="badge badge-address">📍 Address</span>' : ''}
+                    ${onCostar ? '<span class="badge badge-costar">📊 Costar</span>' : ''}
+                </div>
+                <div class="price" style="font-size: 2rem; margin-bottom: 1.5rem;">${property['Asking Price'] || 'Price not available'}</div>
+                <div class="property-details">
+                    <div class="info-row">
+                        <span class="info-label">📍 Area:</span>
+                        <span class="info-value">${property.Area || 'Area not specified'}</span>
+                    </div>
+                    ${address ? `
+                        <div class="info-row">
+                            <span class="info-label">🏢 Address:</span>
+                            <span class="info-value">${property.Address}</span>
+                        </div>
+                    ` : ''}
+                    <div class="info-row">
+                        <span class="info-label">🏠 Real Estate:</span>
+                        <span class="info-value">${property['Real Estate'] || 'Not specified'}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">🔗 URL:</span>
+                        <span class="info-value"><a href="${property.URL}" target="_blank">${property.URL || 'Not available'}</a></span>
+                    </div>
+                </div>
+                ${property.externalUrls && property.externalUrls.length > 0 ? `
+                    <div style="margin-top: 1.5rem;">
+                        <h3>External Links</h3>
+                        <ul style="list-style: none; padding: 0;">
+                            ${property.externalUrls.map(url => `
+                                <li style="margin-bottom: 0.5rem;"><a href="${url}" target="_blank">${url}</a></li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                ` : ''}
+                <div style="margin-top: 1.5rem;">
+                    <div id="propertyMap" style="height: 300px; border-radius: var(--radius); background-color: var(--gray-light); display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-map-marked-alt" style="font-size: 3rem; color: var(--gray);"></i>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Set the original listing button
+        document.getElementById('viewOriginalListing').onclick = () => {
+            if (property.URL) {
+                window.open(property.URL, '_blank');
+            } else {
+                showNotification('warning', 'No URL Available', 'This property does not have an associated URL.');
+            }
+        };
+        
+        modal.classList.add('active');
+    }
+
+    // Toggle favorite
+    function toggleFavorite(index) {
+        const favoriteIndex = favorites.indexOf(index);
+        if (favoriteIndex === -1) {
+            favorites.push(index);
+            showNotification('success', 'Added to Favorites', 'This property has been added to your favorites.');
+        } else {
+            favorites.splice(favoriteIndex, 1);
+            showNotification('info', 'Removed from Favorites', 'This property has been removed from your favorites.');
+        }
+        
+        localStorage.setItem('favorites', JSON.stringify(favorites));
+        renderProperties();
+        
+        // Update favorites tab if it's active
+        if (document.querySelector('.nav-tab[data-tab="favorites"]').classList.contains('active')) {
+            loadFavorites();
+        }
+    }
+
+    // Toggle comparison
+    function toggleComparison(index) {
+        const comparisonIndex = comparisonList.indexOf(index);
+        if (comparisonIndex === -1) {
+            if (comparisonList.length >= 5) {
+                showNotification('warning', 'Comparison Limit', 'You can compare up to 5 properties at a time.');
+                return;
+            }
+            comparisonList.push(index);
+            showNotification('success', 'Added to Comparison', 'This property has been added to the comparison list.');
+        } else {
+            comparisonList.splice(comparisonIndex, 1);
+            showNotification('info', 'Removed from Comparison', 'This property has been removed from the comparison list.');
+        }
+        
+        localStorage.setItem('comparisonList', JSON.stringify(comparisonList));
+        renderProperties();
+        
+        // Update comparison tab if it's active
+        if (document.querySelector('.nav-tab[data-tab="comparison"]').classList.contains('active')) {
+            loadComparison();
+        }
+    }
+
+    // Load favorites
+    function loadFavorites() {
+        const grid = document.getElementById('favoritesGrid');
+        
+        if (favorites.length === 0) {
+            grid.innerHTML = `
+                <div class="no-results" style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+                    <i class="fas fa-heart" style="font-size: 3rem; color: var(--gray-light); margin-bottom: 1rem;"></i>
+                    <p>No favorite properties yet. Click the heart icon on any property to add it to your favorites.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        const favoriteProperties = favorites.map(index => properties[index]);
+        
+        grid.innerHTML = favoriteProperties.map((property, favIndex) => {
+            const originalIndex = favorites[favIndex];
+            const pending = isPending(property['Property Name']);
+            const realEstate = hasRealEstate(property);
+            const address = hasAddress(property);
+            const hasImage = property.imageUrl && property.imageUrl.trim() !== '';
+            const onCostar = property.costar;
+            const status = property.status || 'active';
+
+            // Determine status badge
+            let statusBadge = '';
+            if (status === 'pending') {
+                statusBadge = '<span class="badge badge-pending">⏳ Pending</span>';
+            } else if (status === 'under-contract') {
+                statusBadge = '<span class="badge badge-under-contract">📝 Under Contract</span>';
+            } else if (status === 'sold') {
+                statusBadge = '<span class="badge badge-sold">❌ Sold</span>';
+            } else {
+                statusBadge = '<span class="badge badge-active">✅ Active</span>';
+            }
+
+            return `
+                <div class="card">
+                    <div class="card-image">
+                        ${hasImage ? `<img src="${property.imageUrl}" alt="${property['Property Name']}" onerror="this.onerror=null;this.parentElement.innerHTML='<i class=\\'fas fa-image\\' style=\\'font-size: 3rem; color: var(--gray);\\'></i>';">` : '<i class="fas fa-image" style="font-size: 3rem; color: var(--gray);"></i>'}
+                        <button class="card-favorite active" onclick="toggleFavorite(${originalIndex})" title="Remove from favorites">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <h3 class="card-title">${property['Property Name'] || 'Unnamed Property'}</h3>
+                            <div class="badges">
+                                ${statusBadge}
+                                ${realEstate ? '<span class="badge badge-real-estate">🏠 Real Estate</span>' : ''}
+                                ${address ? '<span class="badge badge-address">📍 Address</span>' : ''}
+                                ${onCostar ? '<span class="badge badge-costar">📊 Costar</span>' : ''}
+                            </div>
+                        </div>
+                        <div class="price">${property['Asking Price'] || 'Price not available'}</div>
+                        <div class="card-info">
+                            <div class="info-row">
+                                <span class="info-label">📍 Area:</span>
+                                <span class="info-value">${property.Area || 'Area not specified'}</span>
+                            </div>
+                            ${address ? `
+                                <div class="info-row">
+                                    <span class="info-label">🏢 Address:</span>
+                                    <span class="info-value">${property.Address}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-primary" onclick="viewProperty(${originalIndex})">
+                                <i class="fas fa-eye"></i> View
+                            </button>
+                            <button class="btn btn-secondary" onclick="searchAddress('${encodeURIComponent(property['Property Name'] || '')}', '${encodeURIComponent(property.Area || '')}')">
+                                <i class="fas fa-search"></i> Find
+                            </button>
+                            <button class="btn btn-outline" onclick="toggleComparison(${originalIndex})" title="Add to comparison">
+                                <i class="fas fa-balance-scale"></i> Compare
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Load comparison
+    function loadComparison() {
+        const tableBody = document.getElementById('comparisonTableBody');
+        
+        if (comparisonList.length === 0) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 2rem;">
+                        No properties selected for comparison. Go to the Properties tab and select properties to compare.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        const comparisonProperties = comparisonList.map(index => properties[index]);
+        
+        tableBody.innerHTML = comparisonProperties.map((property, compIndex) => {
+            const originalIndex = comparisonList[compIndex];
+            const status = property.status || 'active';
+            
+            // Determine status badge
+            let statusBadge = '';
+            if (status === 'pending') {
+                statusBadge = '<span class="badge badge-pending">⏳ Pending</span>';
+            } else if (status === 'under-contract') {
+                statusBadge = '<span class="badge badge-under-contract">📝 Under Contract</span>';
+            } else if (status === 'sold') {
+                statusBadge = '<span class="badge badge-sold">❌ Sold</span>';
+            } else {
+                statusBadge = '<span class="badge badge-active">✅ Active</span>';
+            }
+            
+            return `
+                <tr>
+                    <td>${property['Property Name'] || 'Unnamed Property'}</td>
+                    <td>${property['Asking Price'] || 'Price not available'}</td>
+                    <td>${property.Area || 'Area not specified'}</td>
+                    <td>${statusBadge}</td>
+                    <td>${hasRealEstate(property) ? 'Yes' : 'No'}</td>
+                    <td>
+                        <button class="btn btn-outline" onclick="toggleComparison(${originalIndex})" title="Remove from comparison">
+                            <i class="fas fa-times"></i> Remove
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    // Load dashboard
+    function loadDashboard() {
+        // Create price distribution chart
+        const priceCtx = document.getElementById('priceChart').getContext('2d');
+        const priceRanges = {
+            'Under $1M': 0,
+            '$1M - $5M': 0,
+            '$5M - $10M': 0,
+            'Over $10M': 0
+        };
+        
+        properties.forEach(property => {
+            const price = extractPrice(property['Asking Price']);
+            if (price < 1000000) {
+                priceRanges['Under $1M']++;
+            } else if (price < 5000000) {
+                priceRanges['$1M - $5M']++;
+            } else if (price < 10000000) {
+                priceRanges['$5M - $10M']++;
+            } else {
+                priceRanges['Over $10M']++;
+            }
+        });
+        
+        new Chart(priceCtx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(priceRanges),
+                datasets: [{
+                    label: 'Number of Properties',
+                    data: Object.values(priceRanges),
+                    backgroundColor: [
+                        'rgba(79, 70, 229, 0.7)',
+                        'rgba(6, 182, 212, 0.7)',
+                        'rgba(245, 158, 11, 0.7)',
+                        'rgba(16, 185, 129, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(79, 70, 229, 1)',
+                        'rgba(6, 182, 212, 1)',
+                        'rgba(245, 158, 11, 1)',
+                        'rgba(16, 185, 129, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Create area chart
+        const areaCtx = document.getElementById('areaChart').getContext('2d');
+        const areaCounts = {};
+        
+        properties.forEach(property => {
+            const area = property.Area || 'Unknown';
+            areaCounts[area] = (areaCounts[area] || 0) + 1;
+        });
+        
+        // Sort areas by count and take top 10
+        const sortedAreas = Object.entries(areaCounts)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 10);
+        
+        new Chart(areaCtx, {
+            type: 'pie',
+            data: {
+                labels: sortedAreas.map(area => area[0]),
+                datasets: [{
+                    data: sortedAreas.map(area => area[1]),
+                    backgroundColor: [
+                        'rgba(79, 70, 229, 0.7)',
+                        'rgba(6, 182, 212, 0.7)',
+                        'rgba(245, 158, 11, 0.7)',
+                        'rgba(16, 185, 129, 0.7)',
+                        'rgba(239, 68, 68, 0.7)',
+                        'rgba(107, 114, 128, 0.7)',
+                        'rgba(139, 92, 246, 0.7)',
+                        'rgba(236, 72, 153, 0.7)',
+                        'rgba(14, 165, 233, 0.7)',
+                        'rgba(168, 85, 247, 0.7)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+        
+        // Create status chart
+        const statusCtx = document.getElementById('statusChart').getContext('2d');
+        const statusCounts = {
+            'Active': 0,
+            'Pending': 0,
+            'Under Contract': 0,
+            'Sold': 0
+        };
+        
+        properties.forEach(property => {
+            const status = property.status || 'active';
+            if (status === 'active') {
+                statusCounts['Active']++;
+            } else if (status === 'pending') {
+                statusCounts['Pending']++;
+            } else if (status === 'under-contract') {
+                statusCounts['Under Contract']++;
+            } else if (status === 'sold') {
+                statusCounts['Sold']++;
+            }
+        });
+        
+        new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(statusCounts),
+                datasets: [{
+                    data: Object.values(statusCounts),
+                    backgroundColor: [
+                        'rgba(16, 185, 129, 0.7)',
+                        'rgba(245, 158, 11, 0.7)',
+                        'rgba(6, 182, 212, 0.7)',
+                        'rgba(239, 68, 68, 0.7)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+        
+        // Load market insights
+        setTimeout(() => {
+            const insights = document.getElementById('marketInsights');
+            const totalProperties = properties.length;
+            const avgPrice = Math.round(properties.reduce((sum, p) => sum + extractPrice(p['Asking Price']), 0) / totalProperties);
+            const withRealEstate = properties.filter(hasRealEstate).length;
+            const withAddresses = properties.filter(hasAddress).length;
+            
+            insights.innerHTML = `
+                <div class="insight-item" style="margin-bottom: 1rem;">
+                    <h4 style="margin-bottom: 0.5rem;">Average Price</h4>
+                    <p style="font-size: 1.5rem; font-weight: 700; color: var(--primary);">$${(avgPrice / 1000000).toFixed(1)}M</p>
+                </div>
+                <div class="insight-item" style="margin-bottom: 1rem;">
+                    <h4 style="margin-bottom: 0.5rem;">Properties with Real Estate</h4>
+                    <p style="font-size: 1.5rem; font-weight: 700; color: var(--primary);">${withRealEstate} / ${totalProperties}</p>
+                </div>
+                <div class="insight-item" style="margin-bottom: 1rem;">
+                    <h4 style="margin-bottom: 0.5rem;">Properties with Addresses</h4>
+                    <p style="font-size: 1.5rem; font-weight: 700; color: var(--primary);">${withAddresses} / ${totalProperties}</p>
+                </div>
+                <div class="insight-item">
+                    <h4 style="margin-bottom: 0.5rem;">Market Trend</h4>
+                    <p style="font-size: 1rem; color: var(--gray);">Based on current data, the market is showing steady growth with a focus on properties that include real estate.</p>
+                </div>
+            `;
+        }, 1000);
+    }
+
+    // Search address
+    function searchAddress(propertyName, area) {
+        // Decode URI components
+        const decodedName = decodeURIComponent(propertyName);
+        const decodedArea = decodeURIComponent(area);
+        
+        // Clean up the property name by removing special characters and extra spaces
+        const cleanName = decodedName.replace(/[^\w\s]/gi, '').replace(/\s+/g, ' ').trim();
+        // Clean up the area by removing extra spaces
+        const cleanArea = decodedArea.replace(/\s+/g, ' ').trim();
+        
+        // Create the search query
+        const searchQuery = encodeURIComponent(`${cleanName} ${cleanArea}`);
+        
+        // Open Google search in a new tab
+        window.open(`https://www.google.com/search?q=${searchQuery}`, '_blank');
+    }
+
+    // Open edit modal
+    function openEditModal(index) {
+        const property = properties[index];
+        document.getElementById('editIndex').value = index;
+        document.getElementById('editTitle').value = property['Property Name'] || '';
+        document.getElementById('editArea').value = property.Area || '';
+        document.getElementById('editAddress').value = property.Address || '';
+        document.getElementById('editPrice').value = property['Asking Price'] || '';
+        document.getElementById('editUrl').value = property.URL || '';
+        document.getElementById('editRealEstate').value = property['Real Estate'] || '';
+        document.getElementById('editImageUrl').value = property.imageUrl || '';
+        document.getElementById('editExternalUrls').value = property.externalUrls ? property.externalUrls.join('\n') : '';
+        document.getElementById('editCostar').checked = property.costar || false;
+        document.getElementById('editStatus').value = property.status || 'active';
+        document.getElementById('editModalTitle').textContent = 'Edit Property Details';
+        
+        document.getElementById('editModal').classList.add('active');
+    }
+
+    // Close edit modal
+    function closeEditModal() {
+        document.getElementById('editModal').classList.remove('active');
+    }
+
+    // Save edit
+    function saveEdit() {
+        const index = document.getElementById('editIndex').value;
+        const property = properties[index];
+        
+        // Update all fields
+        property['Property Name'] = document.getElementById('editTitle').value;
+        property.Area = document.getElementById('editArea').value;
+        property.Address = document.getElementById('editAddress').value;
+        property['Asking Price'] = document.getElementById('editPrice').value;
+        property.URL = document.getElementById('editUrl').value;
+        property['Real Estate'] = document.getElementById('editRealEstate').value;
+        property.imageUrl = document.getElementById('editImageUrl').value;
+        const externalUrlsText = document.getElementById('editExternalUrls').value;
+        property.externalUrls = externalUrlsText.split('\n').filter(url => url.trim() !== '');
+        property.costar = document.getElementById('editCostar').checked;
+        property.status = document.getElementById('editStatus').value;
+        
+        // Update filtered properties if the edited property is in the filtered list
+        const filteredIndex = filteredProperties.findIndex(p => p === property);
+        if (filteredIndex !== -1) {
+            filteredProperties[filteredIndex] = property;
+        }
+        
+        if (saveData()) {
+            closeEditModal();
+            renderProperties();
+            showNotification('success', 'Property Updated', 'The property has been successfully updated.');
+        }
+    }
+
+    // Delete property
+    function deleteProperty(index) {
+        if (confirm('Are you sure you want to delete this property?')) {
+            properties.splice(index, 1);
+            
+            // Remove from favorites if present
+            const favoriteIndex = favorites.indexOf(index);
+            if (favoriteIndex !== -1) {
+                favorites.splice(favoriteIndex, 1);
+                // Update all favorite indices that are greater than the deleted index
+                favorites = favorites.map(i => i > index ? i - 1 : i);
+                localStorage.setItem('favorites', JSON.stringify(favorites));
+            }
+            
+            // Remove from comparison if present
+            const comparisonIndex = comparisonList.indexOf(index);
+            if (comparisonIndex !== -1) {
+                comparisonList.splice(comparisonIndex, 1);
+                // Update all comparison indices that are greater than the deleted index
+                comparisonList = comparisonList.map(i => i > index ? i - 1 : i);
+                localStorage.setItem('comparisonList', JSON.stringify(comparisonList));
+            }
+            
+            if (saveData()) {
+                renderProperties();
+                showNotification('info', 'Property Deleted', 'The property has been successfully deleted.');
+            }
+        }
+    }
+
+    // Filter and sort properties
+    function filterAndSort() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const areaFilter = document.getElementById('areaFilter').value;
+        const statusFilter = document.getElementById('statusFilter').value;
+        const priceRangeFilter = document.getElementById('priceRangeFilter').value;
+        const sortBy = document.getElementById('sortSelect').value;
+
+        filteredProperties = properties.filter(property => {
+            const matchesSearch = !searchTerm ||
+                (property['Property Name'] && property['Property Name'].toLowerCase().includes(searchTerm)) ||
+                (property.Area && property.Area.toLowerCase().includes(searchTerm)) ||
+                (property['Asking Price'] && property['Asking Price'].toLowerCase().includes(searchTerm));
+
+            const matchesArea = !areaFilter || (property.Area && property.Area === areaFilter);
+            const matchesStatus = !statusFilter || (property.status && property.status === statusFilter);
+            
+            let matchesPriceRange = true;
+            if (priceRangeFilter) {
+                const price = extractPrice(property['Asking Price']);
+                const [min, max] = priceRangeFilter.split('-').map(p => parseInt(p));
+                matchesPriceRange = price >= min && (max === 999999999 || price <= max);
+            }
+
+            return matchesSearch && matchesArea && matchesStatus && matchesPriceRange;
+        });
+
+        switch(sortBy) {
+            case 'price-high':
+                filteredProperties.sort((a, b) => extractPrice(b['Asking Price']) - extractPrice(a['Asking Price']));
+                break;
+            case 'price-low':
+                filteredProperties.sort((a, b) => extractPrice(a['Asking Price']) - extractPrice(b['Asking Price']));
+                break;
+            case 'name':
+                filteredProperties.sort((a, b) => (a['Property Name'] || '').localeCompare(b['Property Name'] || ''));
+                break;
+            case 'area':
+                filteredProperties.sort((a, b) => (a.Area || '').localeCompare(b.Area || ''));
+                break;
+            case 'status':
+                filteredProperties.sort((a, b) => (a.status || '').localeCompare(b.status || ''));
+                break;
+        }
+
+        renderProperties();
+    }
+
+    // Show notification
+    function showNotification(type, title, message) {
+        const container = document.getElementById('notificationContainer');
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        
+        let icon = '';
+        switch(type) {
+            case 'success':
+                icon = 'fas fa-check-circle';
+                break;
+            case 'error':
+                icon = 'fas fa-exclamation-circle';
+                break;
+            case 'warning':
+                icon = 'fas fa-exclamation-triangle';
+                break;
+            case 'info':
+                icon = 'fas fa-info-circle';
+                break;
+        }
+        
+        notification.innerHTML = `
+            <div class="notification-icon">
+                <i class="${icon}"></i>
+            </div>
+            <div class="notification-content">
+                <div class="notification-title">${title}</div>
+                <div class="notification-message">${message}</div>
+            </div>
+            <button class="notification-close">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        
+        container.appendChild(notification);
+        
+        // Add event listener to close button
+        notification.querySelector('.notification-close').addEventListener('click', () => {
+            notification.remove();
+        });
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            notification.remove();
+        }, 5000);
+    }
+
+    // Tour guide
+    function startTour() {
+        const tourOverlay = document.getElementById('tourOverlay');
+        const tourTooltip = document.getElementById('tourTooltip');
+        const tourTitle = document.getElementById('tourTitle');
+        const tourMessage = document.getElementById('tourMessage');
+        const tourNext = document.getElementById('tourNext');
+        const tourSkip = document.getElementById('tourSkip');
+        
+        let currentStep = 0;
+        const tourSteps = [
+            {
+                element: '.header',
+                title: 'Welcome to Business Opportunities Explorer',
+                message: 'This application helps you discover and analyze business investment opportunities.',
+                position: 'bottom'
+            },
+            {
+                element: '.controls',
+                title: 'Search and Filter',
+                message: 'Use these controls to search for properties and filter by area, status, or price range.',
+                position: 'bottom'
+            },
+            {
+                element: '.stats',
+                title: 'Statistics Overview',
+                message: 'Get a quick overview of the available properties with these key statistics.',
+                position: 'bottom'
+            },
+            {
+                element: '.grid',
+                title: 'Property Cards',
+                message: 'Each card represents a property. Click to view details, add to favorites, or compare properties.',
+                position: 'top'
+            },
+            {
+                element: '.nav-tabs',
+                title: 'Navigation Tabs',
+                message: 'Switch between Properties, Dashboard, Comparison, and Favorites views.',
+                position: 'bottom'
+            }
+        ];
+        
+        function showStep(step) {
+            if (step >= tourSteps.length) {
+                endTour();
+                return;
+            }
+            
+            const currentTourStep = tourSteps[step];
+            const element = document.querySelector(currentTourStep.element);
+            
+            if (!element) {
+                showStep(step + 1);
+                return;
+            }
+            
+            // Add highlight class to element
+            element.classList.add('tour-highlight');
+            
+            // Position tooltip
+            const rect = element.getBoundingClientRect();
+            const tooltipRect = tourTooltip.getBoundingClientRect();
+            
+            let top, left;
+            
+            switch(currentTourStep.position) {
+                case 'top':
+                    top = rect.top - tooltipRect.height - 20;
+                    left = rect.left + (rect.width - tooltipRect.width) / 2;
+                    break;
+                case 'bottom':
+                    top = rect.bottom + 20;
+                    left = rect.left + (rect.width - tooltipRect.width) / 2;
+                    break;
+                case 'left':
+                    top = rect.top + (rect.height - tooltipRect.height) / 2;
+                    left = rect.left - tooltipRect.width - 20;
+                    break;
+                case 'right':
+                    top = rect.top + (rect.height - tooltipRect.height) / 2;
+                    left = rect.right + 20;
+                    break;
+            }
+            
+            // Adjust if tooltip goes out of viewport
+            if (left < 10) left = 10;
+            if (left + tooltipRect.width > window.innerWidth - 10) left = window.innerWidth - tooltipRect.width - 10;
+            if (top < 10) top = 10;
+            if (top + tooltipRect.height > window.innerHeight - 10) top = window.innerHeight - tooltipRect.height - 10;
+            
+            tourTooltip.style.top = `${top}px`;
+            tourTooltip.style.left = `${left}px`;
+            
+            // Update content
+            tourTitle.textContent = currentTourStep.title;
+            tourMessage.textContent = currentTourStep.message;
+            
+            // Update button text
+            if (step === tourSteps.length - 1) {
+                tourNext.textContent = 'Finish';
+            } else {
+                tourNext.textContent = 'Next';
+            }
+            
+            tourOverlay.classList.add('active');
+        }
+        
+        function nextStep() {
+            // Remove highlight from current element
+            const currentElement = document.querySelector(tourSteps[currentStep].element);
+            if (currentElement) {
+                currentElement.classList.remove('tour-highlight');
+            }
+            
+            currentStep++;
+            showStep(currentStep);
+        }
+        
+        function endTour() {
+            // Remove highlight from current element
+            const currentElement = document.querySelector(tourSteps[currentStep].element);
+            if (currentElement) {
+                currentElement.classList.remove('tour-highlight');
+            }
+            
+            tourOverlay.classList.remove('active');
+            
+            // Show completion notification
+            showNotification('success', 'Tour Completed', 'You\'ve completed the tour. Feel free to explore the application on your own!');
+        }
+        
+        // Event listeners
+        tourNext.addEventListener('click', nextStep);
+        tourSkip.addEventListener('click', endTour);
+        
+        // Start tour
+        showStep(0);
+    }
+
+    // Export comparison
+    function exportComparison() {
+        if (comparisonList.length === 0) {
+            showNotification('warning', 'No Properties to Export', 'Please add properties to the comparison list first.');
+            return;
+        }
+        
+        const comparisonProperties = comparisonList.map(index => properties[index]);
+        
+        // Create CSV content
+        let csvContent = 'Property Name,Area,Asking Price,Status,Real Estate,Address,URL\n';
+        
+        comparisonProperties.forEach(property => {
+            const status = property.status || 'active';
+            csvContent += `"${property['Property Name'] || ''}","${property.Area || ''}","${property['Asking Price'] || ''}","${status}","${property['Real Estate'] || ''}","${property.Address || ''}","${property.URL || ''}"\n`;
+        });
+        
+        // Create download link
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'property_comparison.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        showNotification('success', 'Export Successful', 'The comparison data has been exported as a CSV file.');
+    }
+
+    // Clear comparison
+    function clearComparison() {
+        comparisonList = [];
+        localStorage.setItem('comparisonList', JSON.stringify(comparisonList));
+        loadComparison();
+        renderProperties();
+        showNotification('info', 'Comparison Cleared', 'All properties have been removed from the comparison list.');
+    }
+
+    // Event Listeners
+    document.getElementById('searchInput').addEventListener('input', filterAndSort);
+    document.getElementById('areaFilter').addEventListener('change', filterAndSort);
+    document.getElementById('statusFilter').addEventListener('change', filterAndSort);
+    document.getElementById('priceRangeFilter').addEventListener('change', filterAndSort);
+    document.getElementById('sortSelect').addEventListener('change', filterAndSort);
+    document.getElementById('addPropertyBtn').addEventListener('click', function() {
+        document.getElementById('editIndex').value = -1;
+        document.getElementById('editForm').reset();
+        document.getElementById('editCostar').checked = false;
+        document.getElementById('editStatus').value = 'active';
+        document.getElementById('editModalTitle').textContent = 'Add New Property';
+        document.getElementById('editModal').classList.add('active');
+    });
+
+    // Modal event listeners
+    document.getElementById('closePropertyModal').addEventListener('click', function() {
+        document.getElementById('propertyModal').classList.remove('active');
+    });
+    document.getElementById('closePropertyModalBtn').addEventListener('click', function() {
+        document.getElementById('propertyModal').classList.remove('active');
+    });
+    document.getElementById('closeEditModal').addEventListener('click', closeEditModal);
+    document.getElementById('cancelEdit').addEventListener('click', closeEditModal);
+    document.getElementById('saveEdit').addEventListener('click', saveEdit);
+    document.getElementById('editForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveEdit();
+    });
+
+    // Theme toggle
+    document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+    // Tour button
+    document.getElementById('tourBtn').addEventListener('click', startTour);
+
+    // Export comparison
+    document.getElementById('exportComparison').addEventListener('click', exportComparison);
+
+    // Clear comparison
+    document.getElementById('clearComparison').addEventListener('click', clearComparison);
+
+    // Close modals when clicking outside
+    window.addEventListener('click', function(event) {
+        const propertyModal = document.getElementById('propertyModal');
+        const editModal = document.getElementById('editModal');
+        
+        if (event.target === propertyModal) {
+            propertyModal.classList.remove('active');
+        }
+        
+        if (event.target === editModal) {
+            editModal.classList.remove('active');
+        }
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl/Cmd + K for search focus
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            document.getElementById('searchInput').focus();
+        }
+        
+        // Escape to close modals
+        if (e.key === 'Escape') {
+            document.getElementById('propertyModal').classList.remove('active');
+            document.getElementById('editModal').classList.remove('active');
+        }
+    });
+
+    // Initialize
+    initTheme();
+    initTabs();
+    populateAreaFilter();
+    renderProperties();
+
+    // Show welcome notification for first-time users
+    if (!localStorage.getItem('visited')) {
+        setTimeout(() => {
+            showNotification('info', 'Welcome!', 'Click the Tour button to learn about the features of this application.');
+            localStorage.setItem('visited', 'true');
+        }, 1000);
+    }
+</script>
+</body>
+</html>
+</html>
