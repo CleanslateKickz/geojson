@@ -22,7 +22,48 @@
     --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     --radius: 0.5rem;
+    --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    --radius-lg: 1rem;
     --transition: all 0.3s ease;
+}
+
+/* Modal Animations */
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes modalSlideOut {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.95);
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 [data-theme="dark"] {
@@ -89,16 +130,19 @@ body {
     font-size: 2.5rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .header p {
     font-size: 1.1rem;
     opacity: 0.9;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .header-actions {
     display: flex;
     gap: 1rem;
+    align-items: center;
 }
 
 .theme-toggle {
@@ -113,10 +157,12 @@ body {
     justify-content: center;
     cursor: pointer;
     transition: var(--transition);
+    backdrop-filter: blur(10px);
 }
 
 .theme-toggle:hover {
     background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
 }
 
 /* Navigation Tabs */
@@ -127,6 +173,7 @@ body {
     box-shadow: var(--shadow);
     margin: 2rem 0 1rem;
     overflow: hidden;
+    position: relative;
 }
 
 .nav-tab {
@@ -140,10 +187,12 @@ body {
     color: var(--gray);
     transition: var(--transition);
     position: relative;
+    z-index: 1;
 }
 
 .nav-tab.active {
     color: var(--primary);
+    background: rgba(79, 70, 229, 0.05);
 }
 
 .nav-tab.active::after {
@@ -153,11 +202,14 @@ body {
     left: 0;
     right: 0;
     height: 3px;
-    background: var(--primary);
+    background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+    border-radius: 2px 2px 0 0;
 }
 
 .nav-tab:hover:not(.active) {
     background: rgba(79, 70, 229, 0.05);
+    color: var(--primary);
+    transform: translateY(-2px);
 }
 
 /* Controls Section */
@@ -506,6 +558,28 @@ body {
     justify-content: center;
     font-size: 0.8rem;
     padding: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.card-footer .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.card-footer .btn i {
+    margin-right: 0.25rem;
+}
+
+/* Enhanced button styles for better visual hierarchy */
+.btn-outline.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.btn-outline.active:hover {
+    background: var(--primary-dark);
+    border-color: var(--primary-dark);
 }
 
 /* Dashboard Styles */
@@ -674,6 +748,7 @@ body {
     border-radius: var(--radius);
     font-size: 1rem;
     transition: var(--transition);
+    background: white;
 }
 
 .form-group input:focus,
@@ -682,15 +757,63 @@ body {
     outline: none;
     border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    transform: translateY(-1px);
 }
 
 .form-group .checkbox-group {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    padding: 0.75rem;
+    background: var(--gray-light);
+    border-radius: var(--radius);
+    transition: var(--transition);
 }
 
-/* Notification Styles */
+.form-group .checkbox-group:hover {
+    background: rgba(79, 70, 229, 0.05);
+}
+
+.form-group input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+    transform: scale(1.2);
+}
+
+/* Validation Error Styles */
+.validation-error {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    border: 1px solid #f87171;
+    border-radius: var(--radius);
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    animation: slideUp 0.3s ease-out;
+}
+
+.validation-error i {
+    color: #dc2626;
+    font-size: 1.25rem;
+    margin-top: 0.125rem;
+}
+
+.validation-error strong {
+    color: #dc2626;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.validation-error ul {
+    margin: 0;
+    padding-left: 1rem;
+    color: #7f1d1d;
+}
+
+.validation-error li {
+    margin-bottom: 0.25rem;
+}
 .notification-container {
     position: fixed;
     top: 20px;
@@ -2029,6 +2152,9 @@ https://example.com/listing2"></textarea>
                             <button class="btn btn-primary" onclick="viewProperty(${originalIndex})">
                                 <i class="fas fa-eye"></i> View
                             </button>
+                            <button class="btn btn-outline" onclick="openEditModal(${originalIndex})" title="Edit property">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
                             <button class="btn btn-secondary" onclick="searchAddress('${encodeURIComponent(property['Property Name'] || '')}', '${encodeURIComponent(property.Area || '')}')">
                                 <i class="fas fa-search"></i> Find
                             </button>
@@ -2530,33 +2656,174 @@ https://example.com/listing2"></textarea>
     }
 
     // Save edit
-    function saveEdit() {
-        const index = document.getElementById('editIndex').value;
-        const property = properties[index];
+    // Validate form data
+    function validatePropertyForm() {
+        const errors = [];
         
-        // Update all fields
-        property['Property Name'] = document.getElementById('editTitle').value;
-        property.Area = document.getElementById('editArea').value;
-        property.Address = document.getElementById('editAddress').value;
-        property['Asking Price'] = document.getElementById('editPrice').value;
-        property.URL = document.getElementById('editUrl').value;
-        property['Real Estate'] = document.getElementById('editRealEstate').value;
-        property.imageUrl = document.getElementById('editImageUrl').value;
-        const externalUrlsText = document.getElementById('editExternalUrls').value;
-        property.externalUrls = externalUrlsText.split('\n').filter(url => url.trim() !== '');
-        property.costar = document.getElementById('editCostar').checked;
-        property.status = document.getElementById('editStatus').value;
-        
-        // Update filtered properties if the edited property is in the filtered list
-        const filteredIndex = filteredProperties.findIndex(p => p === property);
-        if (filteredIndex !== -1) {
-            filteredProperties[filteredIndex] = property;
+        // Required fields validation
+        const propertyName = document.getElementById('editTitle').value.trim();
+        if (!propertyName) {
+            errors.push('Property Name is required');
         }
         
-        if (saveData()) {
-            closeEditModal();
-            renderProperties();
-            showNotification('success', 'Property Updated', 'The property has been successfully updated.');
+        const area = document.getElementById('editArea').value.trim();
+        if (!area) {
+            errors.push('Area is required');
+        }
+        
+        // Price validation
+        const price = document.getElementById('editPrice').value.trim();
+        if (price && !/^\$?[\d,]+(\.\d{2})?$/.test(price.replace(/,/g, ''))) {
+            errors.push('Price must be a valid currency format (e.g., $1,000,000 or 1000000)');
+        }
+        
+        // URL validation
+        const url = document.getElementById('editUrl').value.trim();
+        if (url && !isValidUrl(url)) {
+            errors.push('URL must be a valid web address');
+        }
+        
+        // Image URL validation
+        const imageUrl = document.getElementById('editImageUrl').value.trim();
+        if (imageUrl && !isValidUrl(imageUrl)) {
+            errors.push('Image URL must be a valid web address');
+        }
+        
+        // External URLs validation
+        const externalUrls = document.getElementById('editExternalUrls').value.trim();
+        if (externalUrls) {
+            const urls = externalUrls.split('\n').filter(url => url.trim() !== '');
+            for (const url of urls) {
+                if (!isValidUrl(url.trim())) {
+                    errors.push(`Invalid external URL: ${url.trim()}`);
+                    break;
+                }
+            }
+        }
+        
+        return errors;
+    }
+    
+    // URL validation helper
+    function isValidUrl(string) {
+        try {
+            new URL(string);
+            return true;
+        } catch (_) {
+            return false;
+        }
+    }
+    
+    // Show validation errors
+    function showValidationErrors(errors) {
+        const errorContainer = document.getElementById('validationErrors') || createErrorContainer();
+        errorContainer.innerHTML = `
+            <div class="validation-error">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div>
+                    <strong>Please fix the following errors:</strong>
+                    <ul>
+                        ${errors.map(error => `<li>${error}</li>`).join('')}
+                    </ul>
+                </div>
+            </div>
+        `;
+        errorContainer.style.display = 'block';
+        
+        // Scroll to top of modal to show errors
+        document.querySelector('.modal-content').scrollTop = 0;
+    }
+    
+    // Create error container if it doesn't exist
+    function createErrorContainer() {
+        const container = document.createElement('div');
+        container.id = 'validationErrors';
+        container.style.display = 'none';
+        
+        const modalBody = document.querySelector('#editModal .modal-body');
+        modalBody.insertBefore(container, modalBody.firstChild);
+        
+        return container;
+    }
+    
+    // Hide validation errors
+    function hideValidationErrors() {
+        const errorContainer = document.getElementById('validationErrors');
+        if (errorContainer) {
+            errorContainer.style.display = 'none';
+        }
+    }
+
+    function saveEdit() {
+        // Hide any previous validation errors
+        hideValidationErrors();
+        
+        // Validate form data
+        const validationErrors = validatePropertyForm();
+        if (validationErrors.length > 0) {
+            showValidationErrors(validationErrors);
+            return;
+        }
+        
+        const index = document.getElementById('editIndex').value;
+        
+        // Check if this is adding a new property
+        if (index === '-1') {
+            // Create new property
+            const newProperty = {
+                'Property Name': document.getElementById('editTitle').value.trim(),
+                Area: document.getElementById('editArea').value.trim(),
+                Address: document.getElementById('editAddress').value.trim(),
+                'Asking Price': document.getElementById('editPrice').value.trim(),
+                URL: document.getElementById('editUrl').value.trim(),
+                'Real Estate': document.getElementById('editRealEstate').value.trim(),
+                imageUrl: document.getElementById('editImageUrl').value.trim(),
+                costar: document.getElementById('editCostar').checked,
+                status: document.getElementById('editStatus').value
+            };
+            
+            // Handle external URLs
+            const externalUrlsText = document.getElementById('editExternalUrls').value.trim();
+            newProperty.externalUrls = externalUrlsText ? externalUrlsText.split('\n').filter(url => url.trim() !== '') : [];
+            
+            // Add to properties array
+            properties.push(newProperty);
+            filteredProperties = [...properties];
+            
+            if (saveData()) {
+                closeEditModal();
+                renderProperties();
+                populateAreaFilter();
+                showNotification('success', 'Property Added', 'The new property has been successfully added.');
+            }
+        } else {
+            // Update existing property
+            const property = properties[index];
+            
+            // Update all fields
+            property['Property Name'] = document.getElementById('editTitle').value.trim();
+            property.Area = document.getElementById('editArea').value.trim();
+            property.Address = document.getElementById('editAddress').value.trim();
+            property['Asking Price'] = document.getElementById('editPrice').value.trim();
+            property.URL = document.getElementById('editUrl').value.trim();
+            property['Real Estate'] = document.getElementById('editRealEstate').value.trim();
+            property.imageUrl = document.getElementById('editImageUrl').value.trim();
+            const externalUrlsText = document.getElementById('editExternalUrls').value.trim();
+            property.externalUrls = externalUrlsText ? externalUrlsText.split('\n').filter(url => url.trim() !== '') : [];
+            property.costar = document.getElementById('editCostar').checked;
+            property.status = document.getElementById('editStatus').value;
+            
+            // Update filtered properties if the edited property is in the filtered list
+            const filteredIndex = filteredProperties.findIndex(p => p === property);
+            if (filteredIndex !== -1) {
+                filteredProperties[filteredIndex] = property;
+            }
+            
+            if (saveData()) {
+                closeEditModal();
+                renderProperties();
+                showNotification('success', 'Property Updated', 'The property has been successfully updated.');
+            }
         }
     }
 
@@ -2885,7 +3152,16 @@ https://example.com/listing2"></textarea>
         document.getElementById('editCostar').checked = false;
         document.getElementById('editStatus').value = 'active';
         document.getElementById('editModalTitle').textContent = 'Add New Property';
-        document.getElementById('editModal').classList.add('active');
+        
+        // Add animation class
+        const modal = document.getElementById('editModal');
+        modal.classList.add('active');
+        modal.style.animation = 'modalSlideIn 0.3s ease-out';
+        
+        // Focus on first input
+        setTimeout(() => {
+            document.getElementById('editPropertyName').focus();
+        }, 100);
     });
 
     // Reset and Sync handlers
