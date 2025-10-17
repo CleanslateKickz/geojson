@@ -1020,10 +1020,28 @@ body {
                 </select>
             </div>
             <div class="control-group">
+                <label for="missingAddressToggle">📭 Only properties without address</label>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <input type="checkbox" id="missingAddressToggle">
+                    <span style="color: var(--gray); font-size: 0.9rem;">Show only missing address</span>
+                </div>
+            </div>
+            <div class="control-group">
                 <label>&nbsp;</label>
                 <button class="btn btn-primary" id="addPropertyBtn">
                     <i class="fas fa-plus"></i> Add Property
                 </button>
+            </div>
+            <div class="control-group">
+                <label>&nbsp;</label>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <button class="btn btn-outline" id="syncDataBtn" title="Merge defaults with your data">
+                        <i class="fas fa-rotate"></i> Sync Defaults
+                    </button>
+                    <button class="btn btn-danger" id="resetDataBtn" title="Clear local changes and reload defaults">
+                        <i class="fas fa-trash"></i> Reset Data
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -1701,20 +1719,93 @@ https://example.com/listing2"></textarea>
         }
     ];
 
-    // Load data from localStorage or use default data
-    function loadData() {
-        const savedData = localStorage.getItem('properties');
-        if (savedData) {
-            try {
-                return JSON.parse(savedData);
-            } catch (e) {
-                console.error('Error parsing saved data:', e);
-                // Fall back to default data if parsing fails
-                return initializeProperties();
-            }
-        } else {
+    // ===== Data schema/version and migration helpers =====
+    const SCHEMA_VERSION = '2';
+
+    function standardizeProperty(p) {
+        return {
+            ...p,
+            imageUrl: (p.imageUrl || ''),
+            externalUrls: Array.isArray(p.externalUrls) ? p.externalUrls : [],
+            costar: !!p.costar,
+            status: p.status || 'active',
+            description: p.description || '',
+            favorite: !!p.favorite,
+            compare: !!p.compare
+        };
+    }
+
+    function keyFor(prop) {
+        const urlKey = (prop && prop.URL ? String(prop.URL).trim().toLowerCase() : '');
+        const nameKey = (prop && prop['Property Name'] ? String(prop['Property Name']).trim().toLowerCase() : '');
+        return urlKey || nameKey;
+    }
+
+    function prefer(saved, def) {
+        // Use saved if it is truthy and not an empty string; otherwise use default
+        return (saved !== undefined && saved !== null && String(saved).trim() !== '') ? saved : def;
+    }
+
+    function migrateData(savedArr) {
+        try {
+            const saved = Array.isArray(savedArr) ? savedArr : [];
+            const savedMap = new Map();
+            saved.forEach(s => savedMap.set(keyFor(s), s));
+
+            const merged = propertyData.map(def => {
+                const s = savedMap.get(keyFor(def));
+                if (!s) return standardizeProperty(def);
+                const mergedProp = {
+                    'Property Name': prefer(s['Property Name'], def['Property Name']),
+                    'Area': prefer(s.Area, def.Area),
+                    'Asking Price': prefer(s['Asking Price'], def['Asking Price']),
+                    'URL': prefer(s.URL, def.URL),
+                    'Real Estate': prefer(s['Real Estate'], def['Real Estate']),
+                    'Address': prefer(s.Address, def.Address),
+                    imageUrl: prefer(s.imageUrl, def.imageUrl),
+                    externalUrls: Array.isArray(s.externalUrls) ? s.externalUrls : (def.externalUrls || []),
+                    costar: s.costar !== undefined ? s.costar : (def.costar || false),
+                    status: prefer(s.status, def.status || 'active'),
+                    description: prefer(s.description, def.description),
+                    favorite: s.favorite || false,
+                    compare: s.compare || false
+                };
+                return standardizeProperty(mergedProp);
+            });
+
+            // Append any saved items that don't exist in defaults
+            saved.forEach(s => {
+                const k = keyFor(s);
+                if (!k) return;
+                const exists = merged.some(m => keyFor(m) === k);
+                if (!exists) merged.push(standardizeProperty(s));
+            });
+
+            localStorage.setItem('properties_meta', JSON.stringify({ version: SCHEMA_VERSION, lastMigratedAt: new Date().toISOString() }));
+            return merged;
+        } catch (e) {
+            console.error('Migration error:', e);
             return initializeProperties();
         }
+    }
+
+    // Load data and apply migration/standardization
+    function loadData() {
+        const savedStr = localStorage.getItem('properties');
+        const metaStr = localStorage.getItem('properties_meta');
+        let saved = null;
+        try { saved = savedStr ? JSON.parse(savedStr) : null; } catch (e) { saved = null; }
+        let meta = null;
+        try { meta = metaStr ? JSON.parse(metaStr) : null; } catch (e) { meta = null; }
+
+        if (!saved) {
+            // No local data, start from defaults
+            return initializeProperties();
+        }
+
+        // If version mismatch or structure incomplete, merge with defaults
+        const needsMigration = !meta || meta.version !== SCHEMA_VERSION || !Array.isArray(saved);
+        return needsMigration ? migrateData(saved) : saved.map(standardizeProperty);
     }
 
     // Initialize properties with custom fields
@@ -1735,6 +1826,7 @@ https://example.com/listing2"></textarea>
     function saveData() {
         try {
             localStorage.setItem('properties', JSON.stringify(properties));
+            localStorage.setItem('properties_meta', JSON.stringify({ version: SCHEMA_VERSION, lastSavedAt: new Date().toISOString() }));
             return true;
         } catch (e) {
             console.error('Error saving data:', e);
@@ -2505,6 +2597,7 @@ https://example.com/listing2"></textarea>
         const statusFilter = document.getElementById('statusFilter').value;
         const priceRangeFilter = document.getElementById('priceRangeFilter').value;
         const sortBy = document.getElementById('sortSelect').value;
+        const missingAddressOnly = document.getElementById('missingAddressToggle') ? document.getElementById('missingAddressToggle').checked : false;
 
         filteredProperties = properties.filter(property => {
             const matchesSearch = !searchTerm ||
@@ -2514,6 +2607,7 @@ https://example.com/listing2"></textarea>
 
             const matchesArea = !areaFilter || (property.Area && property.Area === areaFilter);
             const matchesStatus = !statusFilter || (property.status && property.status === statusFilter);
+            const matchesMissingAddress = !missingAddressOnly || !hasAddress(property);
             
             let matchesPriceRange = true;
             if (priceRangeFilter) {
@@ -2522,7 +2616,7 @@ https://example.com/listing2"></textarea>
                 matchesPriceRange = price >= min && (max === 999999999 || price <= max);
             }
 
-            return matchesSearch && matchesArea && matchesStatus && matchesPriceRange;
+            return matchesSearch && matchesArea && matchesStatus && matchesPriceRange && matchesMissingAddress;
         });
 
         switch(sortBy) {
@@ -2780,6 +2874,7 @@ https://example.com/listing2"></textarea>
     document.getElementById('statusFilter').addEventListener('change', filterAndSort);
     document.getElementById('priceRangeFilter').addEventListener('change', filterAndSort);
     document.getElementById('sortSelect').addEventListener('change', filterAndSort);
+    document.getElementById('missingAddressToggle').addEventListener('change', filterAndSort);
     document.getElementById('addPropertyBtn').addEventListener('click', function() {
         document.getElementById('editIndex').value = -1;
         document.getElementById('editForm').reset();
@@ -2788,6 +2883,32 @@ https://example.com/listing2"></textarea>
         document.getElementById('editModalTitle').textContent = 'Add New Property';
         document.getElementById('editModal').classList.add('active');
     });
+
+    // Reset and Sync handlers
+    function resetLocalData() {
+        localStorage.removeItem('properties');
+        localStorage.removeItem('properties_meta');
+        localStorage.removeItem('favorites');
+        localStorage.removeItem('comparisonList');
+        properties = initializeProperties();
+        filteredProperties = [...properties];
+        saveData();
+        populateAreaFilter();
+        renderProperties();
+        showNotification('info', 'Local Data Reset', 'Defaults reloaded and local changes cleared.');
+    }
+
+    function syncDefaults() {
+        properties = migrateData(properties);
+        filteredProperties = [...properties];
+        saveData();
+        populateAreaFilter();
+        renderProperties();
+        showNotification('success', 'Synced with Defaults', 'Data merged with latest defaults without losing edits.');
+    }
+
+    document.getElementById('resetDataBtn').addEventListener('click', resetLocalData);
+    document.getElementById('syncDataBtn').addEventListener('click', syncDefaults);
 
     // Modal event listeners
     document.getElementById('closePropertyModal').addEventListener('click', function() {
