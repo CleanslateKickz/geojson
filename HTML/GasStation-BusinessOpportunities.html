@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Business Opportunities Explorer - Enhanced</title>
-    <link rel="icon" type="image/x-icon" href="https://images.emojiterra.com/google/android-12l/512px/26fd.png">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="icon" type="image/x-icon" href="https://images.emojiterra.com/google/android-12l/512px/26fd.png">
 <style>
 :root {
     --primary: #4f46e5;
@@ -252,6 +252,17 @@ body {
     color: white;
 }
 
+.btn-danger {
+    background: var(--danger);
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #dc2626;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
 /* Stats Section */
 .stats {
     display: grid;
@@ -491,8 +502,10 @@ body {
 
 .card-footer .btn {
     flex: 1;
-    min-width: 100px;
+    min-width: 80px;
     justify-content: center;
+    font-size: 0.8rem;
+    padding: 0.5rem;
 }
 
 /* Dashboard Styles */
@@ -629,9 +642,19 @@ body {
     gap: 1rem;
 }
 
-/* Form Styles */
+/* Form Styles - More Compact */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
 .form-group {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.form-group.full-width {
+    grid-column: span 2;
 }
 
 .form-group label {
@@ -639,6 +662,7 @@ body {
     margin-bottom: 0.5rem;
     font-weight: 600;
     color: var(--dark);
+    font-size: 0.9rem;
 }
 
 .form-group input,
@@ -892,6 +916,14 @@ body {
     .nav-tabs {
         flex-direction: column;
     }
+    
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-group.full-width {
+        grid-column: span 1;
+    }
 }
 
 @media (max-width: 480px) {
@@ -1103,7 +1135,7 @@ body {
     </div>
 </div>
 
-<!-- Edit Modal -->
+<!-- Edit Modal - More Compact -->
 <div id="editModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -1113,53 +1145,54 @@ body {
         <div class="modal-body">
             <form id="editForm">
                 <input type="hidden" id="editIndex">
-                <div class="form-group">
-                    <label for="editTitle">Property Name:</label>
-                    <input type="text" id="editTitle" placeholder="Enter property name">
-                </div>
-                <div class="form-group">
-                    <label for="editArea">Area:</label>
-                    <input type="text" id="editArea" placeholder="Enter area (city, county, state)">
-                </div>
-                <div class="form-group">
-                    <label for="editAddress">Address:</label>
-                    <input type="text" id="editAddress" placeholder="Enter full address">
-                </div>
-                <div class="form-group">
-                    <label for="editPrice">Asking Price:</label>
-                    <input type="text" id="editPrice" placeholder="Enter price (e.g., $1,000,000)">
-                </div>
-                <div class="form-group">
-                    <label for="editUrl">URL:</label>
-                    <input type="text" id="editUrl" placeholder="Enter property URL">
-                </div>
-                <div class="form-group">
-                    <label for="editRealEstate">Real Estate Included:</label>
-                    <input type="text" id="editRealEstate" placeholder="Enter real estate details">
-                </div>
-                <div class="form-group">
-                    <label for="editImageUrl">Image URL:</label>
-                    <input type="text" id="editImageUrl" placeholder="https://example.com/image.jpg">
-                </div>
-                <div class="form-group">
-                    <label for="editExternalUrls">External URLs (one per line):</label>
-                    <textarea id="editExternalUrls" rows="4" placeholder="https://example.com/listing1
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="editTitle">Property Name:</label>
+                        <input type="text" id="editTitle" placeholder="Enter property name">
+                    </div>
+                    <div class="form-group">
+                        <label for="editPrice">Asking Price:</label>
+                        <input type="text" id="editPrice" placeholder="Enter price (e.g., $1,000,000)">
+                    </div>
+                    <div class="form-group">
+                        <label for="editArea">Area:</label>
+                        <input type="text" id="editArea" placeholder="Enter area (city, county, state)">
+                    </div>
+                    <div class="form-group">
+                        <label for="editStatus">Property Status:</label>
+                        <select id="editStatus">
+                            <option value="active">Active</option>
+                            <option value="pending">Pending</option>
+                            <option value="under-contract">Under Contract</option>
+                            <option value="sold">Sold</option>
+                        </select>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="editAddress">Address:</label>
+                        <input type="text" id="editAddress" placeholder="Enter full address">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="editUrl">URL:</label>
+                        <input type="text" id="editUrl" placeholder="Enter property URL">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="editRealEstate">Real Estate Included:</label>
+                        <input type="text" id="editRealEstate" placeholder="Enter real estate details">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="editImageUrl">Image URL:</label>
+                        <input type="text" id="editImageUrl" placeholder="https://example.com/image.jpg">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="editExternalUrls">External URLs (one per line):</label>
+                        <textarea id="editExternalUrls" rows="3" placeholder="https://example.com/listing1
 https://example.com/listing2"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="editStatus">Property Status:</label>
-                    <select id="editStatus">
-                        <option value="active">Active</option>
-                        <option value="pending">Pending</option>
-                        <option value="under-contract">Under Contract</option>
-                        <option value="sold">Sold</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="editCostar">Costar Status:</label>
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="editCostar">
-                        <label for="editCostar">Listed on Costar</label>
+                    </div>
+                    <div class="form-group">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="editCostar">
+                            <label for="editCostar">Listed on Costar</label>
+                        </div>
                     </div>
                 </div>
             </form>
@@ -1843,14 +1876,15 @@ https://example.com/listing2"></textarea>
         }
 
         grid.innerHTML = filteredProperties.map((property, index) => {
+            const originalIndex = properties.indexOf(property);
             const pending = isPending(property['Property Name']);
             const realEstate = hasRealEstate(property);
             const address = hasAddress(property);
             const hasImage = property.imageUrl && property.imageUrl.trim() !== '';
             const onCostar = property.costar;
             const status = property.status || 'active';
-            const isFavorite = favorites.includes(index);
-            const isComparing = comparisonList.includes(index);
+            const isFavorite = favorites.includes(originalIndex);
+            const isComparing = comparisonList.includes(originalIndex);
 
             // Determine status badge
             let statusBadge = '';
@@ -1868,7 +1902,7 @@ https://example.com/listing2"></textarea>
                 <div class="card">
                     <div class="card-image">
                         ${hasImage ? `<img src="${property.imageUrl}" alt="${property['Property Name']}" onerror="this.onerror=null;this.parentElement.innerHTML='<i class=\\'fas fa-image\\' style=\\'font-size: 3rem; color: var(--gray);\\'></i>';">` : '<i class="fas fa-image" style="font-size: 3rem; color: var(--gray);"></i>'}
-                        <button class="card-favorite ${isFavorite ? 'active' : ''}" onclick="toggleFavorite(${index})" title="Add to favorites">
+                        <button class="card-favorite ${isFavorite ? 'active' : ''}" onclick="toggleFavorite(${originalIndex})" title="Add to favorites">
                             <i class="fas fa-heart"></i>
                         </button>
                     </div>
@@ -1896,17 +1930,17 @@ https://example.com/listing2"></textarea>
                             ` : ''}
                         </div>
                         <div class="card-footer">
-                            <button class="btn btn-primary" onclick="viewProperty(${index})">
+                            <button class="btn btn-primary" onclick="viewProperty(${originalIndex})">
                                 <i class="fas fa-eye"></i> View
                             </button>
                             <button class="btn btn-secondary" onclick="searchAddress('${encodeURIComponent(property['Property Name'] || '')}', '${encodeURIComponent(property.Area || '')}')">
                                 <i class="fas fa-search"></i> Find
                             </button>
-                            <button class="btn btn-outline ${isComparing ? 'active' : ''}" onclick="toggleComparison(${index})" title="Add to comparison">
+                            <button class="btn btn-outline ${isComparing ? 'active' : ''}" onclick="toggleComparison(${originalIndex})" title="Add to comparison">
                                 <i class="fas fa-balance-scale"></i> Compare
                             </button>
-                            <button class="btn btn-outline" onclick="openEditModal(${index})">
-                                <i class="fas fa-edit"></i> Edit
+                            <button class="btn btn-danger" onclick="deleteProperty(${originalIndex})" title="Delete property">
+                                <i class="fas fa-trash"></i> Delete
                             </button>
                         </div>
                     </div>
@@ -2433,8 +2467,6 @@ https://example.com/listing2"></textarea>
     // Delete property
     function deleteProperty(index) {
         if (confirm('Are you sure you want to delete this property?')) {
-            properties.splice(index, 1);
-            
             // Remove from favorites if present
             const favoriteIndex = favorites.indexOf(index);
             if (favoriteIndex !== -1) {
@@ -2452,6 +2484,12 @@ https://example.com/listing2"></textarea>
                 comparisonList = comparisonList.map(i => i > index ? i - 1 : i);
                 localStorage.setItem('comparisonList', JSON.stringify(comparisonList));
             }
+            
+            // Remove from properties array
+            properties.splice(index, 1);
+            
+            // Update filtered properties
+            filteredProperties = [...properties];
             
             if (saveData()) {
                 renderProperties();
