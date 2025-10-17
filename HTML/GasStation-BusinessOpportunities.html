@@ -1742,8 +1742,10 @@ https://example.com/listing2"></textarea>
     }
 
     function prefer(saved, def) {
-        // Use saved if it is truthy and not an empty string; otherwise use default
-        return (saved !== undefined && saved !== null && String(saved).trim() !== '') ? saved : def;
+        // Use saved if it exists and is not empty/whitespace; otherwise use default
+        if (saved === undefined || saved === null) return def;
+        const savedStr = String(saved).trim();
+        return savedStr !== '' ? saved : def;
     }
 
     function migrateData(savedArr) {
@@ -1755,18 +1757,20 @@ https://example.com/listing2"></textarea>
             const merged = propertyData.map(def => {
                 const s = savedMap.get(keyFor(def));
                 if (!s) return standardizeProperty(def);
+                
+                // Preserve existing data, only use defaults for missing fields
                 const mergedProp = {
-                    'Property Name': prefer(s['Property Name'], def['Property Name']),
-                    'Area': prefer(s.Area, def.Area),
-                    'Asking Price': prefer(s['Asking Price'], def['Asking Price']),
-                    'URL': prefer(s.URL, def.URL),
-                    'Real Estate': prefer(s['Real Estate'], def['Real Estate']),
-                    'Address': prefer(s.Address, def.Address),
-                    imageUrl: prefer(s.imageUrl, def.imageUrl),
+                    'Property Name': s['Property Name'] || def['Property Name'],
+                    'Area': s.Area || def.Area,
+                    'Asking Price': s['Asking Price'] || def['Asking Price'],
+                    'URL': s.URL || def.URL,
+                    'Real Estate': s['Real Estate'] || def['Real Estate'],
+                    'Address': s.Address || def.Address,
+                    imageUrl: s.imageUrl || def.imageUrl || '',
                     externalUrls: Array.isArray(s.externalUrls) ? s.externalUrls : (def.externalUrls || []),
                     costar: s.costar !== undefined ? s.costar : (def.costar || false),
-                    status: prefer(s.status, def.status || 'active'),
-                    description: prefer(s.description, def.description),
+                    status: s.status || def.status || 'active',
+                    description: s.description || def.description || '',
                     favorite: s.favorite || false,
                     compare: s.compare || false
                 };
