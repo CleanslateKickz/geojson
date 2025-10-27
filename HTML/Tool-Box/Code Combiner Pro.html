@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -15,15 +16,19 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
 
   <!-- Prism for output syntax highlight -->
-  <link rel="stylesheet" href="https://unpkg.com/prismjs@1.29.0/themes/prism.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/prismjs@1.29.0/themes/prism-tomorrow.css"/>
   <script src="https://unpkg.com/prismjs@1.29.0/components/prism-core.min.js"></script>
   <script src="https://unpkg.com/prismjs@1.29.0/components/prism-markup.min.js"></script>
+  <script src="https://unpkg.com/prismjs@1.29.0/components/prism-css.min.js"></script>
+  <script src="https://unpkg.com/prismjs@1.29.0/components/prism-javascript.min.js"></script>
 
   <style>
     :root{
       --ring: 2px;
       --radius: 14px;
       --card: rgba(255,255,255,.82);
+      --primary: #3b82f6;
+      --primary-dark: #2563eb;
     }
     html, body { height: 100vh; overflow: hidden; }
     body { font-feature-settings: "ss02" 1, "cv01" 1; }
@@ -157,6 +162,231 @@
       display:inline-block; border:1px solid #cbd5e1; border-bottom-width:2px;
       border-radius:8px; padding:.05rem .35rem; font-size:.75rem; background:#fff;
     }
+
+    /* Clean Code Panel */
+    .clean-code-panel {
+      position: fixed;
+      right: -420px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 400px;
+      background: white;
+      border-radius: 12px 0 0 12px;
+      box-shadow: -4px 0 20px rgba(0,0,0,0.1);
+      z-index: 45;
+      transition: right 0.3s ease;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .clean-code-panel.open {
+      right: 0;
+    }
+    
+    .clean-code-toggle {
+      position: absolute;
+      left: -40px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px 0 0 8px;
+      padding: 12px 8px;
+      cursor: pointer;
+      box-shadow: -2px 0 8px rgba(0,0,0,0.1);
+      writing-mode: vertical-lr;
+      text-orientation: mixed;
+      font-size: 12px;
+      font-weight: 600;
+      color: #475569;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Code Statistics Panel */
+    .stats-panel {
+      position: fixed;
+      left: -320px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 300px;
+      background: white;
+      border-radius: 0 12px 12px 0;
+      box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+      z-index: 45;
+      transition: left 0.3s ease;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .stats-panel.open {
+      left: 0;
+    }
+    
+    .stats-toggle {
+      position: absolute;
+      right: -40px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 0 8px 8px 0;
+      padding: 12px 8px;
+      cursor: pointer;
+      box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+      writing-mode: vertical-lr;
+      text-orientation: mixed;
+      font-size: 12px;
+      font-weight: 600;
+      color: #475569;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Device Preview Options */
+    .device-options {
+      display: flex;
+      gap: 8px;
+      padding: 8px;
+      background: rgba(241, 245, 249, 0.8);
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+
+    .device-btn {
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      background: white;
+      border: 1px solid #e2e8f0;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .device-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .device-btn:hover:not(.active) {
+      background: #f8fafc;
+    }
+
+    /* Enhanced Toast */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .toast.success {
+      border-left: 4px solid #10b981;
+    }
+
+    .toast.error {
+      border-left: 4px solid #ef4444;
+    }
+
+    .toast.info {
+      border-left: 4px solid #3b82f6;
+    }
+
+    /* Loading Spinner */
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Keyboard Shortcuts Modal */
+    .shortcuts-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .shortcuts-modal.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .shortcuts-content {
+      background: white;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow: auto;
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+    }
+
+    .shortcuts-modal.show .shortcuts-content {
+      transform: scale(1);
+    }
+
+    .shortcut-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .shortcut-key {
+      display: flex;
+      gap: 5px;
+    }
+
+    .shortcut-key kbd {
+      padding: 3px 6px;
+      background: #f1f5f9;
+      border-radius: 4px;
+      font-size: 12px;
+      border: 1px solid #cbd5e1;
+    }
   </style>
 </head>
 <body class="bg-gradient-to-br from-slate-50 to-slate-100 text-slate-800 flex flex-col">
@@ -215,7 +445,10 @@
                 </select>
               </div>
               <div class="pt-2 border-t border-slate-200">
-                <p class="text-xs text-slate-500">Tip: Press <span class="kbd">Ctrl</span> + <span class="kbd">Enter</span> to refresh preview.</p>
+                <button id="shortcutsBtn" class="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1">
+                  <i data-lucide="keyboard" class="w-3 h-3"></i>
+                  View Keyboard Shortcuts
+                </button>
               </div>
             </div>
           </div>
@@ -223,6 +456,15 @@
 
         <button id="importBtn" class="p-2 rounded-lg border border-slate-300 hover:bg-slate-50 text-sm flex items-center gap-2 transition-colors" title="Import HTML">
           <i data-lucide="paperclip" class="w-4 h-4"></i>
+        </button>
+
+        <button id="statsBtn" class="p-2 rounded-lg border border-slate-300 hover:bg-slate-50 text-sm flex items-center gap-2 transition-colors" title="Code Statistics">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+        </button>
+
+        <button id="cleanCodeBtn" class="p-2 rounded-lg border border-slate-300 hover:bg-slate-50 text-sm flex items-center gap-2 transition-colors" title="HTML Cleaner" onclick="toggleCleanPanel()">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">Clean</span>
         </button>
 
         <button id="downloadBtn" class="p-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm flex items-center gap-2 transition-all shadow-md" title="Download Combined">
@@ -292,6 +534,12 @@
             </div>
           </div>
           <div class="p-3 lg:p-4 flex-grow custom-scrollbar overflow-auto">
+            <div class="device-options">
+              <button class="device-btn active" data-device="desktop">Desktop</button>
+              <button class="device-btn" data-device="tablet">Tablet</button>
+              <button class="device-btn" data-device="mobile">Mobile</button>
+              <button class="device-btn" data-device="custom">Custom</button>
+            </div>
             <div id="previewFrameWrap" class="border border-slate-300 rounded-xl overflow-hidden bg-white shadow-inner w-full h-full relative">
               <iframe id="preview" class="w-full h-full" sandbox="allow-scripts allow-same-origin"></iframe>
               <div class="resize-handle" id="resizeHandle" title="Drag to adjust device width"></div>
@@ -356,6 +604,81 @@
     </div>
   </div>
 
+  <!-- Keyboard Shortcuts Modal -->
+  <div id="shortcutsModal" class="shortcuts-modal">
+    <div class="shortcuts-content">
+      <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+        <h2 class="text-xl font-semibold">Keyboard Shortcuts</h2>
+        <button id="closeShortcuts" class="p-2 rounded-lg hover:bg-slate-100 transition-colors">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="p-6">
+        <div class="shortcut-item">
+          <span>Refresh Preview</span>
+          <div class="shortcut-key">
+            <kbd>Ctrl</kbd>
+            <kbd>Enter</kbd>
+          </div>
+        </div>
+        <div class="shortcut-item">
+          <span>Save File</span>
+          <div class="shortcut-key">
+            <kbd>Ctrl</kbd>
+            <kbd>S</kbd>
+          </div>
+        </div>
+        <div class="shortcut-item">
+          <span>Open File</span>
+          <div class="shortcut-key">
+            <kbd>Ctrl</kbd>
+            <kbd>O</kbd>
+          </div>
+        </div>
+        <div class="shortcut-item">
+          <span>Format Code</span>
+          <div class="shortcut-key">
+            <kbd>Ctrl</kbd>
+            <kbd>Shift</kbd>
+            <kbd>F</kbd>
+          </div>
+        </div>
+        <div class="shortcut-item">
+          <span>Toggle Clean Panel</span>
+          <div class="shortcut-key">
+            <kbd>Ctrl</kbd>
+            <kbd>Shift</kbd>
+            <kbd>C</kbd>
+          </div>
+        </div>
+        <div class="shortcut-item">
+          <span>Toggle Stats Panel</span>
+          <div class="shortcut-key">
+            <kbd>Ctrl</kbd>
+            <kbd>Shift</kbd>
+            <kbd>S</kbd>
+          </div>
+        </div>
+        <div class="shortcut-item">
+          <span>Download File</span>
+          <div class="shortcut-key">
+            <kbd>Ctrl</kbd>
+            <kbd>Shift</kbd>
+            <kbd>D</kbd>
+          </div>
+        </div>
+        <div class="shortcut-item">
+          <span>View Combined Code</span>
+          <div class="shortcut-key">
+            <kbd>Ctrl</kbd>
+            <kbd>Shift</kbd>
+            <kbd>V</kbd>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     // Icons
     lucide.createIcons();
@@ -367,24 +690,59 @@
 
     const defaults = { html: '', css: '', js: '' };
 
+    // Enhanced combinedFile function to properly handle HTML structure
     function combinedFile(html, css, js, title = 'My Project') {
-      return `<!DOCTYPE html>
+      // Check if HTML already contains a complete document structure
+      const hasDoctype = html.trim().toLowerCase().startsWith('<!doctype');
+      const hasHtmlTag = /<html[^>]*>/i.test(html);
+      const hasHeadTag = /<head[^>]*>/i.test(html);
+      const hasBodyTag = /<body[^>]*>/i.test(html);
+      
+      if (hasDoctype && hasHtmlTag && hasHeadTag && hasBodyTag) {
+        // HTML already has complete structure, just inject CSS and JS
+        let result = html;
+        
+        // Inject CSS into existing <head> if there's any CSS
+        if (css.trim()) {
+          const headCloseIndex = result.toLowerCase().indexOf('</head>');
+          if (headCloseIndex !== -1) {
+            result = result.slice(0, headCloseIndex) + 
+                    `<style>\n${css}\n</style>\n` + 
+                    result.slice(headCloseIndex);
+          }
+        }
+        
+        // Inject JS before closing </body> if there's any JS
+        if (js.trim()) {
+          const bodyCloseIndex = result.toLowerCase().lastIndexOf('</body>');
+          if (bodyCloseIndex !== -1) {
+            result = result.slice(0, bodyCloseIndex) + 
+                    `<script>\n${js}\n<\/script>\n` + 
+                    result.slice(bodyCloseIndex);
+          }
+        }
+        
+        return result;
+      } else {
+        // HTML doesn't have complete structure, wrap it
+        return `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${title}</title>
 <style>
-${css}
+ ${css}
 </style>
 </head>
 <body>
-${html}
+ ${html}
 <script>
-${js}
+ ${js}
 <\/script>
 </body>
 </html>`;
+      }
     }
 
     require(['vs/editor/editor.main'], function () {
@@ -466,7 +824,7 @@ ${js}
       a.click();
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
-      toast('404.html downloaded successfully!');
+      showToast('404.html downloaded successfully!', 'success');
     }
 
     // Preview frame (device width) resizing functionality
@@ -506,6 +864,31 @@ ${js}
       document.removeEventListener('mousemove', handleDeviceMouseMove);
       document.removeEventListener('mouseup', stopDeviceResize);
     }
+
+    // Device preview buttons
+    document.querySelectorAll('.device-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.device-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        const device = btn.dataset.device;
+        switch(device) {
+          case 'desktop':
+            previewFrameWrap.style.width = '100%';
+            break;
+          case 'tablet':
+            previewFrameWrap.style.width = '768px';
+            break;
+          case 'mobile':
+            previewFrameWrap.style.width = '390px';
+            break;
+          case 'custom':
+            const customWidth = prompt('Enter custom width (e.g., "800px" or "90%"):', '800px');
+            if (customWidth) previewFrameWrap.style.width = customWidth;
+            break;
+        }
+      });
+    });
 
     // Update preview size when dropdown changes
     document.getElementById('previewSize').addEventListener('change', (e) => {
@@ -597,17 +980,55 @@ ${js}
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
         e.preventDefault();
         renderPreview();
-        toast('Preview refreshed');
+        showToast('Preview refreshed', 'info');
+      }
+      
+      // Keyboard shortcuts
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        saveFile();
+      }
+      
+      if ((e.ctrlKey || e.metaKey) && e.key === 'o') {
+        e.preventDefault();
+        document.getElementById('importBtn').click();
+      }
+      
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'F') {
+        e.preventDefault();
+        document.getElementById('formatBtn').click();
+      }
+      
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'C') {
+        e.preventDefault();
+        toggleCleanPanel();
+      }
+      
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'S') {
+        e.preventDefault();
+        toggleStatsPanel();
+      }
+      
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'D') {
+        e.preventDefault();
+        document.getElementById('downloadBtn').click();
+      }
+      
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'V') {
+        e.preventDefault();
+        document.getElementById('viewCodeBtn').click();
       }
     });
 
-    document.getElementById('downloadBtn').addEventListener('click', () => {
+    function saveFile() {
       const fileName = document.getElementById('fileName').value.trim() || 'my-project';
       const title = fileName.replace(/[^a-zA-Z0-9\s\-_]/g, '');
       const combined = combinedFile(htmlEditor.getValue(), cssEditor.getValue(), jsEditor.getValue(), title);
       download(`${fileName}.html`, combined);
-      toast('File downloaded successfully! 🎉');
-    });
+      showToast('File saved successfully! 🎉', 'success');
+    }
+
+    document.getElementById('downloadBtn').addEventListener('click', saveFile);
 
     document.getElementById('viewCodeBtn').addEventListener('click', openOutput);
     document.getElementById('closeOutput').addEventListener('click', closeOutput);
@@ -615,14 +1036,14 @@ ${js}
 
     document.getElementById('copyOutputBtn').addEventListener('click', async () => {
       await navigator.clipboard.writeText(document.getElementById('outputCode').textContent);
-      toast('Code copied to clipboard! 📋');
+      showToast('Code copied to clipboard! 📋', 'success');
     });
 
     document.getElementById('downloadOutputBtn').addEventListener('click', () => {
       const fileName = document.getElementById('fileName').value.trim() || 'my-project';
       const code = document.getElementById('outputCode').textContent;
       download(`${fileName}.html`, code);
-      toast('File downloaded successfully! 🎉');
+      showToast('File downloaded successfully! 🎉', 'success');
     });
 
     // Import HTML
@@ -650,11 +1071,42 @@ ${js}
       }
     });
 
-    // Smart Import + Cleaner
+    // Enhanced Smart Import + Cleaner
     function importHtml(text, fileName = '') {
       const cleaned = cleanHtml(text);
-      const bodyMatch = cleaned.match(/<body[^>]*>([\s\S]*)<\/body>/i);
-      const html = bodyMatch ? bodyMatch[1].trim() : cleaned.trim();
+      
+      // Extract body content more carefully
+      const bodyMatch = cleaned.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+      let html = bodyMatch ? bodyMatch[1].trim() : cleaned.trim();
+      
+      // If we still have HTML tags in the extracted content, try to remove them
+      if (/<html|<head|<body/i.test(html)) {
+        // Create a temporary DOM element to extract the body content
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = cleaned;
+        
+        // Try to get the body content
+        const bodyElement = tempDiv.querySelector('body');
+        if (bodyElement) {
+          html = bodyElement.innerHTML;
+        } else {
+          // If no body element found, try to extract content between body tags using regex
+          const bodyContentMatch = cleaned.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+          if (bodyContentMatch) {
+            html = bodyContentMatch[1];
+          } else {
+            // As a last resort, try to remove html, head, and body tags
+            html = cleaned
+              .replace(/<!DOCTYPE[^>]*>/i, '')
+              .replace(/<html[^>]*>/i, '')
+              .replace(/<\/html>/i, '')
+              .replace(/<head[^>]*>[\s\S]*?<\/head>/gi, '')
+              .replace(/<body[^>]*>/i, '')
+              .replace(/<\/body>/i, '')
+              .trim();
+          }
+        }
+      }
 
       const styleMatches = cleaned.match(/<style[^>]*>([\s\S]*?)<\/style>/gi);
       const css = styleMatches ? styleMatches.map(m => m.replace(/<style[^>]*>|<\/style>/gi, '')).join('\n\n').trim() : '';
@@ -676,10 +1128,10 @@ ${js}
         document.getElementById('fileName').value = nameWithoutExt;
       }
       renderPreview();
-      toast('HTML file imported and cleaned! 🧹');
+      showToast('HTML file imported and cleaned! 🧹', 'success');
     }
 
-    // Cleaning function: removes analytics/ads/gtm/meta noise/comments
+    // Enhanced cleaning function: removes analytics/ads/gtm/meta noise/comments
     function cleanHtml(html) {
       let out = html;
 
@@ -687,8 +1139,9 @@ ${js}
       out = out.replace(/<!--(?!\[if|\s*\/?ko)([\s\S]*?)-->/g, '');
 
       // Remove Google Tag Manager blocks
-      out = out.replace(/<script[^>]*>\s*?\(function\s*\(w,d,s,l,i\)[\s\S]*?<\/script>/gi, '');
-      out = out.replace(/<noscript>[\s\S]*?googletagmanager[\s\S]*?<\/noscript>/gi, '');
+      const gtmInlinePattern = '<script[^>]*>' + '[\\s\\S]*?' + 'googletagmanager' + '[\\s\\S]*?' + '<\\/script>';
+      out = out.replace(new RegExp(gtmInlinePattern, 'gi'), '');
+      out = out.replace(new RegExp('<noscript>[\\s\\S]*?googletagmanager[\\s\\S]*?<\\/noscript>', 'gi'), '');
 
       // Remove common analytics/ads scripts by src domain keywords
       const noisyHosts = [
@@ -771,16 +1224,37 @@ ${js}
       URL.revokeObjectURL(url);
     }
 
-    function toast(msg) {
-      const div = document.createElement('div');
-      div.className = 'fixed bottom-5 right-5 z-[100] bg-slate-800/90 backdrop-blur text-white text-sm px-4 py-3 rounded-lg shadow-xl translate-y-12 opacity-0 transition-all duration-300 ease-in-out';
-      div.textContent = msg;
-      document.body.appendChild(div);
-      setTimeout(() => { div.classList.remove('translate-y-12','opacity-0'); }, 10);
+    // Enhanced toast function
+    function showToast(message, type = 'info') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      
+      let icon;
+      switch(type) {
+        case 'success':
+          icon = '<i data-lucide="check-circle" class="toast-icon text-green-500"></i>';
+          break;
+        case 'error':
+          icon = '<i data-lucide="alert-circle" class="toast-icon text-red-500"></i>';
+          break;
+        default:
+          icon = '<i data-lucide="info" class="toast-icon text-blue-500"></i>';
+      }
+      
+      toast.innerHTML = `${icon}<span>${message}</span>`;
+      document.body.appendChild(toast);
+      
+      // Initialize Lucide icons for the toast
+      lucide.createIcons();
+      
+      // Show the toast
+      setTimeout(() => toast.classList.add('show'), 10);
+      
+      // Hide and remove the toast after 3 seconds
       setTimeout(() => {
-        div.classList.add('translate-y-12','opacity-0');
-        div.addEventListener('transitionend', () => div.remove());
-      }, 2800);
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
     }
 
     // Workbench splitter: drag gutter to resize editor/preview panes
@@ -888,12 +1362,418 @@ ${js}
       workbench.style.gridTemplateRows = '1fr';
       setCols(['minmax(600px, 1.7fr)', '12px', 'minmax(480px, 1.3fr)']); // make editor larger by default
       previewFrameWrap.style.width = '100%';
-      toast('Layout reset');
+      showToast('Layout reset', 'info');
     });
 
     // Initialize larger editor by default
     setCols(['minmax(620px, 1.8fr)', '12px', 'minmax(480px, 1.2fr)']);
 
+    // Keyboard Shortcuts Modal
+    const shortcutsModal = document.getElementById('shortcutsModal');
+    const shortcutsBtn = document.getElementById('shortcutsBtn');
+    const closeShortcutsBtn = document.getElementById('closeShortcuts');
+
+    shortcutsBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      shortcutsModal.classList.add('show');
+    });
+
+    closeShortcutsBtn.addEventListener('click', () => {
+      shortcutsModal.classList.remove('show');
+    });
+
+    shortcutsModal.addEventListener('click', (e) => {
+      if (e.target === shortcutsModal) {
+        shortcutsModal.classList.remove('show');
+      }
+    });
+
+    // Clean Code Panel Functions
+    function toggleCleanPanel() {
+      const panel = document.getElementById('cleanCodePanel');
+      panel.classList.toggle('open');
+    }
+
+    function cleanImportedCode() {
+      let html = htmlEditor.getValue();
+      let css = cssEditor.getValue();
+      let js = jsEditor.getValue();
+
+      // Remove Google Analytics/Tag Manager
+      if (document.getElementById('removeGA').checked) {
+        html = html.replace(/<script[^>]*googletagmanager[^>]*>[\s\S]*?<\/script>/gi, '');
+        html = html.replace(/<script[^>]*google-analytics[^>]*>[\s\S]*?<\/script>/gi, '');
+        html = html.replace(/<script[^>]*gtag[^>]*>[\s\S]*?<\/script>/gi, '');
+        html = html.replace(/<!-- Google Tag Manager[\s\S]*?End Google Tag Manager -->/gi, '');
+        js = js.replace(/gtag\([^)]*\);?/g, '');
+        js = js.replace(/ga\([^)]*\);?/g, '');
+      }
+
+      // Remove Facebook Pixel
+      if (document.getElementById('removeFB').checked) {
+        html = html.replace(/<script[^>]*facebook[^>]*>[\s\S]*?<\/script>/gi, '');
+        html = html.replace(/<script[^>]*fbevents[^>]*>[\s\S]*?<\/script>/gi, '');
+        html = html.replace(/<!-- Facebook Pixel[\s\S]*?End Facebook Pixel -->/gi, '');
+        js = js.replace(/fbq\([^)]*\);?/g, '');
+      }
+
+      // Remove Ad Scripts
+      if (document.getElementById('removeAds').checked) {
+        html = html.replace(/<script[^>]*doubleclick[^>]*>[\s\S]*?<\/script>/gi, '');
+        html = html.replace(/<script[^>]*googlesyndication[^>]*>[\s\S]*?<\/script>/gi, '');
+        html = html.replace(/<script[^>]*adsense[^>]*>[\s\S]*?<\/script>/gi, '');
+        html = html.replace(/<script[^>]*adsbygoogle[^>]*>[\s\S]*?<\/script>/gi, '');
+        html = html.replace(/<ins[^>]*adsbygoogle[^>]*>[\s\S]*?<\/ins>/gi, '');
+      }
+
+      // Remove Other Tracking Scripts
+      if (document.getElementById('removeTracking').checked) {
+        html = html.replace(/<script[^>]*hotjar[^>]*>[\s\S]*?<\/script>/gi, '');
+        html = html.replace(/<script[^>]*mixpanel[^>]*>[\s\S]*?<\/script>/gi, '');
+        html = html.replace(/<script[^>]*segment[^>]*>[\s\S]*?<\/script>/gi, '');
+        html = html.replace(/<script[^>]*heap[^>]*>[\s\S]*?<\/script>/gi, '');
+        html = html.replace(/<script[^>]*matomo[^>]*>[\s\S]*?<\/script>/gi, '');
+        html = html.replace(/<script[^>]*piwik[^>]*>[\s\S]*?<\/script>/gi, '');
+        html = html.replace(/<script[^>]*clarity[^>]*>[\s\S]*?<\/script>/gi, '');
+        html = html.replace(/<script[^>]*amplitude[^>]*>[\s\S]*?<\/script>/gi, '');
+      }
+
+      // Remove Social Media Scripts
+      if (document.getElementById('removeSocial').checked) {
+        html = html.replace(/<script[^>]*twitter[^>]*>[\s\S]*?<\/script>/gi, '');
+        html = html.replace(/<script[^>]*platform\.twitter[^>]*>[\s\S]*?<\/script>/gi, '');
+        html = html.replace(/<script[^>]*linkedin[^>]*>[\s\S]*?<\/script>/gi, '');
+        html = html.replace(/<script[^>]*pinterest[^>]*>[\s\S]*?<\/script>/gi, '');
+        html = html.replace(/<script[^>]*instagram[^>]*>[\s\S]*?<\/script>/gi, '');
+      }
+
+      // Remove Tracking Meta Tags
+      if (document.getElementById('removeMetaTracking').checked) {
+        html = html.replace(/<meta[^>]*google-site-verification[^>]*>/gi, '');
+        html = html.replace(/<meta[^>]*msvalidate[^>]*>/gi, '');
+        html = html.replace(/<meta[^>]*p:domain_verify[^>]*>/gi, '');
+        html = html.replace(/<meta[^>]*yandex-verification[^>]*>/gi, '');
+      }
+
+      // Remove ALL External Scripts
+      if (document.getElementById('removeExternal').checked) {
+        html = html.replace(/<script[^>]*src=["']https?:\/\/[^"']*["'][^>]*>[\s\S]*?<\/script>/gi, '');
+        html = html.replace(/<link[^>]*href=["']https?:\/\/[^"']*["'][^>]*>/gi, (match) => {
+          if (match.includes('stylesheet')) return match;
+          return '';
+        });
+      }
+
+      // Remove HTML Comments
+      if (document.getElementById('removeComments').checked) {
+        html = html.replace(/<!--[\s\S]*?-->/g, '');
+        css = css.replace(/\/\*[\s\S]*?\*\//g, '');
+        js = js.replace(/\/\*[\s\S]*?\*\//g, '');
+        js = js.replace(/\/\/.*$/gm, '');
+      }
+
+      // Remove Empty Lines
+      if (document.getElementById('removeEmptyLines').checked) {
+        html = html.replace(/^\s*[\r\n]/gm, '');
+        css = css.replace(/^\s*[\r\n]/gm, '');
+        js = js.replace(/^\s*[\r\n]/gm, '');
+      }
+
+      // Minify Code
+      if (document.getElementById('minifyCode').checked) {
+        html = html.replace(/>\s+</g, '><');
+        css = css.replace(/\s*{\s*/g, '{').replace(/;\s*/g, ';').replace(/:\s*/g, ':').replace(/}\s*/g, '}');
+        js = js.replace(/\s*([{}();,])\s*/g, '$1');
+      }
+
+      // Optimize CSS
+      if (document.getElementById('optimizeCSS').checked) {
+        // Remove unused CSS selectors (simplified version)
+        const htmlTags = html.match(/<([a-z][a-z0-9]*)[^>]*>/gi) || [];
+        const usedTags = new Set(htmlTags.map(tag => tag.match(/<([a-z][a-z0-9]*)/i)[1].toLowerCase()));
+        
+        // This is a simplified version - a real implementation would be more complex
+        css = css.replace(/([.#][a-zA-Z0-9_-]+)\s*{[^}]*}/g, (match, selector) => {
+          // Keep selectors that are likely used
+          if (selector.startsWith('.') || selector.startsWith('#') || usedTags.has(selector)) {
+            return match;
+          }
+          return '';
+        });
+      }
+
+      htmlEditor.setValue(html);
+      cssEditor.setValue(css);
+      jsEditor.setValue(js);
+      
+      toggleCleanPanel();
+      showToast('Code cleaned successfully! 🧹', 'success');
+    }
+
+    // Stats Panel Functions
+    function toggleStatsPanel() {
+      const panel = document.getElementById('statsPanel');
+      panel.classList.toggle('open');
+      updateStats();
+    }
+
+    function updateStats() {
+      const html = htmlEditor.getValue();
+      const css = cssEditor.getValue();
+      const js = jsEditor.getValue();
+      
+      // Calculate statistics
+      const htmlLines = html.split('\n').length;
+      const cssLines = css.split('\n').length;
+      const jsLines = js.split('\n').length;
+      const totalLines = htmlLines + cssLines + jsLines;
+      
+      const htmlChars = html.length;
+      const cssChars = css.length;
+      const jsChars = js.length;
+      const totalChars = htmlChars + cssChars + jsChars;
+      
+      const htmlSize = (new Blob([html]).size / 1024).toFixed(2);
+      const cssSize = (new Blob([css]).size / 1024).toFixed(2);
+      const jsSize = (new Blob([js]).size / 1024).toFixed(2);
+      const totalSize = (parseFloat(htmlSize) + parseFloat(cssSize) + parseFloat(jsSize)).toFixed(2);
+      
+      // Count HTML tags
+      const htmlTags = (html.match(/<[^>]+>/g) || []).length;
+      
+      // Count CSS selectors
+      const cssSelectors = (css.match(/([.#]?[\w-]+)\s*{/g) || []).length;
+      
+      // Count JS functions
+      const jsFunctions = (js.match(/function\s+\w+|=>\s*{|\w+\s*:\s*function/g) || []).length;
+      
+      // Update the stats panel
+      document.getElementById('htmlLines').textContent = htmlLines;
+      document.getElementById('cssLines').textContent = cssLines;
+      document.getElementById('jsLines').textContent = jsLines;
+      document.getElementById('totalLines').textContent = totalLines;
+      
+      document.getElementById('htmlChars').textContent = htmlChars.toLocaleString();
+      document.getElementById('cssChars').textContent = cssChars.toLocaleString();
+      document.getElementById('jsChars').textContent = jsChars.toLocaleString();
+      document.getElementById('totalChars').textContent = totalChars.toLocaleString();
+      
+      document.getElementById('htmlSize').textContent = `${htmlSize} KB`;
+      document.getElementById('cssSize').textContent = `${cssSize} KB`;
+      document.getElementById('jsSize').textContent = `${jsSize} KB`;
+      document.getElementById('totalSize').textContent = `${totalSize} KB`;
+      
+      document.getElementById('htmlTags').textContent = htmlTags;
+      document.getElementById('cssSelectors').textContent = cssSelectors;
+      document.getElementById('jsFunctions').textContent = jsFunctions;
+    }
+
+    // Stats button event listener
+    document.getElementById('statsBtn').addEventListener('click', toggleStatsPanel);
+
   </script>
+
+  <!-- Clean Code Panel -->
+  <div id="cleanCodePanel" class="clean-code-panel">
+    <div class="clean-code-toggle" onclick="toggleCleanPanel()">
+      <i data-lucide="sparkles" class="w-4 h-4"></i>
+      Clean Code
+    </div>
+    <div class="p-4 border-b border-slate-200">
+      <h3 class="text-lg font-semibold mb-2">HTML Cleaner</h3>
+      <p class="text-sm text-slate-600">Remove unnecessary scripts and tracking code</p>
+    </div>
+    <div class="p-4 overflow-y-auto flex-grow custom-scrollbar">
+      <div class="space-y-3">
+        <div class="pb-3 border-b border-slate-200">
+          <h4 class="text-sm font-medium text-slate-700 mb-2">Tracking & Analytics</h4>
+          <div class="space-y-2">
+            <label class="flex items-center gap-2">
+              <input type="checkbox" id="removeGA" checked class="rounded">
+              <span class="text-sm">Remove Google Analytics/Tag Manager</span>
+            </label>
+            <label class="flex items-center gap-2">
+              <input type="checkbox" id="removeFB" checked class="rounded">
+              <span class="text-sm">Remove Facebook Pixel</span>
+            </label>
+            <label class="flex items-center gap-2">
+              <input type="checkbox" id="removeTracking" checked class="rounded">
+              <span class="text-sm">Remove Other Tracking Scripts</span>
+            </label>
+            <label class="flex items-center gap-2">
+              <input type="checkbox" id="removeMetaTracking" checked class="rounded">
+              <span class="text-sm">Remove Tracking Meta Tags</span>
+            </label>
+          </div>
+        </div>
+        
+        <div class="pb-3 border-b border-slate-200">
+          <h4 class="text-sm font-medium text-slate-700 mb-2">Advertising</h4>
+          <div class="space-y-2">
+            <label class="flex items-center gap-2">
+              <input type="checkbox" id="removeAds" checked class="rounded">
+              <span class="text-sm">Remove Ad Scripts (AdSense, etc.)</span>
+            </label>
+          </div>
+        </div>
+        
+        <div class="pb-3 border-b border-slate-200">
+          <h4 class="text-sm font-medium text-slate-700 mb-2">Social Media</h4>
+          <div class="space-y-2">
+            <label class="flex items-center gap-2">
+              <input type="checkbox" id="removeSocial" checked class="rounded">
+              <span class="text-sm">Remove Social Media Scripts</span>
+            </label>
+          </div>
+        </div>
+        
+        <div class="pb-3 border-b border-slate-200">
+          <h4 class="text-sm font-medium text-slate-700 mb-2">External Resources</h4>
+          <div class="space-y-2">
+            <label class="flex items-center gap-2">
+              <input type="checkbox" id="removeExternal" class="rounded">
+              <span class="text-sm">Remove ALL External Scripts</span>
+            </label>
+          </div>
+        </div>
+        
+        <div class="pb-3 border-b border-slate-200">
+          <h4 class="text-sm font-medium text-slate-700 mb-2">Code Optimization</h4>
+          <div class="space-y-2">
+            <label class="flex items-center gap-2">
+              <input type="checkbox" id="removeComments" checked class="rounded">
+              <span class="text-sm">Remove HTML/CSS/JS Comments</span>
+            </label>
+            <label class="flex items-center gap-2">
+              <input type="checkbox" id="removeEmptyLines" checked class="rounded">
+              <span class="text-sm">Remove Empty Lines</span>
+            </label>
+            <label class="flex items-center gap-2">
+              <input type="checkbox" id="minifyCode" class="rounded">
+              <span class="text-sm">Minify Code</span>
+            </label>
+            <label class="flex items-center gap-2">
+              <input type="checkbox" id="optimizeCSS" class="rounded">
+              <span class="text-sm">Optimize CSS (remove unused)</span>
+            </label>
+          </div>
+        </div>
+        
+        <div class="pt-4 mt-4">
+          <button onclick="cleanImportedCode()" class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium flex items-center justify-center gap-2">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+            Clean Current Code
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Panel -->
+  <div id="statsPanel" class="stats-panel">
+    <div class="stats-toggle" onclick="toggleStatsPanel()">
+      <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+      Statistics
+    </div>
+    <div class="p-4 border-b border-slate-200">
+      <h3 class="text-lg font-semibold mb-2">Code Statistics</h3>
+      <p class="text-sm text-slate-600">Real-time analysis of your code</p>
+    </div>
+    <div class="p-4 overflow-y-auto flex-grow custom-scrollbar">
+      <div class="space-y-4">
+        <div>
+          <h4 class="text-sm font-medium text-slate-700 mb-2">Line Count</h4>
+          <div class="grid grid-cols-2 gap-2 text-sm">
+            <div class="flex justify-between">
+              <span>HTML:</span>
+              <span id="htmlLines" class="font-mono">0</span>
+            </div>
+            <div class="flex justify-between">
+              <span>CSS:</span>
+              <span id="cssLines" class="font-mono">0</span>
+            </div>
+            <div class="flex justify-between">
+              <span>JavaScript:</span>
+              <span id="jsLines" class="font-mono">0</span>
+            </div>
+            <div class="flex justify-between font-medium">
+              <span>Total:</span>
+              <span id="totalLines" class="font-mono">0</span>
+            </div>
+          </div>
+        </div>
+        
+        <div>
+          <h4 class="text-sm font-medium text-slate-700 mb-2">Character Count</h4>
+          <div class="grid grid-cols-2 gap-2 text-sm">
+            <div class="flex justify-between">
+              <span>HTML:</span>
+              <span id="htmlChars" class="font-mono">0</span>
+            </div>
+            <div class="flex justify-between">
+              <span>CSS:</span>
+              <span id="cssChars" class="font-mono">0</span>
+            </div>
+            <div class="flex justify-between">
+              <span>JavaScript:</span>
+              <span id="jsChars" class="font-mono">0</span>
+            </div>
+            <div class="flex justify-between font-medium">
+              <span>Total:</span>
+              <span id="totalChars" class="font-mono">0</span>
+            </div>
+          </div>
+        </div>
+        
+        <div>
+          <h4 class="text-sm font-medium text-slate-700 mb-2">File Size</h4>
+          <div class="grid grid-cols-2 gap-2 text-sm">
+            <div class="flex justify-between">
+              <span>HTML:</span>
+              <span id="htmlSize" class="font-mono">0 KB</span>
+            </div>
+            <div class="flex justify-between">
+              <span>CSS:</span>
+              <span id="cssSize" class="font-mono">0 KB</span>
+            </div>
+            <div class="flex justify-between">
+              <span>JavaScript:</span>
+              <span id="jsSize" class="font-mono">0 KB</span>
+            </div>
+            <div class="flex justify-between font-medium">
+              <span>Total:</span>
+              <span id="totalSize" class="font-mono">0 KB</span>
+            </div>
+          </div>
+        </div>
+        
+        <div>
+          <h4 class="text-sm font-medium text-slate-700 mb-2">Code Elements</h4>
+          <div class="grid grid-cols-1 gap-2 text-sm">
+            <div class="flex justify-between">
+              <span>HTML Tags:</span>
+              <span id="htmlTags" class="font-mono">0</span>
+            </div>
+            <div class="flex justify-between">
+              <span>CSS Selectors:</span>
+              <span id="cssSelectors" class="font-mono">0</span>
+            </div>
+            <div class="flex justify-between">
+              <span>JS Functions:</span>
+              <span id="jsFunctions" class="font-mono">0</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="pt-4 mt-4">
+          <button onclick="updateStats()" class="w-full px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white rounded-lg transition-colors text-sm font-medium flex items-center justify-center gap-2">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+            Refresh Statistics
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
