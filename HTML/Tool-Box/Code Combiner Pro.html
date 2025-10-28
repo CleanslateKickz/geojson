@@ -1139,9 +1139,8 @@
       out = out.replace(/<!--(?!\[if|\s*\/?ko)([\s\S]*?)-->/g, '');
 
       // Remove Google Tag Manager blocks
-      const gtmInlinePattern = '<script[^>]*>' + '[\\s\\S]*?' + 'googletagmanager' + '[\\s\\S]*?' + '<\\/script>';
-      out = out.replace(new RegExp(gtmInlinePattern, 'gi'), '');
-      out = out.replace(new RegExp('<noscript>[\\s\\S]*?googletagmanager[\\s\\S]*?<\\/noscript>', 'gi'), '');
+      out = out.replace(/<script[^>]*>[\s\S]*?googletagmanager[\s\S]*?<\/script>/gi, '');
+      out = out.replace(/<noscript>[\s\S]*?googletagmanager[\s\S]*?<\/noscript>/gi, '');
 
       // Remove common analytics/ads scripts by src domain keywords
       const noisyHosts = [
@@ -1149,13 +1148,14 @@
         'hotjar.com','hs-scripts.com','hubspot.com','segment.com','mixpanel.com','clarity.ms','newrelic.com',
         'sentry.io','facebook.net','facebook.com/tr','twitter.com/i/adsct','snap.','tiktok','cdn.amplitude.com'
       ];
-      out = out.replace(new RegExp(`<script[^>]*src=["']([^"']*(${noisyHosts.map(h=>h.replace(/\./g,'\\.')).join('|')}))[^"']*["'][^>]*>\\s*<\\/script>`, 'gi'), '');
+      const noisyHostsPattern = noisyHosts.map(h => h.replace(/\./g, '\\.')).join('|');
+      out = out.replace(new RegExp('<script[^>]*src=["\']([^"\']*(' + noisyHostsPattern + '))[^"\']*["\'][^>]*>\\s*<\/script>', 'gi'), '');
 
       // Remove common pixel/beacon images
       out = out.replace(/<img[^>]+(pixel|beacon|tracking)[^>]*>/gi, '');
 
       // Remove meta analytics, preconnects to noisy hosts
-      out = out.replace(new RegExp(`<link[^>]*(dns-prefetch|preconnect)[^>]*href=["']([^"']*(${noisyHosts.map(h=>h.replace(/\./g,'\\.')).join('|')}))[^"']*["'][^>]*>`, 'gi'), '');
+      out = out.replace(new RegExp('<link[^>]*(dns-prefetch|preconnect)[^>]*href=["\']([^"\']*(' + noisyHostsPattern + '))[^"\']*["\'][^>]*>', 'gi'), '');
       out = out.replace(/<meta[^>]*(facebook|og:|twitter:|msvalidate|yandex-verification|ahrefs|baidu|alexa)[^>]*>/gi, '');
 
       // Strip empty lines and excessive whitespace
@@ -1464,6 +1464,81 @@
         });
       }
 
+      // Remove Footer Elements
+      if (document.getElementById('removeFooter').checked) {
+        // Remove <footer> tags and their content (more comprehensive)
+        html = html.replace(/<footer\b[^>]*>[\s\S]*?<\/footer>/gi, '');
+        
+        // Remove elements with footer-related classes (case insensitive)
+        html = html.replace(/<[^>]+class="[^"]*\bfooter\b[^"]*"[^>]*>[\s\S]*?<\/[^>]+>/gi, '');
+        html = html.replace(/<[^>]+class='[^']*\bfooter\b[^']*'[^>]*>[\s\S]*?<\/[^>]+>/gi, '');
+        html = html.replace(/<[^>]+class="[^"]*\bfoot\b[^"]*"[^>]*>[\s\S]*?<\/[^>]+>/gi, '');
+        html = html.replace(/<[^>]+class='[^']*\bfoot\b[^']*'[^>]*>[\s\S]*?<\/[^>]+>/gi, '');
+        
+        // Remove elements with footer-related IDs
+        html = html.replace(/<[^>]+id="[^"]*\bfooter\b[^"]*"[^>]*>[\s\S]*?<\/[^>]+>/gi, '');
+        html = html.replace(/<[^>]+id='[^']*\bfooter\b[^']*'[^>]*>[\s\S]*?<\/[^>]+>/gi, '');
+        html = html.replace(/<[^>]+id="[^"]*\bfoot\b[^"]*"[^>]*>[\s\S]*?<\/[^>]+>/gi, '');
+        html = html.replace(/<[^>]+id='[^']*\bfoot\b[^']*'[^>]*>[\s\S]*?<\/[^>]+>/gi, '');
+        
+        // Remove elements with footer-specific ARIA roles
+        html = html.replace(/<[^>]+role="[^"]*\b(contentinfo|footer)\b[^"]*"[^>]*>[\s\S]*?<\/[^>]+>/gi, '');
+        html = html.replace(/<[^>]+role='[^']*\b(contentinfo|footer)\b[^']*'[^>]*>[\s\S]*?<\/[^>]+>/gi, '');
+        
+        // Remove containers that typically contain footer content
+        html = html.replace(/<div[^>]*id="[^"]*footer[^"]*"[^>]*>([\s\S]*?)<\/div>/gi, '');
+        html = html.replace(/<div[^>]*class="[^"]*footer[^"]*"[^>]*>([\s\S]*?)<\/div>/gi, '');
+        html = html.replace(/<div[^>]*>[\s\S]*?container[\s\S]*?<[^>]*span[^>]*>[\s\S]*?retailstat[^<]*copyright[^<]*[\s\S]*?<\/[^>]+>\s*<\/div>/gi, '');
+        
+        // Remove complex nested footer content with company info and social links
+        html = html.replace(/<div[^>]*class="[^"]*container[^"]*"[^>]*>[\s\S]*?<[^>]*span[^>]*>[\s\S]*?retailstat[^<]*wall street[^<]*[\s\S]*?<\/[^>]+>\s*<\/div>/gi, '');
+        
+        // Remove elements containing common footer indicators with nested content
+        html = html.replace(/<[^>]+>\s*<[^>]*>[\s\S]*?©[^<]*copyright[^<]*[\s\S]*?<\/[^>]+>\s*<\/[^>]+>/gi, '');
+        html = html.replace(/<[^>]+>\s*<[^>]*>[\s\S]*?©\s*\d{4}[^<]*[\s\S]*?<\/[^>]+>\s*<\/[^>]+>/gi, '');
+        html = html.replace(/<[^>]+>\s*<[^>]*>[\s\S]*?all\s+rights\s+reserved[^<]*[\s\S]*?<\/[^>]+>\s*<\/[^>]+>/gi, '');
+        
+        // Remove containers with typical footer text content and structure
+        html = html.replace(/<div[^>]*>[\s\S]*?©[^<]*all\s+rights\s+reserved[^<]*privacy\s+policy[^<]*[\s\S]*?<\/div>/gi, '');
+        html = html.replace(/<div[^>]*>[\s\S]*?retailstat[^<]*99 wall street[^<]*[\s\S]*?<\/div>/gi, '');
+        html = html.replace(/<div[^>]*>[\s\S]*?privacy policy[^<]*terms of use[^<]*[\s\S]*?<\/div>/gi, '');
+        
+        // Remove footer navigation and company info sections
+        html = html.replace(/<div[^>]*span-6[^>]*>[\s\S]*?navigate[^<]*support[^<]*[\s\S]*?<\/div>/gi, '');
+        html = html.replace(/<div[^>]*span-7[^>]*>[\s\S]*?company[^<]*retailstat[^<]*copyright[^<]*[\s\S]*?<\/div>/gi, '');
+        
+        // Remove social media footer links and icons
+        html = html.replace(/<div[^>]*social-follow[^>]*>[\s\S]*?linkedin[^<]*<\/div>/gi, '');
+        
+        // Remove script tags that contain footer-related variables or configuration
+        html = html.replace(/<script[^>]*>[\s\S]*?footer[\s\S]*?<\/script>/gi, '');
+        html = html.replace(/<script[^>]*>[\s\S]*?hsVars[\s\S]*?<\/script>/gi, '');
+        
+        // Remove style tags that hide footer elements
+        html = html.replace(/<style[^>]*>[\s\S]*?footer\s*{[^}]*display:\s*none[^}]*}[\s\S]*?<\/style>/gi, '');
+        
+        // Remove any remaining text blocks that are just copyright or footer info
+        html = html.replace(/<p[^>]*>[^<]*©[^<]*all\s+rights\s+reserved[^<]*<\/p>/gi, '');
+        html = html.replace(/<p[^>]*>[^<]*retailstat[^<]*privacy\s+policy[^<]*<\/p>/gi, '');
+        html = html.replace(/<span[^>]*>[^<]*retailstat[^<]*©[^<]*<\/span>/gi, '');
+        
+        // Remove disclaimer and copyright text
+        html = html.replace(/<div[^>]*>[\s\S]*?<p[^>]*class="disclaimer"[^>]*>[\s\S]*?report.*?exclusive.*?use[^<]*<\/p>[\s\S]*?<\/div>/gi, '');
+        
+        // Clean up any remaining empty divs or span wrappers that might be left behind
+        html = html.replace(/<div[^>]*>\s*<\/div>/gi, '');
+        html = html.replace(/<span[^>]*>\s*<\/span>/gi, '');
+        html = html.replace(/<ul[^>]*>\s*<\/ul>/gi, '');
+        html = html.replace(/<li[^>]*>\s*<\/li>/gi, '');
+        
+        // Remove any floating footer containers or interactive elements
+        html = html.replace(/<div[^>]*go2933276541[^>]*>[\s\S]*?<\/div>/gi, '');
+        html = html.replace(/<div[^>]*hs-web-interactives[^>]*>[\s\S]*?<\/div>/gi, '');
+        
+        // Remove widget wrappers that might contain footer content
+        html = html.replace(/<div[^>]*hs_cos_wrapper[^>]*>[\s\S]*?retailstat[^<]*copyright[^<]*[\s\S]*?<\/div>/gi, '');
+      }
+
       // Remove HTML Comments
       if (document.getElementById('removeComments').checked) {
         html = html.replace(/<!--[\s\S]*?-->/g, '');
@@ -1633,6 +1708,16 @@
             <label class="flex items-center gap-2">
               <input type="checkbox" id="removeExternal" class="rounded">
               <span class="text-sm">Remove ALL External Scripts</span>
+            </label>
+          </div>
+        </div>
+        
+        <div class="pb-3 border-b border-slate-200">
+          <h4 class="text-sm font-medium text-slate-700 mb-2">Content Removal</h4>
+          <div class="space-y-2">
+            <label class="flex items-center gap-2">
+              <input type="checkbox" id="removeFooter" class="rounded">
+              <span class="text-sm">Remove Footer Elements</span>
             </label>
           </div>
         </div>
