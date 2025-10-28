@@ -1,0 +1,4476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Complete commercial real estate investor and property management system">
+    <title>CRE Portfolio Manager Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #1e3a5f;
+            --secondary-color: #4a90e2;
+            --accent-color: #5cb85c;
+            --danger-color: #d9534f;
+            --warning-color: #f0ad4e;
+            --info-color: #5bc0de;
+            --bg-light: #f8f9fa;
+            --bg-dark: #2c3e50;
+            --text-dark: #333;
+            --text-light: #666;
+            --border-color: #ddd;
+            --shadow: 0 2px 10px rgba(0,0,0,0.1);
+            --shadow-hover: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--text-dark);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .logo::before {
+            content: "🏢";
+            margin-right: 10px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            color: white;
+        }
+
+        .btn-primary {
+            background: var(--secondary-color);
+        }
+
+        .btn-primary:hover {
+            background: #357abd;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-success {
+            background: var(--accent-color);
+        }
+
+        .btn-success:hover {
+            background: #4cae4c;
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+        }
+
+        .btn-danger:hover {
+            background: #c9302c;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-info {
+            background: var(--info-color);
+        }
+
+        .btn-info:hover {
+            background: #46b8da;
+        }
+
+        .btn-warning {
+            background: var(--warning-color);
+        }
+
+        .btn-warning:hover {
+            background: #ec971f;
+        }
+
+        .main-content {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .tabs-container {
+            background: var(--bg-light);
+            padding: 15px;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+        }
+
+        .tab:hover {
+            border-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .tab.active {
+            background: var(--secondary-color);
+            color: white;
+            border-color: var(--secondary-color);
+        }
+
+        .tab-name {
+            font-weight: 500;
+        }
+
+        .tab-delete {
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+
+        .tab-delete:hover {
+            opacity: 1;
+        }
+
+        .tab.active .tab-delete {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 30px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--bg-light);
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .criteria-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .criteria-item {
+            background: var(--bg-light);
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            transition: all 0.3s ease;
+        }
+
+        .criteria-item:hover {
+            transform: translateX(5px);
+            box-shadow: var(--shadow);
+        }
+
+        .criteria-content {
+            flex: 1;
+        }
+
+        .criteria-key {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .criteria-value {
+            color: var(--text-light);
+        }
+
+        .criteria-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            color: var(--text-light);
+            transition: color 0.3s;
+        }
+
+        .icon-btn:hover {
+            color: var(--secondary-color);
+        }
+
+        .icon-btn.delete:hover {
+            color: var(--danger-color);
+        }
+
+        .form-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .form-input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+        }
+
+        .notes-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .notes-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .notes-input, .notes-preview {
+            height: 400px;
+            padding: 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: vertical;
+        }
+
+        .notes-input {
+            background: var(--bg-light);
+        }
+
+        .notes-preview {
+            background: white;
+            overflow-y: auto;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+        }
+
+        .notes-preview h1 { 
+            font-size: 28px; 
+            margin: 20px 0 15px 0; 
+            font-weight: 700;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+        .notes-preview h2 { 
+            font-size: 24px; 
+            margin: 18px 0 12px 0; 
+            font-weight: 600;
+            color: var(--primary-color);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+        .notes-preview h3 { 
+            font-size: 20px; 
+            margin: 16px 0 10px 0; 
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        .notes-preview p { 
+            margin: 12px 0; 
+            line-height: 1.7;
+        }
+        .notes-preview ul, .notes-preview ol { 
+            margin: 15px 0 15px 30px; 
+            padding-left: 20px;
+        }
+        .notes-preview ul { 
+            list-style-type: disc;
+        }
+        .notes-preview ol { 
+            list-style-type: decimal;
+        }
+        .notes-preview li { 
+            margin: 8px 0; 
+            line-height: 1.6;
+        }
+        .notes-preview strong { 
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+        .notes-preview em { 
+            font-style: italic;
+        }
+        .notes-preview a { 
+            color: var(--secondary-color); 
+            text-decoration: underline;
+            font-weight: 500;
+        }
+        .notes-preview a:hover {
+            color: var(--primary-color);
+        }
+        .notes-preview code {
+            background: var(--bg-light);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            border: 1px solid var(--border-color);
+        }
+        .notes-preview blockquote {
+            border-left: 4px solid var(--secondary-color);
+            padding: 10px 20px;
+            margin: 20px 0;
+            color: var(--text-light);
+            background: rgba(74, 144, 226, 0.05);
+            border-radius: 0 4px 4px 0;
+        }
+        .notes-preview hr {
+            border: none;
+            border-top: 1px solid var(--border-color);
+            margin: 25px 0;
+        }
+
+        .search-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 40px 12px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+        }
+
+        .search-results {
+            margin-top: 10px;
+            padding: 15px;
+            background: var(--bg-light);
+            border-radius: 8px;
+            display: none;
+        }
+
+        .search-results.active {
+            display: block;
+        }
+
+        .search-result-item {
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .search-result-item:hover {
+            transform: translateX(5px);
+            box-shadow: var(--shadow);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            animation: slideIn 0.3s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            color: var(--primary-color);
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .welcome-message {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-light);
+        }
+
+        .welcome-message h2 {
+            font-size: 32px;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background: var(--accent-color);
+            color: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            display: none;
+            animation: slideUp 0.3s ease;
+            z-index: 2000;
+        }
+
+        .toast.show {
+            display: block;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .brand-link {
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .brand-link:hover {
+            color: var(--primary-color);
+            text-decoration: underline;
+        }
+
+        /* New styles for property management */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .dashboard-card {
+            background: var(--bg-light);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .dashboard-card-title {
+            font-size: 16px;
+            color: var(--text-light);
+            margin-bottom: 10px;
+        }
+
+        .dashboard-card-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .property-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .property-card {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .property-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--secondary-color);
+        }
+
+        .property-image {
+            height: 180px;
+            background: var(--bg-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: var(--text-light);
+            position: relative;
+        }
+
+        .property-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .property-content {
+            padding: 15px;
+        }
+
+        .property-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 10px;
+        }
+
+        .property-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .property-status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-available {
+            background: rgba(92, 184, 92, 0.2);
+            color: var(--accent-color);
+        }
+
+        .status-pending {
+            background: rgba(240, 173, 78, 0.2);
+            color: var(--warning-color);
+        }
+
+        .status-sold {
+            background: rgba(217, 83, 79, 0.2);
+            color: var(--danger-color);
+        }
+
+        .property-details {
+            margin: 10px 0;
+        }
+
+        .property-detail {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .property-detail-label {
+            color: var(--text-light);
+        }
+
+        .property-detail-value {
+            font-weight: 500;
+        }
+
+        .property-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .property-actions .btn {
+            flex: 1;
+            justify-content: center;
+            font-size: 12px;
+            padding: 6px 10px;
+        }
+
+        .match-container {
+            margin-top: 15px;
+            padding: 15px;
+            background: var(--bg-light);
+            border-radius: 8px;
+        }
+
+        .match-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .match-title {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .match-score {
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        .match-investors {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .match-investor {
+            padding: 5px 10px;
+            background: white;
+            border-radius: 20px;
+            font-size: 12px;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .match-investor:hover {
+            background: var(--secondary-color);
+            color: white;
+            border-color: var(--secondary-color);
+        }
+
+        .filter-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-select {
+            padding: 8px 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+        }
+
+        .communication-log {
+            margin-top: 20px;
+        }
+
+        .log-entry {
+            padding: 15px;
+            background: var(--bg-light);
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .log-date {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .log-type {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .type-email {
+            background: rgba(91, 192, 222, 0.2);
+            color: var(--info-color);
+        }
+
+        .type-phone {
+            background: rgba(92, 184, 92, 0.2);
+            color: var(--accent-color);
+        }
+
+        .type-meeting {
+            background: rgba(240, 173, 78, 0.2);
+            color: var(--warning-color);
+        }
+
+        .log-content {
+            color: var(--text-dark);
+        }
+
+        .add-log-form {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .form-select {
+            padding: 10px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+        }
+
+        .form-textarea {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+        }
+
+        .task-list {
+            margin-top: 20px;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: var(--bg-light);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+        }
+
+        .task-item:hover {
+            transform: translateX(5px);
+            box-shadow: var(--shadow);
+        }
+
+        .task-checkbox {
+            margin-right: 15px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .task-content {
+            flex: 1;
+        }
+
+        .task-title {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .task-date {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        .task-priority {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-left: 10px;
+        }
+
+        .priority-high {
+            background: rgba(217, 83, 79, 0.2);
+            color: var(--danger-color);
+        }
+
+        .priority-medium {
+            background: rgba(240, 173, 78, 0.2);
+            color: var(--warning-color);
+        }
+
+        .priority-low {
+            background: rgba(91, 192, 222, 0.2);
+            color: var(--info-color);
+        }
+
+        .add-task-form {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .property-detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .property-detail-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .property-detail-label {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .property-detail-input {
+            padding: 10px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .property-detail-input:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+        }
+
+        .match-details {
+            margin-top: 15px;
+            padding: 15px;
+            background: var(--bg-light);
+            border-radius: 8px;
+        }
+
+        .match-criteria {
+            margin-bottom: 10px;
+        }
+
+        .match-criteria-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--primary-color);
+        }
+
+        .match-criteria-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .match-criteria-item {
+            padding: 4px 8px;
+            background: white;
+            border-radius: 4px;
+            font-size: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .match-criteria-item.match {
+            background: rgba(92, 184, 92, 0.2);
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .match-criteria-item.mismatch {
+            background: rgba(217, 83, 79, 0.2);
+            border-color: var(--danger-color);
+            color: var(--danger-color);
+        }
+
+        /* New styles for enhanced features */
+        .chart-container {
+            height: 300px;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .chart-placeholder {
+            width: 100%;
+            height: 100%;
+            background: var(--bg-light);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .data-table th, .data-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-table th {
+            background: var(--bg-light);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .data-table tr:hover {
+            background: rgba(74, 144, 226, 0.05);
+        }
+
+        .document-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .document-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: var(--bg-light);
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .document-item:hover {
+            transform: translateX(5px);
+            box-shadow: var(--shadow);
+        }
+
+        .document-icon {
+            margin-right: 15px;
+            font-size: 20px;
+            color: var(--secondary-color);
+        }
+
+        .document-info {
+            flex: 1;
+        }
+
+        .document-name {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .document-date {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        .document-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: var(--bg-light);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--secondary-color);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 4px 8px;
+            background: var(--bg-light);
+            border-radius: 4px;
+            font-size: 12px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+
+        .tag-primary {
+            background: rgba(74, 144, 226, 0.2);
+            color: var(--secondary-color);
+        }
+
+        .tag-success {
+            background: rgba(92, 184, 92, 0.2);
+            color: var(--accent-color);
+        }
+
+        .tag-warning {
+            background: rgba(240, 173, 78, 0.2);
+            color: var(--warning-color);
+        }
+
+        .tag-danger {
+            background: rgba(217, 83, 79, 0.2);
+            color: var(--danger-color);
+        }
+
+        .rating {
+            display: flex;
+            gap: 2px;
+            margin-top: 5px;
+        }
+
+        .rating-star {
+            color: #ccc;
+            font-size: 16px;
+        }
+
+        .rating-star.filled {
+            color: #ffc107;
+        }
+
+        .image-upload {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .image-upload:hover {
+            border-color: var(--secondary-color);
+            background: rgba(74, 144, 226, 0.05);
+        }
+
+        .image-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .image-preview-item {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .image-preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .image-remove {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .analytics-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .analytics-card {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .analytics-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .analytics-content {
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-light);
+            border-radius: 8px;
+        }
+
+        .loader {
+            border: 4px solid var(--bg-light);
+            border-top: 4px solid var(--secondary-color);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 20px;
+        }
+
+        .pagination button {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .pagination button:hover {
+            background: var(--bg-light);
+        }
+
+        .pagination button.active {
+            background: var(--secondary-color);
+            color: white;
+            border-color: var(--secondary-color);
+        }
+
+        .sort-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .sort-select {
+            padding: 8px 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .sort-select:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+        }
+
+        .advanced-filter {
+            background: var(--bg-light);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        .filter-label {
+            font-weight: 500;
+            min-width: 100px;
+        }
+
+        .filter-input {
+            flex: 1;
+            padding: 8px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+        }
+
+        .filter-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .map-container {
+            height: 400px;
+            background: var(--bg-light);
+            border-radius: 8px;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--danger-color);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .notification-item {
+            padding: 15px;
+            background: var(--bg-light);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--info-color);
+        }
+
+        .notification-item.unread {
+            background: rgba(91, 192, 222, 0.1);
+            border-left-color: var(--info-color);
+        }
+
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .notification-time {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        .notification-content {
+            color: var(--text-dark);
+        }
+
+        .notification-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .settings-section {
+            margin-bottom: 30px;
+        }
+
+        .settings-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--bg-light);
+        }
+
+        .settings-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--bg-light);
+        }
+
+        .settings-label {
+            font-weight: 500;
+        }
+
+        .settings-description {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-top: 5px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 24px;
+            background: #ccc;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: var(--accent-color);
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(26px);
+        }
+
+        .api-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: var(--bg-light);
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .status-indicator.connected {
+            background: var(--accent-color);
+        }
+
+        .status-indicator.disconnected {
+            background: var(--danger-color);
+        }
+
+        .status-text {
+            font-weight: 500;
+        }
+
+        .sync-button {
+            margin-left: auto;
+        }
+
+        .backup-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .backup-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: var(--bg-light);
+            border-radius: 8px;
+        }
+
+        .backup-info {
+            flex: 1;
+        }
+
+        .backup-name {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .backup-date {
+            font-size: 14px;
+            color: var(--text-light);
+        }
+
+        .backup-actions {
+            display: flex;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-left">
+                <div class="logo">CRE Portfolio Manager Pro</div>
+                <span style="color: var(--text-light);">Advanced commercial real estate management system</span>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-primary" onclick="showAddInvestorModal()">
+                    <i class="fas fa-user-plus"></i> Add Investor
+                </button>
+                <button class="btn btn-success" onclick="showAddPropertyModal()">
+                    <i class="fas fa-building"></i> Add Property
+                </button>
+                <button class="btn btn-secondary" onclick="exportData()">
+                    <i class="fas fa-file-export"></i> Export
+                </button>
+                <button class="btn btn-secondary" onclick="importData()">
+                    <i class="fas fa-file-import"></i> Import
+                </button>
+                <button class="btn btn-info" onclick="showNotifications()" style="position: relative;">
+                    <i class="fas fa-bell"></i> Notifications
+                    <span class="notification-badge" id="notificationBadge">3</span>
+                </button>
+                <button class="btn btn-secondary" onclick="showSettings()">
+                    <i class="fas fa-cog"></i> Settings
+                </button>
+                <a href="file:///C:/Users/Admin/Desktop/Dynamic%20HTML/HTML-Project/(OM%20Comps)%20File%20Name%20Formatter.html" target="_blank" class="btn btn-primary">
+                    OM File Name Formatter
+                </a>
+            </div>
+        </header>
+
+        <div class="search-container">
+            <input type="text" class="search-input" id="searchInput" placeholder="Search across investors, properties, and communications..." oninput="performSearch()">
+            <span class="search-icon"><i class="fas fa-search"></i></span>
+            <div class="search-results" id="searchResults"></div>
+        </div>
+
+        <div class="main-content">
+            <div class="tabs-container" id="tabsContainer">
+                <div class="tab active" onclick="switchTab('dashboard')">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span class="tab-name">Dashboard</span>
+                </div>
+                <div class="tab" onclick="switchTab('properties')">
+                    <i class="fas fa-building"></i>
+                    <span class="tab-name">Properties</span>
+                </div>
+                <div class="tab" onclick="switchTab('investors')">
+                    <i class="fas fa-users"></i>
+                    <span class="tab-name">Investors</span>
+                </div>
+                <div class="tab" onclick="switchTab('matches')">
+                    <i class="fas fa-handshake"></i>
+                    <span class="tab-name">Matches</span>
+                </div>
+                <div class="tab" onclick="switchTab('analytics')">
+                    <i class="fas fa-chart-line"></i>
+                    <span class="tab-name">Analytics</span>
+                </div>
+                <div class="tab" onclick="switchTab('documents')">
+                    <i class="fas fa-file-alt"></i>
+                    <span class="tab-name">Documents</span>
+                </div>
+            </div>
+            <div id="tabContentContainer"></div>
+            <div class="welcome-message" id="welcomeMessage" style="display: none;">
+                <h2>Welcome to CRE Portfolio Manager Pro</h2>
+                <p>Start by adding your first investor or property using the buttons above.</p>
+                <p>Track investment criteria, properties, and manage your real estate portfolio efficiently.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Investor Modal -->
+    <div class="modal" id="addInvestorModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Add New Investor</h3>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <input type="text" class="form-input" id="newInvestorName" placeholder="Enter investor name...">
+                </div>
+                <div class="form-group">
+                    <input type="email" class="form-input" id="newInvestorEmail" placeholder="Enter investor email...">
+                </div>
+                <div class="form-group">
+                    <input type="tel" class="form-input" id="newInvestorPhone" placeholder="Enter investor phone...">
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-input" id="newInvestorCompany" placeholder="Enter investor company...">
+                </div>
+                <div class="form-group">
+                    <select class="form-select" id="newInvestorType">
+                        <option value="">Select Investor Type</option>
+                        <option value="Individual">Individual</option>
+                        <option value="Institutional">Institutional</option>
+                        <option value="Family Office">Family Office</option>
+                        <option value="REIT">REIT</option>
+                        <option value="Fund">Fund</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('addInvestorModal')">Cancel</button>
+                <button class="btn btn-success" onclick="addNewInvestor()">Add Investor</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Property Modal -->
+    <div class="modal" id="addPropertyModal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Add New Property</h3>
+            </div>
+            <div class="modal-body">
+                <div class="property-detail-grid">
+                    <div class="property-detail-group">
+                        <label class="property-detail-label">Property Name</label>
+                        <input type="text" class="property-detail-input" id="propertyName" placeholder="e.g., Downtown Office Tower">
+                    </div>
+                    <div class="property-detail-group">
+                        <label class="property-detail-label">Property Type</label>
+                        <select class="property-detail-input" id="propertyType">
+                            <option value="">Select Type</option>
+                            <option value="Office">Office</option>
+                            <option value="Retail">Retail</option>
+                            <option value="Industrial">Industrial</option>
+                            <option value="Multifamily">Multifamily</option>
+                            <option value="Mixed Use">Mixed Use</option>
+                            <option value="Hospitality">Hospitality</option>
+                            <option value="Land">Land</option>
+                        </select>
+                    </div>
+                    <div class="property-detail-group">
+                        <label class="property-detail-label">Address</label>
+                        <input type="text" class="property-detail-input" id="propertyAddress" placeholder="e.g., 123 Main St, City, State">
+                    </div>
+                    <div class="property-detail-group">
+                        <label class="property-detail-label">Size (sq ft)</label>
+                        <input type="number" class="property-detail-input" id="propertySize" placeholder="e.g., 25000">
+                    </div>
+                    <div class="property-detail-group">
+                        <label class="property-detail-label">Price ($)</label>
+                        <input type="number" class="property-detail-input" id="propertyPrice" placeholder="e.g., 5000000">
+                    </div>
+                    <div class="property-detail-group">
+                        <label class="property-detail-label">Status</label>
+                        <select class="property-detail-input" id="propertyStatus">
+                            <option value="available">Available</option>
+                            <option value="pending">Pending</option>
+                            <option value="sold">Sold</option>
+                        </select>
+                    </div>
+                    <div class="property-detail-group">
+                        <label class="property-detail-label">Year Built</label>
+                        <input type="number" class="property-detail-input" id="propertyYearBuilt" placeholder="e.g., 2010">
+                    </div>
+                    <div class="property-detail-group">
+                        <label class="property-detail-label">Cap Rate (%)</label>
+                        <input type="number" step="0.1" class="property-detail-input" id="propertyCapRate" placeholder="e.g., 6.5">
+                    </div>
+                </div>
+                <div class="property-detail-group" style="margin-top: 15px;">
+                    <label class="property-detail-label">Description</label>
+                    <textarea class="form-textarea" id="propertyDescription" placeholder="Enter property description..."></textarea>
+                </div>
+                <div class="property-detail-group" style="margin-top: 15px;">
+                    <label class="property-detail-label">Property Images</label>
+                    <div class="image-upload" onclick="document.getElementById('propertyImageInput').click()">
+                        <i class="fas fa-cloud-upload-alt" style="font-size: 24px; color: var(--text-light); margin-bottom: 10px;"></i>
+                        <p>Click to upload images</p>
+                        <input type="file" id="propertyImageInput" style="display: none;" accept="image/*" multiple onchange="handleImageUpload(event)">
+                    </div>
+                    <div class="image-preview" id="propertyImagePreview"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('addPropertyModal')">Cancel</button>
+                <button class="btn btn-success" onclick="addNewProperty()">Add Property</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Criteria Modal -->
+    <div class="modal" id="addCriteriaModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Add Investment Criteria</h3>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <select class="form-select" id="criteriaKeySelect" onchange="updateCriteriaValueInput()">
+                        <option value="">Select Criteria Type</option>
+                        <option value="Property Type">Property Type</option>
+                        <option value="Geographic Preference">Geographic Preference</option>
+                        <option value="Deal Size">Deal Size</option>
+                        <option value="Investment Focus">Investment Focus</option>
+                        <option value="Risk Profile">Risk Profile</option>
+                        <option value="Hold Period">Hold Period</option>
+                        <option value="Custom">Custom Criteria</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-input" id="criteriaKey" placeholder="Criteria name (e.g., Property Type)">
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-input" id="criteriaValue" placeholder="Value (e.g., Office Buildings)">
+                </div>
+                <div class="form-group">
+                    <label class="property-detail-label">Weight</label>
+                    <input type="range" class="form-input" id="criteriaWeight" min="1" max="10" value="5">
+                    <div style="text-align: center; margin-top: 5px;">
+                        <span id="criteriaWeightValue">5</span> / 10
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('addCriteriaModal')">Cancel</button>
+                <button class="btn btn-success" onclick="addCriteria()">Add Criteria</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Criteria Modal -->
+    <div class="modal" id="editCriteriaModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Edit Investment Criteria</h3>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <input type="text" class="form-input" id="editCriteriaKey" placeholder="Criteria name">
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-input" id="editCriteriaValue" placeholder="Value">
+                </div>
+                <div class="form-group">
+                    <label class="property-detail-label">Weight</label>
+                    <input type="range" class="form-input" id="editCriteriaWeight" min="1" max="10" value="5">
+                    <div style="text-align: center; margin-top: 5px;">
+                        <span id="editCriteriaWeightValue">5</span> / 10
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('editCriteriaModal')">Cancel</button>
+                <button class="btn btn-success" onclick="saveCriteriaEdit()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Property Modal -->
+    <div class="modal" id="editPropertyModal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Edit Property</h3>
+            </div>
+            <div class="modal-body">
+                <div class="property-detail-grid">
+                    <div class="property-detail-group">
+                        <label class="property-detail-label">Property Name</label>
+                        <input type="text" class="property-detail-input" id="editPropertyName" placeholder="e.g., Downtown Office Tower">
+                    </div>
+                    <div class="property-detail-group">
+                        <label class="property-detail-label">Property Type</label>
+                        <select class="property-detail-input" id="editPropertyType">
+                            <option value="">Select Type</option>
+                            <option value="Office">Office</option>
+                            <option value="Retail">Retail</option>
+                            <option value="Industrial">Industrial</option>
+                            <option value="Multifamily">Multifamily</option>
+                            <option value="Mixed Use">Mixed Use</option>
+                            <option value="Hospitality">Hospitality</option>
+                            <option value="Land">Land</option>
+                        </select>
+                    </div>
+                    <div class="property-detail-group">
+                        <label class="property-detail-label">Address</label>
+                        <input type="text" class="property-detail-input" id="editPropertyAddress" placeholder="e.g., 123 Main St, City, State">
+                    </div>
+                    <div class="property-detail-group">
+                        <label class="property-detail-label">Size (sq ft)</label>
+                        <input type="number" class="property-detail-input" id="editPropertySize" placeholder="e.g., 25000">
+                    </div>
+                    <div class="property-detail-group">
+                        <label class="property-detail-label">Price ($)</label>
+                        <input type="number" class="property-detail-input" id="editPropertyPrice" placeholder="e.g., 5000000">
+                    </div>
+                    <div class="property-detail-group">
+                        <label class="property-detail-label">Status</label>
+                        <select class="property-detail-input" id="editPropertyStatus">
+                            <option value="available">Available</option>
+                            <option value="pending">Pending</option>
+                            <option value="sold">Sold</option>
+                        </select>
+                    </div>
+                    <div class="property-detail-group">
+                        <label class="property-detail-label">Year Built</label>
+                        <input type="number" class="property-detail-input" id="editPropertyYearBuilt" placeholder="e.g., 2010">
+                    </div>
+                    <div class="property-detail-group">
+                        <label class="property-detail-label">Cap Rate (%)</label>
+                        <input type="number" step="0.1" class="property-detail-input" id="editPropertyCapRate" placeholder="e.g., 6.5">
+                    </div>
+                </div>
+                <div class="property-detail-group" style="margin-top: 15px;">
+                    <label class="property-detail-label">Description</label>
+                    <textarea class="form-textarea" id="editPropertyDescription" placeholder="Enter property description..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('editPropertyModal')">Cancel</button>
+                <button class="btn btn-success" onclick="savePropertyEdit()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Property Details Modal -->
+    <div class="modal" id="propertyDetailsModal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="propertyDetailsTitle">Property Details</h3>
+            </div>
+            <div class="modal-body" id="propertyDetailsContent">
+                <!-- Property details will be inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('propertyDetailsModal')">Close</button>
+                <button class="btn btn-primary" id="editPropertyBtn" onclick="showEditPropertyModal()">Edit Property</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Match Details Modal -->
+    <div class="modal" id="matchDetailsModal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="matchDetailsTitle">Match Analysis</h3>
+            </div>
+            <div class="modal-body" id="matchDetailsContent">
+                <!-- Match details will be inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('matchDetailsModal')">Close</button>
+                <button class="btn btn-primary" onclick="contactInvestor()">Contact Investor</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications Modal -->
+    <div class="modal" id="notificationsModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Notifications</h3>
+            </div>
+            <div class="modal-body" id="notificationsContent">
+                <!-- Notifications will be inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('notificationsModal')">Close</button>
+                <button class="btn btn-primary" onclick="markAllNotificationsRead()">Mark All Read</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Settings</h3>
+            </div>
+            <div class="modal-body" id="settingsContent">
+                <!-- Settings will be inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('settingsModal')">Close</button>
+                <button class="btn btn-success" onclick="saveSettings()">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden file input for import -->
+    <input type="file" id="fileInput" style="display: none;" accept=".json" onchange="handleFileImport(event)">
+
+    <!-- Toast notification -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Data structure
+        let data = {
+            investors: {},
+            properties: {},
+            communications: {},
+            tasks: {},
+            documents: {},
+            notifications: [],
+            settings: {
+                autoSave: true,
+                notifications: true,
+                darkMode: false,
+                apiEndpoint: 'https://api.example.com',
+                apiKey: '',
+                syncInterval: 30 // minutes
+            }
+        };
+        let activeTab = 'dashboard';
+        let currentEditingCriteria = null;
+        let currentEditingInvestor = null;
+        let currentEditingProperty = null;
+        let currentPropertyImages = [];
+        let currentMatchProperty = null;
+        let currentMatchInvestor = null;
+
+        // Initialize app
+        function init() {
+            loadData();
+            if (Object.keys(data.investors).length === 0 && Object.keys(data.properties).length === 0) {
+                // Create default data
+                data = {
+                    investors: {
+                        'Investor A': {
+                            email: 'investora@example.com',
+                            phone: '(555) 123-4567',
+                            company: 'Alpha Investments',
+                            type: 'Institutional',
+                            criteria: [
+                                { key: 'Investment Focus', value: 'Value-add opportunities in major metros', weight: 8 },
+                                { key: 'Property Type', value: 'Office and Multi-family', weight: 7 },
+                                { key: 'Geographic Preference', value: 'Northeast corridor', weight: 9 },
+                                { key: 'Deal Size', value: '$5M - $50M', weight: 6 },
+                                { key: 'Risk Profile', value: 'Moderate', weight: 5 },
+                                { key: 'Hold Period', value: '5-7 years', weight: 4 }
+                            ],
+                            notes: '# Investor Profile\n\nKey points to remember:\n- Prefers stabilized assets with upside potential\n- Quick decision maker\n- Values transparency\n\n## Contact Info\n- **Email**: investor.a@example.com\n- **Phone**: (555) 123-4567\n\n### Recent Activity\n- Closed on downtown office building in Q1\n- Currently evaluating three multi-family properties'
+                        },
+                        'Investor B': {
+                            email: 'investorb@example.com',
+                            phone: '(555) 234-5678',
+                            company: 'Beta Capital',
+                            type: 'Family Office',
+                            criteria: [
+                                { key: 'Investment Focus', value: 'Development projects', weight: 9 },
+                                { key: 'Property Type', value: 'Industrial and Logistics', weight: 8 },
+                                { key: 'Geographic Preference', value: 'Sun Belt states', weight: 7 },
+                                { key: 'Deal Size', value: '$10M - $100M', weight: 6 },
+                                { key: 'Risk Profile', value: 'Moderate to High', weight: 7 },
+                                { key: 'Hold Period', value: '7-10 years', weight: 5 }
+                            ],
+                            notes: '# Development Specialist\n\n## Recent Interests\n- E-commerce driven warehouse demand\n- Last-mile delivery centers\n\n## Notes\n- Partner-friendly approach\n- Long-term hold strategy\n\n### Key Contacts\n- **John Smith** (Partner): johninvestorb.com\n- **Sarah Johnson** (Analyst): sarahinvestorb.com'
+                        },
+                        'Investor C': {
+                            email: 'investorc@example.com',
+                            phone: '(555) 345-6789',
+                            company: 'Gamma REIT',
+                            type: 'REIT',
+                            criteria: [
+                                { key: 'Investment Focus', value: 'Core-plus acquisitions', weight: 7 },
+                                { key: 'Property Type', value: 'Retail centers and Mixed-use', weight: 8 },
+                                { key: 'Geographic Preference', value: 'Secondary markets', weight: 6 },
+                                { key: 'Deal Size', value: '$2M - $20M', weight: 5 },
+                                { key: 'Risk Profile', value: 'Low to Moderate', weight: 8 },
+                                { key: 'Hold Period', value: '3-5 years', weight: 6 }
+                            ],
+                            notes: '# Retail Specialist\n\n## Strategy\n- Focus on grocery-anchored centers\n- Value in demographic shifts\n\n## Contact Notes\n- Prefers email communication\n- Monthly updates requested\n\n### Portfolio Highlights\n- 15 retail properties across Midwest\n- Average occupancy: 94%'
+                        }
+                    },
+                    properties: {
+                        'Downtown Office Tower': {
+                            type: 'Office',
+                            address: '123 Main St, New York, NY',
+                            size: 45000,
+                            price: 12000000,
+                            status: 'available',
+                            yearBuilt: 2015,
+                            capRate: 6.5,
+                            description: 'Prime downtown office building with excellent visibility and access to public transportation. Recently renovated lobby and common areas.',
+                            images: ['https://picsum.photos/seed/office1/800/600.jpg', 'https://picsum.photos/seed/office2/800/600.jpg'],
+                            documents: ['OM_DowntownOffice.pdf', 'Financial_Model_DowntownOffice.xlsx'],
+                            tags: ['Downtown', 'Transit Access', 'Renovated']
+                        },
+                        'Industrial Warehouse Complex': {
+                            type: 'Industrial',
+                            address: '456 Commerce Ave, Los Angeles, CA',
+                            size: 120000,
+                            price: 8500000,
+                            status: 'available',
+                            yearBuilt: 2010,
+                            capRate: 7.2,
+                            description: 'Modern warehouse facility with 30-foot ceilings, multiple loading docks, and secure yard area. Ideal for e-commerce or logistics operations.',
+                            images: ['https://picsum.photos/seed/warehouse1/800/600.jpg', 'https://picsum.photos/seed/warehouse2/800/600.jpg'],
+                            documents: ['OM_IndustrialWarehouse.pdf', 'Site_Plan_Warehouse.pdf'],
+                            tags: ['Logistics', 'E-commerce', 'High Ceilings']
+                        },
+                        'Suburban Retail Center': {
+                            type: 'Retail',
+                            address: '789 Shopping Blvd, Chicago, IL',
+                            size: 35000,
+                            price: 5500000,
+                            status: 'pending',
+                            yearBuilt: 2005,
+                            capRate: 8.0,
+                            description: 'Well-established shopping center with anchor tenant and strong foot traffic. Ample parking and visibility from major roadway.',
+                            images: ['https://picsum.photos/seed/retail1/800/600.jpg', 'https://picsum.photos/seed/retail2/800/600.jpg'],
+                            documents: ['OM_RetailCenter.pdf', 'Tenant_Mix_Retail.pdf'],
+                            tags: ['Grocery Anchored', 'High Traffic', 'Ample Parking']
+                        }
+                    },
+                    communications: {
+                        'Investor A': [
+                            {
+                                date: '2023-06-15',
+                                type: 'email',
+                                content: 'Sent information about three potential office acquisitions in Boston area.'
+                            },
+                            {
+                                date: '2023-06-10',
+                                type: 'phone',
+                                content: 'Discussed investment timeline for Q3 and Q4 acquisitions.'
+                            }
+                        ],
+                        'Investor B': [
+                            {
+                                date: '2023-06-12',
+                                type: 'meeting',
+                                content: 'Presented development opportunity in Austin, TX. Investor expressed strong interest.'
+                            }
+                        ]
+                    },
+                    tasks: {
+                        'Investor A': [
+                            {
+                                title: 'Follow up on Boston office properties',
+                                dueDate: '2023-06-20',
+                                priority: 'high',
+                                completed: false
+                            },
+                            {
+                                title: 'Send market analysis report',
+                                dueDate: '2023-06-25',
+                                priority: 'medium',
+                                completed: false
+                            }
+                        ],
+                        'Investor B': [
+                            {
+                                title: 'Prepare pro forma for Austin development',
+                                dueDate: '2023-06-18',
+                                priority: 'high',
+                                completed: false
+                            }
+                        ]
+                    },
+                    documents: {
+                        'Downtown Office Tower': [
+                            {
+                                name: 'OM_DowntownOffice.pdf',
+                                type: 'Offering Memorandum',
+                                date: '2023-06-01',
+                                size: '2.5 MB'
+                            },
+                            {
+                                name: 'Financial_Model_DowntownOffice.xlsx',
+                                type: 'Financial Model',
+                                date: '2023-06-02',
+                                size: '1.2 MB'
+                            }
+                        ],
+                        'Industrial Warehouse Complex': [
+                            {
+                                name: 'OM_IndustrialWarehouse.pdf',
+                                type: 'Offering Memorandum',
+                                date: '2023-05-28',
+                                size: '3.1 MB'
+                            },
+                            {
+                                name: 'Site_Plan_Warehouse.pdf',
+                                type: 'Site Plan',
+                                date: '2023-05-29',
+                                size: '5.7 MB'
+                            }
+                        ],
+                        'Suburban Retail Center': [
+                            {
+                                name: 'OM_RetailCenter.pdf',
+                                type: 'Offering Memorandum',
+                                date: '2023-05-15',
+                                size: '2.8 MB'
+                            },
+                            {
+                                name: 'Tenant_Mix_Retail.pdf',
+                                type: 'Tenant Mix',
+                                date: '2023-05-16',
+                                size: '1.5 MB'
+                            }
+                        ]
+                    },
+                    notifications: [
+                        {
+                            id: 1,
+                            title: 'New Property Match',
+                            content: 'Downtown Office Tower matches Investor A criteria with 85% score.',
+                            time: '2 hours ago',
+                            read: false,
+                            type: 'match'
+                        },
+                        {
+                            id: 2,
+                            title: 'Task Due Soon',
+                            content: 'Follow up on Boston office properties is due in 2 days.',
+                            time: '5 hours ago',
+                            read: false,
+                            type: 'task'
+                        },
+                        {
+                            id: 3,
+                            title: 'New Document Available',
+                            content: 'Updated financial model for Industrial Warehouse Complex is now available.',
+                            time: '1 day ago',
+                            read: false,
+                            type: 'document'
+                        }
+                    ],
+                    settings: {
+                        autoSave: true,
+                        notifications: true,
+                        darkMode: false,
+                        apiEndpoint: 'https://api.example.com',
+                        apiKey: '',
+                        syncInterval: 30
+                    }
+                };
+                saveData();
+            }
+            renderTabs();
+            switchTab('dashboard');
+            updateNotificationBadge();
+        }
+
+        // Data persistence
+        function saveData() {
+            localStorage.setItem('crePortfolioData', JSON.stringify(data));
+        }
+
+        function loadData() {
+            const saved = localStorage.getItem('crePortfolioData');
+            if (saved) {
+                data = JSON.parse(saved);
+            }
+        }
+
+        // Tab management
+        function renderTabs() {
+            // Tab rendering is now static in HTML
+        }
+
+        function switchTab(tabName) {
+            activeTab = tabName;
+            
+            // Update active tab styling
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Render content based on active tab
+            switch(tabName) {
+                case 'dashboard':
+                    renderDashboard();
+                    break;
+                case 'properties':
+                    renderProperties();
+                    break;
+                case 'investors':
+                    renderInvestors();
+                    break;
+                case 'matches':
+                    renderMatches();
+                    break;
+                case 'analytics':
+                    renderAnalytics();
+                    break;
+                case 'documents':
+                    renderDocuments();
+                    break;
+            }
+        }
+
+        function renderDashboard() {
+            const container = document.getElementById('tabContentContainer');
+            const investorCount = Object.keys(data.investors).length;
+            const propertyCount = Object.keys(data.properties).length;
+            const availableCount = Object.values(data.properties).filter(p => p.status === 'available').length;
+            const pendingCount = Object.values(data.properties).filter(p => p.status === 'pending').length;
+            
+            container.innerHTML = `
+                <div class="tab-content active">
+                    <h2 style="margin-bottom: 20px;">Portfolio Dashboard</h2>
+                    
+                    <div class="dashboard">
+                        <div class="dashboard-card">
+                            <div class="dashboard-card-title">Total Investors</div>
+                            <div class="dashboard-card-value">${investorCount}</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="dashboard-card-title">Total Properties</div>
+                            <div class="dashboard-card-value">${propertyCount}</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="dashboard-card-title">Available Properties</div>
+                            <div class="dashboard-card-value">${availableCount}</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="dashboard-card-title">Pending Deals</div>
+                            <div class="dashboard-card-value">${pendingCount}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <h3 class="section-title">Portfolio Value</h3>
+                        </div>
+                        <div class="chart-container">
+                            <div class="chart-placeholder">
+                                <i class="fas fa-chart-pie" style="font-size: 48px; margin-bottom: 10px;"></i>
+                                <p>Portfolio Value by Property Type</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <h3 class="section-title">Recent Properties</h3>
+                            <button class="btn btn-primary" onclick="switchTab('properties')">View All</button>
+                        </div>
+                        <div class="property-grid">
+                            ${Object.entries(data.properties).slice(0, 3).map(([name, property]) => `
+                                <div class="property-card" onclick="showPropertyDetails('${name}')">
+                                    <div class="property-image">
+                                        ${property.images && property.images.length > 0 ? 
+                                            `<img src="${property.images[0]}" alt="${name}">` : 
+                                            '<i class="fas fa-building" style="font-size: 40px; color: var(--text-light);"></i>'
+                                        }
+                                    </div>
+                                    <div class="property-content">
+                                        <div class="property-header">
+                                            <div class="property-title">${name}</div>
+                                            <div class="property-status status-${property.status}">${property.status}</div>
+                                        </div>
+                                        <div class="property-details">
+                                            <div class="property-detail">
+                                                <span class="property-detail-label">Type:</span>
+                                                <span class="property-detail-value">${property.type}</span>
+                                            </div>
+                                            <div class="property-detail">
+                                                <span class="property-detail-label">Size:</span>
+                                                <span class="property-detail-value">${property.size.toLocaleString()} sq ft</span>
+                                            </div>
+                                            <div class="property-detail">
+                                                <span class="property-detail-label">Price:</span>
+                                                <span class="property-detail-value">$${property.price.toLocaleString()}</span>
+                                            </div>
+                                            ${property.capRate ? `
+                                                <div class="property-detail">
+                                                    <span class="property-detail-label">Cap Rate:</span>
+                                                    <span class="property-detail-value">${property.capRate}%</span>
+                                                </div>
+                                            ` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <h3 class="section-title">Upcoming Tasks</h3>
+                            <button class="btn btn-primary" onclick="switchTab('investors')">View All</button>
+                        </div>
+                        <div class="task-list">
+                            ${Object.entries(data.tasks).flatMap(([investor, tasks]) => 
+                                tasks.filter(task => !task.completed).slice(0, 2).map(task => `
+                                    <div class="task-item">
+                                        <input type="checkbox" class="task-checkbox" onchange="toggleTask('${investor}', '${task.title}')">
+                                        <div class="task-content">
+                                            <div class="task-title">${task.title}</div>
+                                            <div class="task-date">Due: ${task.dueDate} | Investor: ${investor}</div>
+                                        </div>
+                                        <div class="task-priority priority-${task.priority}">${task.priority}</div>
+                                    </div>
+                                `)
+                            ).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderProperties() {
+            const container = document.getElementById('tabContentContainer');
+            
+            container.innerHTML = `
+                <div class="tab-content active">
+                    <div class="section">
+                        <div class="section-header">
+                            <h2 class="section-title">Properties</h2>
+                            <button class="btn btn-success" onclick="showAddPropertyModal()">
+                                <i class="fas fa-plus"></i> Add Property
+                            </button>
+                        </div>
+                        
+                        <div class="filter-container">
+                            <select class="filter-select" id="propertyTypeFilter" onchange="filterProperties()">
+                                <option value="">All Types</option>
+                                <option value="Office">Office</option>
+                                <option value="Retail">Retail</option>
+                                <option value="Industrial">Industrial</option>
+                                <option value="Multifamily">Multifamily</option>
+                                <option value="Mixed Use">Mixed Use</option>
+                                <option value="Hospitality">Hospitality</option>
+                                <option value="Land">Land</option>
+                            </select>
+                            <select class="filter-select" id="propertyStatusFilter" onchange="filterProperties()">
+                                <option value="">All Statuses</option>
+                                <option value="available">Available</option>
+                                <option value="pending">Pending</option>
+                                <option value="sold">Sold</option>
+                            </select>
+                            <input type="text" class="form-input" id="propertySearchInput" placeholder="Search properties..." oninput="filterProperties()">
+                        </div>
+                        
+                        <div class="sort-container">
+                            <select class="sort-select" id="propertySortSelect" onchange="sortProperties()">
+                                <option value="name-asc">Name (A-Z)</option>
+                                <option value="name-desc">Name (Z-A)</option>
+                                <option value="price-asc">Price (Low to High)</option>
+                                <option value="price-desc">Price (High to Low)</option>
+                                <option value="size-asc">Size (Small to Large)</option>
+                                <option value="size-desc">Size (Large to Small)</option>
+                                <option value="caprate-asc">Cap Rate (Low to High)</option>
+                                <option value="caprate-desc">Cap Rate (High to Low)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="property-grid" id="propertyGrid">
+                            ${Object.entries(data.properties).map(([name, property]) => `
+                                <div class="property-card" data-type="${property.type}" data-status="${property.status}" data-name="${name.toLowerCase()}" data-price="${property.price}" data-size="${property.size}" data-caprate="${property.capRate || 0}" onclick="showPropertyDetails('${name}')">
+                                    <div class="property-image">
+                                        ${property.images && property.images.length > 0 ? 
+                                            `<img src="${property.images[0]}" alt="${name}">` : 
+                                            '<i class="fas fa-building" style="font-size: 40px; color: var(--text-light);"></i>'
+                                        }
+                                    </div>
+                                    <div class="property-content">
+                                        <div class="property-header">
+                                            <div class="property-title">${name}</div>
+                                            <div class="property-status status-${property.status}">${property.status}</div>
+                                        </div>
+                                        <div class="property-details">
+                                            <div class="property-detail">
+                                                <span class="property-detail-label">Type:</span>
+                                                <span class="property-detail-value">${property.type}</span>
+                                            </div>
+                                            <div class="property-detail">
+                                                <span class="property-detail-label">Size:</span>
+                                                <span class="property-detail-value">${property.size.toLocaleString()} sq ft</span>
+                                            </div>
+                                            <div class="property-detail">
+                                                <span class="property-detail-label">Price:</span>
+                                                <span class="property-detail-value">$${property.price.toLocaleString()}</span>
+                                            </div>
+                                            ${property.capRate ? `
+                                                <div class="property-detail">
+                                                    <span class="property-detail-label">Cap Rate:</span>
+                                                    <span class="property-detail-value">${property.capRate}%</span>
+                                                </div>
+                                            ` : ''}
+                                        </div>
+                                        ${property.tags && property.tags.length > 0 ? `
+                                            <div style="margin-top: 10px;">
+                                                ${property.tags.map(tag => `<span class="tag tag-primary">${tag}</span>`).join('')}
+                                            </div>
+                                        ` : ''}
+                                        <div class="property-actions">
+                                            <button class="btn btn-primary" onclick="event.stopPropagation(); showPropertyDetails('${name}')">View Details</button>
+                                            <button class="btn btn-secondary" onclick="event.stopPropagation(); showEditPropertyModal('${name}')">Edit</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderInvestors() {
+            const container = document.getElementById('tabContentContainer');
+            
+            container.innerHTML = `
+                <div class="tab-content active">
+                    <div class="section">
+                        <div class="section-header">
+                            <h2 class="section-title">Investors</h2>
+                            <button class="btn btn-primary" onclick="showAddInvestorModal()">
+                                <i class="fas fa-user-plus"></i> Add Investor
+                            </button>
+                        </div>
+                        
+                        <div class="property-grid">
+                            ${Object.entries(data.investors).map(([name, investor]) => `
+                                <div class="property-card" onclick="showInvestorDetails('${name}')">
+                                    <div class="property-image">
+                                        <i class="fas fa-user-tie" style="font-size: 40px; color: var(--text-light);"></i>
+                                    </div>
+                                    <div class="property-content">
+                                        <div class="property-header">
+                                            <div class="property-title">${name}</div>
+                                            <div class="property-status status-available">${investor.type || 'Individual'}</div>
+                                        </div>
+                                        <div class="property-details">
+                                            <div class="property-detail">
+                                                <span class="property-detail-label">Company:</span>
+                                                <span class="property-detail-value">${investor.company || 'N/A'}</span>
+                                            </div>
+                                            <div class="property-detail">
+                                                <span class="property-detail-label">Email:</span>
+                                                <span class="property-detail-value">${investor.email}</span>
+                                            </div>
+                                            <div class="property-detail">
+                                                <span class="property-detail-label">Phone:</span>
+                                                <span class="property-detail-value">${investor.phone}</span>
+                                            </div>
+                                            <div class="property-detail">
+                                                <span class="property-detail-label">Criteria:</span>
+                                                <span class="property-detail-value">${investor.criteria.length} items</span>
+                                            </div>
+                                        </div>
+                                        <div class="property-actions">
+                                            <button class="btn btn-primary" onclick="event.stopPropagation(); showInvestorDetails('${name}')">View Details</button>
+                                            <button class="btn btn-info" onclick="event.stopPropagation(); showInvestorMatches('${name}')">Find Matches</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderMatches() {
+            const container = document.getElementById('tabContentContainer');
+            
+            // Calculate matches for all properties
+            const matches = [];
+            Object.entries(data.properties).forEach(([propName, property]) => {
+                if (property.status !== 'available') return;
+                
+                const matchingInvestors = [];
+                Object.entries(data.investors).forEach(([invName, investor]) => {
+                    let score = 0;
+                    let totalWeight = 0;
+                    const matchedCriteria = [];
+                    
+                    investor.criteria.forEach(criteria => {
+                        totalWeight += criteria.weight;
+                        
+                        if (criteria.key === 'Property Type' && criteria.value.includes(property.type)) {
+                            score += criteria.weight;
+                            matchedCriteria.push(criteria.key);
+                        }
+                        // Add more matching logic here based on other criteria
+                        if (criteria.key === 'Geographic Preference' && property.address) {
+                            // Simple check if address contains any of the preferred locations
+                            const locations = criteria.value.split(',').map(loc => loc.trim().toLowerCase());
+                            const address = property.address.toLowerCase();
+                            if (locations.some(loc => address.includes(loc))) {
+                                score += criteria.weight;
+                                matchedCriteria.push(criteria.key);
+                            }
+                        }
+                        if (criteria.key === 'Deal Size' && property.price) {
+                            // Parse deal size range
+                            const range = criteria.value.match(/\$(\d+)M\s*-\s*\$(\d+)M/);
+                            if (range) {
+                                const min = parseInt(range[1]) * 1000000;
+                                const max = parseInt(range[2]) * 1000000;
+                                if (property.price >= min && property.price <= max) {
+                                    score += criteria.weight;
+                                    matchedCriteria.push(criteria.key);
+                                }
+                            }
+                        }
+                    });
+                    
+                    if (score > 0) {
+                        matchingInvestors.push({
+                            name: invName,
+                            score: Math.round((score / totalWeight) * 100),
+                            matchedCriteria
+                        });
+                    }
+                });
+                
+                if (matchingInvestors.length > 0) {
+                    matches.push({
+                        property: propName,
+                        propertyData: property,
+                        investors: matchingInvestors.sort((a, b) => b.score - a.score)
+                    });
+                }
+            });
+            
+            container.innerHTML = `
+                <div class="tab-content active">
+                    <div class="section">
+                        <div class="section-header">
+                            <h2 class="section-title">Investor-Property Matches</h2>
+                            <button class="btn btn-primary" onclick="refreshMatches()">
+                                <i class="fas fa-sync-alt"></i> Refresh Matches
+                            </button>
+                        </div>
+                        
+                        ${matches.length > 0 ? `
+                            <div class="property-grid">
+                                ${matches.map(match => `
+                                    <div class="property-card">
+                                        <div class="property-image">
+                                            ${match.propertyData.images && match.propertyData.images.length > 0 ? 
+                                                `<img src="${match.propertyData.images[0]}" alt="${match.property}">` : 
+                                                '<i class="fas fa-building" style="font-size: 40px; color: var(--text-light);"></i>'
+                                            }
+                                        </div>
+                                        <div class="property-content">
+                                            <div class="property-header">
+                                                <div class="property-title">${match.property}</div>
+                                                <div class="property-status status-${match.propertyData.status}">${match.propertyData.status}</div>
+                                            </div>
+                                            <div class="property-details">
+                                                <div class="property-detail">
+                                                    <span class="property-detail-label">Type:</span>
+                                                    <span class="property-detail-value">${match.propertyData.type}</span>
+                                                </div>
+                                                <div class="property-detail">
+                                                    <span class="property-detail-label">Price:</span>
+                                                    <span class="property-detail-value">$${match.propertyData.price.toLocaleString()}</span>
+                                                </div>
+                                                ${match.propertyData.capRate ? `
+                                                    <div class="property-detail">
+                                                        <span class="property-detail-label">Cap Rate:</span>
+                                                        <span class="property-detail-value">${match.propertyData.capRate}%</span>
+                                                    </div>
+                                                ` : ''}
+                                            </div>
+                                            <div class="match-container">
+                                                <div class="match-header">
+                                                    <div class="match-title">Matching Investors</div>
+                                                </div>
+                                                <div class="match-investors">
+                                                    ${match.investors.map(investor => `
+                                                        <div class="match-investor" onclick="showMatchDetails('${match.property}', '${investor.name}')">
+                                                            ${investor.name} (${investor.score}%)
+                                                        </div>
+                                                    `).join('')}
+                                                </div>
+                                            </div>
+                                            <div class="property-actions">
+                                                <button class="btn btn-primary" onclick="showPropertyDetails('${match.property}')">View Property</button>
+                                                <button class="btn btn-info" onclick="showMatchDetails('${match.property}', '${match.investors[0].name}')">Match Details</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : '<p>No matches found. Try adding more properties or investor criteria.</p>'}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderAnalytics() {
+            const container = document.getElementById('tabContentContainer');
+            
+            // Calculate analytics data
+            const totalPropertyValue = Object.values(data.properties).reduce((sum, prop) => sum + prop.price, 0);
+            const avgCapRate = Object.values(data.properties)
+                .filter(prop => prop.capRate)
+                .reduce((sum, prop, _, arr) => sum + prop.capRate / arr.length, 0);
+            
+            const propertyTypes = {};
+            Object.values(data.properties).forEach(prop => {
+                if (!propertyTypes[prop.type]) {
+                    propertyTypes[prop.type] = { count: 0, value: 0 };
+                }
+                propertyTypes[prop.type].count++;
+                propertyTypes[prop.type].value += prop.price;
+            });
+            
+            container.innerHTML = `
+                <div class="tab-content active">
+                    <div class="section">
+                        <div class="section-header">
+                            <h2 class="section-title">Portfolio Analytics</h2>
+                            <button class="btn btn-primary" onclick="exportAnalytics()">
+                                <i class="fas fa-download"></i> Export Report
+                            </button>
+                        </div>
+                        
+                        <div class="analytics-container">
+                            <div class="analytics-card">
+                                <div class="analytics-title">Total Portfolio Value</div>
+                                <div class="analytics-content">
+                                    <div style="text-align: center;">
+                                        <div style="font-size: 36px; font-weight: bold; color: var(--primary-color);">$${totalPropertyValue.toLocaleString()}</div>
+                                        <div style="margin-top: 10px; color: var(--text-light);">Across ${Object.keys(data.properties).length} properties</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="analytics-card">
+                                <div class="analytics-title">Average Cap Rate</div>
+                                <div class="analytics-content">
+                                    <div style="text-align: center;">
+                                        <div style="font-size: 36px; font-weight: bold; color: var(--primary-color);">${avgCapRate.toFixed(2)}%</div>
+                                        <div style="margin-top: 10px; color: var(--text-light);">Across all properties</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="analytics-card">
+                                <div class="analytics-title">Property Distribution</div>
+                                <div class="analytics-content">
+                                    <div class="chart-placeholder">
+                                        <i class="fas fa-chart-pie" style="font-size: 48px; margin-bottom: 10px;"></i>
+                                        <p>Property Type Distribution</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <div class="section-header">
+                                <h3 class="section-title">Property Breakdown by Type</h3>
+                            </div>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Property Type</th>
+                                        <th>Count</th>
+                                        <th>Total Value</th>
+                                        <th>Average Cap Rate</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${Object.entries(propertyTypes).map(([type, data]) => {
+                                        const propsOfType = Object.values(data.properties).filter(prop => prop.type === type);
+                                        const avgCapRate = propsOfType
+                                            .filter(prop => prop.capRate)
+                                            .reduce((sum, prop, _, arr) => sum + prop.capRate / arr.length, 0);
+                                        
+                                        return `
+                                            <tr>
+                                                <td>${type}</td>
+                                                <td>${data.count}</td>
+                                                <td>$${data.value.toLocaleString()}</td>
+                                                <td>${avgCapRate ? avgCapRate.toFixed(2) + '%' : 'N/A'}</td>
+                                            </tr>
+                                        `;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="section">
+                            <div class="section-header">
+                                <h3 class="section-title">Investor Activity</h3>
+                            </div>
+                            <div class="chart-container">
+                                <div class="chart-placeholder">
+                                    <i class="fas fa-chart-line" style="font-size: 48px; margin-bottom: 10px;"></i>
+                                    <p>Investor Activity Over Time</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderDocuments() {
+            const container = document.getElementById('tabContentContainer');
+            
+            // Group documents by property
+            const documentsByProperty = {};
+            Object.entries(data.documents).forEach(([property, docs]) => {
+                documentsByProperty[property] = docs;
+            });
+            
+            container.innerHTML = `
+                <div class="tab-content active">
+                    <div class="section">
+                        <div class="section-header">
+                            <h2 class="section-title">Document Management</h2>
+                            <button class="btn btn-success" onclick="showUploadDocumentModal()">
+                                <i class="fas fa-upload"></i> Upload Document
+                            </button>
+                        </div>
+                        
+                        <div class="filter-container">
+                            <select class="filter-select" id="documentPropertyFilter" onchange="filterDocuments()">
+                                <option value="">All Properties</option>
+                                ${Object.keys(data.properties).map(prop => `
+                                    <option value="${prop}">${prop}</option>
+                                `).join('')}
+                            </select>
+                            <select class="filter-select" id="documentTypeFilter" onchange="filterDocuments()">
+                                <option value="">All Types</option>
+                                <option value="Offering Memorandum">Offering Memorandum</option>
+                                <option value="Financial Model">Financial Model</option>
+                                <option value="Site Plan">Site Plan</option>
+                                <option value="Tenant Mix">Tenant Mix</option>
+                                <option value="Lease Agreement">Lease Agreement</option>
+                                <option value="Appraisal">Appraisal</option>
+                            </select>
+                        </div>
+                        
+                        ${Object.entries(documentsByProperty).map(([property, docs]) => `
+                            <div class="section" data-property="${property}">
+                                <div class="section-header">
+                                    <h3 class="section-title">${property}</h3>
+                                    <button class="btn btn-primary" onclick="showUploadDocumentModal('${property}')">
+                                        <i class="fas fa-plus"></i> Add Document
+                                    </button>
+                                </div>
+                                <div class="document-list">
+                                    ${docs.map(doc => `
+                                        <div class="document-item" data-type="${doc.type}">
+                                            <div class="document-icon">
+                                                <i class="fas fa-file-pdf" style="color: var(--danger-color);"></i>
+                                            </div>
+                                            <div class="document-info">
+                                                <div class="document-name">${doc.name}</div>
+                                                <div class="document-date">${doc.type} • ${doc.date} • ${doc.size}</div>
+                                            </div>
+                                            <div class="document-actions">
+                                                <button class="btn btn-info" onclick="viewDocument('${property}', '${doc.name}')">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="btn btn-secondary" onclick="downloadDocument('${property}', '${doc.name}')">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                <button class="btn btn-danger" onclick="deleteDocument('${property}', '${doc.name}')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function showInvestorDetails(investorName) {
+            const investor = data.investors[investorName];
+            const communications = data.communications[investorName] || [];
+            const tasks = data.tasks[investorName] || [];
+            
+            const container = document.getElementById('tabContentContainer');
+            
+            container.innerHTML = `
+                <div class="tab-content active">
+                    <div class="section">
+                        <div class="section-header">
+                            <h2 class="section-title">${investorName}</h2>
+                            <button class="btn btn-secondary" onclick="renderInvestors()">Back to Investors</button>
+                        </div>
+                        
+                        <div class="criteria-list">
+                            <div class="criteria-item">
+                                <div class="criteria-content">
+                                    <div class="criteria-key">Email</div>
+                                    <div class="criteria-value">${investor.email}</div>
+                                </div>
+                            </div>
+                            <div class="criteria-item">
+                                <div class="criteria-content">
+                                    <div class="criteria-key">Phone</div>
+                                    <div class="criteria-value">${investor.phone}</div>
+                                </div>
+                            </div>
+                            <div class="criteria-item">
+                                <div class="criteria-content">
+                                    <div class="criteria-key">Company</div>
+                                    <div class="criteria-value">${investor.company || 'N/A'}</div>
+                                </div>
+                            </div>
+                            <div class="criteria-item">
+                                <div class="criteria-content">
+                                    <div class="criteria-key">Type</div>
+                                    <div class="criteria-value">${investor.type || 'Individual'}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <h3 class="section-title">Investment Criteria</h3>
+                            <button class="btn btn-primary" onclick="showAddCriteriaModal('${investorName}')">
+                                <i class="fas fa-plus"></i> Add Criteria
+                            </button>
+                        </div>
+                        <div class="criteria-list" id="criteriaList">
+                            ${renderCriteriaList(investorName)}
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <h3 class="section-title">Notes</h3>
+                        </div>
+                        <div class="notes-container">
+                            <textarea class="notes-input" id="notesInput" placeholder="Enter markdown notes here..." 
+                                oninput="updateNotes('${investorName}')">${investor.notes || ''}</textarea>
+                            <div class="notes-preview" id="notesPreview">${renderMarkdown(investor.notes || '')}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <h3 class="section-title">Communication Log</h3>
+                            <button class="btn btn-primary" onclick="showAddCommunicationModal('${investorName}')">
+                                <i class="fas fa-plus"></i> Add Communication
+                            </button>
+                        </div>
+                        <div class="communication-log">
+                            ${communications.length > 0 ? communications.map(comm => `
+                                <div class="log-entry">
+                                    <div class="log-header">
+                                        <div class="log-date">${comm.date}</div>
+                                        <div class="log-type type-${comm.type}">${comm.type}</div>
+                                    </div>
+                                    <div class="log-content">${comm.content}</div>
+                                </div>
+                            `).join('') : '<p>No communications logged yet.</p>'}
+                        </div>
+                        <div class="add-log-form" id="addLogForm" style="display: none;">
+                            <select class="form-select" id="communicationType">
+                                <option value="email">Email</option>
+                                <option value="phone">Phone</option>
+                                <option value="meeting">Meeting</option>
+                            </select>
+                            <input type="date" class="form-input" id="communicationDate">
+                            <textarea class="form-textarea" id="communicationContent" placeholder="Enter communication details..."></textarea>
+                            <button class="btn btn-success" onclick="addCommunication('${investorName}')">Add</button>
+                            <button class="btn btn-secondary" onclick="document.getElementById('addLogForm').style.display='none'">Cancel</button>
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <h3 class="section-title">Tasks</h3>
+                            <button class="btn btn-primary" onclick="showAddTaskModal('${investorName}')">
+                                <i class="fas fa-plus"></i> Add Task
+                            </button>
+                        </div>
+                        <div class="task-list">
+                            ${tasks.length > 0 ? tasks.map(task => `
+                                <div class="task-item">
+                                    <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask('${investorName}', '${task.title}')">
+                                    <div class="task-content">
+                                        <div class="task-title">${task.title}</div>
+                                        <div class="task-date">Due: ${task.dueDate}</div>
+                                    </div>
+                                    <div class="task-priority priority-${task.priority}">${task.priority}</div>
+                                </div>
+                            `).join('') : '<p>No tasks assigned yet.</p>'}
+                        </div>
+                        <div class="add-task-form" id="addTaskForm" style="display: none;">
+                            <input type="text" class="form-input" id="taskTitle" placeholder="Task title...">
+                            <input type="date" class="form-input" id="taskDueDate">
+                            <select class="form-select" id="taskPriority">
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                            <button class="btn btn-success" onclick="addTask('${investorName}')">Add</button>
+                            <button class="btn btn-secondary" onclick="document.getElementById('addTaskForm').style.display='none'">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showPropertyDetails(propertyName) {
+            const property = data.properties[propertyName];
+            
+            // Find matching investors
+            const matchingInvestors = [];
+            Object.entries(data.investors).forEach(([name, investor]) => {
+                let score = 0;
+                let totalWeight = 0;
+                const matchedCriteria = [];
+                
+                investor.criteria.forEach(criteria => {
+                    totalWeight += criteria.weight;
+                    
+                    if (criteria.key === 'Property Type' && criteria.value.includes(property.type)) {
+                        score += criteria.weight;
+                        matchedCriteria.push(criteria.key);
+                    }
+                    // Add more matching logic here based on other criteria
+                    if (criteria.key === 'Geographic Preference' && property.address) {
+                        // Simple check if address contains any of the preferred locations
+                        const locations = criteria.value.split(',').map(loc => loc.trim().toLowerCase());
+                        const address = property.address.toLowerCase();
+                        if (locations.some(loc => address.includes(loc))) {
+                            score += criteria.weight;
+                            matchedCriteria.push(criteria.key);
+                        }
+                    }
+                    if (criteria.key === 'Deal Size' && property.price) {
+                        // Parse deal size range
+                        const range = criteria.value.match(/\$(\d+)M\s*-\s*\$(\d+)M/);
+                        if (range) {
+                            const min = parseInt(range[1]) * 1000000;
+                            const max = parseInt(range[2]) * 1000000;
+                            if (property.price >= min && property.price <= max) {
+                                score += criteria.weight;
+                                matchedCriteria.push(criteria.key);
+                            }
+                        }
+                    }
+                });
+                
+                if (score > 0) {
+                    matchingInvestors.push({
+                        name,
+                        score: Math.round((score / totalWeight) * 100),
+                        matchedCriteria
+                    });
+                }
+            });
+            
+            matchingInvestors.sort((a, b) => b.score - a.score);
+            
+            document.getElementById('propertyDetailsTitle').textContent = propertyName;
+            document.getElementById('propertyDetailsContent').innerHTML = `
+                <div class="property-detail-grid">
+                    <div class="property-detail-group">
+                        <label class="property-detail-label">Property Type</label>
+                        <div class="property-detail-value">${property.type}</div>
+                    </div>
+                    <div class="property-detail-group">
+                        <label class="property-detail-label">Status</label>
+                        <div class="property-detail-value">
+                            <span class="property-status status-${property.status}">${property.status}</span>
+                        </div>
+                    </div>
+                    <div class="property-detail-group">
+                        <label class="property-detail-label">Address</label>
+                        <div class="property-detail-value">${property.address}</div>
+                    </div>
+                    <div class="property-detail-group">
+                        <label class="property-detail-label">Size</label>
+                        <div class="property-detail-value">${property.size.toLocaleString()} sq ft</div>
+                    </div>
+                    <div class="property-detail-group">
+                        <label class="property-detail-label">Price</label>
+                        <div class="property-detail-value">$${property.price.toLocaleString()}</div>
+                    </div>
+                    <div class="property-detail-group">
+                        <label class="property-detail-label">Price per sq ft</label>
+                        <div class="property-detail-value">$${Math.round(property.price / property.size).toLocaleString()}</div>
+                    </div>
+                    ${property.yearBuilt ? `
+                        <div class="property-detail-group">
+                            <label class="property-detail-label">Year Built</label>
+                            <div class="property-detail-value">${property.yearBuilt}</div>
+                        </div>
+                    ` : ''}
+                    ${property.capRate ? `
+                        <div class="property-detail-group">
+                            <label class="property-detail-label">Cap Rate</label>
+                            <div class="property-detail-value">${property.capRate}%</div>
+                        </div>
+                    ` : ''}
+                </div>
+                
+                <div class="property-detail-group" style="margin-top: 20px;">
+                    <label class="property-detail-label">Description</label>
+                    <div class="property-detail-value">${property.description}</div>
+                </div>
+                
+                ${property.tags && property.tags.length > 0 ? `
+                    <div class="property-detail-group" style="margin-top: 20px;">
+                        <label class="property-detail-label">Tags</label>
+                        <div>
+                            ${property.tags.map(tag => `<span class="tag tag-primary">${tag}</span>`).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+                
+                ${property.images && property.images.length > 0 ? `
+                    <div class="property-detail-group" style="margin-top: 20px;">
+                        <label class="property-detail-label">Property Images</label>
+                        <div class="image-preview">
+                            ${property.images.map((img, index) => `
+                                <div class="image-preview-item">
+                                    <img src="${img}" alt="Property Image ${index + 1}">
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+                
+                ${matchingInvestors.length > 0 ? `
+                    <div class="match-details">
+                        <div class="match-criteria-title">Matching Investors</div>
+                        <div class="match-investors">
+                            ${matchingInvestors.map(investor => `
+                                <div class="match-investor" onclick="showMatchDetails('${propertyName}', '${investor.name}')">
+                                    ${investor.name} (${investor.score}% match)
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        ${matchingInvestors.length > 0 ? `
+                            <div class="match-criteria" style="margin-top: 15px;">
+                                <div class="match-criteria-title">Match Details for ${matchingInvestors[0].name}</div>
+                                <div class="match-criteria-list">
+                                    ${matchingInvestors[0].matchedCriteria.map(criteria => `
+                                        <div class="match-criteria-item match">${criteria}</div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                ` : '<p style="margin-top: 20px;">No matching investors found based on current criteria.</p>'}
+                
+                ${data.documents[propertyName] && data.documents[propertyName].length > 0 ? `
+                    <div class="property-detail-group" style="margin-top: 20px;">
+                        <label class="property-detail-label">Related Documents</label>
+                        <div class="document-list">
+                            ${data.documents[propertyName].map(doc => `
+                                <div class="document-item">
+                                    <div class="document-icon">
+                                        <i class="fas fa-file-pdf" style="color: var(--danger-color);"></i>
+                                    </div>
+                                    <div class="document-info">
+                                        <div class="document-name">${doc.name}</div>
+                                        <div class="document-date">${doc.type} • ${doc.date} • ${doc.size}</div>
+                                    </div>
+                                    <div class="document-actions">
+                                        <button class="btn btn-info" onclick="viewDocument('${propertyName}', '${doc.name}')">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-secondary" onclick="downloadDocument('${propertyName}', '${doc.name}')">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+            
+            document.getElementById('editPropertyBtn').setAttribute('onclick', `showEditPropertyModal('${propertyName}')`);
+            document.getElementById('propertyDetailsModal').classList.add('active');
+        }
+
+        function showMatchDetails(propertyName, investorName) {
+            currentMatchProperty = propertyName;
+            currentMatchInvestor = investorName;
+            
+            const property = data.properties[propertyName];
+            const investor = data.investors[investorName];
+            
+            // Calculate detailed match analysis
+            let score = 0;
+            let totalWeight = 0;
+            const criteriaMatches = [];
+            
+            investor.criteria.forEach(criteria => {
+                totalWeight += criteria.weight;
+                let match = false;
+                let matchDetails = '';
+                
+                if (criteria.key === 'Property Type' && criteria.value.includes(property.type)) {
+                    match = true;
+                    matchDetails = `Property type "${property.type}" matches preference`;
+                }
+                
+                if (criteria.key === 'Geographic Preference' && property.address) {
+                    const locations = criteria.value.split(',').map(loc => loc.trim().toLowerCase());
+                    const address = property.address.toLowerCase();
+                    if (locations.some(loc => address.includes(loc))) {
+                        match = true;
+                        matchDetails = `Property location matches preference`;
+                    }
+                }
+                
+                if (criteria.key === 'Deal Size' && property.price) {
+                    const range = criteria.value.match(/\$(\d+)M\s*-\s*\$(\d+)M/);
+                    if (range) {
+                        const min = parseInt(range[1]) * 1000000;
+                        const max = parseInt(range[2]) * 1000000;
+                        if (property.price >= min && property.price <= max) {
+                            match = true;
+                            matchDetails = `Property price $${property.price.toLocaleString()} is within preferred range`;
+                        }
+                    }
+                }
+                
+                if (match) {
+                    score += criteria.weight;
+                }
+                
+                criteriaMatches.push({
+                    key: criteria.key,
+                    value: criteria.value,
+                    weight: criteria.weight,
+                    match,
+                    matchDetails
+                });
+            });
+            
+            const overallScore = Math.round((score / totalWeight) * 100);
+            
+            document.getElementById('matchDetailsTitle').textContent = `Match Analysis: ${investorName} & ${propertyName}`;
+            document.getElementById('matchDetailsContent').innerHTML = `
+                <div class="property-detail-grid">
+                    <div class="property-detail-group">
+                        <label class="property-detail-label">Overall Match Score</label>
+                        <div class="property-detail-value" style="font-size: 24px; font-weight: bold; color: var(--accent-color);">${overallScore}%</div>
+                    </div>
+                    <div class="property-detail-group">
+                        <label class="property-detail-label">Investor</label>
+                        <div class="property-detail-value">${investorName}</div>
+                    </div>
+                    <div class="property-detail-group">
+                        <label class="property-detail-label">Property</label>
+                        <div class="property-detail-value">${propertyName}</div>
+                    </div>
+                    <div class="property-detail-group">
+                        <label class="property-detail-label">Property Type</label>
+                        <div class="property-detail-value">${property.type}</div>
+                    </div>
+                </div>
+                
+                <div class="match-details" style="margin-top: 20px;">
+                    <div class="match-criteria-title">Criteria Breakdown</div>
+                    <div class="match-criteria-list">
+                        ${criteriaMatches.map(criteria => `
+                            <div class="match-criteria-item ${criteria.match ? 'match' : 'mismatch'}">
+                                <strong>${criteria.key}:</strong> ${criteria.value} (Weight: ${criteria.weight}/10)
+                                ${criteria.matchDetails ? `<div style="font-size: 12px; margin-top: 5px;">${criteria.matchDetails}</div>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <div class="progress-bar" style="margin-top: 20px;">
+                    <div class="progress-fill" style="width: ${overallScore}%;"></div>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <h4>Next Steps</h4>
+                    <ul>
+                        <li>Prepare property information package for ${investorName}</li>
+                        <li>Schedule a property tour or virtual walkthrough</li>
+                        <li>Prepare financial analysis and investment thesis</li>
+                        <li>Follow up within 3 business days</li>
+                    </ul>
+                </div>
+            `;
+            
+            document.getElementById('matchDetailsModal').classList.add('active');
+        }
+
+        function showInvestorMatches(investorName) {
+            // Find matching properties for this investor
+            const investor = data.investors[investorName];
+            const matchingProperties = [];
+            
+            Object.entries(data.properties).forEach(([name, property]) => {
+                if (property.status !== 'available') return;
+                
+                let score = 0;
+                let totalWeight = 0;
+                const matchedCriteria = [];
+                
+                investor.criteria.forEach(criteria => {
+                    totalWeight += criteria.weight;
+                    
+                    if (criteria.key === 'Property Type' && criteria.value.includes(property.type)) {
+                        score += criteria.weight;
+                        matchedCriteria.push(criteria.key);
+                    }
+                    
+                    if (criteria.key === 'Geographic Preference' && property.address) {
+                        const locations = criteria.value.split(',').map(loc => loc.trim().toLowerCase());
+                        const address = property.address.toLowerCase();
+                        if (locations.some(loc => address.includes(loc))) {
+                            score += criteria.weight;
+                            matchedCriteria.push(criteria.key);
+                        }
+                    }
+                    
+                    if (criteria.key === 'Deal Size' && property.price) {
+                        const range = criteria.value.match(/\$(\d+)M\s*-\s*\$(\d+)M/);
+                        if (range) {
+                            const min = parseInt(range[1]) * 1000000;
+                            const max = parseInt(range[2]) * 1000000;
+                            if (property.price >= min && property.price <= max) {
+                                score += criteria.weight;
+                                matchedCriteria.push(criteria.key);
+                            }
+                        }
+                    }
+                });
+                
+                if (score > 0) {
+                    matchingProperties.push({
+                        name,
+                        property,
+                        score: Math.round((score / totalWeight) * 100),
+                        matchedCriteria
+                    });
+                }
+            });
+            
+            matchingProperties.sort((a, b) => b.score - a.score);
+            
+            const container = document.getElementById('tabContentContainer');
+            
+            container.innerHTML = `
+                <div class="tab-content active">
+                    <div class="section">
+                        <div class="section-header">
+                            <h2 class="section-title">Properties Matching ${investorName}</h2>
+                            <button class="btn btn-secondary" onclick="showInvestorDetails('${investorName}')">Back to Investor</button>
+                        </div>
+                        
+                        ${matchingProperties.length > 0 ? `
+                            <div class="property-grid">
+                                ${matchingProperties.map(match => `
+                                    <div class="property-card">
+                                        <div class="property-image">
+                                            ${match.property.images && match.property.images.length > 0 ? 
+                                                `<img src="${match.property.images[0]}" alt="${match.name}">` : 
+                                                '<i class="fas fa-building" style="font-size: 40px; color: var(--text-light);"></i>'
+                                            }
+                                        </div>
+                                        <div class="property-content">
+                                            <div class="property-header">
+                                                <div class="property-title">${match.name}</div>
+                                                <div class="match-score">${match.score}% Match</div>
+                                            </div>
+                                            <div class="property-details">
+                                                <div class="property-detail">
+                                                    <span class="property-detail-label">Type:</span>
+                                                    <span class="property-detail-value">${match.property.type}</span>
+                                                </div>
+                                                <div class="property-detail">
+                                                    <span class="property-detail-label">Size:</span>
+                                                    <span class="property-detail-value">${match.property.size.toLocaleString()} sq ft</span>
+                                                </div>
+                                                <div class="property-detail">
+                                                    <span class="property-detail-label">Price:</span>
+                                                    <span class="property-detail-value">$${match.property.price.toLocaleString()}</span>
+                                                </div>
+                                                ${match.property.capRate ? `
+                                                    <div class="property-detail">
+                                                        <span class="property-detail-label">Cap Rate:</span>
+                                                        <span class="property-detail-value">${match.property.capRate}%</span>
+                                                    </div>
+                                                ` : ''}
+                                            </div>
+                                            <div class="match-container">
+                                                <div class="match-header">
+                                                    <div class="match-title">Matched Criteria</div>
+                                                </div>
+                                                <div class="match-criteria-list">
+                                                    ${match.matchedCriteria.map(criteria => `
+                                                        <div class="match-criteria-item match">${criteria}</div>
+                                                    `).join('')}
+                                                </div>
+                                            </div>
+                                            <div class="property-actions">
+                                                <button class="btn btn-primary" onclick="showPropertyDetails('${match.name}')">View Property</button>
+                                                <button class="btn btn-info" onclick="showMatchDetails('${match.name}', '${investorName}')">Match Details</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : '<p>No matching properties found. Try adjusting investor criteria or adding more properties.</p>'}
+                    </div>
+                </div>
+            `;
+        }
+
+        function contactInvestor() {
+            if (currentMatchProperty && currentMatchInvestor) {
+                // This would open a communication form or email client
+                showToast(`Contact feature for ${currentMatchInvestor} about ${currentMatchProperty} coming soon!`);
+                closeModal('matchDetailsModal');
+            }
+        }
+
+        function renderCriteriaList(investorName) {
+            const criteria = data.investors[investorName].criteria || [];
+            return criteria.map((item, index) => `
+                <div class="criteria-item">
+                    <div class="criteria-content">
+                        <div class="criteria-key">${item.key}</div>
+                        <div class="criteria-value">${item.value}</div>
+                        <div style="margin-top: 5px;">
+                            <span class="tag tag-info">Weight: ${item.weight}/10</span>
+                        </div>
+                    </div>
+                    <div class="criteria-actions">
+                        <button class="icon-btn" onclick="editCriteria('${investorName}', ${index})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="icon-btn delete" onclick="deleteCriteria('${investorName}', ${index})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Criteria management
+        function showAddCriteriaModal(investorName) {
+            currentEditingInvestor = investorName;
+            document.getElementById('addCriteriaModal').classList.add('active');
+            document.getElementById('criteriaKeySelect').value = '';
+            document.getElementById('criteriaKey').value = '';
+            document.getElementById('criteriaValue').value = '';
+            document.getElementById('criteriaWeight').value = 5;
+            document.getElementById('criteriaWeightValue').textContent = 5;
+        }
+
+        function updateCriteriaValueInput() {
+            const select = document.getElementById('criteriaKeySelect');
+            const keyInput = document.getElementById('criteriaKey');
+            const valueInput = document.getElementById('criteriaValue');
+            
+            if (select.value === 'Custom') {
+                keyInput.style.display = 'block';
+                valueInput.style.display = 'block';
+                keyInput.value = '';
+                valueInput.value = '';
+            } else if (select.value) {
+                keyInput.style.display = 'none';
+                valueInput.style.display = 'block';
+                keyInput.value = select.value;
+                
+                // Set default value based on criteria type
+                switch(select.value) {
+                    case 'Property Type':
+                        valueInput.value = 'Office, Retail, Industrial';
+                        break;
+                    case 'Geographic Preference':
+                        valueInput.value = 'Northeast, West Coast';
+                        break;
+                    case 'Deal Size':
+                        valueInput.value = '$5M - $50M';
+                        break;
+                    case 'Investment Focus':
+                        valueInput.value = 'Value-add, Core-plus';
+                        break;
+                    case 'Risk Profile':
+                        valueInput.value = 'Low, Moderate, High';
+                        break;
+                    case 'Hold Period':
+                        valueInput.value = '3-5 years, 5-7 years';
+                        break;
+                    default:
+                        valueInput.value = '';
+                }
+            } else {
+                keyInput.style.display = 'block';
+                valueInput.style.display = 'block';
+            }
+        }
+
+        function addCriteria() {
+            const key = document.getElementById('criteriaKey').value.trim();
+            const value = document.getElementById('criteriaValue').value.trim();
+            const weight = parseInt(document.getElementById('criteriaWeight').value);
+            
+            if (!key || !value) {
+                showToast('Please fill in both fields', 'error');
+                return;
+            }
+            
+            if (!data.investors[currentEditingInvestor].criteria) {
+                data.investors[currentEditingInvestor].criteria = [];
+            }
+            
+            data.investors[currentEditingInvestor].criteria.push({ key, value, weight });
+            saveData();
+            showInvestorDetails(currentEditingInvestor);
+            closeModal('addCriteriaModal');
+            showToast('Criteria added successfully');
+        }
+
+        function editCriteria(investorName, index) {
+            const criteria = data.investors[investorName].criteria[index];
+            currentEditingCriteria = { investorName, index };
+            document.getElementById('editCriteriaKey').value = criteria.key;
+            document.getElementById('editCriteriaValue').value = criteria.value;
+            document.getElementById('editCriteriaWeight').value = criteria.weight;
+            document.getElementById('editCriteriaWeightValue').textContent = criteria.weight;
+            document.getElementById('editCriteriaModal').classList.add('active');
+        }
+
+        function saveCriteriaEdit() {
+            const key = document.getElementById('editCriteriaKey').value.trim();
+            const value = document.getElementById('editCriteriaValue').value.trim();
+            const weight = parseInt(document.getElementById('editCriteriaWeight').value);
+            
+            if (!key || !value) {
+                showToast('Please fill in both fields', 'error');
+                return;
+            }
+            
+            data.investors[currentEditingCriteria.investorName].criteria[currentEditingCriteria.index] = { key, value, weight };
+            saveData();
+            showInvestorDetails(currentEditingCriteria.investorName);
+            closeModal('editCriteriaModal');
+            showToast('Criteria updated successfully');
+        }
+
+        function deleteCriteria(investorName, index) {
+            if (confirm('Are you sure you want to delete this criteria?')) {
+                data.investors[investorName].criteria.splice(index, 1);
+                saveData();
+                showInvestorDetails(investorName);
+                showToast('Criteria deleted');
+            }
+        }
+
+        // Notes management
+        function updateNotes(investorName) {
+            const notes = document.getElementById('notesInput').value;
+            data.investors[investorName].notes = notes;
+            saveData();
+            document.getElementById('notesPreview').innerHTML = renderMarkdown(notes);
+        }
+
+        // Enhanced markdown parser
+        function renderMarkdown(text) {
+            if (!text) return '';
+            
+            let html = text;
+            
+            // Code blocks (```code:disable-run
+            html = html.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
+            
+            // Inline code (`code`)
+            html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+            
+            // Horizontal rules
+            html = html.replace(/\n---\n/g, '<hr>');
+            
+            // Blockquotes
+            html = html.replace(/^> (.*)$/gim, '<blockquote>$1</blockquote>');
+            
+            // Headers
+            html = html.replace(/^###### (.*$)/gim, '<h6>$1</h6>');
+            html = html.replace(/^##### (.*$)/gim, '<h5>$1</h5>');
+            html = html.replace(/^#### (.*$)/gim, '<h4>$1</h4>');
+            html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+            html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+            html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+            
+            // Ordered lists
+            html = html.replace(/^\d+\. (.*)$/gim, '<li>$1</li>');
+            html = html.replace(/(<li>.*<\/li>)/s, '<ol>$1</ol>');
+            
+            // Unordered lists
+            html = html.replace(/^\* (.*)$/gim, '<li>$1</li>');
+            html = html.replace(/^\+ (.*)$/gim, '<li>$1</li>');
+            html = html.replace(/^  \* (.*)$/gim, '<li style="margin-left: 20px;">$1</li>');
+            html = html.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+            
+            // Bold and italic
+            html = html.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
+            html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+            html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+            html = html.replace(/___(.+?)___/g, '<strong><em>$1</em></strong>');
+            html = html.replace(/__(.+?)__/g, '<strong>$1</strong>');
+            html = html.replace(/_(.+?)_/g, '<em>$1</em>');
+            
+            // Links
+            html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+            
+            // Line breaks
+            html = html.replace(/\n\n/g, '</p><p>');
+            html = '<p>' + html + '</p>';
+            
+            // Clean up empty paragraphs
+            html = html.replace(/<p><\/p>/g, '');
+            
+            // Clean up nested paragraph issues
+            html = html.replace(/<p>(<h[1-6]>)/g, '$1');
+            html = html.replace(/(<\/h[1-6]>)<\/p>/g, '$1');
+            html = html.replace(/<p>(<ul>)/g, '$1');
+            html = html.replace(/(<\/ul>)<\/p>/g, '$1');
+            html = html.replace(/<p>(<ol>)/g, '$1');
+            html = html.replace(/(<\/ol>)<\/p>/g, '$1');
+            html = html.replace(/<p>(<blockquote>)/g, '$1');
+            html = html.replace(/(<\/blockquote>)<\/p>/g, '$1');
+            html = html.replace(/<p>(<pre>)/g, '$1');
+            html = html.replace(/(<\/pre>)<\/p>/g, '$1');
+            html = html.replace(/<p><hr><\/p>/g, '<hr>');
+            
+            return html;
+        }
+
+        // Investor management
+        function showAddInvestorModal() {
+            document.getElementById('addInvestorModal').classList.add('active');
+            document.getElementById('newInvestorName').value = '';
+            document.getElementById('newInvestorEmail').value = '';
+            document.getElementById('newInvestorPhone').value = '';
+            document.getElementById('newInvestorCompany').value = '';
+            document.getElementById('newInvestorType').value = '';
+        }
+
+        function addNewInvestor() {
+            const name = document.getElementById('newInvestorName').value.trim();
+            const email = document.getElementById('newInvestorEmail').value.trim();
+            const phone = document.getElementById('newInvestorPhone').value.trim();
+            const company = document.getElementById('newInvestorCompany').value.trim();
+            const type = document.getElementById('newInvestorType').value;
+            
+            if (!name) {
+                showToast('Please enter an investor name', 'error');
+                return;
+            }
+            
+            if (data.investors[name]) {
+                showToast('Investor already exists', 'error');
+                return;
+            }
+            
+            data.investors[name] = { 
+                email, 
+                phone, 
+                company,
+                type,
+                criteria: [], 
+                notes: '' 
+            };
+            
+            // Initialize empty arrays for communications and tasks
+            if (!data.communications[name]) {
+                data.communications[name] = [];
+            }
+            if (!data.tasks[name]) {
+                data.tasks[name] = [];
+            }
+            
+            saveData();
+            closeModal('addInvestorModal');
+            showToast('Investor added successfully');
+            
+            // Switch to investors tab to show the new investor
+            switchTab('investors');
+        }
+
+        // Property management
+        function showAddPropertyModal() {
+            document.getElementById('addPropertyModal').classList.add('active');
+            // Reset form
+            document.getElementById('propertyName').value = '';
+            document.getElementById('propertyType').value = '';
+            document.getElementById('propertyAddress').value = '';
+            document.getElementById('propertySize').value = '';
+            document.getElementById('propertyPrice').value = '';
+            document.getElementById('propertyStatus').value = 'available';
+            document.getElementById('propertyYearBuilt').value = '';
+            document.getElementById('propertyCapRate').value = '';
+            document.getElementById('propertyDescription').value = '';
+            document.getElementById('propertyImagePreview').innerHTML = '';
+            currentPropertyImages = [];
+        }
+
+        function handleImageUpload(event) {
+            const files = event.target.files;
+            const preview = document.getElementById('propertyImagePreview');
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const imageContainer = document.createElement('div');
+                    imageContainer.className = 'image-preview-item';
+                    
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    
+                    const removeBtn = document.createElement('button');
+                    removeBtn.className = 'image-remove';
+                    removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                    removeBtn.onclick = function() {
+                        imageContainer.remove();
+                        const index = currentPropertyImages.indexOf(e.target.result);
+                        if (index > -1) {
+                            currentPropertyImages.splice(index, 1);
+                        }
+                    };
+                    
+                    imageContainer.appendChild(img);
+                    imageContainer.appendChild(removeBtn);
+                    preview.appendChild(imageContainer);
+                    
+                    currentPropertyImages.push(e.target.result);
+                };
+                
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function addNewProperty() {
+            const name = document.getElementById('propertyName').value.trim();
+            const type = document.getElementById('propertyType').value;
+            const address = document.getElementById('propertyAddress').value.trim();
+            const size = parseInt(document.getElementById('propertySize').value);
+            const price = parseInt(document.getElementById('propertyPrice').value);
+            const status = document.getElementById('propertyStatus').value;
+            const yearBuilt = parseInt(document.getElementById('propertyYearBuilt').value);
+            const capRate = parseFloat(document.getElementById('propertyCapRate').value);
+            const description = document.getElementById('propertyDescription').value.trim();
+            
+            if (!name || !type || !address || !size || !price) {
+                showToast('Please fill in all required fields', 'error');
+                return;
+            }
+            
+            if (data.properties[name]) {
+                showToast('Property already exists', 'error');
+                return;
+            }
+            
+            data.properties[name] = { 
+                type, 
+                address, 
+                size, 
+                price, 
+                status, 
+                yearBuilt,
+                capRate,
+                description,
+                images: [...currentPropertyImages],
+                tags: []
+            };
+            
+            // Initialize empty documents array
+            if (!data.documents[name]) {
+                data.documents[name] = [];
+            }
+            
+            saveData();
+            closeModal('addPropertyModal');
+            showToast('Property added successfully');
+            
+            // Switch to properties tab to show the new property
+            switchTab('properties');
+        }
+
+        function showEditPropertyModal(propertyName) {
+            currentEditingProperty = propertyName;
+            const property = data.properties[propertyName];
+            
+            document.getElementById('editPropertyName').value = propertyName;
+            document.getElementById('editPropertyType').value = property.type;
+            document.getElementById('editPropertyAddress').value = property.address;
+            document.getElementById('editPropertySize').value = property.size;
+            document.getElementById('editPropertyPrice').value = property.price;
+            document.getElementById('editPropertyStatus').value = property.status;
+            document.getElementById('editPropertyYearBuilt').value = property.yearBuilt || '';
+            document.getElementById('editPropertyCapRate').value = property.capRate || '';
+            document.getElementById('editPropertyDescription').value = property.description;
+            
+            document.getElementById('editPropertyModal').classList.add('active');
+        }
+
+        function savePropertyEdit() {
+            const newName = document.getElementById('editPropertyName').value.trim();
+            const type = document.getElementById('editPropertyType').value;
+            const address = document.getElementById('editPropertyAddress').value.trim();
+            const size = parseInt(document.getElementById('editPropertySize').value);
+            const price = parseInt(document.getElementById('editPropertyPrice').value);
+            const status = document.getElementById('editPropertyStatus').value;
+            const yearBuilt = parseInt(document.getElementById('editPropertyYearBuilt').value);
+            const capRate = parseFloat(document.getElementById('editPropertyCapRate').value);
+            const description = document.getElementById('editPropertyDescription').value.trim();
+            
+            if (!newName || !type || !address || !size || !price) {
+                showToast('Please fill in all required fields', 'error');
+                return;
+            }
+            
+            // If name changed, update the key
+            if (newName !== currentEditingProperty) {
+                data.properties[newName] = data.properties[currentEditingProperty];
+                delete data.properties[currentEditingProperty];
+                
+                // Also update documents key if it exists
+                if (data.documents[currentEditingProperty]) {
+                    data.documents[newName] = data.documents[currentEditingProperty];
+                    delete data.documents[currentEditingProperty];
+                }
+            }
+            
+            data.properties[newName] = { 
+                ...data.properties[newName],
+                type, 
+                address, 
+                size, 
+                price, 
+                status, 
+                yearBuilt,
+                capRate,
+                description
+            };
+            
+            saveData();
+            closeModal('editPropertyModal');
+            closeModal('propertyDetailsModal');
+            showToast('Property updated successfully');
+            
+            // Refresh the current view
+            if (activeTab === 'properties') {
+                renderProperties();
+            } else if (activeTab === 'matches') {
+                renderMatches();
+            }
+        }
+
+        function deleteProperty(propertyName) {
+            if (confirm(`Are you sure you want to delete "${propertyName}"?`)) {
+                delete data.properties[propertyName];
+                if (data.documents[propertyName]) {
+                    delete data.documents[propertyName];
+                }
+                saveData();
+                renderProperties();
+                showToast('Property deleted');
+            }
+        }
+
+        // Communication management
+        function showAddCommunicationModal(investorName) {
+            document.getElementById('addLogForm').style.display = 'flex';
+            // Set today's date as default
+            document.getElementById('communicationDate').valueAsDate = new Date();
+        }
+
+        function addCommunication(investorName) {
+            const type = document.getElementById('communicationType').value;
+            const date = document.getElementById('communicationDate').value;
+            const content = document.getElementById('communicationContent').value.trim();
+            
+            if (!date || !content) {
+                showToast('Please fill in all fields', 'error');
+                return;
+            }
+            
+            if (!data.communications[investorName]) {
+                data.communications[investorName] = [];
+            }
+            
+            data.communications[investorName].push({ type, date, content });
+            saveData();
+            showInvestorDetails(investorName);
+            showToast('Communication added successfully');
+        }
+
+        // Task management
+        function showAddTaskModal(investorName) {
+            document.getElementById('addTaskForm').style.display = 'flex';
+            // Set today's date as default
+            document.getElementById('taskDueDate').valueAsDate = new Date();
+        }
+
+        function addTask(investorName) {
+            const title = document.getElementById('taskTitle').value.trim();
+            const dueDate = document.getElementById('taskDueDate').value;
+            const priority = document.getElementById('taskPriority').value;
+            
+            if (!title || !dueDate) {
+                showToast('Please fill in all fields', 'error');
+                return;
+            }
+            
+            if (!data.tasks[investorName]) {
+                data.tasks[investorName] = [];
+            }
+            
+            data.tasks[investorName].push({ title, dueDate, priority, completed: false });
+            saveData();
+            showInvestorDetails(investorName);
+            showToast('Task added successfully');
+        }
+
+        function toggleTask(investorName, taskTitle) {
+            const task = data.tasks[investorName].find(t => t.title === taskTitle);
+            if (task) {
+                task.completed = !task.completed;
+                saveData();
+                showInvestorDetails(investorName);
+            }
+        }
+
+        // Filter properties
+        function filterProperties() {
+            const typeFilter = document.getElementById('propertyTypeFilter').value;
+            const statusFilter = document.getElementById('propertyStatusFilter').value;
+            const searchQuery = document.getElementById('propertySearchInput').value.toLowerCase();
+            
+            const propertyCards = document.querySelectorAll('.property-card');
+            
+            propertyCards.forEach(card => {
+                const type = card.getAttribute('data-type');
+                const status = card.getAttribute('data-status');
+                const name = card.getAttribute('data-name');
+                
+                let show = true;
+                
+                if (typeFilter && type !== typeFilter) {
+                    show = false;
+                }
+                
+                if (statusFilter && status !== statusFilter) {
+                    show = false;
+                }
+                
+                if (searchQuery && !name.includes(searchQuery)) {
+                    show = false;
+                }
+                
+                card.style.display = show ? 'block' : 'none';
+            });
+        }
+
+        // Sort properties
+        function sortProperties() {
+            const sortValue = document.getElementById('propertySortSelect').value;
+            const propertyGrid = document.getElementById('propertyGrid');
+            const propertyCards = Array.from(propertyGrid.children);
+            
+            propertyCards.sort((a, b) => {
+                const aName = a.getAttribute('data-name');
+                const bName = b.getAttribute('data-name');
+                const aPrice = parseInt(a.getAttribute('data-price'));
+                const bPrice = parseInt(b.getAttribute('data-price'));
+                const aSize = parseInt(a.getAttribute('data-size'));
+                const bSize = parseInt(b.getAttribute('data-size'));
+                const aCapRate = parseFloat(a.getAttribute('data-caprate'));
+                const bCapRate = parseFloat(b.getAttribute('data-caprate'));
+                
+                switch(sortValue) {
+                    case 'name-asc':
+                        return aName.localeCompare(bName);
+                    case 'name-desc':
+                        return bName.localeCompare(aName);
+                    case 'price-asc':
+                        return aPrice - bPrice;
+                    case 'price-desc':
+                        return bPrice - aPrice;
+                    case 'size-asc':
+                        return aSize - bSize;
+                    case 'size-desc':
+                        return bSize - aSize;
+                    case 'caprate-asc':
+                        return aCapRate - bCapRate;
+                    case 'caprate-desc':
+                        return bCapRate - aCapRate;
+                    default:
+                        return 0;
+                }
+            });
+            
+            propertyGrid.innerHTML = '';
+            propertyCards.forEach(card => {
+                propertyGrid.appendChild(card);
+            });
+        }
+
+        // Filter documents
+        function filterDocuments() {
+            const propertyFilter = document.getElementById('documentPropertyFilter').value;
+            const typeFilter = document.getElementById('documentTypeFilter').value;
+            
+            const sections = document.querySelectorAll('.section[data-property]');
+            
+            sections.forEach(section => {
+                const property = section.getAttribute('data-property');
+                const documents = section.querySelectorAll('.document-item');
+                
+                let showSection = true;
+                
+                if (propertyFilter && property !== propertyFilter) {
+                    showSection = false;
+                }
+                
+                if (showSection) {
+                    documents.forEach(doc => {
+                        const type = doc.getAttribute('data-type');
+                        let showDoc = true;
+                        
+                        if (typeFilter && type !== typeFilter) {
+                            showDoc = false;
+                        }
+                        
+                        doc.style.display = showDoc ? 'flex' : 'none';
+                    });
+                }
+                
+                section.style.display = showSection ? 'block' : 'none';
+            });
+        }
+
+        // Document management
+        function showUploadDocumentModal(propertyName) {
+            showToast('Document upload feature coming soon!');
+        }
+
+        function viewDocument(propertyName, documentName) {
+            showToast(`Viewing ${documentName} for ${propertyName}`);
+        }
+
+        function downloadDocument(propertyName, documentName) {
+            showToast(`Downloading ${documentName} for ${propertyName}`);
+        }
+
+        function deleteDocument(propertyName, documentName) {
+            if (confirm(`Are you sure you want to delete "${documentName}"?`)) {
+                const documents = data.documents[propertyName];
+                const index = documents.findIndex(doc => doc.name === documentName);
+                
+                if (index > -1) {
+                    documents.splice(index, 1);
+                    saveData();
+                    renderDocuments();
+                    showToast('Document deleted');
+                }
+            }
+        }
+
+        // Refresh matches
+        function refreshMatches() {
+            renderMatches();
+            showToast('Matches refreshed');
+        }
+
+        // Search functionality
+        function performSearch() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const resultsContainer = document.getElementById('searchResults');
+            
+            if (!query) {
+                resultsContainer.classList.remove('active');
+                return;
+            }
+            
+            const results = [];
+            
+            // Search in investors
+            Object.entries(data.investors).forEach(([name, investor]) => {
+                if (name.toLowerCase().includes(query)) {
+                    results.push({ type: 'investor', name, text: name });
+                }
+                
+                if (investor.email && investor.email.toLowerCase().includes(query)) {
+                    results.push({ type: 'investor', name, text: `${name} - ${investor.email}` });
+                }
+                
+                if (investor.company && investor.company.toLowerCase().includes(query)) {
+                    results.push({ type: 'investor', name, text: `${name} - ${investor.company}` });
+                }
+                
+                // Search in criteria
+                investor.criteria.forEach((item, index) => {
+                    if (item.key.toLowerCase().includes(query) || 
+                        item.value.toLowerCase().includes(query)) {
+                        results.push({ 
+                            type: 'criteria', 
+                            name, 
+                            text: `${name}: ${item.key}: ${item.value}`,
+                            index 
+                        });
+                    }
+                });
+                
+                // Search in notes
+                if (investor.notes && investor.notes.toLowerCase().includes(query)) {
+                    results.push({ type: 'notes', name, text: `Found in notes for ${name}` });
+                }
+            });
+            
+            // Search in properties
+            Object.entries(data.properties).forEach(([name, property]) => {
+                if (name.toLowerCase().includes(query)) {
+                    results.push({ type: 'property', name, text: name });
+                }
+                
+                if (property.type && property.type.toLowerCase().includes(query)) {
+                    results.push({ type: 'property', name, text: `${name} - ${property.type}` });
+                }
+                
+                if (property.address && property.address.toLowerCase().includes(query)) {
+                    results.push({ type: 'property', name, text: `${name} - ${property.address}` });
+                }
+                
+                if (property.description && property.description.toLowerCase().includes(query)) {
+                    results.push({ type: 'property', name, text: `Found in description for ${name}` });
+                }
+                
+                if (property.tags) {
+                    property.tags.forEach(tag => {
+                        if (tag.toLowerCase().includes(query)) {
+                            results.push({ type: 'property', name, text: `${name} - Tag: ${tag}` });
+                        }
+                    });
+                }
+            });
+            
+            // Search in communications
+            Object.entries(data.communications).forEach(([investorName, communications]) => {
+                communications.forEach((comm, index) => {
+                    if (comm.content.toLowerCase().includes(query)) {
+                        results.push({ 
+                            type: 'communication', 
+                            name: investorName, 
+                            text: `${comm.date} - ${comm.type}: ${comm.content.substring(0, 50)}...`,
+                            index 
+                        });
+                    }
+                });
+            });
+            
+            // Search in tasks
+            Object.entries(data.tasks).forEach(([investorName, tasks]) => {
+                tasks.forEach((task, index) => {
+                    if (task.title.toLowerCase().includes(query)) {
+                        results.push({ 
+                            type: 'task', 
+                            name: investorName, 
+                            text: `Task: ${task.title}`,
+                            index 
+                        });
+                    }
+                });
+            });
+            
+            // Search in documents
+            Object.entries(data.documents).forEach(([propertyName, documents]) => {
+                documents.forEach(doc => {
+                    if (doc.name.toLowerCase().includes(query) || 
+                        doc.type.toLowerCase().includes(query)) {
+                        results.push({ 
+                            type: 'document', 
+                            name: propertyName, 
+                            text: `${propertyName}: ${doc.name} (${doc.type})`
+                        });
+                    }
+                });
+            });
+            
+            if (results.length > 0) {
+                resultsContainer.innerHTML = `
+                    <div style="font-weight: 600; margin-bottom: 10px;">Search Results:</div>
+                    ${results.map(result => `
+                        <div class="search-result-item" onclick="handleSearchResult('${result.type}', '${result.name}', ${result.index || -1})">
+                            <strong>${result.name}</strong> - ${result.text}
+                        </div>
+                    `).join('')}
+                `;
+                resultsContainer.classList.add('active');
+            } else {
+                resultsContainer.innerHTML = '<div style="color: var(--text-light);">No results found</div>';
+                resultsContainer.classList.add('active');
+            }
+        }
+
+        function handleSearchResult(type, name, index) {
+            document.getElementById('searchResults').classList.remove('active');
+            document.getElementById('searchInput').value = '';
+            
+            // Navigate to the appropriate view
+            switch(type) {
+                case 'investor':
+                case 'criteria':
+                case 'notes':
+                case 'communication':
+                case 'task':
+                    showInvestorDetails(name);
+                    break;
+                case 'property':
+                    showPropertyDetails(name);
+                    break;
+                case 'document':
+                    switchTab('documents');
+                    break;
+            }
+            
+            // Highlight the relevant section if needed
+            setTimeout(() => {
+                if (type === 'criteria' && index >= 0) {
+                    const criteriaItems = document.querySelectorAll('.criteria-item');
+                    if (criteriaItems[index]) {
+                        criteriaItems[index].style.background = '#fff3cd';
+                        setTimeout(() => {
+                            criteriaItems[index].style.background = '';
+                        }, 2000);
+                    }
+                }
+            }, 100);
+        }
+
+        // Export/Import functionality
+        function exportData() {
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `cre-portfolio-${new Date().toISOString().slice(0,10)}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            
+            showToast('Data exported successfully');
+        }
+
+        function exportAnalytics() {
+            showToast('Analytics export feature coming soon!');
+        }
+
+        function importData() {
+            document.getElementById('fileInput').click();
+        }
+
+        function handleFileImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    data = imported;
+                    saveData();
+                    switchTab('dashboard');
+                    showToast('Data imported successfully');
+                } catch (error) {
+                    showToast('Error importing file. Please ensure it\'s a valid JSON file.', 'error');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        // Notifications
+        function showNotifications() {
+            const container = document.getElementById('notificationsContent');
+            
+            container.innerHTML = `
+                ${data.notifications.length > 0 ? data.notifications.map(notif => `
+                    <div class="notification-item ${notif.read ? '' : 'unread'}">
+                        <div class="notification-header">
+                            <div class="notification-title">${notif.title}</div>
+                            <div class="notification-time">${notif.time}</div>
+                        </div>
+                        <div class="notification-content">${notif.content}</div>
+                        <div class="notification-actions">
+                            ${!notif.read ? `<button class="btn btn-secondary" onclick="markNotificationRead(${notif.id})">Mark as Read</button>` : ''}
+                            <button class="btn btn-danger" onclick="deleteNotification(${notif.id})">Delete</button>
+                        </div>
+                    </div>
+                `).join('') : '<p>No notifications</p>'}
+            `;
+            
+            document.getElementById('notificationsModal').classList.add('active');
+        }
+
+        function updateNotificationBadge() {
+            const unreadCount = data.notifications.filter(notif => !notif.read).length;
+            const badge = document.getElementById('notificationBadge');
+            
+            if (unreadCount > 0) {
+                badge.textContent = unreadCount;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        function markNotificationRead(id) {
+            const notification = data.notifications.find(notif => notif.id === id);
+            if (notification) {
+                notification.read = true;
+                saveData();
+                showNotifications();
+                updateNotificationBadge();
+            }
+        }
+
+        function markAllNotificationsRead() {
+            data.notifications.forEach(notif => {
+                notif.read = true;
+            });
+            saveData();
+            showNotifications();
+            updateNotificationBadge();
+            showToast('All notifications marked as read');
+        }
+
+        function deleteNotification(id) {
+            const index = data.notifications.findIndex(notif => notif.id === id);
+            if (index > -1) {
+                data.notifications.splice(index, 1);
+                saveData();
+                showNotifications();
+                updateNotificationBadge();
+                showToast('Notification deleted');
+            }
+        }
+
+        // Settings
+        function showSettings() {
+            const container = document.getElementById('settingsContent');
+            
+            container.innerHTML = `
+                <div class="settings-section">
+                    <div class="settings-title">General Settings</div>
+                    <div class="settings-item">
+                        <div>
+                            <div class="settings-label">Auto Save</div>
+                            <div class="settings-description">Automatically save changes to local storage</div>
+                        </div>
+                        <div class="toggle-switch ${data.settings.autoSave ? 'active' : ''}" onclick="toggleSetting('autoSave')">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                    <div class="settings-item">
+                        <div>
+                            <div class="settings-label">Notifications</div>
+                            <div class="settings-description">Enable desktop notifications</div>
+                        </div>
+                        <div class="toggle-switch ${data.settings.notifications ? 'active' : ''}" onclick="toggleSetting('notifications')">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                    <div class="settings-item">
+                        <div>
+                            <div class="settings-label">Dark Mode</div>
+                            <div class="settings-description">Use dark theme (coming soon)</div>
+                        </div>
+                        <div class="toggle-switch ${data.settings.darkMode ? 'active' : ''}" onclick="toggleSetting('darkMode')">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <div class="settings-title">API Integration</div>
+                    <div class="api-status">
+                        <div class="status-indicator disconnected"></div>
+                        <div class="status-text">API Status: Disconnected</div>
+                        <button class="btn btn-primary sync-button" onclick="testApiConnection()">Test Connection</button>
+                    </div>
+                    <div class="settings-item">
+                        <div>
+                            <div class="settings-label">API Endpoint</div>
+                            <div class="settings-description">External API endpoint for data synchronization</div>
+                        </div>
+                        <input type="text" class="form-input" style="width: 300px;" value="${data.settings.apiEndpoint}" onchange="updateSetting('apiEndpoint', this.value)">
+                    </div>
+                    <div class="settings-item">
+                        <div>
+                            <div class="settings-label">API Key</div>
+                            <div class="settings-description">Authentication key for API access</div>
+                        </div>
+                        <input type="password" class="form-input" style="width: 300px;" value="${data.settings.apiKey}" onchange="updateSetting('apiKey', this.value)">
+                    </div>
+                    <div class="settings-item">
+                        <div>
+                            <div class="settings-label">Sync Interval</div>
+                            <div class="settings-description">How often to sync data with API (in minutes)</div>
+                        </div>
+                        <input type="number" class="form-input" style="width: 100px;" value="${data.settings.syncInterval}" onchange="updateSetting('syncInterval', this.value)">
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <div class="settings-title">Data Management</div>
+                    <div class="backup-container">
+                        <div class="backup-item">
+                            <div class="backup-info">
+                                <div class="backup-name">Last Backup</div>
+                                <div class="backup-date">${new Date().toLocaleDateString()}</div>
+                            </div>
+                            <div class="backup-actions">
+                                <button class="btn btn-primary" onclick="createBackup()">Create Backup</button>
+                                <button class="btn btn-secondary" onclick="restoreBackup()">Restore Backup</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <button class="btn btn-danger" onclick="clearAllData()">Clear All Data</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('settingsModal').classList.add('active');
+        }
+
+        function toggleSetting(setting) {
+            data.settings[setting] = !data.settings[setting];
+            saveData();
+            showSettings();
+            showToast(`Setting ${setting} ${data.settings[setting] ? 'enabled' : 'disabled'}`);
+        }
+
+        function updateSetting(setting, value) {
+            data.settings[setting] = value;
+            saveData();
+            showToast(`Setting ${setting} updated`);
+        }
+
+        function saveSettings() {
+            saveData();
+            closeModal('settingsModal');
+            showToast('Settings saved successfully');
+        }
+
+        function testApiConnection() {
+            showToast('Testing API connection...');
+            setTimeout(() => {
+                showToast('API connection test failed. Check endpoint and API key.', 'error');
+            }, 2000);
+        }
+
+        function createBackup() {
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `cre-backup-${new Date().toISOString().slice(0,10)}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            
+            showToast('Backup created successfully');
+        }
+
+        function restoreBackup() {
+            document.getElementById('fileInput').click();
+        }
+
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
+                localStorage.removeItem('crePortfolioData');
+                location.reload();
+            }
+        }
+
+        // Modal functions
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.background = type === 'error' ? 'var(--danger-color)' : 'var(--accent-color)';
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Close modals on outside click
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+            }
+        }
+
+        // Update weight value display
+        document.addEventListener('DOMContentLoaded', function() {
+            const criteriaWeight = document.getElementById('criteriaWeight');
+            const criteriaWeightValue = document.getElementById('criteriaWeightValue');
+            const editCriteriaWeight = document.getElementById('editCriteriaWeight');
+            const editCriteriaWeightValue = document.getElementById('editCriteriaWeightValue');
+            
+            if (criteriaWeight) {
+                criteriaWeight.addEventListener('input', function() {
+                    criteriaWeightValue.textContent = this.value;
+                });
+            }
+            
+            if (editCriteriaWeight) {
+                editCriteriaWeight.addEventListener('input', function() {
+                    editCriteriaWeightValue.textContent = this.value;
+                });
+            }
+        });
+
+        // Initialize app on load
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
