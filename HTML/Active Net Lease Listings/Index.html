@@ -1,0 +1,2187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Active Net Lease Listings | Q4 2025</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', 'Helvetica', sans-serif;
+            background: #f5f5f5;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+        }
+
+        .topbar {
+            background: #fff;
+            padding: 16px 50px 0 50px;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            background: #ffffff;
+            padding: 12px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px 14px;
+            border: 1px solid #dcdcdc;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .search-select {
+            padding: 12px 10px;
+            border: 1px solid #dcdcdc;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #0a3d5c;
+            background: #fff;
+        }
+
+        .btn {
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+        .btn-primary { background: #0a3d5c; color: #fff; }
+        .btn-secondary { background: #f7f7f7; color: #0a3d5c; border-color: #e0e0e0; }
+
+        .search-results {
+            margin-top: 16px;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .results-card {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+        }
+
+        .results-card .card-header {
+            background: #0a3d5c;
+            color: #fff;
+            padding: 12px 16px;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .results-card .card-body { padding: 8px 0; }
+
+        .header {
+            background: #0a3d5c;
+            color: white;
+            padding: 40px 50px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: normal;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .header .subtitle {
+            font-size: 16px;
+            letter-spacing: 1px;
+            opacity: 0.9;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            align-items: stretch;
+            border-top: 3px solid #d4af37;
+            background: white;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .tab {
+            padding: 12px 18px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            color: #0a3d5c;
+            background: #f7f7f7;
+            border: 1px solid #e0e0e0;
+            border-bottom: none;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background: white;
+            border-color: #d4af37;
+        }
+
+        .hidden { display: none; }
+
+        .stat {
+            flex: 1;
+            padding: 30px 20px;
+            text-align: center;
+            border-right: 1px solid #e0e0e0;
+        }
+
+        .stat:last-child {
+            border-right: none;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: bold;
+            color: #d4af37;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .map-section {
+            padding: 40px 50px;
+            background: #fafafa;
+        }
+
+        .map-placeholder {
+            width: 100%;
+            height: 70vh;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            border: none;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        }
+
+        #map, #allMap {
+            width: 100%;
+            height: 100%;
+        }
+
+        .map-overlay {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: rgba(255,255,255,0.95);
+            padding: 12px 16px;
+            border-radius: 10px;
+            text-align: left;
+            z-index: 1000;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        }
+
+        .map-overlay h3 {
+            color: #0a3d5c;
+            font-size: 14px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .map-overlay p {
+            color: #666;
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #0a3d5c;
+            margin-bottom: 25px;
+            font-weight: 600;
+            border-bottom: 3px solid #d4af37;
+            padding-bottom: 10px;
+        }
+
+        .properties-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 40px;
+            background: white;
+        }
+
+        .properties-table thead {
+            background: #0a3d5c;
+            color: white;
+        }
+
+        .properties-table thead th {
+            padding: 15px 12px;
+            text-align: center;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .properties-table tbody tr {
+            border-bottom: 1px solid #e0e0e0;
+            transition: background 0.2s ease;
+        }
+
+        .properties-table tbody tr:hover {
+            background: #f8f8f8;
+        }
+
+        .sale-comps-table tbody tr { cursor: pointer; }
+
+        .marker-listing, .marker-comp {
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+            border: 2px solid #ffffff;
+        }
+        .marker-listing {
+            background: radial-gradient(circle at 30% 30%, #f5d86d, #d4af37);
+            outline: 2px solid #0a3d5c;
+        }
+        .marker-comp {
+            background: radial-gradient(circle at 30% 30%, #6eb1ff, #1e88e5);
+            outline: 2px solid #0a3d5c;
+            transform: rotate(45deg);
+        }
+        .marker-listing img, .marker-comp img {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+        }
+        .marker-comp img { transform: rotate(-45deg); }
+        .marker-dot { width: 8px; height: 8px; background: #0a3d5c; border-radius: 50%; }
+
+        .properties-table tbody td {
+            padding: 20px 12px;
+            text-align: center;
+            font-size: 13px;
+            vertical-align: middle;
+        }
+
+        .tenant-cell {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .tenant-logo-box {
+            width: 80px;
+            height: 80px;
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .tenant-logo-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .tenant-info {
+            text-align: left;
+        }
+
+        .tenant-name {
+            font-weight: bold;
+            color: #0a3d5c;
+            font-size: 14px;
+            margin-bottom: 3px;
+        }
+
+        .property-address {
+            font-size: 11px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .price-cell {
+            font-weight: bold;
+            color: #0a3d5c;
+            font-size: 15px;
+        }
+
+        .cap-rate-cell {
+            font-weight: bold;
+            color: #d4af37;
+            font-size: 15px;
+        }
+
+        .view-link {
+            display: inline-block;
+            padding: 8px 20px;
+            background: #0a3d5c;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+
+        .view-link:hover {
+            background: #1a5d7c;
+        }
+
+        .details-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.35);
+            display: none;
+            z-index: 2000;
+        }
+
+        .details-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 420px;
+            max-width: 85vw;
+            height: 100%;
+            background: white;
+            box-shadow: -4px 0 12px rgba(0,0,0,0.2);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 2100;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .details-overlay.show { display: block; }
+        .details-panel.show { transform: translateX(0); }
+
+        .details-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+        .close-btn { background: #0a3d5c; color: white; border: none; padding: 8px 12px; border-radius: 4px; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; }
+        .panel-title { display: flex; align-items: center; gap: 10px; }
+        .panel-logo { width: 56px; height: 56px; object-fit: contain; }
+        .panel-tenant { color: #0a3d5c; font-weight: 700; font-size: 16px; }
+        .panel-address { color: #666; font-size: 12px; }
+        .detail-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; font-size: 13px; }
+        .detail-key { color: #666; }
+        .detail-value { color: #0a3d5c; font-weight: 600; }
+        .notes { margin-top: 12px; font-size: 13px; color: #333; line-height: 1.5; }
+
+        @media (max-width: 968px) {
+            .properties-table {
+                font-size: 12px;
+            }
+            
+            .tenant-cell {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .tenant-info {
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-bar {
+                flex-wrap: wrap;
+            }
+            
+            .stat {
+                flex: 1 1 50%;
+                border-right: none;
+                border-bottom: 1px solid #e0e0e0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>ACTIVE NET LEASE LISTINGS</h1>
+            <div class="subtitle">OREGON & WASHINGTON | Q4 2025</div>
+        </div>
+
+        <div class="topbar">
+            <div class="search-bar">
+                <select id="searchModeSelect" class="search-select">
+                    <option value="tenant">Tenant</option>
+                    <option value="city">City</option>
+                </select>
+                <input id="tenantSearchInput" class="search-input" type="text" list="searchDatalist" placeholder="Search tenant or city">
+                <datalist id="searchDatalist"></datalist>
+                <button id="tenantSearchBtn" class="btn btn-primary">Search</button>
+                <button id="tenantClearBtn" class="btn btn-secondary">Clear</button>
+            </div>
+            <div id="searchResults" class="search-results hidden">
+                <div class="results-grid">
+                    <div class="results-card">
+                        <div class="card-header">On-Market For Sale</div>
+                        <div class="card-body">
+                            <table class="properties-table">
+                                <thead>
+                                    <tr>
+                                        <th style="text-align: left; padding-left: 20px;">Tenant / Property</th>
+                                        <th>Sale Price</th>
+                                        <th>Lease Term<br>Remaining</th>
+                                        <th>Cap Rate</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="searchListingsBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="results-card">
+                        <div class="card-header">Sale Comps</div>
+                        <div class="card-body">
+                            <table class="properties-table sale-comps-table">
+                                <thead>
+                                    <tr>
+                                        <th style="text-align: left; padding-left: 20px;">Tenant / Property</th>
+                                        <th>Sale Price</th>
+                                        <th>Sale Date</th>
+                                        <th>Cap Rate</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="searchCompsBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button id="tabActive" class="tab active">Active Listings</button>
+            <button id="tabComps" class="tab">Sale Comps</button>
+            <button id="tabMap" class="tab">Map</button>
+        </div>
+
+        <div class="stats-bar" id="statsBar">
+            <div class="stat">
+                <div class="stat-value">$3.4M</div>
+                <div class="stat-label">Average Sale Price</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">5.91%</div>
+                <div class="stat-label">Average Cap Rate</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">10.2 YRS</div>
+                <div class="stat-label">Average Lease Term</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">26</div>
+                <div class="stat-label">Active Listings</div>
+            </div>
+        </div>
+
+        <div id="activeSection" class="map-section">
+            <div class="section-title">Active Listings</div>
+
+            <table class="properties-table">
+                <thead>
+                    <tr>
+                        <th style="text-align: left; padding-left: 20px;">Tenant / Property</th>
+                        <th>Sale Price</th>
+                        <th>Lease Term<br>Remaining</th>
+                        <th>Cap Rate</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="propertiesTable"></tbody>
+            </table>
+        </div>
+
+        <div id="compsSection" class="map-section hidden">
+            <div class="section-title">Sale Comps</div>
+            <table class="properties-table sale-comps-table">
+                <thead>
+                    <tr>
+                        <th style="text-align: left; padding-left: 20px;">Tenant / Property</th>
+                        <th>Sale Price</th>
+                        <th>Sale Date</th>
+                        <th>Cap Rate</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="saleCompsTableBody"></tbody>
+            </table>
+        </div>
+        <div id="mapSection" class="map-section hidden">
+            <div class="map-placeholder">
+                <div id="allMap"></div>
+                <div class="map-overlay">
+                    <h3>Properties Map</h3>
+                    <p>Active listings and sale comps</p>
+                    <div style="display:flex; gap:12px; justify-content:center; margin-top:6px;">
+                        <span style="display:flex; align-items:center; gap:6px;"><span style="display:inline-block; width:12px; height:12px; background:#d4af37; border:2px solid #0a3d5c; border-radius:50%;"></span>For Sale</span>
+                        <span style="display:flex; align-items:center; gap:6px;"><span style="display:inline-block; width:12px; height:12px; background:#1e88e5; border:2px solid #0a3d5c; transform: rotate(45deg);"></span>Sale Comps</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script id="saleCompsData" type="application/json">[
+  {
+    "PropertyID": "9269475",
+    "Tenant": "KFC, Taco Bell",
+    "Sale Date": "5/14/2025",
+    "Sale Price": "$2,400,000",
+    "Asking Price": "",
+    "Price Per SF": "$743.26",
+    "Cap Rate": "",
+    "Market Time": "",
+    "Property Address": "601 S Roosevelt Dr",
+    "Property City": "Seaside",
+    "Property State": "OR",
+    "Zip": "97138",
+    "Size": "3,229",
+    "Land Area SF": "10,019",
+    "Secondary Type": "Fast Food",
+    "Sale Condition": "Investment Triple Net",
+    "Transaction Notes": "A private individual sold this 3,229 SF property to another private individual for $2,400,000 or 743.26 per SF with a sales condition of investment triple net. The information in the comparable has been sourced from public record.",
+    "Listing Broker Company": "",
+    "Latitude": "45.9894066",
+    "Longitude": "-123.9214447",
+    "Buyers Broker Company": "",
+    "Buyer Company": "Weber Coastal Bells LP",
+    "Seller Company": "Graja Inc",
+    "Building Park": "",
+    "Land Area AC": "0.23",
+    "Year Built": "1998"
+  },
+  {
+    "PropertyID": "7723109",
+    "Tenant": "Walgreens",
+    "Sale Date": "2/15/2024",
+    "Sale Price": "$4,455,686",
+    "Asking Price": "",
+    "Price Per SF": "$300.25",
+    "Cap Rate": "7.20%",
+    "Market Time": "",
+    "Property Address": "20100 W Mcloughlin Blvd",
+    "Property City": "Gladstone",
+    "Property State": "OR",
+    "Zip": "97027",
+    "Size": "14,840",
+    "Land Area SF": "60,440",
+    "Secondary Type": "Drug Store",
+    "Sale Condition": "1031 Exchange,Bulk/Portfolio Sale,Investment Triple Net,Sale Leaseback",
+    "Transaction Notes": "Walgreens sold a portfolio of 33 retail properties in various states to Orion Real Estate Group for $122 million.\nAll of the properties are drugstores which are fully occupied by Walgreens. The properties have an average size of about 15,000 square feet. The properties were sold in an off market deal. All of the properties are part of a sale leaseback arrangement with the seller. All of the leases are investment triple net leases with an initiial 15-year lease term. There are twelve 5-year renewal options. There is a 5% annual escalation every 5 years in the initial lease term and at the start of each renewal option.\nAdditionally, several of the properties are upleg properties for the buyer as part of 1031 exchanges. The other properties in the 1031 exchange were not identified.\nThe pro forma cap rate was reported to be about 7.2%, which equates to a pro forma NOI of about $8,784,000.\nThe same parties had a transaction for 34 drugstores in November 2023. (See CoStar COMP ID#",
+    "Listing Broker Company": "CBRE",
+    "Latitude": "45.375362",
+    "Longitude": "-122.600993",
+    "Buyers Broker Company": "",
+    "Buyer Company": "Joseph Blazejack",
+    "Seller Company": "",
+    "Building Park": "Gladstone Crossing",
+    "Land Area AC": "1.39",
+    "Year Built": "2011"
+  },
+  {
+    "PropertyID": "16783376",
+    "Tenant": "Sherwin-Williams Paints",
+    "Sale Date": "1/9/2024",
+    "Sale Price": "$3,350,000",
+    "Asking Price": "",
+    "Price Per SF": "$837.50",
+    "Cap Rate": "5%",
+    "Market Time": "172",
+    "Property Address": "1500 SE East Devils Lake Rd",
+    "Property City": "Lincoln City",
+    "Property State": "OR",
+    "Zip": "97367",
+    "Size": "4,000",
+    "Land Area SF": "59,955",
+    "Secondary Type": "Storefront",
+    "Sale Condition": "Investment Triple Net",
+    "Transaction Notes": "Seth Singerman sold this 4,000 square foot retail building to Carla Fillippone for $3,350,000 or $837.50 per square foot. All information in the comparable has been verified by the seller and buyer broker.",
+    "Listing Broker Company": "Colliers | First Western Properties",
+    "Latitude": "44.9580658",
+    "Longitude": "-124.0131927",
+    "Buyers Broker Company": "SMI Real Estate",
+    "Buyer Company": "1500DLR LLC",
+    "Seller Company": "Devils Lake Road, LLC",
+    "Building Park": "",
+    "Land Area AC": "1.38",
+    "Year Built": "2023"
+  },
+  {
+    "PropertyID": "9649789",
+    "Tenant": "NAPA Auto Parts",
+    "Sale Date": "9/16/2025",
+    "Sale Price": "$3,300,000",
+    "Asking Price": "$3,300,000",
+    "Price Per SF": "$231.82",
+    "Cap Rate": "10.61%",
+    "Market Time": "63",
+    "Property Address": "144 SW 20th St",
+    "Property City": "Pendleton",
+    "Property State": "OR",
+    "Zip": "97801",
+    "Size": "14,235",
+    "Land Area SF": "66,211",
+    "Secondary Type": "Drug Store",
+    "Sale Condition": "Investment Triple Net",
+    "Transaction Notes": "On September 16th, 2025, a private individual sold this 14,235 square foot retail property to a private individual for $3,300,000. The cap rate at the time of the sale was 10.6%. The information in the comparable has been verified by sources deemed reliable.",
+    "Listing Broker Company": "SVN | Imbrie Realty",
+    "Latitude": "45.6677112",
+    "Longitude": "-118.8057423",
+    "Buyers Broker Company": "",
+    "Buyer Company": "NAPA STAR LLC",
+    "Seller Company": "Walpen Llc",
+    "Building Park": "",
+    "Land Area AC": "1.52",
+    "Year Built": "2013"
+  },
+  {
+    "PropertyID": "5986727",
+    "Tenant": "Chick-fil-A",
+    "Sale Date": "10/20/2025",
+    "Sale Price": "",
+    "Asking Price": "$6,840,000",
+    "Price Per SF": "",
+    "Cap Rate": "4.75%",
+    "Market Time": "195",
+    "Property Address": "14801 Kruse Oaks Blvd",
+    "Property City": "Lake Oswego",
+    "Property State": "OR",
+    "Zip": "97035",
+    "Size": "8,400",
+    "Land Area SF": "62,726",
+    "Secondary Type": "Fast Food",
+    "Sale Condition": "Investment Triple Net",
+    "Transaction Notes": "This is the leased fee interest (land ownership) in an absolute NNN, newly renovated Chick-fil-A investment property. The tenant, Chick-fil-A, Inc., recently signed a brand new 15 year lease with 6 (5-year) options to extend. The lease features 10% rental increases every 5 years throughout the initial term and at the beginning of each option period. The lease is absolute NNN with zero landlord responsibilities.",
+    "Listing Broker Company": "SRS National Net Lease",
+    "Latitude": "45.419116",
+    "Longitude": "-122.739759",
+    "Buyers Broker Company": "",
+    "Buyer Company": "Mcdermott Investors Llc",
+    "Seller Company": "Sib Holdings Llc",
+    "Building Park": "",
+    "Land Area AC": "1.44",
+    "Year Built": "1989"
+  },
+  {
+    "PropertyID": "8307259",
+    "Tenant": "Jack in the Box",
+    "Sale Date": "3/3/2025",
+    "Sale Price": "",
+    "Asking Price": "$2,380,000",
+    "Price Per SF": "",
+    "Cap Rate": "4.75%",
+    "Market Time": "124",
+    "Property Address": "2020 S Santiam Hwy",
+    "Property City": "Lebanon",
+    "Property State": "OR",
+    "Zip": "97355",
+    "Size": "2,492",
+    "Land Area SF": "22,651",
+    "Secondary Type": "Fast Food",
+    "Sale Condition": "Investment Triple Net",
+    "Transaction Notes": "",
+    "Listing Broker Company": "Northmarq",
+    "Latitude": "44.52661",
+    "Longitude": "-122.907677",
+    "Buyers Broker Company": "",
+    "Buyer Company": "DNBA Properties LLC",
+    "Seller Company": "Prep East Food Lebanon Llc",
+    "Building Park": "",
+    "Land Area AC": "0.52",
+    "Year Built": "2011"
+  },
+  {
+    "PropertyID": "12889681",
+    "Tenant": "Chase Bank",
+    "Sale Date": "2/19/2025",
+    "Sale Price": "$2,800,000",
+    "Asking Price": "$3,000,000",
+    "Price Per SF": "$933.33",
+    "Cap Rate": "4.82%",
+    "Market Time": "112",
+    "Property Address": "442 Baseline St",
+    "Property City": "Cornelius",
+    "Property State": "OR",
+    "Zip": "97113",
+    "Size": "3,000",
+    "Land Area SF": "29,621",
+    "Secondary Type": "Bank",
+    "Sale Condition": "Ground Lease (Leased Fee),Investment Triple Net",
+    "Transaction Notes": "A private individual sold this 3,000 square foot retail property to an individual in a limited partnership for $2,800,000, or $933.33 per square foot. The property was 100% leased at the time of sale to Chase Bank on a new 15-year NNN lease with 4 (5-year) options to extend and 10% rental increases every 5 years.\nThe property was on the market for 118 days, with an initial asking price of $3,000,000.\nThe net operating income for February 2025 was reported as $135,000.00, yielding an actual cap rate of 4.82%.\nThe closing price of this transaction was impacted by both \"\"Ground Lease (Leased Fee)\"\" and \"\"Investment Triple Net\"\" sale conditions.\nThe information in the comparable has been verified by the listing broker.",
+    "Listing Broker Company": "SRS National Net Lease",
+    "Latitude": "45.5204093",
+    "Longitude": "-123.0664751",
+    "Buyers Broker Company": "",
+    "Buyer Company": "Norman and Esther Harris Family LP",
+    "Seller Company": "442 West Baseline LLC",
+    "Building Park": "",
+    "Land Area AC": "0.68",
+    "Year Built": "2025"
+  },
+  {
+    "PropertyID": "6102551",
+    "Tenant": "Starbucks",
+    "Sale Date": "12/16/2024",
+    "Sale Price": "$3,187,500",
+    "Asking Price": "",
+    "Price Per SF": "$1,242.69",
+    "Cap Rate": "4.86%",
+    "Market Time": "",
+    "Property Address": "1895 Franklin Blvd",
+    "Property City": "Eugene",
+    "Property State": "OR",
+    "Zip": "97403",
+    "Size": "2,565",
+    "Land Area SF": "42,253",
+    "Secondary Type": "Fast Food",
+    "Sale Condition": "Investment Triple Net",
+    "Transaction Notes": "A private individual sold this 2,565 square foot to another private individual for an undisclosed price. The property was fully leased to Starbucks on a triple net lease deal. The net operating income for 2024 was reported to be $155,182, yielding a 4.86% cap rate. The property was on the market for 103 days with the initial asking price of $3,450,000. The information in this comparable has been verified by listing broker.",
+    "Listing Broker Company": "Hanley Investment Group",
+    "Latitude": "44.045881",
+    "Longitude": "-123.064632",
+    "Buyers Broker Company": "",
+    "Buyer Company": "715 Investments Eugene Llc",
+    "Seller Company": "314SG, LLC",
+    "Building Park": "",
+    "Land Area AC": "0.97",
+    "Year Built": "2000/2016"
+  },
+  {
+    "PropertyID": "5060036",
+    "Tenant": "Chipotle",
+    "Sale Date": "1/22/2025",
+    "Sale Price": "$3,320,000",
+    "Asking Price": "$3,463,158",
+    "Price Per SF": "$1,397.31",
+    "Cap Rate": "4.95%",
+    "Market Time": "159",
+    "Property Address": "12035 NE Halsey St",
+    "Property City": "Portland",
+    "Property State": "OR",
+    "Zip": "97220",
+    "Size": "2,376",
+    "Land Area SF": "25,265",
+    "Secondary Type": "Quick Service",
+    "Sale Condition": "Investment Triple Net",
+    "Transaction Notes": "A private individual sold this 2,376 square foot standalone retail building to another private individual for $3,320,000, or $1,397.31 per square foot. This was a triple net investment sale with a cap rate of 4.95% at the time of sale. The tenant, Chipotle, was operating on a 15-year lease with contractual increases of 10% every 5 years at the time of sale. The information in this comparable was confirmed by the listing and buyer brokers.",
+    "Listing Broker Company": "CBRE",
+    "Latitude": "45.53383",
+    "Longitude": "-122.538946",
+    "Buyers Broker Company": "Pinnacle Estate Properties",
+    "Buyer Company": "Bhhg Queen Llc",
+    "Seller Company": "Cvp-halsey Cmg Llc",
+    "Building Park": "",
+    "Land Area AC": "0.58",
+    "Year Built": "2024"
+  },
+  {
+    "PropertyID": "19798857",
+    "Tenant": "Chipotle",
+    "Sale Date": "4/15/2025",
+    "Sale Price": "$2,813,000",
+    "Asking Price": "",
+    "Price Per SF": "$1,209.89",
+    "Cap Rate": "5.17%",
+    "Market Time": "",
+    "Property Address": "920 NE Wood Village Blvd",
+    "Property City": "Wood Village",
+    "Property State": "OR",
+    "Zip": "97060",
+    "Size": "2,325",
+    "Land Area SF": "61,420",
+    "Secondary Type": "Restaurant",
+    "Sale Condition": "Investment Triple Net",
+    "Transaction Notes": "A private individual sold this 2,325 sqft retail building to a private individual for $2,813,000 or $1,209.89 per sqft. The net operating income for 2025 was reported to be $145,313 yielding an actual cap rate of 5.17%. This asset was in escrow for 35 days. The information in this comparable has been confirmed by the listing broker and the buyer broker.",
+    "Listing Broker Company": "CIRE Partners",
+    "Latitude": "45.528632",
+    "Longitude": "-122.427663",
+    "Buyers Broker Company": "CFI",
+    "Buyer Company": "DJS Properties Management LLC",
+    "Seller Company": "Wood Village Retail I LLC; Stacy Craft",
+    "Building Park": "",
+    "Land Area AC": "1.41",
+    "Year Built": "2023"
+  },
+  {
+    "PropertyID": "7826199",
+    "Tenant": "Arby's",
+    "Sale Date": "4/4/2025",
+    "Sale Price": "$1,900,000",
+    "Asking Price": "",
+    "Price Per SF": "$778.05",
+    "Cap Rate": "5.22%",
+    "Market Time": "",
+    "Property Address": "2820 SW Cedar Hills Blvd",
+    "Property City": "Beaverton",
+    "Property State": "OR",
+    "Zip": "97005",
+    "Size": "2,442",
+    "Land Area SF": "21,780",
+    "Secondary Type": "Fast Food",
+    "Sale Condition": "Investment Triple Net",
+    "Transaction Notes": "Metri Lutfi sold this 2,442 SF retail building to Xiulin Yan for $1,900,000, or $778.05 per SF. The information in the comparable has been verified by sources deemed reliable.",
+    "Listing Broker Company": "",
+    "Latitude": "45.499552",
+    "Longitude": "-122.806537",
+    "Buyers Broker Company": "Capacity Commercial Group LLC",
+    "Buyer Company": "Cedar Hills Investment Property Llc",
+    "Seller Company": "Or 1647 Llc; Pamela Berger",
+    "Building Park": "Walker Center",
+    "Land Area AC": "0.50",
+    "Year Built": "1975"
+  },
+  {
+    "PropertyID": "20298959",
+    "Tenant": "Sherwin Williams",
+    "Sale Date": "12/20/2024",
+    "Sale Price": "",
+    "Asking Price": "$2,880,000",
+    "Price Per SF": "",
+    "Cap Rate": "5.25%",
+    "Market Time": "100",
+    "Property Address": "8930 SW Old Tualatin Sherwood Rd",
+    "Property City": "Tualatin",
+    "Property State": "OR",
+    "Zip": "97062",
+    "Size": "3,500",
+    "Land Area SF": "22,650",
+    "Secondary Type": "",
+    "Sale Condition": "Build to Suit,Investment Triple Net",
+    "Transaction Notes": "",
+    "Listing Broker Company": "Northmarq",
+    "Latitude": "45.380536",
+    "Longitude": "-122.768811",
+    "Buyers Broker Company": "",
+    "Buyer Company": "Stonegate Investment Trust",
+    "Seller Company": "SWT LLC",
+    "Building Park": "",
+    "Land Area AC": "0.52",
+    "Year Built": "2019"
+  },
+  {
+    "PropertyID": "10966331",
+    "Tenant": "Starbucks",
+    "Sale Date": "11/22/2024",
+    "Sale Price": "$1,500,000",
+    "Asking Price": "$1,500,000",
+    "Price Per SF": "$743.68",
+    "Cap Rate": "5.34%",
+    "Market Time": "129",
+    "Property Address": "1270 N Bayshore Dr",
+    "Property City": "Coos Bay",
+    "Property State": "OR",
+    "Zip": "97420",
+    "Size": "2,017",
+    "Land Area SF": "9,148",
+    "Secondary Type": "Fast Food",
+    "Sale Condition": "Investment Triple Net,Sale Leaseback",
+    "Transaction Notes": "Gregory Drobot sold this 2,017 SF building to Stephanie Teazis for $1,500,000 or $743.68 per SF. The property was on the market for4 months, with an initial asking price of $1,500,000. The in-place net operating income was reported to be $80,100, yielding an actual cap rate of 5.34%. The information in the comparable has been verified by sources deemed reliable",
+    "Listing Broker Company": "Pacific Properties | Pacific Coast Real Estate and Development",
+    "Latitude": "43.3766389",
+    "Longitude": "-124.214108",
+    "Buyers Broker Company": "COMMERCIAL ASSOCIATES",
+    "Buyer Company": "Stephanie Teazis",
+    "Seller Company": "Beetham Brent",
+    "Building Park": "Coos Bay Village",
+    "Land Area AC": "0.21",
+    "Year Built": "2020"
+  },
+  {
+    "PropertyID": "19223373",
+    "Tenant": "Starbucks",
+    "Sale Date": "4/10/2024",
+    "Sale Price": "$2,590,000",
+    "Asking Price": "$2,620,000",
+    "Price Per SF": "$1,210.28",
+    "Cap Rate": "5.41%",
+    "Market Time": "147",
+    "Property Address": "31330 S Highway 213",
+    "Property City": "Molalla",
+    "Property State": "OR",
+    "Zip": "97038",
+    "Size": "2,140",
+    "Land Area SF": "25,310",
+    "Secondary Type": "Fast Food",
+    "Sale Condition": "Investment Triple Net",
+    "Transaction Notes": "A private investeor sold this 2,140 SF retail building to a private investor for $2,590,000, or $1210.28 per SF. The property is 100% occupied wtht a triple net lease to Starbucks.\nThe property was on market for five month, with an initial asking price of $2,620,000.\nThe newly delivered Starbucks opened in November 2023 and has a ten year lease with 10% escalations every five years.\nThe net operating income for 2024 was report to be $140,170, yielding an actual cap rate of 5.41%.\nThe information in this comparable has been verified by sources deemed reliable.",
+    "Listing Broker Company": "Northmarq",
+    "Latitude": "45.1528648",
+    "Longitude": "-122.6044473",
+    "Buyers Broker Company": "Essential CRE",
+    "Buyer Company": "Kyu Yong Lee",
+    "Seller Company": "SB Molalla LLC",
+    "Building Park": "",
+    "Land Area AC": "0.58",
+    "Year Built": "2023"
+  },
+  {
+    "PropertyID": "6822898",
+    "Tenant": "Sears",
+    "Sale Date": "4/25/2025",
+    "Sale Price": "$2,750,000",
+    "Asking Price": "$2,897,000",
+    "Price Per SF": "$1,285.05",
+    "Cap Rate": "5.63%",
+    "Market Time": "156",
+    "Property Address": "1657 E Idaho Ave",
+    "Property City": "Ontario",
+    "Property State": "OR",
+    "Zip": "97914",
+    "Size": "2,140",
+    "Land Area SF": "28,314",
+    "Secondary Type": "Quick Service",
+    "Sale Condition": "Investment Triple Net",
+    "Transaction Notes": "On April 19th, 2025, MAJ Development sold the 2,140 square foot retail building to a private individual for $2,750,000 or about $1,285 per square foot.\nAt the time of sale, the property was 100% leased out, yielding a net operating income of $154,825, yielding a cap rate of 5.63%.\nAll information was verified by the parties involved.",
+    "Listing Broker Company": "MAJ Commercial Real Estate | MAJ Development Corporation",
+    "Latitude": "44.0251632",
+    "Longitude": "-116.9415699",
+    "Buyers Broker Company": "Kidder Mathews",
+    "Buyer Company": "FM FM LLC",
+    "Seller Company": "Maj Ontario Llc",
+    "Building Park": "Ontario Marketplace",
+    "Land Area AC": "0.65",
+    "Year Built": "2024"
+  },
+  {
+    "PropertyID": "11126932",
+    "Tenant": "Black Rock Coffee Bar",
+    "Sale Date": "9/11/2024",
+    "Sale Price": "$1,100,000",
+    "Asking Price": "$1,129,000",
+    "Price Per SF": "$2,380.95",
+    "Cap Rate": "5.64%",
+    "Market Time": "397",
+    "Property Address": "15290 SW Pacific Hwy",
+    "Property City": "Tigard",
+    "Property State": "OR",
+    "Zip": "97224",
+    "Size": "462",
+    "Land Area SF": "19,602",
+    "Secondary Type": "Fast Food",
+    "Sale Condition": "1031 Exchange,Ground Lease (Leased Fee),Investment Triple Net",
+    "Transaction Notes": "On September 11th, 2024, a private individual sold the 426-square-foot retail property to another private individual for $1,100,000 or about $2,380 per square foot. The triple net investment sale was a Leased Fee opportunity, producing a cap rate of 5.64% and NOI of $62,040.\nAll information in the comparable was verified by the brokers involved.",
+    "Listing Broker Company": "Marcus & Millichap",
+    "Latitude": "45.409262",
+    "Longitude": "-122.7938098",
+    "Buyers Broker Company": "Compass Commercial Real Estate Services",
+    "Buyer Company": "Sandeb Limited Partnership",
+    "Seller Company": "Misbehavin Group Llc",
+    "Building Park": "",
+    "Land Area AC": "0.45",
+    "Year Built": "2011"
+  },
+  {
+    "PropertyID": "19810843",
+    "Tenant": "Taco Bell",
+    "Sale Date": "11/7/2025",
+    "Sale Price": "$2,682,257",
+    "Asking Price": "$2,728,905",
+    "Price Per SF": "$1,197.44",
+    "Cap Rate": "5.75%",
+    "Market Time": "190",
+    "Property Address": "1375 Campbell St",
+    "Property City": "Baker City",
+    "Property State": "OR",
+    "Zip": "97814",
+    "Size": "2,240",
+    "Land Area SF": "31,799",
+    "Secondary Type": "Fast Food",
+    "Sale Condition": "Ground Lease (Leased Fee),Investment Triple Net",
+    "Transaction Notes": "",
+    "Listing Broker Company": "Northmarq",
+    "Latitude": "44.7812804",
+    "Longitude": "-117.8216012",
+    "Buyers Broker Company": "Colliers",
+    "Buyer Company": "",
+    "Seller Company": "Pacific Bells Llc",
+    "Building Park": "",
+    "Land Area AC": "0.73",
+    "Year Built": "2023"
+  },
+  {
+    "PropertyID": "11622558",
+    "Tenant": "Chipotle",
+    "Sale Date": "6/12/2024",
+    "Sale Price": "$2,737,693",
+    "Asking Price": "$2,845,000",
+    "Price Per SF": "$1,177.50",
+    "Cap Rate": "5.75%",
+    "Market Time": "195",
+    "Property Address": "15717 SE McLoughlin Blvd",
+    "Property City": "Milwaukie",
+    "Property State": "OR",
+    "Zip": "97267",
+    "Size": "2,325",
+    "Land Area SF": "26,136",
+    "Secondary Type": "Fast Food",
+    "Sale Condition": "Investment Triple Net",
+    "Transaction Notes": "On June 12th, 2024 MAJ Development sold the 2,325-square-foot retail building to a private individual for $2,737,693 or about $1,177 per square foot.\nAll information in the comparable was verified by the brokers involved.",
+    "Listing Broker Company": "MAJ Commercial Real Estate",
+    "Latitude": "45.4092188",
+    "Longitude": "-122.6272257",
+    "Buyers Broker Company": "Value Net Lease Partners",
+    "Buyer Company": "Lakshmi Holdings LLC",
+    "Seller Company": "Maj Pasco Llc",
+    "Building Park": "",
+    "Land Area AC": "0.60",
+    "Year Built": "2024"
+  },
+  {
+    "PropertyID": "9659375",
+    "Tenant": "Dairy Queen",
+    "Sale Date": "5/31/2024",
+    "Sale Price": "$2,260,000",
+    "Asking Price": "$2,325,000",
+    "Price Per SF": "$981.75",
+    "Cap Rate": "5.98%",
+    "Market Time": "100",
+    "Property Address": "320 Pacific Ave S",
+    "Property City": "Monmouth",
+    "Property State": "OR",
+    "Zip": "97361",
+    "Size": "2,302",
+    "Land Area SF": "19,166",
+    "Secondary Type": "Fast Food",
+    "Sale Condition": "Investment Triple Net",
+    "Transaction Notes": "The Mary Lee Revocable Trust sold this 2,302 square foot retail building to two private individuals for $2,260,000, or $981.75 per square foot. The property was a triple net lease to Dairy Queen at the time of sale. The property was on the market for three (3) months, with an initial asking price of $2,325,000. Dairy Queen has 16 years remaining in their primary term, two 10-year option periods, and 10% rental increases every five (5) years. The in-place net operating income for 2024 was reported to be $135,082.50, yielding an actual cap rate of 5.98%. The information in this sale comparable report has been confirmed by the listing brokers and the buyer's broker.",
+    "Listing Broker Company": "Colliers",
+    "Latitude": "44.8461821",
+    "Longitude": "-123.2296766",
+    "Buyers Broker Company": "Marcus & Millichap",
+    "Buyer Company": "Mallard Vi Llc",
+    "Seller Company": "Mary Lee Revocable Trust; Jerry Lee",
+    "Building Park": "",
+    "Land Area AC": "0.44",
+    "Year Built": "1975"
+  },
+  {
+    "PropertyID": "17974654",
+    "Tenant": "Black Rock Coffee Bar, 7-Eleven",
+    "Sale Date": "7/17/2024",
+    "Sale Price": "$4,375,000",
+    "Asking Price": "$8,995,000",
+    "Price Per SF": "$1,458.33",
+    "Cap Rate": "6.02%",
+    "Market Time": "163",
+    "Property Address": "1320-1340 W 7th Ave",
+    "Property City": "Eugene",
+    "Property State": "OR",
+    "Zip": "97402",
+    "Size": "6,000",
+    "Land Area SF": "40,072",
+    "Secondary Type": "Convenience Store",
+    "Sale Condition": "Investment Triple Net,Partial Interest Transfer",
+    "Transaction Notes": "On July 17th, 2024, MAJ Development sold a 50% interest in the 6,000 square-foot retail building to a private individual for $4,375,000 or about $1,458 per square foot.\nThe triple net investment sale was fully leased at time of sale, producing a net operating income of $527,107 and cap rate of 6.02%.\nAll information in the comparable was verified by the brokers involved.",
+    "Listing Broker Company": "MAJ Commercial Real Estate | MAJ Development Corporation",
+    "Latitude": "44.0519585",
+    "Longitude": "-123.1131181",
+    "Buyers Broker Company": "",
+    "Buyer Company": "KJA Eugune, LLC",
+    "Seller Company": "MAJ Eugene LLC",
+    "Building Park": "",
+    "Land Area AC": "0.92",
+    "Year Built": "2023"
+  },
+  {
+    "PropertyID": "1403436",
+    "Tenant": "Walgreens",
+    "Sale Date": "2/25/2025",
+    "Sale Price": "$4,550,000",
+    "Asking Price": "",
+    "Price Per SF": "$329.16",
+    "Cap Rate": "6.1%",
+    "Market Time": "",
+    "Property Address": "4380 Commercial St SE",
+    "Property City": "Salem",
+    "Property State": "OR",
+    "Zip": "97302",
+    "Size": "13,823",
+    "Land Area SF": "61,420",
+    "Secondary Type": "Drug Store",
+    "Sale Condition": "1031 Exchange,Investment Triple Net",
+    "Transaction Notes": "A private individual sold this 13,823 square foot retail property to a private individual for $4,550,000, or $329.16 per square foot. The property was 100% leased at the time of sale by Walgreens with 14 years remaining on a 15-year absolute NNN lease. The lease includes 5% rent increases every 5 years.\nThe property was on the market for 112 days, with an initial asking price of $4,625,333.\nThe net operating income for February 2025 was reported as $277,399.98, yielding an actual cap rate of 6.10%.\nThe closing price of this transaction was impacted by an \"\"Investment Triple Net\"\" sale condition and a \"\"1031 Exchange\"\" sale condition.\nThe information in the comparable has been verified by the listing broker and the buyer broker.",
+    "Listing Broker Company": "Marcus & Millichap",
+    "Latitude": "44.890686",
+    "Longitude": "-123.0337876",
+    "Buyers Broker Company": "Coldwell Banker Commercial Mountain West",
+    "Buyer Company": "Derfler Properties LLC",
+    "Seller Company": "Cotrust Wash LLC; Sylvia Franca",
+    "Building Park": "",
+    "Land Area AC": "1.41",
+    "Year Built": "1997"
+  },
+  {
+    "PropertyID": "5886043",
+    "Tenant": "Key Bank",
+    "Sale Date": "1/29/2024",
+    "Sale Price": "$1,459,000",
+    "Asking Price": "$1,590,000",
+    "Price Per SF": "$417.45",
+    "Cap Rate": "6.21%",
+    "Market Time": "196",
+    "Property Address": "2829 W 11th Ave",
+    "Property City": "Eugene",
+    "Property State": "OR",
+    "Zip": "97402",
+    "Size": "3,495",
+    "Land Area SF": "26,136",
+    "Secondary Type": "Bank",
+    "Sale Condition": "1031 Exchange,Investment Triple Net",
+    "Transaction Notes": "A Trust sold this 3,495 square foot property to another family Trust for $1.459 million or $417.45 per square feet. The property was 100% leased at the time of sale. The property was on the market for 196 days with an initial asking price of $1.59 million. The seller was motivated to divest the property because it was fully leased and perceived as a good investment. The buyer was drawn to the property by an opportunity for a 1031 exchange. The in-place net operating income for 2023 was estimated to be $90,603.90 yielding an actual cap rate of 6.21%. All information in the comparable has been verified by buyer the listing broker and buyer broker.",
+    "Listing Broker Company": "SVN | Commercial Advisors, LLC",
+    "Latitude": "44.0482665",
+    "Longitude": "-123.1344096",
+    "Buyers Broker Company": "Eugene Commercial Real Estate",
+    "Buyer Company": "Lee White & Kerry Silvey Family Trust",
+    "Seller Company": "Herbert Trust",
+    "Building Park": "",
+    "Land Area AC": "0.60",
+    "Year Built": "1997"
+  },
+  {
+    "PropertyID": "6337329",
+    "Tenant": "NAPA Auto Parts",
+    "Sale Date": "10/2/2025",
+    "Sale Price": "$1,042,064",
+    "Asking Price": "",
+    "Price Per SF": "$151.86",
+    "Cap Rate": "6.25%",
+    "Market Time": "",
+    "Property Address": "760 Ivy St",
+    "Property City": "Junction City",
+    "Property State": "OR",
+    "Zip": "97448",
+    "Size": "6,862",
+    "Land Area SF": "17,216",
+    "Secondary Type": "Storefront",
+    "Sale Condition": "1031 Exchange,Deferred Maintenance,Investment Triple Net",
+    "Transaction Notes": "In a trade between private individuals this 6,862 square foot retail property sold for $1,042,064 or $151.86 per square foot.\nThe buyer received a credit for deferred maintenance from the sale price of $1,077,000 and used a 1031 exchange for their all cash purchase.\nThe property was marketed as an Investment NNN with an early 10 year lease extension from the tenant, NAPA Auto Parts for a cap rate of 6.25%\nThe information in the comparable was verified by a source deemed reliable.",
+    "Listing Broker Company": "Marcus & Millichap",
+    "Latitude": "44.2204378",
+    "Longitude": "-123.2044825",
+    "Buyers Broker Company": "",
+    "Buyer Company": "Boyer Family Partnership II, LP",
+    "Seller Company": "Sunset Development, Llc",
+    "Building Park": "",
+    "Land Area AC": "0.40",
+    "Year Built": "1937"
+  },
+  {
+    "PropertyID": "21002853",
+    "Tenant": "Dollar General",
+    "Sale Date": "7/29/2025",
+    "Sale Price": "$2,925,000",
+    "Asking Price": "",
+    "Price Per SF": "$274.91",
+    "Cap Rate": "6.27%",
+    "Market Time": "",
+    "Property Address": "4000 S Pacific Hwy",
+    "Property City": "Medford",
+    "Property State": "OR",
+    "Zip": "97501",
+    "Size": "10,640",
+    "Land Area SF": "44,431",
+    "Secondary Type": "Freestanding",
+    "Sale Condition": "Investment Triple Net",
+    "Transaction Notes": "A private individual sold this 10,640 SF property to another private individual for $2,925,000.\nThe property was purchased as an investment NNN with Dollar General as the tenant.\nThe cap rate at time of sale was 6.27% making the NOI $183,397.\nThe information in the comparable has been verified by the listing broker.",
+    "Listing Broker Company": "Marcus & Millichap",
+    "Latitude": "42.281566",
+    "Longitude": "-122.8256092",
+    "Buyers Broker Company": "Kidder Mathews",
+    "Buyer Company": "Verducci Enterprises LP",
+    "Seller Company": "Phoenix Medford Dg Llc",
+    "Building Park": "",
+    "Land Area AC": "1.02",
+    "Year Built": "2025"
+  },
+  {
+    "PropertyID": "10130297",
+    "Tenant": "Dollar General",
+    "Sale Date": "4/4/2025",
+    "Sale Price": "",
+    "Asking Price": "$2,322,000",
+    "Price Per SF": "",
+    "Cap Rate": "6.3%",
+    "Market Time": "84",
+    "Property Address": "100 Territorial St",
+    "Property City": "Harrisburg",
+    "Property State": "OR",
+    "Zip": "97446",
+    "Size": "9,135",
+    "Land Area SF": "42,253",
+    "Secondary Type": "Freestanding",
+    "Sale Condition": "1031 Exchange,Investment Triple Net",
+    "Transaction Notes": "A private individual sold this 9,135 SF retail property to Bruns' Apple Market for an undisclosed price. This subject property was fully occupied by Dollar General at the time of sale, for a NNN investment.\nThis transaction was also involved a 1031 exchange.\nThe reported net operating income was reported to be $146,328.\nThe following has been confirmed with the listing broker and the buyer broker.",
+    "Listing Broker Company": "CBRE",
+    "Latitude": "44.274384",
+    "Longitude": "-123.1706028",
+    "Buyers Broker Company": "Campbell Commercial Real Estate",
+    "Buyer Company": "Bruns Family Properties Llc; Carmie Brothers",
+    "Seller Company": "340 North Street Llc",
+    "Building Park": "",
+    "Land Area AC": "0.97",
+    "Year Built": "2016"
+  },
+  {
+    "PropertyID": "9930542",
+    "Tenant": "Johnny Carino's",
+    "Sale Date": "12/20/2024",
+    "Sale Price": "$1,053,300",
+    "Asking Price": "",
+    "Price Per SF": "$153.41",
+    "Cap Rate": "6.5%",
+    "Market Time": "",
+    "Property Address": "1825 14th Ave SE",
+    "Property City": "Albany",
+    "Property State": "OR",
+    "Zip": "97322",
+    "Size": "6,866",
+    "Land Area SF": "46,609",
+    "Secondary Type": "Restaurant",
+    "Sale Condition": "Investment Triple Net",
+    "Transaction Notes": "A private individual sold this 6,866 sqauer foot retail building to a private individual for $1,053,300 or at $153.41 per square foot. CoStar was not tracking this comparable so the historical time on market data is not available at this time. The in place net operating income rfor year 2024 reported to be $68,464 yielding a capitalization rate of 6.5%. All information in the comparable has been verified by the listing broker and sourced from public record information.",
+    "Listing Broker Company": "Marcus & Millichap",
+    "Latitude": "44.6305725",
+    "Longitude": "-123.0830146",
+    "Buyers Broker Company": "",
+    "Buyer Company": "Vcg Heritage Mall Llc",
+    "Seller Company": "Ticorp Llc",
+    "Building Park": "Heritage Mall",
+    "Land Area AC": "1.07",
+    "Year Built": "2008"
+  },
+  {
+    "PropertyID": "8139660",
+    "Tenant": "Ziggi’s Coffee",
+    "Sale Date": "4/17/2025",
+    "Sale Price": "$2,142,279",
+    "Asking Price": "$2,180,107",
+    "Price Per SF": "$5,289.58",
+    "Cap Rate": "6.61%",
+    "Market Time": "62",
+    "Property Address": "21003 SW Pacific Hwy",
+    "Property City": "Sherwood",
+    "Property State": "OR",
+    "Zip": "97140",
+    "Size": "405",
+    "Land Area SF": "6,970",
+    "Secondary Type": "Fast Food",
+    "Sale Condition": "Investment Triple Net,Sale Leaseback",
+    "Transaction Notes": "A private individual sold this 405 square foot retail property to an individual in a trust for $2,142,279, or $5,289.58 per square foot. The property was 100% leased at the time of sale to Ziggi's Coffee on a 20-year absolute NNN lease that commenced in October 2024. The lease includes 6 (5-year) options to extend and 7.5% rent increases every 5 years.\nThe property was on the market for 62 days, with an initial asking price of $2,180,107.\nThe net operating income for April 2025 was reported as $141,709.29, yielding an actual cap rate of 6.61%.\nThe closing price of this transaction was impacted by an \"\"Investment Triple Net\"\" sale condition and a \"\"Sale Leaseback\"\" sale condition.\nThe information in the comparable has been verified by the dual agency broker.",
+    "Listing Broker Company": "Value Net Lease Partners",
+    "Latitude": "45.368063",
+    "Longitude": "-122.8468219",
+    "Buyers Broker Company": "Value Net Lease Partners",
+    "Buyer Company": "Stephani K Gulewich Trust",
+    "Seller Company": "Sherwood Equity Group Llc",
+    "Building Park": "",
+    "Land Area AC": "0.16",
+    "Year Built": "2007"
+  },
+  {
+    "PropertyID": "10738865",
+    "Tenant": "Dollar General",
+    "Sale Date": "12/6/2024",
+    "Sale Price": "$1,750,000",
+    "Asking Price": "",
+    "Price Per SF": "$233.68",
+    "Cap Rate": "6.85%",
+    "Market Time": "",
+    "Property Address": "115 E Columbia River Hwy",
+    "Property City": "Clatskanie",
+    "Property State": "OR",
+    "Zip": "97016",
+    "Size": "7,489",
+    "Land Area SF": "45,738",
+    "Secondary Type": "Freestanding",
+    "Sale Condition": "Investment Triple Net",
+    "Transaction Notes": "A private individual has sold this 7,489 SF NNN investment Dollar General to a private individual for $1,750,000 or $233 per SF. This sales comparable was confirmed by public record.",
+    "Listing Broker Company": "Marcus & Millichap",
+    "Latitude": "46.1029424",
+    "Longitude": "-123.2025563",
+    "Buyers Broker Company": "",
+    "Buyer Company": "Charles E Wuerpel and Ashley A. Miller",
+    "Seller Company": "Titel Family Trust",
+    "Building Park": "",
+    "Land Area AC": "1.05",
+    "Year Built": "2018"
+  },
+  {
+    "PropertyID": "7775362",
+    "Tenant": "Denny's",
+    "Sale Date": "10/3/2025",
+    "Sale Price": "$2,030,000",
+    "Asking Price": "$2,120,000",
+    "Price Per SF": "$404.62",
+    "Cap Rate": "6.89%",
+    "Market Time": "85",
+    "Property Address": "1710 W 6th St",
+    "Property City": "The Dalles",
+    "Property State": "OR",
+    "Zip": "97058",
+    "Size": "5,017",
+    "Land Area SF": "48,787",
+    "Secondary Type": "Restaurant",
+    "Sale Condition": "Investment Triple Net",
+    "Transaction Notes": "On October 3rd, 2025 a private individual sold the 5,017 square foot retail building to a private individual for $2,030,000 or about $404 per square foot.\nThe property was on market since July 10th for a total of 85 days, with an asking price of $2,210,000. The main cause for a drop in sale price was due to a full gut renovation including roof and parking lot. A reported cap rate of 6.89% and net operating income of approximately $140,000 was in place at time of sale.\nThe information in the comparable has been verified by the brokers involved.",
+    "Listing Broker Company": "Marcus & Millichap",
+    "Latitude": "45.6100834",
+    "Longitude": "-121.2064366",
+    "Buyers Broker Company": "Marcus & Millichap",
+    "Buyer Company": "KDT Holdings",
+    "Seller Company": "MLP, LLC",
+    "Building Park": "",
+    "Land Area AC": "1.12",
+    "Year Built": "1972"
+  },
+  {
+    "PropertyID": "11020656",
+    "Tenant": "Jimmy John's",
+    "Sale Date": "7/1/2025",
+    "Sale Price": "$1,600,000",
+    "Asking Price": "$1,610,000",
+    "Price Per SF": "$784.31",
+    "Cap Rate": "6%",
+    "Market Time": "469",
+    "Property Address": "1238 S Riverside Ave",
+    "Property City": "Medford",
+    "Property State": "OR",
+    "Zip": "97501",
+    "Size": "2,040",
+    "Land Area SF": "18,731",
+    "Secondary Type": "Fast Food",
+    "Sale Condition": "Investment Triple Net",
+    "Transaction Notes": "Vermont Properties Inc. sold this 2,040 SF Jimmy Johns to a private individual for $1,600,000, or $784.31 per SF. This property was fully leased at the time of sale by Jimmy Johns and provided a net operating income of $96,000 for the year 2024, which resulted in a cap rate of 6% at the time of sale. This was a triple net investment sale. All information in this comparable has been verified by the listing broker.",
+    "Listing Broker Company": "Northmarq",
+    "Latitude": "42.3139898",
+    "Longitude": "-122.8618123",
+    "Buyers Broker Company": "",
+    "Buyer Company": "Rrb Properties Group Llc",
+    "Seller Company": "Vermont Properties Inc",
+    "Building Park": "",
+    "Land Area AC": "0.43",
+    "Year Built": "2016"
+  },
+  {
+    "PropertyID": "10714391",
+    "Tenant": "Dollar General",
+    "Sale Date": "2/5/2025",
+    "Sale Price": "$2,080,000",
+    "Asking Price": "$2,150,000",
+    "Price Per SF": "$260.91",
+    "Cap Rate": "6%",
+    "Market Time": "154",
+    "Property Address": "178 S Main St",
+    "Property City": "Brownsville",
+    "Property State": "OR",
+    "Zip": "97327",
+    "Size": "7,972",
+    "Land Area SF": "84,506",
+    "Secondary Type": "Freestanding",
+    "Sale Condition": "Investment Triple Net",
+    "Transaction Notes": "A private individual sold this 7,972 SF property to another private individual for $2,080,000, or $260.91 per SF. The property was on the market since 9.4.24 with an initial asking price of $2,150,000. The information in the comparable has been verified by the listing broker.",
+    "Listing Broker Company": "Northwest Properties and Investment Services, LLC",
+    "Latitude": "44.3903496",
+    "Longitude": "-122.9847816",
+    "Buyers Broker Company": "",
+    "Buyer Company": "Charles Timothy Heckman",
+    "Seller Company": "Auric Investments LLC",
+    "Building Park": "",
+    "Land Area AC": "1.94",
+    "Year Built": "2018"
+  },
+  {
+    "PropertyID": "7050189",
+    "Tenant": "Starbucks",
+    "Sale Date": "10/15/2024",
+    "Sale Price": "$5,365,000",
+    "Asking Price": "",
+    "Price Per SF": "$5,921.63",
+    "Cap Rate": "6%",
+    "Market Time": "",
+    "Property Address": "10215 SE Stark St",
+    "Property City": "Portland",
+    "Property State": "OR",
+    "Zip": "97216",
+    "Size": "906",
+    "Land Area SF": "15,682",
+    "Secondary Type": "Fast Food",
+    "Sale Condition": "Investment Triple Net",
+    "Transaction Notes": "A private individual sold this 906 Retail building to an undisclosed buyer for $5,365,000, or $5,921.63 per SF.\nAll information in the comparable has been verified by the listing broker.",
+    "Listing Broker Company": "Marcus & Millichap",
+    "Latitude": "45.5193538",
+    "Longitude": "-122.5581689",
+    "Buyers Broker Company": "",
+    "Buyer Company": "",
+    "Seller Company": "Agree Development LLC",
+    "Building Park": "",
+    "Land Area AC": "0.36",
+    "Year Built": "1991"
+  },
+  {
+    "PropertyID": "6485359",
+    "Tenant": "Burger King",
+    "Sale Date": "6/13/2024",
+    "Sale Price": "$1,750,000",
+    "Asking Price": "",
+    "Price Per SF": "$532.24",
+    "Cap Rate": "7.17%",
+    "Market Time": "107",
+    "Property Address": "2095 S Santiam Hwy",
+    "Property City": "Lebanon",
+    "Property State": "OR",
+    "Zip": "97355",
+    "Size": "3,288",
+    "Land Area SF": "47,044",
+    "Secondary Type": "Fast Food",
+    "Sale Condition": "Bulk/Portfolio Sale,Investment Triple Net",
+    "Transaction Notes": "On June 13th, 2024 a private individual sold the two retail properties to QSR West for a combined $3,500,000 or about $598 per square foot.\nThe triple net investment sale had both properties fully occupied at time of sale, producing a combined net operating income of $250,590, yielding a cap rate of 7.17%.\nAll information in the comparable was verified by the brokers involved.",
+    "Listing Broker Company": "Marcus & Millichap",
+    "Latitude": "44.52551",
+    "Longitude": "-122.906567",
+    "Buyers Broker Company": "Marcus & Millichap",
+    "Buyer Company": "Alimany Opportunity Fund Llc",
+    "Seller Company": "Boss Aften Properties Llc",
+    "Building Park": "",
+    "Land Area AC": "1.08",
+    "Year Built": "2000"
+  },
+  {
+    "PropertyID": "1409049",
+    "Tenant": "Burger King",
+    "Sale Date": "6/13/2024",
+    "Sale Price": "$1,750,000",
+    "Asking Price": "",
+    "Price Per SF": "$684.40",
+    "Cap Rate": "7.17%",
+    "Market Time": "107",
+    "Property Address": "1445 N Pacific Hwy",
+    "Property City": "Woodburn",
+    "Property State": "OR",
+    "Zip": "97071",
+    "Size": "2,557",
+    "Land Area SF": "41,382",
+    "Secondary Type": "Fast Food",
+    "Sale Condition": "Bulk/Portfolio Sale,Investment Triple Net",
+    "Transaction Notes": "On June 13th, 2024 a private individual sold the two retail properties to QSR West for a combined $3,500,000 or about $598 per square foot.\nThe triple net investment sale had both properties fully occupied at time of sale, producing a combined net operating income of $250,590, yielding a cap rate of 7.17%.\nAll information in the comparable was verified by the brokers involved.",
+    "Listing Broker Company": "Marcus & Millichap",
+    "Latitude": "45.1487101",
+    "Longitude": "-122.8340729",
+    "Buyers Broker Company": "Marcus & Millichap",
+    "Buyer Company": "Alimany Opportunity Fund Llc",
+    "Seller Company": "Boss Aften Properties Llc",
+    "Building Park": "",
+    "Land Area AC": "0.95",
+    "Year Built": "1985"
+  },
+  {
+    "PropertyID": "8218180",
+    "Tenant": "Aaron's",
+    "Sale Date": "9/19/2025",
+    "Sale Price": "$1,950,000",
+    "Asking Price": "",
+    "Price Per SF": "$188.06",
+    "Cap Rate": "7.5%",
+    "Market Time": "",
+    "Property Address": "422 SE 10th Ave",
+    "Property City": "Hillsboro",
+    "Property State": "OR",
+    "Zip": "97123",
+    "Size": "10,369",
+    "Land Area SF": "23,958",
+    "Secondary Type": "Freestanding",
+    "Sale Condition": "1031 Exchange,Investment Triple Net",
+    "Transaction Notes": "A private Individual sold this 10,369 square foot retail property to another private individual for $1,950,000 or $188.06 per square foot. The property was full occupied single tenant building operating as an The Aaron's Company Inc. The property was on the market for 329 days with an original asking price of $2,000,000. The seller was informed tenant was seeking to sublease the building, so they decided it was time to sell and exchange into another single tenant investment property with a longer lease term. There were two sales conditions on this transaction: the buyer purchased this property as a NNN investment, and the seller was involved in a 1031 exchange. The actual in place net operating income for 2025 was $149,955 yielding an actual cap rate of 7.69%.\nAll information in this sales comparable has been verified by both the buyer and listing broker.",
+    "Listing Broker Company": "Marcus & Millichap",
+    "Latitude": "45.518448",
+    "Longitude": "-122.97343",
+    "Buyers Broker Company": "Realty One Group Prestige",
+    "Buyer Company": "Wentworth Managements LLC",
+    "Seller Company": "Trumpp Armand H & D L Trust",
+    "Building Park": "",
+    "Land Area AC": "0.55",
+    "Year Built": "2004"
+  },
+  {
+    "PropertyID": "6265188",
+    "Tenant": "Office Depot",
+    "Sale Date": "8/1/2025",
+    "Sale Price": "$6,000,000",
+    "Asking Price": "",
+    "Price Per SF": "$240.21",
+    "Cap Rate": "7.5%",
+    "Market Time": "",
+    "Property Address": "2859 Chad Dr",
+    "Property City": "Eugene",
+    "Property State": "OR",
+    "Zip": "97408",
+    "Size": "24,978",
+    "Land Area SF": "100,624",
+    "Secondary Type": "Freestanding",
+    "Sale Condition": "Expansion,Investment Triple Net",
+    "Transaction Notes": "On August 1st, 2025 One Liberty Properties sold the 24,978 square foot retail property to Costco Wholesale Corporation for $6,000,000 or about $240 per square foot.\nThe buyer was motivated to acquire the property as an investment short term, as Office Depot fully occupies the property for at least the next five-to-ten years depending on lease options. A cap rate of 7.5% was estimated, yielding a net operating income of $450,000.\nLong term, a potential redevelopment could be in play, if the buyer were to expand operations from their neighboring property at 2828 Chad Dr. See Costar Property ID 6245485 for more information. The information in the comparable has been verified by the buyer broker.",
+    "Listing Broker Company": "CBRE",
+    "Latitude": "44.0910603",
+    "Longitude": "-123.0652072",
+    "Buyers Broker Company": "Commercial Realty Advisors NW",
+    "Buyer Company": "Costco Wholesale Corporation",
+    "Seller Company": "OLP EUGENE LLC; Lawrence Ricketts",
+    "Building Park": "",
+    "Land Area AC": "2.31",
+    "Year Built": "1994"
+  },
+  {
+    "PropertyID": "5827122",
+    "Tenant": "Jiffy Lube",
+    "Sale Date": "2/7/2025",
+    "Sale Price": "$1,680,000",
+    "Asking Price": "",
+    "Price Per SF": "$700.00",
+    "Cap Rate": "7.5%",
+    "Market Time": "",
+    "Property Address": "528 W 7th Ave",
+    "Property City": "Eugene",
+    "Property State": "OR",
+    "Zip": "97401",
+    "Size": "2,400",
+    "Land Area SF": "23,522",
+    "Secondary Type": "Auto Repair",
+    "Sale Condition": "Investment Triple Net",
+    "Transaction Notes": "A private individual sold this 2,400 SF general retail building to a private individual for $1,680,000. The cap rate was 7.5%. The information in the comparable has been verified by the listing broker.",
+    "Listing Broker Company": "Northmarq",
+    "Latitude": "44.05184",
+    "Longitude": "-123.100942",
+    "Buyers Broker Company": "",
+    "Buyer Company": "Mill Town Properties Llc",
+    "Seller Company": "Dale E Farmer",
+    "Building Park": "",
+    "Land Area AC": "0.54",
+    "Year Built": "1996"
+  },
+  {
+    "PropertyID": "1167496",
+    "Tenant": "Ross",
+    "Sale Date": "6/27/2025",
+    "Sale Price": "$5,750,704",
+    "Asking Price": "",
+    "Price Per SF": "$41.20",
+    "Cap Rate": "7%",
+    "Market Time": "",
+    "Property Address": "1875-2255 14th Ave SE",
+    "Property City": "Albany",
+    "Property State": "OR",
+    "Zip": "97322",
+    "Size": "139,597",
+    "Land Area SF": "910,840",
+    "Secondary Type": "Storefront",
+    "Sale Condition": "Investment Triple Net",
+    "Transaction Notes": "Namdar Realty Group sold Heritage Mall to Agree Realty Corporation for $5,750,704\nThe NOI was $402,500 resulting in a CAP rate of 7%\nThe information in the comparable was verified by sources deemed reliable.",
+    "Listing Broker Company": "Marcus & Millichap",
+    "Latitude": "44.6304647",
+    "Longitude": "-123.080298",
+    "Buyers Broker Company": "",
+    "Buyer Company": "",
+    "Seller Company": "Heritage Realty Llc",
+    "Building Park": "Heritage Mall",
+    "Land Area AC": "20.91",
+    "Year Built": "1988"
+  },
+  {
+    "PropertyID": "5886129",
+    "Tenant": "Big 5",
+    "Sale Date": "6/10/2024",
+    "Sale Price": "",
+    "Asking Price": "$2,385,000",
+    "Price Per SF": "",
+    "Cap Rate": "7%",
+    "Market Time": "101",
+    "Property Address": "2121 Newmark St",
+    "Property City": "North Bend",
+    "Property State": "OR",
+    "Zip": "97459",
+    "Size": "37,944",
+    "Land Area SF": "101,495",
+    "Secondary Type": "Department Store",
+    "Sale Condition": "Investment Triple Net",
+    "Transaction Notes": "A private individual sold this 37,944 square foot property to a private individual for an undisclosed amount. The information in the comparable has been sourced from public record.",
+    "Listing Broker Company": "Kin Properties, Inc.",
+    "Latitude": "43.3905344",
+    "Longitude": "-124.2409193",
+    "Buyers Broker Company": "",
+    "Buyer Company": "Carrington Capital Investments IV LLC",
+    "Seller Company": "Esan LLC",
+    "Building Park": "",
+    "Land Area AC": "2.33",
+    "Year Built": "1966"
+  },
+  {
+    "PropertyID": "6578900",
+    "Tenant": "Big 5",
+    "Sale Date": "10/28/2024",
+    "Sale Price": "$2,045,000",
+    "Asking Price": "",
+    "Price Per SF": "$204.09",
+    "Cap Rate": "8.31%",
+    "Market Time": "130",
+    "Property Address": "595 NE Circle Blvd",
+    "Property City": "Corvallis",
+    "Property State": "OR",
+    "Zip": "97330",
+    "Size": "10,020",
+    "Land Area SF": "33,106",
+    "Secondary Type": "Freestanding",
+    "Sale Condition": "Investment Triple Net",
+    "Transaction Notes": "",
+    "Listing Broker Company": "Marcus & Millichap",
+    "Latitude": "44.5893592",
+    "Longitude": "-123.250747",
+    "Buyers Broker Company": "",
+    "Buyer Company": "Silver Lupine Capital Llc",
+    "Seller Company": "Red Brick Llc",
+    "Building Park": "",
+    "Land Area AC": "0.76",
+    "Year Built": "1997"
+  },
+  {
+    "PropertyID": "7192889",
+    "Tenant": "Staples",
+    "Sale Date": "10/24/2025",
+    "Sale Price": "$3,900,000",
+    "Asking Price": "$3,960,000",
+    "Price Per SF": "$163.83",
+    "Cap Rate": "8%",
+    "Market Time": "248",
+    "Property Address": "1150 NE Highway 99w",
+    "Property City": "Mcminnville",
+    "Property State": "OR",
+    "Zip": "97128",
+    "Size": "23,805",
+    "Land Area SF": "74,052",
+    "Secondary Type": "Freestanding",
+    "Sale Condition": "Investment Triple Net",
+    "Transaction Notes": "",
+    "Listing Broker Company": "Northmarq",
+    "Latitude": "45.2249677",
+    "Longitude": "-123.1864713",
+    "Buyers Broker Company": "",
+    "Buyer Company": "Wohl Mcminnville Llc",
+    "Seller Company": "Argo Mcminnville Llc",
+    "Building Park": "",
+    "Land Area AC": "1.70",
+    "Year Built": "1969"
+  }
+]</script>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+    <script>
+        const properties = [
+            {tenant: "TJ Maxx", address: "1233 Teakwood Ave, Coos Bay, OR 97420", price: 7900000, term: 10.4, cap: 4.55, url: "https://www.crexi.com/properties/2254422/oregon-1233-teakwood-ave-coos-bay", lat: 43.3665, lng: -124.2179},
+            {tenant: "Planet Fitness", address: "1236 Teakwood Ave, Coos Bay, OR 97420", price: 6400000, term: 8.5, cap: 3.86, url: "https://www.crexi.com/properties/2254549/oregon-1236-teakwood-ave-coos-bay-or", lat: 43.3666, lng: -124.2178},
+            {tenant: "Popeyes", address: "1680 N 1st St, Hermiston, OR 97838", price: 3440000, term: 17.5, cap: 6.25, url: "https://www.crexi.com/properties/2258043/oregon-popeyes", lat: 45.8407, lng: -119.2894},
+            {tenant: "Popeyes", address: "5503 Commercial Street SE, Salem, OR 97306", price: 3385783, term: 17.5, cap: 6, url: "https://www.crexi.com/properties/2258066/oregon-popeyes", lat: 44.9009, lng: -123.0232},
+            {tenant: "Burger King", address: "121 Ponderosa Dr, Sutherlin, OR 97479", price: 1769533, term: 15.6, cap: 6, url: "https://www.crexi.com/properties/1344386/oregon-burger-king", lat: 43.3912, lng: -123.3120},
+            {tenant: "Burger King", address: "1611 18th St, Springfield, OR 97477", price: 2035533, term: 15.6, cap: 6, url: "https://www.crexi.com/properties/1344451/oregon-burger-king", lat: 44.0462, lng: -122.9395},
+            {tenant: "Dairy Queen", address: "398 Lancaster Dr NE, Salem, OR 97301", price: 1745000, term: 11.4, cap: 5.55, url: "https://www.crexi.com/properties/2217116/oregon-dairy-queen", lat: 44.9429, lng: -123.0245},
+            {tenant: "DaVita", address: "1935 Thompson Rd, Coos Bay, OR 97420", price: 3974246, term: 8.2, cap: 6.50, url: "https://www.crexi.com/properties/2240354/oregon-davita-oregon-2019-bts-hope-prototype", lat: 43.3765, lng: -124.2079},
+            {tenant: "Chipotle", address: "2612 E Baseline St, Cornelius, OR 97113", price: 3772000, term: 15, cap: 4.50, url: "https://www.crexi.com/properties/2202576/oregon-chipotle-portland-msa", lat: 45.5198, lng: -122.8473},
+            {tenant: "Jack in the Box", address: "1400 NE Stephens St, Roseburg, OR 97470", price: 1555160, term: 3, cap: 5, url: "https://www.crexi.com/properties/1889266/oregon-jack-in-the-box---roseburg-or", lat: 43.2237, lng: -123.3417},
+            {tenant: "Jack in the Box", address: "2602 NE 238th Dr, Wood Village, OR 97060", price: 2385000, term: 3.9, cap: 6, url: "https://www.crexi.com/properties/2147002/oregon-jack-in-the-box", lat: 45.5334, lng: -122.4175},
+            {tenant: "Dutch Bros", address: "4455 SE 26th Ave, Portland, OR 97202", price: 995000, term: 3.4, cap: 5.54, url: "https://www.crexi.com/properties/1924116/oregon-dutch-bros-leased-investment", lat: 45.4922, lng: -122.6387},
+            {tenant: "Les Schwab", address: "609 E Broadway Ave, Milton-Freewater, OR 97862", price: 4900000, term: 20, cap: 5.42, url: "https://www.crexi.com/properties/1893644/oregon-les-schwab---609-e-broadway-ave-milton-freewater-or", lat: 45.9324, lng: -118.3875},
+            {tenant: "BestMed", address: "1890 NW 6th St, Grants Pass, OR 97526", price: 2948000, term: 15, cap: 6.35, url: "https://www.crexi.com/properties/2257098/oregon-bestmed-urgent-care", lat: 42.4390, lng: -123.3406},
+            {tenant: "Black Rock", address: "21150 SW Tualatin Valley Hwy, Beaverton, OR 97006", price: 2300000, term: 3, cap: 5.42, url: "https://www.crexi.com/properties/2233202/oregon-black-rock-coffee-bar-lamar-digital-billboard", lat: 45.4640, lng: -122.8698},
+            {tenant: "Dollar General", address: "1008 S. Chiloquin Blvd., Chiloquin, OR 97624", price: 1736777, term: 7.2, cap: 7.25, url: "https://www.crexi.com/properties/2198482/oregon-dollar-general-chiloquin-or", lat: 42.5762, lng: -121.8653},
+            {tenant: "Taco Time", address: "915 Campbell St, Baker City, OR 97814", price: 1328000, term: 8.6, cap: 5.50, url: "https://www.crexi.com/properties/2227291/oregon-taco-time---baker-city", lat: 44.7749, lng: -117.8344},
+            {tenant: "PetSmart", address: "12375 SW Walker Rd, Beaverton, OR 97005", price: 7990629, term: 6.3, cap: 6.75, url: "https://www.crexi.com/properties/2240528/oregon-petsmart-30-yr-operating-history-w-recent-option-extension", lat: 45.4479, lng: -122.8042},
+            {tenant: "Sherwin Williams", address: "2200 Ashland St, Ashland, OR 97520", price: 1750000, term: 2.9, cap: 6.36, url: "https://www.crexi.com/properties/1843765/oregon-sherwin-williams---ashland-or", lat: 42.1946, lng: -122.7095},
+            {tenant: "Black Rock", address: "4560 River Rd N, Keizer, OR 97303", price: 975000, term: 5.7, cap: 6.11, url: "https://www.crexi.com/properties/1723043/oregon-black-rock-coffee-bar-keizer", lat: 44.9901, lng: -123.0262},
+            {tenant: "7-Eleven", address: "1516 NE Killingsworth St, Portland, OR 97211", price: 2050000, term: 4.6, cap: 6.02, url: "https://www.crexi.com/properties/1756021/oregon-7-eleven", lat: 45.5624, lng: -122.6488},
+            {tenant: "Chipotle", address: "597 SW 1st Ave, Canby, OR 97013", price: 3690000, term: 15, cap: 5.00, url: "https://www.crexi.com/properties/1743564/oregon-chiptole", lat: 45.2626, lng: -122.6923},
+            {tenant: "Grocery Outlet", address: "2040 Broadway Ave, North Bend, OR 97459", price: 4550000, term: 10, cap: 6.60, url: "https://www.crexi.com/properties/1952966/oregon-grocery-outlet---coos-bay", lat: 43.4065, lng: -124.2245},
+            {tenant: "Walgreens", address: "1080 SW 1st Ave, Canby, OR 97013", price: 4631000, term: 12.7, cap: 6.40, url: "https://www.crexi.com/properties/1963235/oregon-walgreens-w-rental-increases---28m-in-store-sales", lat: 45.2629, lng: -122.6924},
+            {tenant: "Burgerville", address: "612 SE 3rd St, Bend, OR 97702", price: 3325000, term: 15, cap: 4.81, url: "https://www.crexi.com/properties/2036769/oregon-612-se-3-rd-st", lat: 44.0582, lng: -121.3153},
+            {tenant: "Valvoline", address: "1109 S Holladay Dr, Seaside, OR 97138", price: 1125000, term: 5, cap: 6.51, url: "https://www.crexi.com/properties/2144051/oregon-valvoline-instant-oil-change", lat: 45.9929, lng: -123.9226}
+        ];
+
+        const tenantLogos = {
+            "TJ Maxx": "Tenant Logos/TJ_Maxx.png",
+            "Planet Fitness": "Tenant Logos/Planet_Fitness.png",
+            "Popeyes": "Tenant Logos/Popeyes.png",
+            "Burger King": "Tenant Logos/Burger_King.png",
+            "Dairy Queen": "Tenant Logos/Dairy-Queen.png",
+            "DaVita": "Tenant Logos/DaVita.png",
+            "Chipotle": "Tenant Logos/Chipotle.png",
+            "Jack in the Box": "Tenant Logos/Jack-in-the-Box.png",
+            "Dutch Bros": "Tenant Logos/Dutch_Bros_Coffee.png",
+            "Les Schwab": "Tenant Logos/Les_Schwab.png",
+            "BestMed": "Tenant Logos/BestMed.webp",
+            "Black Rock": "Tenant Logos/Black-Rock.png",
+            "Dollar General": "Tenant Logos/Dollar_General.png",
+            "Taco Time": "Tenant Logos/TacoTime.png",
+            "PetSmart": "Tenant Logos/PetSmart.png",
+            "Sherwin Williams": "Tenant Logos/Sherwin_Williams.png",
+            "Sherwin-Williams Paints": "Tenant Logos/Sherwin_Williams.png",
+            "7-Eleven": "Tenant Logos/7-Eleven.png",
+            "Grocery Outlet": "Tenant Logos/Grocery_Outlet.png",
+            "Walgreens": "Tenant Logos/Walgreens.png",
+            "Burgerville": "Tenant Logos/Burgerville.png",
+            "Valvoline": "Tenant Logos/Valvoline.png",
+            "Starbucks": "Tenant Logos/Starbucks.png",
+            "Arby's": "Tenant Logos/Arbys.png",
+            "Chase Bank": "Tenant Logos/Chase_Bank.png",
+            "Key Bank": "Tenant Logos/KeyBank.png",
+            "NAPA Auto Parts": "Tenant Logos/NAPA_Auto_Parts.png",
+            "Taco Bell": "Tenant Logos/Taco_Bell.png",
+            "KFC": "Tenant Logos/KFC.png",
+            "Black Rock Coffee Bar": "Tenant Logos/Black-Rock.png",
+            "Chick-fil-A": "Tenant Logos/Chick-fil-A.png",
+            "Sears": "Tenant Logos/Sears.png",
+            "Ziggi’s Coffee": "Tenant Logos/Ziggis Coffee.png",
+            "Denny's": "Tenant Logos/Denny.png",
+            "Jimmy John's": "Tenant Logos/Jimmy_Johns.png",
+            "Aaron's": "Tenant Logos/Aaron.png",
+            "Office Depot": "Tenant Logos/Office_Depot.png",
+            "Jiffy Lube": "Tenant Logos/Jiffy-Lube.png",
+            "Target": "Tenant Logos/Target.png",
+            "Home Depot": "Tenant Logos/Home_Depot.png",
+            "Ross": "Tenant Logos/Ross_Stores.png",
+            "Big 5": "Tenant Logos/Big5.png",
+            "Staples": "Tenant Logos/Staples.png",
+            "Aaron's": "Tenant Logos/Aarons.png",
+            "Denny's": "Tenant Logos/Dennys.png",
+            "Johnny Carino's": "Tenant Logos/Johnny Carinos.png"
+        };
+
+        function getLogoSrc(tenant) {
+            if (!tenant) return null;
+            const t = tenant.trim();
+            if (tenantLogos[t]) return tenantLogos[t];
+            const parts = t.split(',').map(s => s.trim());
+            for (let i = 0; i < parts.length; i++) {
+                if (tenantLogos[parts[i]]) return tenantLogos[parts[i]];
+            }
+            const simple = t.replace(/\u2019|\'/g, '').replace(/\s+/g, ' ').trim();
+            for (const k in tenantLogos) {
+                if (k.toLowerCase() === simple.toLowerCase()) return tenantLogos[k];
+            }
+            return null;
+        }
+
+        function formatPrice(price) {
+            if (price >= 1000000) {
+                return '$' + (price / 1000000).toFixed(2) + 'M';
+            }
+            return '$' + price.toLocaleString();
+        }
+
+        let allMap;
+        let mapInitialized = false;
+        let listingMarkers = [];
+        let compMarkers = [];
+        let currentFilter = '';
+        let searchMode = 'tenant';
+        function createListingIcon(prop) {
+            const logoSrc = getLogoSrc(prop.tenant);
+            const html = '<div class="marker-listing">' + (logoSrc ? ('<img src="' + logoSrc + '" alt="">') : '<span class="marker-dot"></span>') + '</div>';
+            return L.divIcon({ className: '', html, iconSize: [42, 42], iconAnchor: [21, 21], popupAnchor: [0, -20] });
+        }
+
+        function createCompIcon(c) {
+            const logoSrc = getLogoSrc(c["Tenant"]);
+            const html = '<div class="marker-comp">' + (logoSrc ? ('<img src="' + logoSrc + '" alt="">') : '<span class="marker-dot"></span>') + '</div>';
+            return L.divIcon({ className: '', html, iconSize: [42, 42], iconAnchor: [21, 21], popupAnchor: [0, -20] });
+        }
+
+        async function initAllMap() {
+            if (mapInitialized) return;
+            allMap = L.map('allMap').setView([44.5, -122.0], 7);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors' }).addTo(allMap);
+            const bounds = [];
+            properties.forEach((prop) => {
+                const m = L.marker([prop.lat, prop.lng], { icon: createListingIcon(prop) }).addTo(allMap);
+                m.on('click', () => openListingDetails(prop));
+                bounds.push([prop.lat, prop.lng]);
+                listingMarkers.push(m);
+            });
+            if (!saleComps.length) { await loadSaleComps(); }
+            saleComps.forEach((c) => {
+                const lat = parseFloat(c["Latitude"]);
+                const lng = parseFloat(c["Longitude"]);
+                if (!isFinite(lat) || !isFinite(lng)) return;
+                const m = L.marker([lat, lng], { icon: createCompIcon(c) }).addTo(allMap);
+                m.on('click', () => openCompDetails(c));
+                bounds.push([lat, lng]);
+                compMarkers.push(m);
+            });
+            if (bounds.length) { allMap.fitBounds(bounds, { padding: [40, 40] }); }
+            mapInitialized = true;
+        }
+
+        function tenantMatches(tenant, query) {
+            if (!query) return true;
+            if (!tenant) return false;
+            const q = query.trim().toLowerCase();
+            const parts = tenant.split(',').map(s => s.trim().toLowerCase());
+            return parts.some(p => p.includes(q));
+        }
+
+        function getCityFromListingAddress(addr) {
+            if (!addr) return '';
+            const parts = addr.split(',');
+            if (parts.length >= 2) return parts[1].trim();
+            return '';
+        }
+
+        function cityMatchesListing(addr, query) {
+            if (!query) return true;
+            const city = getCityFromListingAddress(addr);
+            return city.toLowerCase().includes(query.trim().toLowerCase());
+        }
+
+        function cityMatchesComp(city, query) {
+            if (!query) return true;
+            return (city || '').toLowerCase().includes(query.trim().toLowerCase());
+        }
+
+        function listingMatches(prop, q) { return searchMode === 'tenant' ? tenantMatches(prop.tenant, q) : cityMatchesListing(prop.address, q); }
+        function compMatches(c, q) { return searchMode === 'tenant' ? tenantMatches(c["Tenant"], q) : cityMatchesComp(c["Property City"], q); }
+
+        async function renderFilteredMap(filter) {
+            if (!mapInitialized) return;
+            listingMarkers.forEach(m => allMap.removeLayer(m));
+            compMarkers.forEach(m => allMap.removeLayer(m));
+            listingMarkers = [];
+            compMarkers = [];
+            const bounds = [];
+            const q = filter || '';
+            properties.forEach((prop) => {
+                if (!listingMatches(prop, q)) return;
+                const m = L.marker([prop.lat, prop.lng], { icon: createListingIcon(prop) }).addTo(allMap);
+                m.on('click', () => openListingDetails(prop));
+                listingMarkers.push(m);
+                bounds.push([prop.lat, prop.lng]);
+            });
+            if (!saleComps.length) { await loadSaleComps(); }
+            saleComps.forEach((c) => {
+                if (!compMatches(c, q)) return;
+                const lat = parseFloat(c["Latitude"]);
+                const lng = parseFloat(c["Longitude"]);
+                if (!isFinite(lat) || !isFinite(lng)) return;
+                const m = L.marker([lat, lng], { icon: createCompIcon(c) }).addTo(allMap);
+                m.on('click', () => openCompDetails(c));
+                compMarkers.push(m);
+                bounds.push([lat, lng]);
+            });
+            if (bounds.length) { allMap.fitBounds(bounds, { padding: [40, 40] }); }
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('propertiesTable');
+            properties.forEach((prop, index) => {
+                const row = document.createElement('tr');
+                const logoSrc = getLogoSrc(prop.tenant);
+                row.innerHTML = '<td style="text-align: left; padding-left: 30px;">' +
+                    '<div class="tenant-cell">' +
+                    '<div class="tenant-logo-box">' +
+                    (logoSrc ? ('<img src="' + logoSrc + '" alt="' + prop.tenant + ' logo">') : ('<div style="font-weight: bold; color: #0a3d5c; font-size: 12px;">' + (index + 1) + '</div>')) +
+                    '</div>' +
+                    '<div class="tenant-info">' +
+                    '<div class="tenant-name">' + prop.tenant + '</div>' +
+                    '<div class="property-address">' + prop.address + '</div>' +
+                    '</div>' +
+                    '</div>' +
+                    '</td>' +
+                    '<td class="price-cell">' + formatPrice(prop.price) + '</td>' +
+                    '<td>' + prop.term + ' yrs</td>' +
+                    '<td class="cap-rate-cell">' + prop.cap + '%</td>' +
+                    '<td><a href="' + prop.url + '" target="_blank" class="view-link">View</a></td>';
+                tbody.appendChild(row);
+            });
+        }
+
+        renderTable();
+
+        let saleComps = [];
+        async function loadSaleComps() {
+            try {
+                const res = await fetch('tableConvert.json', { cache: 'no-store' });
+                const data = await res.json();
+                if (Array.isArray(data) && data.length) { saleComps = data; return; }
+            } catch (e) {}
+            try {
+                const inline = document.getElementById('saleCompsData');
+                if (inline) { saleComps = JSON.parse(inline.textContent); return; }
+            } catch (e) {}
+            saleComps = [];
+        }
+
+        function fmt(v) { return v && v.trim() ? v : '—'; }
+
+        function renderSaleComps() {
+            const tbody = document.getElementById('saleCompsTableBody');
+            tbody.innerHTML = '';
+            saleComps.forEach((c, idx) => {
+                const tr = document.createElement('tr');
+                const logoSrc = getLogoSrc(c["Tenant"]);
+                const addr = [c["Property Address"], c["Property City"], c["Property State"], c["Zip"]].filter(Boolean).join(', ');
+                tr.innerHTML = '<td style="text-align: left; padding-left: 30px;">' +
+                    '<div class="tenant-cell">' +
+                    '<div class="tenant-logo-box">' +
+                    (logoSrc ? ('<img src="' + logoSrc + '" alt="' + c["Tenant"] + ' logo">') : '') +
+                    '</div>' +
+                    '<div class="tenant-info">' +
+                    '<div class="tenant-name">' + (c["Tenant"] || '') + '</div>' +
+                    '<div class="property-address">' + addr + '</div>' +
+                    '</div>' +
+                    '</div>' +
+                    '</td>' +
+                    '<td class="price-cell">' + fmt(c["Sale Price"]) + '</td>' +
+                    '<td>' + fmt(c["Sale Date"]) + '</td>' +
+                    '<td class="cap-rate-cell">' + fmt(c["Cap Rate"]) + '</td>' +
+                    '<td><a href="#" class="view-link">View</a></td>';
+                tr.addEventListener('click', () => openCompDetails(c));
+                tr.querySelector('.view-link').addEventListener('click', (ev) => { ev.preventDefault(); openCompDetails(c); });
+                tbody.appendChild(tr);
+            });
+        }
+
+        function populateSuggestions(mode) {
+            const dl = document.getElementById('searchDatalist');
+            const set = new Set();
+            if (mode === 'city') {
+                properties.forEach(p => { const c = getCityFromListingAddress(p.address); if (c) set.add(c); });
+                saleComps.forEach(c => { const city = c["Property City"]; if (city) set.add(city); });
+            } else {
+                properties.forEach(p => set.add(p.tenant));
+                saleComps.forEach(c => (c["Tenant"]||'').split(',').map(s=>s.trim()).forEach(t => t && set.add(t)));
+            }
+            dl.innerHTML = Array.from(set).sort().map(v => '<option value="' + v.replace(/"/g,'&quot;') + '"></option>').join('');
+        }
+
+        function renderSearchResults(listings, comps) {
+            const lb = document.getElementById('searchListingsBody');
+            const cb = document.getElementById('searchCompsBody');
+            lb.innerHTML = '';
+            cb.innerHTML = '';
+            listings.forEach((prop, index) => {
+                const row = document.createElement('tr');
+                const logoSrc = getLogoSrc(prop.tenant);
+                row.innerHTML = '<td style="text-align: left; padding-left: 30px;">' +
+                    '<div class="tenant-cell">' +
+                    '<div class="tenant-logo-box">' +
+                    (logoSrc ? ('<img src="' + logoSrc + '" alt="' + prop.tenant + ' logo">') : ('<div style="font-weight: bold; color: #0a3d5c; font-size: 12px;">' + (index + 1) + '</div>')) +
+                    '</div>' +
+                    '<div class="tenant-info">' +
+                    '<div class="tenant-name">' + prop.tenant + '</div>' +
+                    '<div class="property-address">' + prop.address + '</div>' +
+                    '</div>' +
+                    '</div>' +
+                    '</td>' +
+                    '<td class="price-cell">' + formatPrice(prop.price) + '</td>' +
+                    '<td>' + prop.term + ' yrs</td>' +
+                    '<td class="cap-rate-cell">' + prop.cap + '%</td>' +
+                    '<td><a href="' + prop.url + '" target="_blank" class="view-link">View</a></td>';
+                row.addEventListener('click', () => openListingDetails(prop));
+                lb.appendChild(row);
+            });
+            comps.forEach((c) => {
+                const tr = document.createElement('tr');
+                const logoSrc = getLogoSrc(c["Tenant"]);
+                const addr = [c["Property Address"], c["Property City"], c["Property State"], c["Zip"]].filter(Boolean).join(', ');
+                tr.innerHTML = '<td style="text-align: left; padding-left: 30px;">' +
+                    '<div class="tenant-cell">' +
+                    '<div class="tenant-logo-box">' +
+                    (logoSrc ? ('<img src="' + logoSrc + '" alt="' + c["Tenant"] + ' logo">') : '') +
+                    '</div>' +
+                    '<div class="tenant-info">' +
+                    '<div class="tenant-name">' + (c["Tenant"] || '') + '</div>' +
+                    '<div class="property-address">' + addr + '</div>' +
+                    '</div>' +
+                    '</div>' +
+                    '</td>' +
+                    '<td class="price-cell">' + fmt(c["Sale Price"]) + '</td>' +
+                    '<td>' + fmt(c["Sale Date"]) + '</td>' +
+                    '<td class="cap-rate-cell">' + fmt(c["Cap Rate"]) + '</td>' +
+                    '<td><a href="#" class="view-link">View</a></td>';
+                tr.addEventListener('click', () => openCompDetails(c));
+                tr.querySelector('.view-link').addEventListener('click', (ev) => { ev.preventDefault(); openCompDetails(c); });
+                cb.appendChild(tr);
+            });
+        }
+
+        function runSearch() {
+            searchMode = document.getElementById('searchModeSelect').value;
+            const q = (document.getElementById('tenantSearchInput').value || '').trim();
+            currentFilter = q;
+            const listings = properties.filter(p => listingMatches(p, q));
+            const comps = saleComps.filter(c => compMatches(c, q));
+            document.getElementById('searchResults').classList.toggle('hidden', !(q && (listings.length || comps.length)));
+            renderSearchResults(listings, comps);
+            if (document.getElementById('mapSection') && !document.getElementById('mapSection').classList.contains('hidden')) {
+                renderFilteredMap(q);
+            }
+        }
+
+        function clearSearch() {
+            currentFilter = '';
+            document.getElementById('tenantSearchInput').value = '';
+            document.getElementById('searchResults').classList.add('hidden');
+            if (document.getElementById('mapSection') && !document.getElementById('mapSection').classList.contains('hidden')) {
+                renderFilteredMap('');
+            }
+        }
+
+        function openCompDetails(c) {
+            const overlay = document.getElementById('detailsOverlay');
+            const panel = document.getElementById('detailsPanel');
+            const logoSrc = getLogoSrc(c["Tenant"]);
+            const addr = [c["Property Address"], c["Property City"], c["Property State"], c["Zip"]].filter(Boolean).join(', ');
+            const content = document.getElementById('detailsContent');
+            content.innerHTML = '' +
+                '<div class="details-header">' +
+                '<div class="panel-title">' +
+                (logoSrc ? ('<img class="panel-logo" src="' + logoSrc + '" alt="' + (c["Tenant"]||'') + ' logo">') : '') +
+                '<div><div class="panel-tenant">' + (c["Tenant"] || '') + '</div><div class="panel-address">' + addr + '</div></div>' +
+                '</div>' +
+                '<button class="close-btn" id="closeDetailsBtn">Close</button>' +
+                '</div>' +
+                detailRow('Sale Price', fmt(c["Sale Price"])) +
+                detailRow('Sale Date', fmt(c["Sale Date"])) +
+                detailRow('Cap Rate', fmt(c["Cap Rate"])) +
+                detailRow('Asking Price', fmt(c["Asking Price"])) +
+                detailRow('Price Per SF', fmt(c["Price Per SF"])) +
+                detailRow('Size (SF)', fmt(c["Size"])) +
+                detailRow('Land Area (SF)', fmt(c["Land Area SF"])) +
+                detailRow('Land Area (AC)', fmt(c["Land Area AC"])) +
+                detailRow('Secondary Type', fmt(c["Secondary Type"])) +
+                detailRow('Sale Condition', fmt(c["Sale Condition"])) +
+                detailRow('Listing Broker', fmt(c["Listing Broker Company"])) +
+                detailRow('Buyer', fmt(c["Buyer Company"])) +
+                detailRow('Seller', fmt(c["Seller Company"])) +
+                detailRow('Year Built', fmt(c["Year Built"])) +
+                (c["Transaction Notes"] ? ('<div class="notes">' + c["Transaction Notes"].replace(/\n/g,'<br>') + '</div>') : '');
+            overlay.classList.add('show');
+            panel.classList.add('show');
+            const closeBtn = document.getElementById('closeDetailsBtn');
+            closeBtn.onclick = closeDetails;
+            overlay.onclick = closeDetails;
+        }
+
+        function openListingDetails(prop) {
+            const overlay = document.getElementById('detailsOverlay');
+            const panel = document.getElementById('detailsPanel');
+            const logoSrc = getLogoSrc(prop.tenant);
+            const content = document.getElementById('detailsContent');
+            content.innerHTML = '' +
+                '<div class="details-header">' +
+                '<div class="panel-title">' +
+                (logoSrc ? ('<img class="panel-logo" src="' + logoSrc + '" alt="' + prop.tenant + ' logo">') : '') +
+                '<div><div class="panel-tenant">' + prop.tenant + '</div><div class="panel-address">' + prop.address + '</div></div>' +
+                '</div>' +
+                '<button class="close-btn" id="closeDetailsBtn">Close</button>' +
+                '</div>' +
+                detailRow('Asking Price', formatPrice(prop.price)) +
+                detailRow('Cap Rate', prop.cap + '%') +
+                detailRow('Lease Term', prop.term + ' yrs') +
+                '<div class="detail-row"><div class="detail-key">Link</div><div class="detail-value"><a href="' + prop.url + '" target="_blank">View Property</a></div></div>';
+            overlay.classList.add('show');
+            panel.classList.add('show');
+            const closeBtn = document.getElementById('closeDetailsBtn');
+            closeBtn.onclick = closeDetails;
+            overlay.onclick = closeDetails;
+        }
+
+        function detailRow(k, v) {
+            return '<div class="detail-row"><div class="detail-key">' + k + '</div><div class="detail-value">' + v + '</div></div>';
+        }
+
+        function closeDetails() {
+            document.getElementById('detailsOverlay').classList.remove('show');
+            document.getElementById('detailsPanel').classList.remove('show');
+        }
+
+        function showTab(name) {
+            const active = name === 'active';
+            const comps = name === 'comps';
+            const mapTab = name === 'map';
+            document.getElementById('activeSection').classList.toggle('hidden', !active);
+            document.getElementById('compsSection').classList.toggle('hidden', !comps);
+            document.getElementById('mapSection').classList.toggle('hidden', !mapTab);
+            document.getElementById('statsBar').classList.toggle('hidden', !active);
+            document.getElementById('tabActive').classList.toggle('active', active);
+            document.getElementById('tabComps').classList.toggle('active', comps);
+            document.getElementById('tabMap').classList.toggle('active', mapTab);
+            if (mapTab) {
+                initAllMap();
+                setTimeout(() => { if (allMap) allMap.invalidateSize(); }, 50);
+            }
+        }
+
+        document.getElementById('tabActive').addEventListener('click', () => showTab('active'));
+        document.getElementById('tabComps').addEventListener('click', () => showTab('comps'));
+        document.getElementById('tabMap').addEventListener('click', () => showTab('map'));
+        document.getElementById('tenantSearchBtn').addEventListener('click', runSearch);
+        document.getElementById('tenantClearBtn').addEventListener('click', clearSearch);
+        document.getElementById('tenantSearchInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') runSearch(); });
+        document.getElementById('searchModeSelect').addEventListener('change', () => { searchMode = document.getElementById('searchModeSelect').value; populateSuggestions(searchMode); });
+
+        loadSaleComps().then(() => { renderSaleComps(); populateSuggestions(searchMode); });
+    </script>
+    <div id="detailsOverlay" class="details-overlay"></div>
+    <div id="detailsPanel" class="details-panel"><div id="detailsContent"></div></div>
+</body>
+</html>
