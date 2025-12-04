@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crexi Excel File Processor</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f7fa;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .upload-area {
+            border: 2px dashed #3498db;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 20px;
+            background-color: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+        .upload-area.dragover {
+            background-color: #e3f2fd;
+            border-color: #2196f3;
+        }
+        .upload-area p {
+            margin: 10px 0;
+            color: #555;
+        }
+        .file-input {
+            display: none;
+        }
+        .btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        .file-list {
+            margin-top: 20px;
+        }
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .file-item:last-child {
+            border-bottom: none;
+        }
+        .file-name {
+            font-weight: 500;
+        }
+        .file-status {
+            color: #27ae60;
+            font-size: 14px;
+        }
+        .file-status.error {
+            color: #e74c3c;
+        }
+        .progress-container {
+            margin-top: 20px;
+            display: none;
+        }
+        .progress-bar {
+            height: 10px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .progress {
+            height: 100%;
+            background-color: #3498db;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        .result-container {
+            margin-top: 30px;
+            display: none;
+            text-align: center;
+        }
+        .result-message {
+            margin-bottom: 20px;
+            font-size: 18px;
+            color: #27ae60;
+        }
+        .download-btn {
+            background-color: #27ae60;
+        }
+        .download-btn:hover {
+            background-color: #219a52;
+        }
+        .instructions {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3498db;
+        }
+        .instructions h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .instructions ul {
+            padding-left: 20px;
+        }
+        .instructions li {
+            margin-bottom: 5px;
+        }
+        .stats {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            border-left: 4px solid #27ae60;
+        }
+        .stats h4 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .stats p {
+            margin: 5px 0;
+        }
+        .checkbox-container {
+            margin: 20px 0;
+            text-align: left;
+        }
+        .checkbox-container label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        .checkbox-container input {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Crexi Excel File Processor</h1>
+        
+        <div class="instructions">
+            <h3>How to use:</h3>
+            <ul>
+                <li>Drag and drop your Crexi Excel files or click the button to select them</li>
+                <li>The tool will automatically remove the logo and first two rows from each file</li>
+                <li>All processed files will be combined into a single Excel file</li>
+                <li>Optional: Remove duplicate rows from the combined data</li>
+                <li>Download the combined file when processing is complete</li>
+            </ul>
+        </div>
+        
+        <div class="upload-area" id="uploadArea">
+            <p>Drag and drop your Crexi Excel files here or</p>
+            <button class="btn" id="selectFilesBtn">Select Files</button>
+            <input type="file" id="fileInput" class="file-input" multiple accept=".xlsx">
+        </div>
+        
+        <div class="checkbox-container">
+            <label>
+                <input type="checkbox" id="removeDuplicates" checked>
+                Remove duplicate rows from combined data
+            </label>
+        </div>
+        
+        <div class="file-list" id="fileList"></div>
+        
+        <div class="progress-container" id="progressContainer">
+            <p>Processing files...</p>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        
+        <div class="result-container" id="resultContainer">
+            <div class="result-message" id="resultMessage"></div>
+            <div class="stats" id="statsContainer" style="display: none;">
+                <h4>Processing Statistics:</h4>
+                <p id="statsText"></p>
+            </div>
+            <button class="btn download-btn" id="downloadBtn">Download Combined File</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+            const selectFilesBtn = document.getElementById('selectFilesBtn');
+            const fileList = document.getElementById('fileList');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressBar = document.getElementById('progressBar');
+            const resultContainer = document.getElementById('resultContainer');
+            const resultMessage = document.getElementById('resultMessage');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const removeDuplicatesCheckbox = document.getElementById('removeDuplicates');
+            const statsContainer = document.getElementById('statsContainer');
+            const statsText = document.getElementById('statsText');
+            
+            let combinedData = null;
+            let processingStats = {};
+            
+            // Event listeners
+            selectFilesBtn.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', handleFileSelect);
+            
+            // Drag and drop events
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                handleFiles(e.dataTransfer.files);
+            });
+            
+            downloadBtn.addEventListener('click', downloadCombinedFile);
+            
+            function handleFileSelect(e) {
+                handleFiles(e.target.files);
+            }
+            
+            function handleFiles(files) {
+                if (files.length === 0) return;
+                
+                fileList.innerHTML = '';
+                progressContainer.style.display = 'block';
+                resultContainer.style.display = 'none';
+                statsContainer.style.display = 'none';
+                
+                const fileArray = Array.from(files);
+                let processedCount = 0;
+                
+                fileArray.forEach(file => {
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'file-item';
+                    fileItem.innerHTML = `
+                        <span class="file-name">${file.name}</span>
+                        <span class="file-status">Processing...</span>
+                    `;
+                    fileList.appendChild(fileItem);
+                });
+                
+                processFiles(fileArray, (data, errors) => {
+                    const fileItems = fileList.querySelectorAll('.file-item');
+                    
+                    data.forEach((sheetData, index) => {
+                        const statusElement = fileItems[index].querySelector('.file-status');
+                        statusElement.textContent = 'Processed';
+                    });
+                    
+                    errors.forEach((error, index) => {
+                        const fileIndex = data.length + index;
+                        const statusElement = fileItems[fileIndex].querySelector('.file-status');
+                        statusElement.textContent = error;
+                        statusElement.classList.add('error');
+                    });
+                    
+                    if (data.length > 0) {
+                        resultMessage.textContent = `Successfully processed ${data.length} file(s). Click to download the combined file.`;
+                        resultContainer.style.display = 'block';
+                        
+                        // Show statistics
+                        if (processingStats.duplicatesRemoved > 0) {
+                            statsText.innerHTML = `
+                                Total rows before deduplication: ${processingStats.totalRowsBefore}<br>
+                                Total rows after deduplication: ${processingStats.totalRowsAfter}<br>
+                                Duplicate rows removed: ${processingStats.duplicatesRemoved}
+                            `;
+                            statsContainer.style.display = 'block';
+                        }
+                    } else {
+                        resultMessage.textContent = 'No files were processed successfully.';
+                        resultMessage.style.color = '#e74c3c';
+                        resultContainer.style.display = 'block';
+                    }
+                    
+                    progressContainer.style.display = 'none';
+                });
+            }
+            
+            function processFiles(files, callback) {
+                const processedData = [];
+                const errors = [];
+                let filesProcessed = 0;
+                
+                files.forEach((file, index) => {
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        try {
+                            const data = new Uint8Array(e.target.result);
+                            const workbook = XLSX.read(data, {type: 'array'});
+                            
+                            // Get the first worksheet (assuming all files have the same structure)
+                            const firstSheetName = workbook.SheetNames[0];
+                            const worksheet = workbook.Sheets[firstSheetName];
+                            
+                            // Convert to JSON
+                            const jsonData = XLSX.utils.sheet_to_json(worksheet, {header: 1});
+                            
+                            // Remove the first two rows (logo and empty row)
+                            if (jsonData.length > 2) {
+                                const processedJsonData = jsonData.slice(2);
+                                
+                                // Add to processed data
+                                processedData.push({
+                                    name: file.name,
+                                    data: processedJsonData
+                                });
+                            } else {
+                                errors.push(`Error processing ${file.name}: File has insufficient rows`);
+                            }
+                        } catch (error) {
+                            errors.push(`Error processing ${file.name}: ${error.message}`);
+                        }
+                        
+                        filesProcessed++;
+                        updateProgressBar(filesProcessed, files.length);
+                        
+                        if (filesProcessed === files.length) {
+                            // Combine all data
+                            if (processedData.length > 0) {
+                                // Combine all data (excluding headers from subsequent files)
+                                let combinedRows = [];
+                                
+                                processedData.forEach((fileData, index) => {
+                                    // For the first file, include all rows (including header)
+                                    // For subsequent files, skip the header row
+                                    const rowsToAdd = index === 0 ? fileData.data : fileData.data.slice(1);
+                                    combinedRows = combinedRows.concat(rowsToAdd);
+                                });
+                                
+                                // Remove duplicates if checkbox is checked
+                                const shouldRemoveDuplicates = removeDuplicatesCheckbox.checked;
+                                let finalRows = combinedRows;
+                                let duplicatesRemoved = 0;
+                                
+                                if (shouldRemoveDuplicates && combinedRows.length > 1) {
+                                    const headerRow = combinedRows[0];
+                                    const dataRows = combinedRows.slice(1);
+                                    
+                                    // Create a Set to track unique rows
+                                    const uniqueRows = new Set();
+                                    const uniqueDataRows = [];
+                                    
+                                    dataRows.forEach(row => {
+                                        // Convert row to string for comparison
+                                        const rowString = JSON.stringify(row);
+                                        
+                                        if (!uniqueRows.has(rowString)) {
+                                            uniqueRows.add(rowString);
+                                            uniqueDataRows.push(row);
+                                        }
+                                    });
+                                    
+                                    duplicatesRemoved = dataRows.length - uniqueDataRows.length;
+                                    finalRows = [headerRow, ...uniqueDataRows];
+                                }
+                                
+                                // Store statistics
+                                processingStats = {
+                                    totalRowsBefore: combinedRows.length,
+                                    totalRowsAfter: finalRows.length,
+                                    duplicatesRemoved: duplicatesRemoved
+                                };
+                                
+                                // Create a new workbook with the combined data
+                                const newWorkbook = XLSX.utils.book_new();
+                                const newWorksheet = XLSX.utils.aoa_to_sheet(finalRows);
+                                XLSX.utils.book_append_sheet(newWorkbook, newWorksheet, "Combined Data");
+                                
+                                combinedData = XLSX.write(newWorkbook, {bookType: 'xlsx', type: 'binary'});
+                            }
+                            
+                            callback(processedData, errors);
+                        }
+                    };
+                    
+                    reader.readAsArrayBuffer(file);
+                });
+            }
+            
+            function updateProgressBar(current, total) {
+                const percentage = Math.round((current / total) * 100);
+                progressBar.style.width = `${percentage}%`;
+            }
+            
+            function downloadCombinedFile() {
+                if (!combinedData) return;
+                
+                // Convert binary string to ArrayBuffer
+                const buffer = new ArrayBuffer(combinedData.length);
+                const view = new Uint8Array(buffer);
+                for (let i = 0; i < combinedData.length; i++) {
+                    view[i] = combinedData.charCodeAt(i) & 0xFF;
+                }
+                
+                // Create blob
+                const blob = new Blob([buffer], {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+                
+                // Create download link
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `crexi_combined_${new Date().toISOString().slice(0, 10)}.xlsx`;
+                document.body.appendChild(a);
+                a.click();
+                
+                // Clean up
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 0);
+            }
+        });
+    </script>
+</body>
+</html>
