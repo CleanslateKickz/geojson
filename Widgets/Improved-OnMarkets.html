@@ -1,0 +1,1640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Property Listings Widget</title>
+  <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+      /* Resets and General Styles */
+      * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+      }
+
+      body {
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+          background: #f8f9fa;
+          color: #1a1a1a;
+          line-height: 1.6;
+      }
+
+      .container {
+          max-width: 1400px;
+          margin: 0 auto;
+          padding: 1.5rem 1rem;
+      }
+
+      /* Header Section */
+      .header {
+          text-align: center;
+          margin-bottom: 2rem;
+          animation: fadeInDown 0.6s ease;
+      }
+
+      .header h1 {
+          font-size: 2rem;
+          font-weight: 700;
+          color: #0a2540;
+          margin-bottom: 0.5rem;
+          letter-spacing: -0.03em;
+      }
+
+      .header p {
+          font-size: 1rem;
+          color: #64748b;
+          font-weight: 400;
+      }
+
+      /* Controls Bar */
+      .controls-bar {
+          background: white;
+          border-radius: 12px;
+          padding: 1rem;
+          margin-bottom: 1.5rem;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.75rem;
+          align-items: center;
+          animation: fadeInUp 0.6s ease 0.1s both;
+      }
+
+      .search-box {
+          flex: 1;
+          min-width: 240px;
+          position: relative;
+      }
+
+      .search-box input {
+          width: 100%;
+          padding: 0.6rem 0.8rem 0.6rem 2.5rem;
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
+          font-size: 0.9rem;
+          transition: all 0.3s ease;
+          background: #f8fafc;
+      }
+
+      .search-box input:focus {
+          outline: none;
+          border-color: #3b82f6;
+          background: white;
+          box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+      }
+
+      .search-box svg {
+          position: absolute;
+          left: 0.8rem;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 18px;
+          height: 18px;
+          stroke: #94a3b8;
+      }
+
+      .filter-group {
+          display: flex;
+          gap: 0.6rem;
+          flex-wrap: wrap;
+      }
+
+      .filter-btn {
+          padding: 0.6rem 1rem;
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
+          background: white;
+          color: #475569;
+          font-size: 0.9rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+      }
+
+      .filter-btn:hover {
+          border-color: #cbd5e1;
+          background: #f8fafc;
+      }
+
+      .filter-btn.active {
+          background: #3b82f6;
+          color: white;
+          border-color: #3b82f6;
+      }
+
+      .filter-btn svg {
+          width: 14px;
+          height: 14px;
+      }
+
+      /* Property Grid */
+      .property-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          gap: 1.5rem;
+          animation: fadeInUp 0.6s ease 0.2s both;
+      }
+
+      /* Property Card Styles */
+      .property-card {
+          position: relative;
+          perspective: 1000px;
+          height: 380px; /* Adjusted height */
+          cursor: pointer;
+      }
+
+      .card-inner {
+          position: relative;
+          width: 100%;
+          height: 100%;
+          transition: transform 0.6s;
+          transform-style: preserve-3d;
+      }
+
+      .property-card:hover .card-inner {
+          transform: rotateY(180deg);
+      }
+
+      .card-front,
+      .card-back {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          backface-visibility: hidden;
+          border-radius: 12px;
+          overflow: hidden;
+          background: white;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      }
+
+      .card-back {
+          transform: rotateY(180deg);
+          display: flex;
+          flex-direction: column;
+      }
+
+      /* Card Front Styles */
+      .card-image-container {
+          position: relative;
+          height: 180px; /* Adjusted height */
+          overflow: hidden;
+          background: #f1f5f9;
+      }
+
+      .card-image {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: transform 0.3s ease;
+      }
+
+      .property-card:hover .card-image {
+          transform: scale(1.05);
+      }
+
+      .card-badges {
+          position: absolute;
+          top: 0.75rem;
+          left: 0.75rem;
+          display: flex;
+          flex-direction: column;
+          gap: 0.3rem;
+      }
+
+      .badge {
+          padding: 0.3rem 0.6rem;
+          background: rgba(255, 255, 255, 0.9);
+          backdrop-filter: blur(10px);
+          border-radius: 6px;
+          font-size: 0.7rem;
+          font-weight: 600;
+          color: #1e293b;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .badge.new {
+          background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+          color: white;
+      }
+
+      .select-checkbox {
+          position: absolute;
+          top: 0.75rem;
+          right: 0.75rem;
+          width: 28px;
+          height: 28px;
+          background: rgba(255, 255, 255, 0.85);
+          backdrop-filter: blur(8px);
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          z-index: 10;
+          transform-style: preserve-3d;
+      }
+
+      .select-checkbox:hover {
+          background: white;
+          transform: scale(1.1);
+      }
+
+      .select-checkbox input {
+          width: 16px;
+          height: 16px;
+          cursor: pointer;
+      }
+
+      .card-content {
+          padding: 0.8rem;
+          flex-grow: 1;
+          display: flex;
+          flex-direction: column;
+      }
+
+      .property-type {
+          font-size: 0.7rem;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          color: #64748b;
+          margin-bottom: 0.3rem;
+      }
+
+      .property-name {
+          font-size: 1rem;
+          font-weight: 600;
+          color: #0f172a;
+          margin-bottom: 0.3rem;
+          line-height: 1.3;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+      }
+
+      .property-address {
+          font-size: 0.8rem;
+          color: #64748b;
+          display: flex;
+          align-items: center;
+          gap: 0.3rem;
+          margin-bottom: 0.6rem;
+      }
+
+      .property-address svg {
+          width: 13px;
+          height: 13px;
+          flex-shrink: 0;
+      }
+
+      .card-footer {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding-top: 0.7rem;
+          border-top: 1px solid #e2e8f0;
+          margin-top: auto;
+      }
+
+      .price {
+          font-size: 1.1rem;
+          font-weight: 700;
+          color: #059669;
+      }
+
+      .cap-rate {
+          font-size: 0.8rem;
+          color: #64748b;
+      }
+
+      .cap-rate-value {
+          font-weight: 600;
+          color: #3b82f6;
+      }
+
+      /* Card Back Styles */
+      .back-header {
+          background: linear-gradient(135deg, #0f172a, #334155);
+          color: white;
+          padding: 1.2rem;
+      }
+
+      .back-header h3 {
+          font-size: 1.1rem;
+          font-weight: 600;
+          margin-bottom: 0.4rem;
+      }
+
+      .back-header p {
+          font-size: 0.8rem;
+          opacity: 0.9;
+      }
+
+      .back-content {
+          padding: 1.2rem;
+          flex-grow: 1;
+          overflow-y: auto;
+      }
+
+      .detail-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 0.75rem;
+          margin-bottom: 1rem;
+      }
+
+      .detail-item {
+          padding: 0.6rem;
+          background: #f8fafc;
+          border-radius: 6px;
+      }
+
+      .detail-label {
+          font-size: 0.7rem;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          color: #64748b;
+          margin-bottom: 0.2rem;
+      }
+
+      .detail-value {
+          font-size: 0.9rem;
+          font-weight: 600;
+          color: #0f172a;
+      }
+
+      .description {
+          margin-top: 0.8rem;
+      }
+
+      .description h4 {
+          font-size: 0.8rem;
+          font-weight: 600;
+          color: #475569;
+          margin-bottom: 0.4rem;
+      }
+
+      .description p {
+          font-size: 0.8rem;
+          color: #64748b;
+          line-height: 1.5;
+      }
+
+      .back-footer {
+          padding: 0.8rem 1.2rem;
+          border-top: 1px solid #e2e8f0;
+          display: flex;
+          justify-content: space-between; /* Align items horizontally */
+          align-items: center;
+      }
+
+      .action-btn {
+          flex: 1;
+          padding: 0.5rem;
+          border: none;
+          border-radius: 6px;
+          font-size: 0.8rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.4rem;
+      }
+
+      .action-btn.primary {
+          background: #3b82f6;
+          color: white;
+      }
+
+      .action-btn.primary:hover {
+          background: #2563eb;
+      }
+
+      .action-btn.secondary {
+          background: #f1f5f9;
+          color: #475569;
+      }
+
+      .action-btn.secondary:hover {
+          background: #e2e8f0;
+      }
+
+      .action-btn svg {
+          width: 14px;
+          height: 14px;
+      }
+      
+      .logo-button {
+          height: 32px; /* Adjust as needed */
+          object-fit: contain;
+      }
+
+      /* Status Message */
+      .status-message {
+          text-align: center;
+          padding: 4rem 2rem;
+          color: #64748b;
+          font-size: 1.125rem;
+      }
+
+      .loading-spinner {
+          width: 40px;
+          height: 40px;
+          margin: 0 auto 1rem;
+          border: 3px solid #e2e8f0;
+          border-top-color: #3b82f6;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+      }
+
+      /* Export Modal */
+      .modal-overlay {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.5);
+          backdrop-filter: blur(4px);
+          z-index: 1000;
+          animation: fadeIn 0.3s ease;
+      }
+
+      .modal-overlay.show {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+      }
+
+      .modal {
+          background: white;
+          border-radius: 16px;
+          max-width: 500px;
+          width: 90%;
+          max-height: 90vh;
+          overflow: auto;
+          animation: slideUp 0.3s ease;
+      }
+
+      .modal-header {
+          padding: 1.5rem;
+          border-bottom: 1px solid #e2e8f0;
+      }
+
+      .modal-header h2 {
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: #0f172a;
+      }
+
+      .modal-body {
+          padding: 1.5rem;
+      }
+
+      .modal-footer {
+          padding: 1.5rem;
+          border-top: 1px solid #e2e8f0;
+          display: flex;
+          gap: 0.75rem;
+          justify-content: flex-end;
+      }
+
+      /* PDF Viewer Modal */
+      .pdf-modal-overlay {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.8);
+          backdrop-filter: blur(4px);
+          z-index: 2000;
+          animation: fadeIn 0.3s ease;
+      }
+
+      .pdf-modal-overlay.show {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+      }
+
+      .pdf-modal {
+          background: white;
+          border-radius: 8px;
+          width: 90%;
+          height: 90%;
+          max-width: 1200px;
+          max-height: 900px;
+          display: flex;
+          flex-direction: column;
+          animation: slideUp 0.3s ease;
+      }
+
+      .pdf-modal-header {
+          padding: 1rem;
+          border-bottom: 1px solid #e2e8f0;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+      }
+
+      .pdf-modal-header h2 {
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: #0f172a;
+      }
+
+      .pdf-modal-close {
+          background: none;
+          border: none;
+          font-size: 1.5rem;
+          cursor: pointer;
+          color: #64748b;
+          padding: 0.25rem 0.5rem;
+          border-radius: 4px;
+          transition: all 0.2s ease;
+      }
+
+      .pdf-modal-close:hover {
+          background: #f1f5f9;
+          color: #1e293b;
+      }
+
+      .pdf-modal-body {
+          flex: 1;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+      }
+
+      .pdf-viewer-container {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          overflow: auto;
+      }
+
+      .pdf-viewer {
+          width: 100%;
+          height: 100%;
+          border: none;
+      }
+
+      .pdf-loading {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          height: 100%;
+      }
+
+      .pdf-loading-spinner {
+          width: 40px;
+          height: 40px;
+          margin-bottom: 1rem;
+          border: 3px solid #e2e8f0;
+          border-top-color: #3b82f6;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+      }
+
+      .pdf-modal-footer {
+          padding: 1rem;
+          border-top: 1px solid #e2e8f0;
+          display: flex;
+          justify-content: space-between;
+      }
+
+      .pdf-controls {
+          display: flex;
+          gap: 0.5rem;
+      }
+
+      .pdf-control-btn {
+          padding: 0.5rem 1rem;
+          background: #f1f5f9;
+          border: none;
+          border-radius: 6px;
+          font-size: 0.9rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+      }
+
+      .pdf-control-btn:hover {
+          background: #e2e8f0;
+      }
+
+      .pdf-control-btn svg {
+          width: 16px;
+          height: 16px;
+      }
+
+      .pdf-page-info {
+          display: flex;
+          align-items: center;
+          font-size: 0.9rem;
+          color: #64748b;
+      }
+
+      .pdf-page-input {
+          width: 40px;
+          padding: 0.25rem;
+          margin: 0 0.5rem;
+          border: 1px solid #e2e8f0;
+          border-radius: 4px;
+          text-align: center;
+      }
+
+      /* Animations */
+      @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+      }
+
+      @keyframes fadeInDown {
+          from {
+              opacity: 0;
+              transform: translateY(-20px);
+          }
+          to {
+              opacity: 1;
+              transform: translateY(0);
+          }
+      }
+
+      @keyframes fadeInUp {
+          from {
+              opacity: 0;
+              transform: translateY(20px);
+          }
+          to {
+              opacity: 1;
+              transform: translateY(0);
+          }
+      }
+
+      @keyframes slideUp {
+          from {
+              transform: translateY(20px);
+              opacity: 0;
+          }
+          to {
+              transform: translateY(0);
+              opacity: 1;
+          }
+      }
+
+      @keyframes spin {
+          to { transform: rotate(360deg); }
+      }
+
+      /* Responsive Design */
+      @media (max-width: 768px) {
+          .header h1 {
+              font-size: 2rem;
+          }
+
+          .controls-bar {
+              padding: 1rem;
+          }
+
+          .search-box {
+              min-width: 100%;
+          }
+
+          .property-grid {
+              grid-template-columns: 1fr;
+              gap: 1.5rem;
+          }
+
+          .property-card {
+              height: 360px;
+          }
+
+          .card-image-container {
+              height: 180px;
+          }
+          
+          .pdf-modal {
+              width: 95%;
+              height: 95%;
+          }
+      }
+
+      @media (max-width: 480px) {
+          .container {
+              padding: 1rem 0.75rem;
+          }
+
+          .header {
+              margin-bottom: 2rem;
+          }
+
+          .filter-group {
+              width: 100%;
+          }
+
+          .filter-btn {
+              flex: 1;
+              justify-content: center;
+          }
+      }
+      .detail-overlay {
+          display: none;
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.4);
+          backdrop-filter: blur(4px);
+          z-index: 1200;
+          align-items: stretch;
+          justify-content: flex-end;
+      }
+      .detail-overlay.show { display: flex; }
+      .detail-panel {
+          width: 100%;
+          max-width: 800px;
+          background: #ffffff;
+          height: 100vh;
+          box-shadow: -8px 0 24px rgba(0,0,0,0.15);
+          display: flex;
+          flex-direction: column;
+          animation: slideInRight 0.3s ease;
+      }
+      .detail-header { position: relative; height: 260px; }
+      .detail-image { width: 100%; height: 100%; object-fit: cover; }
+      .detail-gradient { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.8), rgba(0,0,0,0) 60%, rgba(0,0,0,.3)); }
+      .detail-close {
+          position: absolute; top: 12px; right: 12px; width: 36px; height: 36px;
+          background: rgba(255,255,255,0.2); color: #fff; border: none; border-radius: 999px;
+      }
+      .detail-title { position: absolute; left: 0; bottom: 0; padding: 20px; color: #fff; width: 100%; }
+      .lease-badge { background: #4f46e5; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; display: inline-block; margin-bottom: 8px; }
+      .detail-title h2 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+      .detail-title p { color: #e2e8f0; }
+      .detail-body { padding: 24px; background: #f8fafc; overflow-y: auto; flex: 1; }
+      .metrics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+      .metric { background: #fff; border: 1px solid #f1f5f9; border-radius: 12px; padding: 16px; }
+      .metric-label { font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase; margin-bottom: 6px; }
+      .metric-value { font-size: 22px; font-weight: 800; color: #0f172a; }
+      .metric-value.accent { color: #059669; }
+      .sections { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+      .section-title { font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 12px; }
+      .section { background: #fff; border: 1px solid #f1f5f9; border-radius: 12px; overflow: hidden; }
+      .section .kv { display: flex; justify-content: space-between; padding: 12px 14px; border-top: 1px solid #f1f5f9; }
+      .section .kv:first-child { border-top: none; }
+      .section .kv span:first-child { color: #64748b; font-size: 13px; }
+      .section .kv span:last-child { color: #0f172a; font-weight: 600; }
+      .highlights { margin-top: 24px; }
+      .highlights-body { background: #fff; border: 1px solid #f1f5f9; border-radius: 12px; padding: 16px; color: #475569; line-height: 1.6; }
+      .detail-actions { margin-top: 24px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      .detail-actions a, .detail-actions button {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          padding: 12px 16px;
+          border-radius: 10px;
+          font-weight: 700;
+          color: #fff;
+          text-decoration: none;
+          border: none;
+          cursor: pointer;
+      }
+      .detail-actions a.om, .detail-actions button.om { background: #0f172a; }
+      .detail-actions a.listing, .detail-actions button.listing { background: #4f46e5; }
+      @keyframes slideInRight { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+      @media (max-width: 768px) {
+          .detail-header { height: 220px; }
+          .metrics-grid { grid-template-columns: 1fr; }
+          .sections { grid-template-columns: 1fr; }
+      }
+    </style>
+    </head>
+    <body>
+        <div class="container">
+
+
+            <div class="controls-bar">
+                <div class="search-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                    <input type="text" id="search-input" placeholder="Search properties..." disabled>
+                </div>
+
+                <div class="filter-group">
+                    <select id="type-filter" class="filter-btn">
+                        <option value="all">All Types</option>
+                    </select>
+
+                    <select id="city-filter" class="filter-btn">
+                        <option value="all">All Cities</option>
+                    </select>
+
+                    <button id="export-btn" class="filter-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        <span class="export-label">Export</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="status-message" class="status-message">
+                <div class="loading-spinner"></div>
+                Loading properties...
+            </div>
+
+            <div id="property-grid" class="property-grid"></div>
+        </div>
+
+        <div id="export-modal" class="modal-overlay">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2>Export Properties</h2>
+                </div>
+                <div class="modal-body">
+                    <p>Export selected properties to HTML format for sharing or printing.</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="action-btn secondary" onclick="closeExportModal()">Cancel</button>
+                    <button class="action-btn primary" onclick="performExport()">Export Now</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PDF Viewer Modal -->
+        <div id="pdf-modal-overlay" class="pdf-modal-overlay">
+            <div class="pdf-modal">
+                <div class="pdf-modal-header">
+                    <h2 id="pdf-title">Offering Memorandum</h2>
+                    <button id="pdf-modal-close" class="pdf-modal-close">&times;</button>
+                </div>
+                <div class="pdf-modal-body">
+                    <div class="pdf-viewer-container">
+                        <div id="pdf-loading" class="pdf-loading">
+                            <div class="pdf-loading-spinner"></div>
+                            <p>Loading PDF...</p>
+                        </div>
+                        <iframe id="pdf-viewer" class="pdf-viewer" style="display: none;"></iframe>
+                    </div>
+                </div>
+                <div class="pdf-modal-footer">
+                    <div class="pdf-controls">
+                        <button id="pdf-zoom-out" class="pdf-control-btn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="8" y1="11" x2="14" y2="11"></line>
+                            </svg>
+                            Zoom Out
+                        </button>
+                        <button id="pdf-zoom-in" class="pdf-control-btn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="11" y1="8" x2="11" y2="14"></line>
+                                <line x1="8" y1="11" x2="14" y2="11"></line>
+                            </svg>
+                            Zoom In
+                        </button>
+                        <button id="pdf-download" class="pdf-control-btn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            Download
+                        </button>
+                    </div>
+                    <div class="pdf-page-info">
+                        Page <input id="pdf-page-input" class="pdf-page-input" type="number" min="1" value="1"> of <span id="pdf-total-pages">1</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="detail-overlay" class="detail-overlay">
+            <div class="detail-panel">
+                <div class="detail-header">
+                    <img id="detail-image" class="detail-image" alt="Property">
+                    <div class="detail-gradient"></div>
+                    <button id="detail-close" class="detail-close">✕</button>
+                    <div class="detail-title">
+                        <div class="detail-badges">
+                            <span id="detail-leaseType" class="lease-badge" style="display:none"></span>
+                        </div>
+                        <h2 id="detail-name"></h2>
+                        <p id="detail-address"></p>
+                    </div>
+                </div>
+
+                <div class="detail-body">
+                    <div class="metrics-grid">
+                        <div class="metric">
+                            <div class="metric-label">List Price</div>
+                            <div id="metric-price" class="metric-value"></div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Cap Rate</div>
+                            <div id="metric-cap" class="metric-value accent"></div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">NOI</div>
+                            <div id="metric-noi" class="metric-value"></div>
+                        </div>
+                    </div>
+
+                    <div class="sections">
+                        <div class="section">
+                            <h3 class="section-title">Lease Details</h3>
+                            <div class="kv"><span>Tenant</span><span id="lease-tenant"></span></div>
+                            <div class="kv"><span>Term Remaining</span><span id="lease-term"></span></div>
+                            <div class="kv"><span>Expiration</span><span id="lease-expiration"></span></div>
+                            <div class="kv"><span>Rent Bumps</span><span id="lease-bumps" class="accent"></span></div>
+                            <div class="kv"><span>Renewal Options</span><span id="lease-options"></span></div>
+                        </div>
+                        <div class="section">
+                            <h3 class="section-title">Site Details</h3>
+                            <div class="kv"><span>Building Size (RBA)</span><span id="site-rba"></span></div>
+                            <div class="kv"><span>Land Size</span><span id="site-land"></span></div>
+                            <div class="kv"><span>Price / SF</span><span id="site-price-sf"></span></div>
+                            <div class="kv"><span>Date Listed</span><span id="site-dateListed"></span></div>
+                        </div>
+                    </div>
+
+                    <div class="highlights">
+                        <h3 class="section-title">Investment Highlights</h3>
+                        <div id="highlights" class="highlights-body"></div>
+                    </div>
+
+                    <div id="detail-actions" class="detail-actions"></div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            let allRecords = [];
+            let filteredRecords = [];
+            let selectedIds = new Set();
+            let currentPdfUrl = null;
+            let currentPdfZoom = 100;
+            let currentRecord = null;
+
+            // Initialize Grist
+            grist.ready({ requiredAccess: 'read table' });
+
+            // Format functions
+            const formatPrice = (price) => {
+                if (!price) return 'Contact for Price';
+                return `$${Number(price).toLocaleString()}`;
+            };
+
+            const formatCapRate = (rate) => {
+                if (!rate) return 'N/A';
+                return `${(Number(rate) * 100).toFixed(2)}%`;
+            };
+
+            const formatSquareFeet = (sf) => {
+                if (!sf) return 'N/A';
+                return `${Number(sf).toLocaleString()} SF`;
+            };
+
+            const getDaysOnMarket = (dateVal) => {
+                if (!dateVal) return null;
+                const date = new Date(dateVal);
+                if (isNaN(date.getTime())) return null;
+                const diff = Math.floor((Date.now() - date.getTime()) / 86400000);
+                return diff < 0 ? 0 : diff;
+            };
+
+            const extractCity = (address) => {
+                if (!address) return '';
+                const parts = address.split(',').map(p => p.trim());
+                return parts[parts.length - 2] || '';
+            };
+
+            const extractImageUrls = (record) => {
+                const urlFields = [record['IMG URL'], record.photo_url, record.Image_URL, record.Images];
+                const urls = [];
+
+                for (const field of urlFields) {
+                    if (!field) continue;
+                    if (Array.isArray(field)) {
+                        urls.push(...field);
+                    } else if (typeof field === 'string') {
+                        urls.push(...field.split(/[\s,]+/));
+                    }
+                }
+
+                return [...new Set(urls.filter(url => url && url.startsWith('http')))];
+            };
+            const COSTAR_LOGO_URL = 'https://cleanslatekickz.github.io/geojson/Images/CoStar.png';
+            const CREXI_LOGO_URL = 'https://cdn.freelogovectors.net/wp-content/uploads/2021/11/crexi-logo-freelogovectors.net_.png';
+            const OM_LOGO_URL = 'https://cdn-icons-png.flaticon.com/512/8921/8921005.png';
+
+            // Helper function to escape HTML attributes
+            const escapeHtml = (text) => {
+                if (!text) return '';
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            };
+
+            // Modified JavaScript
+            function toggleSelection(id) {
+                const strId = String(id);
+                if (selectedIds.has(strId)) {
+                    selectedIds.delete(strId);
+                } else {
+                    selectedIds.add(strId);
+                }
+                updateExportButton();
+            }
+
+            // Open PDF in modal
+            function openPdfModal(pdfUrl, title = 'Offering Memorandum') {
+                if (!pdfUrl) return;
+                
+                currentPdfUrl = pdfUrl;
+                currentPdfZoom = 100;
+                
+                const modal = document.getElementById('pdf-modal-overlay');
+                const pdfTitle = document.getElementById('pdf-title');
+                const pdfViewer = document.getElementById('pdf-viewer');
+                const pdfLoading = document.getElementById('pdf-loading');
+                
+                pdfTitle.textContent = title;
+                modal.classList.add('show');
+                pdfLoading.style.display = 'flex';
+                pdfViewer.style.display = 'none';
+                
+                // Check if it's a local file URL
+                if (pdfUrl.startsWith('file://')) {
+                    pdfLoading.innerHTML = `
+                        <div class="pdf-loading-spinner"></div>
+                        <p>Local file detected. Opening in new tab.</p>
+                        <button class="action-btn primary" onclick="window.open('${escapeHtml(pdfUrl)}', '_blank')">Open PDF</button>
+                    `;
+                    return;
+                }
+                
+                // Use Google Docs Viewer for PDFs
+                const viewerUrl = `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(pdfUrl)}`;
+                
+                pdfViewer.onload = function() {
+                    pdfLoading.style.display = 'none';
+                    pdfViewer.style.display = 'block';
+                };
+                
+                pdfViewer.onerror = function() {
+                    pdfLoading.innerHTML = `
+                        <p>Error loading PDF. 
+                        <a href="${escapeHtml(pdfUrl)}" target="_blank" style="color: #3b82f6; text-decoration: underline;">Open in new tab</a>
+                        </p>
+                    `;
+                };
+                
+                pdfViewer.src = viewerUrl;
+            }
+
+            // Close PDF modal
+            function closePdfModal() {
+                const modal = document.getElementById('pdf-modal-overlay');
+                const pdfViewer = document.getElementById('pdf-viewer');
+                
+                modal.classList.remove('show');
+                pdfViewer.src = '';
+            }
+
+            // PDF zoom controls
+            function zoomInPdf() {
+                currentPdfZoom += 10;
+                updatePdfZoom();
+            }
+
+            function zoomOutPdf() {
+                currentPdfZoom = Math.max(50, currentPdfZoom - 10);
+                updatePdfZoom();
+            }
+
+            function updatePdfZoom() {
+                const pdfViewer = document.getElementById('pdf-viewer');
+                pdfViewer.style.transform = `scale(${currentPdfZoom / 100})`;
+            }
+
+            // Download PDF
+            function downloadPdf() {
+                if (currentPdfUrl) {
+                    const a = document.createElement('a');
+                    a.href = currentPdfUrl;
+                    a.download = 'offering-memorandum.pdf';
+                    a.target = '_blank';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                }
+            }
+
+            // Modified card creation
+            const createPropertyCard = (record) => {
+                const imageUrls = extractImageUrls(record);
+                const imageUrl = imageUrls[0] || `https://placehold.co/600x400/e2e8f0/64748b?text=${encodeURIComponent(record.Property_Name || 'No Image')}`;
+                const daysOnMarket = getDaysOnMarket(record.Date_Listed);
+                const isSelected = selectedIds.has(String(record.id));
+                const propertyName = record.Property_Name || 'Unnamed Property';
+                const escapedName = escapeHtml(propertyName);
+
+                return `
+    <div class="property-card" data-id="${record.id}">
+      <div class="select-checkbox" onclick="event.stopPropagation(); toggleSelection('${record.id}')">
+        <input type="checkbox" ${isSelected ? 'checked' : ''} onclick="event.stopPropagation()">
+            </div>
+      <div class="card-inner">
+        <div class="card-front">
+          <div class="card-image-container">
+            <img src="${imageUrl}" alt="${escapedName}" class="card-image">
+            <div class="card-badges">
+              ${daysOnMarket !== null && daysOnMarket <= 7 ? '<span class="badge new">NEW</span>' : ''}
+              ${record.Property_Type ? `<span class="badge">${escapeHtml(record.Property_Type)}</span>` : ''}
+            </div>
+            </div>
+          <div class="card-content">
+            ${record.Property_Type ? `<div class="property-type">${escapeHtml(record.Property_Type)}</div>` : ''}
+            <h3 class="property-name">${escapedName}</h3>
+            <div class="property-address">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+              <span>${escapeHtml(record.Address || 'Address not available')}</span>
+            </div>
+            <div class="card-footer">
+              <div class="price">${formatPrice(record.Price)}</div>
+              <div class="cap-rate">Cap Rate: <span class="cap-rate-value">${formatCapRate(record.Cap_Rate)}</span></div>
+            </div>
+            </div>
+            </div>
+        <div class="card-back">
+          <div class="back-header">
+            <h3>${escapedName}</h3>
+            <p>${escapeHtml(record.Address || 'Address not available')}</p>
+            </div>
+          <div class="back-content">
+            <div class="detail-grid">
+              <div class="detail-item">
+                <div class="detail-label">Price</div>
+                <div class="detail-value">${formatPrice(record.Price)}</div>
+            </div>
+              <div class="detail-item">
+                <div class="detail-label">Building Size</div>
+                <div class="detail-value">${formatSquareFeet(record.RBA)}</div>
+            </div>
+              <div class="detail-item">
+                <div class="detail-label">Cap Rate</div>
+                <div class="detail-value">${formatCapRate(record.Cap_Rate)}</div>
+            </div>
+              <div class="detail-item">
+                <div class="detail-label">Days on Market</div>
+                <div class="detail-value">${daysOnMarket !== null ? `${daysOnMarket} days` : 'N/A'}</div>
+            </div>
+            </div>
+            ${record.Notes ? `
+              <div class="description">
+                <h4>Description</h4>
+                <p>${escapeHtml(record.Notes)}</p>
+            </div>
+            ` : ''}
+            </div>
+          <div class="back-footer">
+          <div style="display: flex; gap: 0.5rem;">
+            ${record.CoStar ? `
+              <a href="${escapeHtml(record.CoStar)}" target="_blank" class="action-btn secondary">
+              <img src="${COSTAR_LOGO_URL}" alt="CoStar" class="logo-button">
+            </a>
+            ` : ''}
+            ${record.Crexi ? `
+              <a href="${escapeHtml(record.Crexi)}" target="_blank" class="action-btn secondary">
+                <img src="${CREXI_LOGO_URL}" alt="Crexi" class="logo-button">
+            </a>
+            ` : ''}
+            ${record.OM ? `
+              <button class="action-btn secondary om-btn" data-record-id="${record.id}" onclick="event.stopPropagation(); handleOmClick('${record.id}')">
+                <img src="${OM_LOGO_URL}" alt="OM" class="logo-button">
+            </button>
+            ` : ''}
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
+  `;
+            };
+            
+            // Handle OM button click
+            function handleOmClick(recordId) {
+                const record = allRecords.find(r => String(r.id) === String(recordId));
+                if (record && record.OM) {
+                    const propertyName = record.Property_Name || 'Property';
+                    openPdfModal(record.OM, 'Offering Memorandum - ' + propertyName);
+                }
+            }
+            
+            function normalize(record) {
+                const get = (...names) => {
+                    for (const n of names) {
+                        const v = record[n];
+                        if (v !== undefined && v !== null && v !== '') return v;
+                    }
+                    return undefined;
+                };
+                const id = String(record.id);
+                const propertyName = get('Property_Name','propertyName') || 'Property';
+                const address = get('Address','address') || '';
+                const city = get('City','city') || extractCity(address) || '';
+                const state = get('State','state') || '';
+                const zip = get('Zip','zip') || '';
+                const priceVal = get('Price','price');
+                const price = priceVal != null ? Number(priceVal) : null;
+                const capRateVal = get('Cap_Rate','capRate');
+                const capRate = capRateVal != null ? Number(capRateVal) : null;
+                let noiVal = get('NOI','noi');
+                let noi = noiVal != null ? Number(noiVal) : null;
+                if (noi == null && price != null && capRate != null) {
+                    noi = price * capRate;
+                }
+                const rbaVal = get('RBA','Building_Size','rba');
+                const rba = rbaVal != null ? Number(rbaVal) : null;
+                const landSize = get('Land_Size','landSize');
+                const landUnit = get('Land_Unit','landUnit') || (typeof landSize === 'string' && landSize.toUpperCase().includes('AC') ? 'AC' : (landSize ? 'SF' : ''));
+                const leaseTermRemainingVal = get('Lease_Term_Remaining','leaseTermRemaining');
+                const leaseTermRemaining = leaseTermRemainingVal != null ? Number(leaseTermRemainingVal) : null;
+                const leaseType = get('Lease_Type','leaseType','Property_Type') || '';
+                const leaseExpiration = get('Lease_Expiration','leaseExpiration') || '';
+                const leaseOptions = get('Lease_Options','leaseOptions') || '';
+                const rentBumps = get('Rent_Bumps','rentBumps') || '';
+                const tenantName = get('Tenant','Tenant_Name','tenantName') || '';
+                const dateListed = get('Date_Listed','dateListed') || '';
+                const imageUrls = extractImageUrls(record);
+                const omUrl = get('OM','omUrl');
+                const listingUrl = get('Listing_URL','listingUrl');
+                const costar = get('CoStar');
+                const crexi = get('Crexi');
+                return { id, propertyName, address, city, state, zip, price, capRate, noi, rba, landSize, landUnit, leaseTermRemaining, leaseType, leaseExpiration, leaseOptions, rentBumps, imageUrls, omUrl, listingUrl, costar, crexi, notes: get('Notes','notes'), dateListed };
+            }
+            // Populate filters
+            function populateFilters(records) {
+                // Property types
+                const types = [...new Set(records.map(r => r.Property_Type).filter(Boolean))].sort();
+                const typeFilter = document.getElementById('type-filter');
+                typeFilter.innerHTML = '<option value="all">All Types</option>';
+                types.forEach(type => {
+                    const option = document.createElement('option');
+                    option.value = type;
+                    option.textContent = type;
+                    typeFilter.appendChild(option);
+                });
+
+                // Cities
+                const cities = [...new Set(records.map(r => extractCity(r.Address)).filter(Boolean))].sort();
+                const cityFilter = document.getElementById('city-filter');
+                cityFilter.innerHTML = '<option value="all">All Cities</option>';
+                cities.forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city;
+                    option.textContent = city;
+                    cityFilter.appendChild(option);
+                });
+            }
+
+            // Apply filters
+            function applyFilters() {
+                const searchTerm = document.getElementById('search-input').value.toLowerCase();
+                const typeFilter = document.getElementById('type-filter').value;
+                const cityFilter = document.getElementById('city-filter').value;
+
+                filteredRecords = allRecords.filter(record => {
+                    const matchesSearch = !searchTerm ||
+                          (record.Property_Name && record.Property_Name.toLowerCase().includes(searchTerm)) ||
+                          (record.Address && record.Address.toLowerCase().includes(searchTerm));
+
+                    const matchesType = typeFilter === 'all' || record.Property_Type === typeFilter;
+                    const matchesCity = cityFilter === 'all' || extractCity(record.Address) === cityFilter;
+
+                    return matchesSearch && matchesType && matchesCity;
+                });
+
+                // Sort by most recently updated
+                filteredRecords.sort((a, b) => {
+                    const dateA = new Date(a.Last_updated_at || a.Created_at || 0);
+                    const dateB = new Date(b.Last_updated_at || b.Created_at || 0);
+                    return dateB - dateA;
+                });
+
+                renderProperties(filteredRecords);
+            }
+
+            // Render properties
+            function renderProperties(records) {
+                const grid = document.getElementById('property-grid');
+                const statusMessage = document.getElementById('status-message');
+
+                if (!records || records.length === 0) {
+                    grid.innerHTML = '';
+                    statusMessage.style.display = 'block';
+                    return;
+                }
+
+                statusMessage.style.display = 'none';
+                grid.innerHTML = records.map(record => createPropertyCard(record)).join('');
+                
+                // Add event listeners for property cards
+                const cards = grid.querySelectorAll('.property-card');
+                cards.forEach(card => {
+                    const id = card.getAttribute('data-id');
+                    const rec = records.find(r => String(r.id) === String(id));
+                    card.addEventListener('click', () => openPropertyPanel(rec));
+                });
+            }
+
+            // Export functions
+            function closeExportModal() {
+                document.getElementById('export-modal').classList.remove('show');
+            }
+
+            function performExport() {
+                const recordsToExport = selectedIds.size > 0
+                ? allRecords.filter(r => selectedIds.has(String(r.id)))
+                : filteredRecords;
+
+                if (recordsToExport.length === 0) {
+                    alert('No properties to export');
+                    closeExportModal();
+                    return;
+                }
+
+                const html = generateExportHTML(recordsToExport);
+                const blob = new Blob([html], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `properties-export-${new Date().toISOString().slice(0, 10)}.html`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                closeExportModal();
+            }
+
+            function generateExportHTML(records) {
+                const propertyCards = records.map(record => {
+                    const imageUrls = extractImageUrls(record);
+                    const imageUrl = imageUrls[0] || `https://placehold.co/600x400/e2e8f0/64748b?text=${encodeURIComponent(record.Property_Name || 'No Image')}`;
+
+                    return `<!DOCTYPE html>
+                      <html>
+                      <head>
+                        <meta charset="UTF-8">
+                         <title>Property Listings Export</title>
+                        <style>
+                          body {
+                            font-family: Arial, sans-serif;
+                            margin: 20px;
+                          }
+                          .property-card {
+                            background: white;
+                            border-radius: 12px;
+                            overflow: hidden;
+                            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                            margin-bottom: 20px;
+                          }
+                          .property-image {
+                            width: 100%;
+                            height: 250px;
+                            object-fit: cover;
+                            }
+                            .property-details {
+                              padding: 20px;
+                            }
+                            .price {
+                              color: #059669;
+                              font-size: 1.25rem;
+                              font-weight: bold;
+                            }
+            </style>
+            </head>
+                            <body>
+                            <div class="property-card">
+                            <img src="${imageUrl}" alt="${escapeHtml(record.Property_Name || 'Property')}" class="property-image">
+                            <div class="property-details">
+                              <h2>${escapeHtml(record.Property_Name || 'Unnamed Property')}</h2>
+                              <p class="price">${formatPrice(record.Price)}</p>
+                              <p>${escapeHtml(record.Address || 'Address not available')}</p>
+                              <p>Cap Rate: ${formatCapRate(record.Cap_Rate)}</p>
+                              ${record.Notes ? `<p>${escapeHtml(record.Notes)}</p>` : ''}
+            </div>
+            </div>
+            </body>
+            </html>`;
+                }).join('');
+
+                return `<!DOCTYPE html>
+
+<html>
+
+<head>
+                            <meta charset="UTF-8">
+                            <title>Property Listings Export</title>
+                            <style>
+                            body {
+                            font-family: Arial, sans-serif;
+                            margin: 20px;
+                            }
+                            .container {
+                            max-width: 1200px;
+                            margin: 0 auto;
+                            }
+                             h1 {
+                            text-align: center;
+                            margin-bottom: 30px;
+                            }
+                            .grid {
+                            display: grid;
+                            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                            gap: 20px;
+                            }
+            </style>
+            </head>
+
+<body>
+                             <div class="container">
+                            <h1>Property Listings Export</h1>
+                            <div class="grid">
+                            ${propertyCards}
+            </div>
+            </div>
+            </body>
+            </html>`;
+            }
+            function updateExportButton() {
+                const btn = document.getElementById('export-btn');
+                if (!btn) return;
+                const labelEl = btn.querySelector('.export-label');
+                const count = selectedIds.size;
+                if (labelEl) labelEl.textContent = count > 0 ? `Export (${count})` : 'Export';
+                btn.disabled = !filteredRecords || filteredRecords.length === 0;
+                btn.classList.toggle('active', count > 0);
+            }
+
+            function openPropertyPanel(record) {
+                if (!record) return;
+                currentRecord = record;
+                const d = normalize(record);
+                const overlay = document.getElementById('detail-overlay');
+                const imgEl = document.getElementById('detail-image');
+                const leaseBadge = document.getElementById('detail-leaseType');
+                const nameEl = document.getElementById('detail-name');
+                const addrEl = document.getElementById('detail-address');
+                const priceEl = document.getElementById('metric-price');
+                const capEl = document.getElementById('metric-cap');
+                const noiEl = document.getElementById('metric-noi');
+                const tTenant = document.getElementById('lease-tenant');
+                const tTerm = document.getElementById('lease-term');
+                const tExp = document.getElementById('lease-expiration');
+                const tBumps = document.getElementById('lease-bumps');
+                const tOpts = document.getElementById('lease-options');
+                const sRba = document.getElementById('site-rba');
+                const sLand = document.getElementById('site-land');
+                const sPriceSf = document.getElementById('site-price-sf');
+                const sDate = document.getElementById('site-dateListed');
+                const notesEl = document.getElementById('highlights');
+                const actions = document.getElementById('detail-actions');
+
+                const imageUrl = (d.imageUrls && d.imageUrls[0]) || `https://placehold.co/800x500/e2e8f0/64748b?text=${encodeURIComponent(d.propertyName)}`;
+                imgEl.setAttribute('src', imageUrl);
+                if (d.leaseType) {
+                    leaseBadge.style.display = 'inline-block';
+                    leaseBadge.textContent = d.leaseType + (d.leaseType.toUpperCase().includes('NNN') ? ' Lease' : '');
+                } else {
+                    leaseBadge.style.display = 'none';
+                }
+
+                nameEl.textContent = d.propertyName || 'Property';
+                const addrParts = [d.address, [d.city, d.state].filter(Boolean).join(', '), d.zip].filter(Boolean);
+                addrEl.textContent = addrParts.join(' ');
+
+                priceEl.textContent = d.price != null ? formatPrice(d.price) : 'Contact for Price';
+                capEl.textContent = d.capRate != null ? formatCapRate(d.capRate) : 'N/A';
+                noiEl.textContent = d.noi != null ? formatPrice(d.noi) : 'N/A';
+
+                tTenant.textContent = d.tenantName || 'N/A';
+                tTerm.textContent = d.leaseTermRemaining != null ? `${d.leaseTermRemaining} Years` : 'N/A';
+                tExp.textContent = d.leaseExpiration ? new Date(d.leaseExpiration).toLocaleDateString() : 'N/A';
+                tBumps.textContent = d.rentBumps || 'N/A';
+                tOpts.textContent = d.leaseOptions || 'N/A';
+
+                sRba.textContent = d.rba != null ? `${Number(d.rba).toLocaleString()} SF` : 'N/A';
+                if (d.landSize != null) {
+                    sLand.textContent = `${d.landSize} ${d.landUnit || ''}`.trim();
+                } else {
+                    sLand.textContent = 'N/A';
+                }
+                sPriceSf.textContent = (d.price != null && d.rba) ? formatPrice(d.price / d.rba) : 'N/A';
+                sDate.textContent = d.dateListed || 'N/A';
+
+                notesEl.textContent = d.notes || 'No additional notes provided for this property.';
+
+                // Clear and rebuild action buttons
+                actions.innerHTML = '';
+                
+                // Add OM button if available
+                if (d.omUrl) {
+                    const omBtn = document.createElement('button');
+                    omBtn.className = 'om';
+                    omBtn.innerHTML = 'View Offering Memorandum';
+                    omBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        openPdfModal(d.omUrl, 'Offering Memorandum - ' + d.propertyName);
+                    });
+                    actions.appendChild(omBtn);
+                }
+                
+                // Add listing button if available
+                const listingUrl = d.listingUrl || d.costar || d.crexi;
+                if (listingUrl) {
+                    const listBtn = document.createElement('a');
+                    listBtn.className = 'listing';
+                    listBtn.href = listingUrl;
+                    listBtn.target = '_blank';
+                    listBtn.rel = 'noreferrer';
+                    listBtn.innerHTML = 'Visit Listing Page';
+                    actions.appendChild(listBtn);
+                }
+
+                overlay.classList.add('show');
+            }
+
+            function closePropertyPanel() {
+                document.getElementById('detail-overlay').classList.remove('show');
+                currentRecord = null;
+            }
+
+            // Event listeners
+            document.getElementById('search-input').addEventListener('input', applyFilters);
+            document.getElementById('type-filter').addEventListener('change', applyFilters);
+            document.getElementById('city-filter').addEventListener('change', applyFilters);
+            document.getElementById('export-btn').addEventListener('click', () => {
+                document.getElementById('export-modal').classList.add('show');
+            });
+            document.getElementById('detail-close').addEventListener('click', closePropertyPanel);
+            document.getElementById('detail-overlay').addEventListener('click', (e) => {
+                if (e.target && e.target.id === 'detail-overlay') closePropertyPanel();
+            });
+            
+            // PDF Modal Event Listeners
+            document.getElementById('pdf-modal-close').addEventListener('click', closePdfModal);
+            document.getElementById('pdf-zoom-in').addEventListener('click', zoomInPdf);
+            document.getElementById('pdf-zoom-out').addEventListener('click', zoomOutPdf);
+            document.getElementById('pdf-download').addEventListener('click', downloadPdf);
+            document.getElementById('pdf-modal-overlay').addEventListener('click', (e) => {
+                if (e.target && e.target.id === 'pdf-modal-overlay') closePdfModal();
+            });
+            
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closePropertyPanel();
+                    closePdfModal();
+                }
+            });
+
+            // Handle Grist data
+            grist.onRecords((records, mappings) => {
+                allRecords = grist.mapColumnNames(records, mappings) || [];
+                document.getElementById('search-input').disabled = false;
+                populateFilters(allRecords);
+                applyFilters();
+                updateExportButton();
+            });
+        </script>
+    </body>
+</html>
