@@ -1,222 +1,263 @@
-import { initializeEmailEditor } from './ckeditor-config.js';
+import {
+	ClassicEditor,
+	Alignment,
+	Autoformat,
+	AutoImage,
+	AutoLink,
+	Autosave,
+	Bold,
+	CloudServices,
+	Essentials,
+	FindAndReplace,
+	FontBackgroundColor,
+	FontColor,
+	FontFamily,
+	FontSize,
+	FullPage,
+	Fullscreen,
+	GeneralHtmlSupport,
+	Heading,
+	HorizontalLine,
+	HtmlEmbed,
+	ImageBlock,
+	ImageCaption,
+	ImageEditing,
+	ImageInline,
+	ImageInsertViaUrl,
+	ImageResize,
+	ImageStyle,
+	ImageTextAlternative,
+	ImageToolbar,
+	ImageUpload,
+	ImageUtils,
+	Indent,
+	IndentBlock,
+	Italic,
+	Link,
+	LinkImage,
+	List,
+	ListProperties,
+	MediaEmbed,
+	PageBreak,
+	Paragraph,
+	PasteFromOffice,
+	PlainTableOutput,
+	RemoveFormat,
+	SourceEditing,
+	SpecialCharacters,
+	SpecialCharactersArrows,
+	SpecialCharactersCurrency,
+	SpecialCharactersEssentials,
+	SpecialCharactersLatin,
+	SpecialCharactersMathematical,
+	SpecialCharactersText,
+	Strikethrough,
+	Style,
+	Table,
+	TableCaption,
+	TableCellProperties,
+	TableColumnResize,
+	TableLayout,
+	TableProperties,
+	TableToolbar,
+	TextTransformation,
+	Underline
+} from 'ckeditor5';
+
 import { initializeGrist, onRecordChange } from './grist-handler.js';
 import { generateSubjectLine, generateEmailTemplate } from './templates.js';
 
-/**
- * Main application logic for the Investment Email Widget
- */
-class InvestmentEmailWidget {
-    constructor() {
-        this.editor = null;
-        this.currentData = null;
-        this.currentTemplate = 'net-lease';
+const LICENSE_KEY = 'GPL';
+
+const editorConfig = {
+	toolbar: {
+		items: [
+			'undo', 'redo', '|',
+			'sourceEditing', '|',
+			'heading', 'style', '|',
+			'fontSize', 'fontFamily', 'fontColor', 'fontBackgroundColor', '|',
+			'bold', 'italic', 'underline', '|',
+			'link', 'insertTable', '|',
+			'alignment', '|',
+			'bulletedList', 'numberedList', 'outdent', 'indent'
+		],
+		shouldNotGroupWhenFull: false
+	},
+	plugins: [
+		Alignment, Autoformat, AutoImage, AutoLink, Autosave, Bold, CloudServices, Essentials,
+		FindAndReplace, FontBackgroundColor, FontColor, FontFamily, FontSize, FullPage, Fullscreen,
+		GeneralHtmlSupport, Heading, HorizontalLine, HtmlEmbed, ImageBlock, ImageCaption, ImageEditing,
+		ImageInline, ImageInsertViaUrl, ImageResize, ImageStyle, ImageTextAlternative, ImageToolbar,
+		ImageUpload, ImageUtils, Indent, IndentBlock, Italic, Link, LinkImage, List, ListProperties,
+		MediaEmbed, PageBreak, Paragraph, PasteFromOffice, PlainTableOutput, RemoveFormat, SourceEditing,
+		SpecialCharacters, SpecialCharactersArrows, SpecialCharactersCurrency, SpecialCharactersEssentials,
+		SpecialCharactersLatin, SpecialCharactersMathematical, SpecialCharactersText, Strikethrough,
+		Style, Table, TableCaption, TableCellProperties, TableColumnResize, TableLayout, TableProperties,
+		TableToolbar, TextTransformation, Underline
+	],
+	fontFamily: { supportAllValues: true },
+	fontSize: { options: [10, 12, 14, 'default', 18, 20, 22], supportAllValues: true },
+	heading: {
+		options: [
+			{ model: 'paragraph', title: 'Paragraph', class: 'ck-heading_paragraph' },
+			{ model: 'heading1', view: 'h2', title: 'Heading 1', class: 'ck-heading_heading1' },
+			{ model: 'heading2', view: 'h3', title: 'Heading 2', class: 'ck-heading_heading2' },
+			{ model: 'heading3', view: 'h4', title: 'Heading 3', class: 'ck-heading_heading3' }
+		]
+	},
+	htmlSupport: {
+		allow: [
+			{ name: /^.*$/, styles: true, attributes: true, classes: true }
+		]
+	},
+	image: {
+		toolbar: [
+			'toggleImageCaption', 'imageTextAlternative', '|',
+			'imageStyle:inline', 'imageStyle:wrapText', 'imageStyle:breakText', '|',
+			'resizeImage'
+		]
+	},
+	licenseKey: LICENSE_KEY,
+	link: {
+		addTargetToExternalLinks: true,
+		defaultProtocol: 'https://'
+	},
+	table: {
+		contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells', 'tableProperties', 'tableCellProperties']
+	}
+};
+
+// Global State
+let editorInstance = null;
+let currentGristData = null;
+
+// UI Elements
+const ui = {
+    inputs: {
+        propertyName: document.getElementById('propertyName'),
+        address: document.getElementById('address'),
+        askingPrice: document.getElementById('askingPrice'),
+        capRate: document.getElementById('capRate'),
+        leaseTerm: document.getElementById('leaseTerm'),
+        leaseExpiration: document.getElementById('leaseExpiration'),
+        buildingSize: document.getElementById('buildingSize'),
+        landSize: document.getElementById('landSize'),
+        leaseType: document.getElementById('leaseType'),
+        description: document.getElementById('description'),
+        mainImageUrl: document.getElementById('mainImageUrl')
+    },
+    subject: document.getElementById('emailSubject'),
+    resetBtn: document.getElementById('resetTemplateBtn'),
+    copySubjectBtn: document.getElementById('copySubjectBtn'),
+    copyEmailBtn: document.getElementById('copyEmailBtn'),
+    status: document.getElementById('statusMessage')
+};
+
+// Application Initialization
+async function init() {
+    try {
+        // 1. Initialize Editor
+        editorInstance = await ClassicEditor.create(document.querySelector('#editor'), editorConfig);
         
-        this.init();
-    }
-    
-    /**
-     * Initialize the widget
-     */
-    async init() {
-        try {
-            // Initialize CKEditor
-            this.editor = await initializeEmailEditor('editor');
+        // 2. Initialize Grist
+        await initializeGrist();
+        
+        // 3. Setup Grist Listener
+        onRecordChange((data) => {
+            currentGristData = data;
+            populateInputs(data);
             
-            // Initialize Grist integration
-            await initializeGrist();
-            
-            // Set up event listeners
-            this.setupEventListeners();
-            
-            // Listen for record changes
-            onRecordChange((data) => {
-                this.currentData = data;
-                this.updateEmailContent();
-            });
-            
-            // Show notification that widget is ready
-            this.showNotification('Widget loaded successfully. Select a property to get started.');
-        } catch (error) {
-            console.error('Error initializing widget:', error);
-            this.showNotification('Error loading widget. Please refresh the page.', 'error');
-        }
-    }
-    
-    /**
-     * Set up event listeners for UI elements
-     */
-    setupEventListeners() {
-        // Template selection
-        const templateSelect = document.getElementById('template-select');
-        if (templateSelect) {
-            templateSelect.addEventListener('change', (e) => {
-                this.currentTemplate = e.target.value;
-                this.updateEmailContent();
-            });
-        }
-        
-        // Copy subject button
-        const copySubjectBtn = document.getElementById('copy-subject');
-        if (copySubjectBtn) {
-            copySubjectBtn.addEventListener('click', () => {
-                this.copySubjectToClipboard();
-            });
-        }
-        
-        // Copy email body button
-        const copyEmailBtn = document.getElementById('copy-email');
-        if (copyEmailBtn) {
-            copyEmailBtn.addEventListener('click', () => {
-                this.copyEmailToClipboard();
-            });
-        }
-        
-        // Refresh template button
-        const refreshBtn = document.getElementById('refresh-template');
-        if (refreshBtn) {
-            refreshBtn.addEventListener('click', () => {
-                this.updateEmailContent();
-                this.showNotification('Template refreshed');
-            });
-        }
-    }
-    
-    /**
-     * Update email content based on current data and template
-     */
-    updateEmailContent() {
-        if (!this.currentData) {
-            this.setPlaceholderContent();
-            return;
-        }
-        
-        // Update subject line
-        const subjectInput = document.getElementById('subject');
-        if (subjectInput) {
-            subjectInput.value = generateSubjectLine(this.currentData);
-        }
-        
-        // Generate email body based on selected template
-        const emailContent = generateEmailTemplate(this.currentTemplate, this.currentData);
-        
-        // Update CKEditor content
-        if (this.editor) {
-            this.editor.setData(emailContent);
-        }
-    }
-    
-    /**
-     * Set placeholder content when no data is available
-     */
-    setPlaceholderContent() {
-        const subjectInput = document.getElementById('subject');
-        if (subjectInput) {
-            subjectInput.value = 'Select a property to generate email';
-        }
-        
-        if (this.editor) {
-            this.editor.setData(`
-                <h2>Investment Email Generator</h2>
-                <p>Please select a property from your Grist table to generate an investment email.</p>
-                <p>The email will include:</p>
-                <ul>
-                    <li>Property details and financial metrics</li>
-                    <li>Key investment highlights</li>
-                    <li>Property images</li>
-                    <li>Links to listings and documents</li>
-                </ul>
-                <p>Choose a template type from the dropdown above to customize the email for different property types.</p>
-            `);
-        }
-    }
-    
-    /**
-     * Copy subject line to clipboard
-     */
-    async copySubjectToClipboard() {
-        const subjectInput = document.getElementById('subject');
-        if (!subjectInput || !subjectInput.value) {
-            this.showNotification('No subject to copy', 'warning');
-            return;
-        }
-        
-        try {
-            await navigator.clipboard.writeText(subjectInput.value);
-            this.showNotification('Subject copied to clipboard');
-        } catch (error) {
-            console.error('Error copying subject:', error);
-            this.showNotification('Failed to copy subject', 'error');
-        }
-    }
-    
-    /**
-     * Copy email body to clipboard
-     */
-    async copyEmailToClipboard() {
-        if (!this.editor) {
-            this.showNotification('Editor not ready', 'warning');
-            return;
-        }
-        
-        try {
-            // Get HTML content from CKEditor
-            const htmlContent = this.editor.getData();
-            
-            if (!htmlContent || htmlContent.trim() === '') {
-                this.showNotification('No content to copy', 'warning');
-                return;
-            }
-            
-            // Copy HTML to clipboard
-            await navigator.clipboard.writeText(htmlContent);
-            this.showNotification('Email body copied to clipboard. Paste into Outlook.');
-        } catch (error) {
-            console.error('Error copying email:', error);
-            this.showNotification('Failed to copy email body', 'error');
-        }
-    }
-    
-    /**
-     * Show notification message
-     * @param {string} message - Message to display
-     * @param {string} type - Type of notification (success, error, warning)
-     */
-    showNotification(message, type = 'success') {
-        const notification = document.getElementById('notification');
-        const notificationText = document.getElementById('notification-text');
-        
-        if (!notification || !notificationText) return;
-        
-        // Set message
-        notificationText.textContent = message;
-        
-        // Set background color based on type
-        switch (type) {
-            case 'error':
-                notification.style.backgroundColor = '#dc3545';
-                break;
-            case 'warning':
-                notification.style.backgroundColor = '#ffc107';
-                notification.style.color = '#212529';
-                break;
-            default:
-                notification.style.backgroundColor = '#28a745';
-                notification.style.color = 'white';
-        }
-        
-        // Show notification
-        notification.classList.remove('hidden');
-        notification.classList.add('show');
-        
-        // Hide after 3 seconds
-        setTimeout(() => {
-            notification.classList.remove('show');
-            notification.classList.add('hidden');
-        }, 3000);
+            // Only auto-update editor if it's empty or user hasn't heavily edited?
+            // For now, we always regenerate on record switch to show the new property.
+            regenerateTemplate(); 
+            showStatus('Loaded record: ' + (data.propertyName || 'New Property'), 'info');
+        });
+
+        // 4. Setup UI Listeners
+        setupEventListeners();
+
+    } catch (error) {
+        console.error('Initialization Error:', error);
+        showStatus('Error initializing widget. Check console.', 'error');
     }
 }
 
-// Initialize the widget when the DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    new InvestmentEmailWidget();
-});
+function populateInputs(data) {
+    for (const [key, el] of Object.entries(ui.inputs)) {
+        if (el && data[key] !== undefined) {
+            el.value = data[key];
+        }
+    }
+}
+
+function getFormData() {
+    const data = {};
+    for (const [key, el] of Object.entries(ui.inputs)) {
+        if (el) data[key] = el.value;
+    }
+    // Preserve links from original Grist data as they aren't in inputs
+    if (currentGristData) {
+        data.omLink = currentGristData.omLink;
+        data.costarLink = currentGristData.costarLink;
+        data.crexiLink = currentGristData.crexiLink;
+        data.tenancy = currentGristData.tenancy;
+    }
+    return data;
+}
+
+function regenerateTemplate() {
+    if (!editorInstance) return;
+    
+    const data = getFormData();
+    
+    // Update Subject
+    ui.subject.value = generateSubjectLine(data);
+    
+    // Update Editor
+    const html = generateEmailTemplate('default', data);
+    editorInstance.setData(html);
+}
+
+function setupEventListeners() {
+    // Reset Button
+    ui.resetBtn.addEventListener('click', () => {
+        regenerateTemplate();
+        showStatus('Template reset to current inputs.', 'success');
+    });
+
+    // Inputs Change -> Optional: Could auto-update subject or wait for reset?
+    // Let's auto-update Subject, but NOT the body to avoid overwriting edits.
+    Object.values(ui.inputs).forEach(input => {
+        input.addEventListener('input', () => {
+            ui.subject.value = generateSubjectLine(getFormData());
+        });
+    });
+
+    // Copy Subject
+    ui.copySubjectBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(ui.subject.value).then(() => {
+            showStatus('Subject copied!', 'success');
+        });
+    });
+
+    // Copy Email Body
+    ui.copyEmailBtn.addEventListener('click', () => {
+        if (!editorInstance) return;
+        const data = editorInstance.getData();
+        navigator.clipboard.writeText(data).then(() => {
+            showStatus('Email body copied! Paste into Outlook.', 'success');
+        });
+    });
+}
+
+function showStatus(msg, type) {
+    ui.status.textContent = msg;
+    ui.status.className = `status-message ${type}`;
+    setTimeout(() => {
+        ui.status.className = 'status-message';
+        ui.status.textContent = '';
+    }, 4000);
+}
+
+// Start
+init();
