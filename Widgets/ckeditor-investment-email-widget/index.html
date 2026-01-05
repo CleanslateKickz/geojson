@@ -3,56 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Investment Email Widget</title>
-    <link rel="stylesheet" href="css/widget.css">
+    <title>Investment Email Generator</title>
+    
+    <!-- Grist Plugin API -->
     <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="ckeditor5/ckeditor5.css">
+    <link rel="stylesheet" href="css/widget.css">
 </head>
 <body>
-    <div class="widget-container">
-        <header class="widget-header">
-            <h1>Investment Email Generator</h1>
-        </header>
-        
-        <div class="controls">
-            <div class="control-group">
-                <label for="template-select">Email Template:</label>
-                <select id="template-select">
-                    <option value="net-lease">Net Lease</option>
-                    <option value="qsr">QSR (Quick Service Restaurant)</option>
-                    <option value="big-box">Big Box</option>
-                </select>
+    <div class="app-container">
+        <!-- Left Pane: Controls -->
+        <div class="controls-pane">
+            <header class="controls-header">
+                <h2>Investment Email Generator</h2>
+                <p>Edit property details to customize the email template.</p>
+            </header>
+
+            <main class="controls-main">
+                <!-- Property Information Form -->
+                <div class="form-section">
+                    <h3>Property Information</h3>
+                    
+                    <div class="form-group">
+                        <label for="propertyName">Property Name</label>
+                        <input type="text" id="propertyName">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="address">Address</label>
+                        <input type="text" id="address">
+                    </div>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="askingPrice">Asking Price</label>
+                            <input type="text" id="askingPrice">
+                        </div>
+                        <div class="form-group">
+                            <label for="capRate">Cap Rate</label>
+                            <input type="text" id="capRate">
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="leaseTerm">Lease Term</label>
+                            <input type="text" id="leaseTerm">
+                        </div>
+                        <div class="form-group">
+                            <label for="leaseExpiration">Lease Expiration</label>
+                            <input type="text" id="leaseExpiration">
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="buildingSize">Building Size (RBA)</label>
+                            <input type="text" id="buildingSize">
+                        </div>
+                        <div class="form-group">
+                            <label for="landSize">Land Size (Acres)</label>
+                            <input type="text" id="landSize">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="leaseType">Lease Type</label>
+                        <input type="text" id="leaseType">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Highlights / Notes</label>
+                        <textarea id="description" rows="6"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="mainImageUrl">Main Image URL</label>
+                        <input type="text" id="mainImageUrl" placeholder="https://...">
+                    </div>
+                </div>
+            </main>
+            
+            <footer class="controls-footer">
+                <button id="resetTemplateBtn" class="btn btn-secondary" style="width: 100%;">
+                    &#8635; Reset Editor to Template
+                </button>
+                <div id="statusMessage" class="status-message"></div>
+            </footer>
+        </div>
+
+        <!-- Right Pane: Editor -->
+        <div class="editor-pane">
+            <div class="editor-header">
+                <div class="form-group" style="margin-bottom: 0; flex-grow: 1; margin-right: 16px;">
+                    <input type="text" id="emailSubject" placeholder="Email Subject" style="font-weight: 500;">
+                </div>
+                <div class="actions-group">
+                    <button id="copySubjectBtn" class="btn btn-secondary btn-sm">Copy Subject</button>
+                    <button id="copyEmailBtn" class="btn btn-primary btn-sm">Copy Email Body</button>
+                </div>
             </div>
             
-            <div class="control-group">
-                <label for="subject">Email Subject:</label>
-                <input type="text" id="subject" placeholder="Email subject will appear here...">
-                <button id="copy-subject" class="copy-btn">Copy Subject</button>
+            <div class="editor-content">
+                <div class="editor-container editor-container_classic-editor" id="editor-container">
+                    <div class="editor-container__editor">
+                        <div id="editor"></div>
+                    </div>
+                </div>
             </div>
-        </div>
-        
-        <div class="editor-container">
-            <div id="editor"></div>
-        </div>
-        
-        <div class="actions">
-            <button id="copy-email" class="copy-btn primary">Copy Email Body</button>
-            <button id="refresh-template" class="refresh-btn">Refresh Template</button>
-        </div>
-        
-        <div id="notification" class="notification hidden">
-            <span id="notification-text"></span>
         </div>
     </div>
 
+    <!-- Import Map for CKEditor -->
     <script type="importmap">
     {
         "imports": {
-            "ckeditor5": "../ckeditor5/ckeditor5.js",
-            "ckeditor5/": "../ckeditor5/"
+            "ckeditor5": "./ckeditor5/ckeditor5.js",
+            "ckeditor5/": "./ckeditor5/"
         }
     }
     </script>
-    
-    <script type="module" src="js/main.js"></script>
+
+    <!-- Main Application Logic -->
+    <script type="module" src="./js/main.js"></script>
 </body>
 </html>
