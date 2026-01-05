@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investment Email Widget</title>
+    <link rel="stylesheet" href="css/widget.css">
+    <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+</head>
+<body>
+    <div class="widget-container">
+        <header class="widget-header">
+            <h1>Investment Email Generator</h1>
+        </header>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label for="template-select">Email Template:</label>
+                <select id="template-select">
+                    <option value="net-lease">Net Lease</option>
+                    <option value="qsr">QSR (Quick Service Restaurant)</option>
+                    <option value="big-box">Big Box</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="subject">Email Subject:</label>
+                <input type="text" id="subject" placeholder="Email subject will appear here...">
+                <button id="copy-subject" class="copy-btn">Copy Subject</button>
+            </div>
+        </div>
+        
+        <div class="editor-container">
+            <div id="editor"></div>
+        </div>
+        
+        <div class="actions">
+            <button id="copy-email" class="copy-btn primary">Copy Email Body</button>
+            <button id="refresh-template" class="refresh-btn">Refresh Template</button>
+        </div>
+        
+        <div id="notification" class="notification hidden">
+            <span id="notification-text"></span>
+        </div>
+    </div>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "ckeditor5": "../ckeditor5/ckeditor5.js",
+            "ckeditor5/": "../ckeditor5/"
+        }
+    }
+    </script>
+    
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

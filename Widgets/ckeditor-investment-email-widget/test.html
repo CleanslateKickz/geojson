@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investment Email Widget - Test</title>
+    <link rel="stylesheet" href="css/widget.css">
+    <!-- Note: In production, this would be loaded from Grist -->
+    <!-- <script src="https://docs.getgrist.com/grist-plugin-api.js"></script> -->
+</head>
+<body>
+    <div class="widget-container">
+        <header class="widget-header">
+            <h1>Investment Email Generator - Test Mode</h1>
+            <p style="color: #666; font-size: 14px;">Testing with Walgreens example data</p>
+        </header>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label for="template-select">Email Template:</label>
+                <select id="template-select">
+                    <option value="net-lease">Net Lease</option>
+                    <option value="qsr">QSR (Quick Service Restaurant)</option>
+                    <option value="big-box">Big Box</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="subject">Email Subject:</label>
+                <input type="text" id="subject" placeholder="Email subject will appear here...">
+                <button id="copy-subject" class="copy-btn">Copy Subject</button>
+            </div>
+        </div>
+        
+        <div class="editor-container">
+            <div id="editor"></div>
+        </div>
+        
+        <div class="actions">
+            <button id="copy-email" class="copy-btn primary">Copy Email Body</button>
+            <button id="refresh-template" class="refresh-btn">Refresh Template</button>
+        </div>
+        
+        <div id="notification" class="notification hidden">
+            <span id="notification-text"></span>
+        </div>
+    </div>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "ckeditor5": "./ckeditor5/ckeditor5.js",
+            "ckeditor5/": "./ckeditor5/"
+        }
+    }
+    </script>
+    
+    <script type="module">
+        // Import test data and simulation
+        import { walgreensTestData, simulateGristData } from './test-data.js';
+        import { initializeEmailEditor } from './js/ckeditor-config.js';
+        import { normalizeRecord } from './js/grist-handler.js';
+        import { generateSubjectLine, generateEmailTemplate } from './js/templates.js';
+        
+        // Simulate Grist environment for testing
+        simulateGristData();
+        
+        // Main widget logic (simplified for testing)
+        class TestInvestmentEmailWidget {
+            constructor() {
+                this.editor = null;
+                this.currentData = null;
+                this.currentTemplate = 'net-lease';
+                
+                this.init();
+            }
+            
+            async init() {
+                try {
+                    // Initialize CKEditor
+                    this.editor = await initializeEmailEditor('editor');
+                    
+                    // Set up event listeners
+                    this.setupEventListeners();
+                    
+                    // Load test data
+                    this.loadTestData();
+                    
+                    // Show notification that widget is ready
+                    this.showNotification('Widget loaded with test data. Try different templates!');
+                } catch (error) {
+                    console.error('Error initializing widget:', error);
+                    this.showNotification('Error loading widget. Please refresh page.', 'error');
+                }
+            }
+            
+            setupEventListeners() {
+                // Template selection
+                const templateSelect = document.getElementById('template-select');
+                if (templateSelect) {
+                    templateSelect.addEventListener('change', (e) => {
+                        this.currentTemplate = e.target.value;
+                        this.updateEmailContent();
+                    });
+                }
+                
+                // Copy subject button
+                const copySubjectBtn = document.getElementById('copy-subject');
+                if (copySubjectBtn) {
+                    copySubjectBtn.addEventListener('click', () => {
+                        this.copySubjectToClipboard();
+                    });
+                }
+                
+                // Copy email body button
+                const copyEmailBtn = document.getElementById('copy-email');
+                if (copyEmailBtn) {
+                    copyEmailBtn.addEventListener('click', () => {
+                        this.copyEmailToClipboard();
+                    });
+                }
+                
+                // Refresh template button
+                const refreshBtn = document.getElementById('refresh-template');
+                if (refreshBtn) {
+                    refreshBtn.addEventListener('click', () => {
+                        this.updateEmailContent();
+                        this.showNotification('Template refreshed');
+                    });
+                }
+            }
+            
+            loadTestData() {
+                // Normalize test data
+                this.currentData = normalizeRecord(walgreensTestData);
+                this.updateEmailContent();
+            }
+            
+            updateEmailContent() {
+                if (!this.currentData) return;
+                
+                // Update subject line
+                const subjectInput = document.getElementById('subject');
+                if (subjectInput) {
+                    subjectInput.value = generateSubjectLine(this.currentData);
+                }
+                
+                // Generate email body based on selected template
+                const emailContent = generateEmailTemplate(this.currentTemplate, this.currentData);
+                
+                // Update CKEditor content
+                if (this.editor) {
+                    this.editor.setData(emailContent);
+                }
+            }
+            
+            async copySubjectToClipboard() {
+                const subjectInput = document.getElementById('subject');
+                if (!subjectInput || !subjectInput.value) {
+                    this.showNotification('No subject to copy', 'warning');
+                    return;
+                }
+                
+                try {
+                    await navigator.clipboard.writeText(subjectInput.value);
+                    this.showNotification('Subject copied to clipboard');
+                } catch (error) {
+                    console.error('Error copying subject:', error);
+                    this.showNotification('Failed to copy subject', 'error');
+                }
+            }
+            
+            async copyEmailToClipboard() {
+                if (!this.editor) {
+                    this.showNotification('Editor not ready', 'warning');
+                    return;
+                }
+                
+                try {
+                    // Get HTML content from CKEditor
+                    const htmlContent = this.editor.getData();
+                    
+                    if (!htmlContent || htmlContent.trim() === '') {
+                        this.showNotification('No content to copy', 'warning');
+                        return;
+                    }
+                    
+                    // Copy HTML to clipboard
+                    await navigator.clipboard.writeText(htmlContent);
+                    this.showNotification('Email body copied to clipboard. Paste into Outlook.');
+                } catch (error) {
+                    console.error('Error copying email:', error);
+                    this.showNotification('Failed to copy email body', 'error');
+                }
+            }
+            
+            showNotification(message, type = 'success') {
+                const notification = document.getElementById('notification');
+                const notificationText = document.getElementById('notification-text');
+                
+                if (!notification || !notificationText) return;
+                
+                // Set message
+                notificationText.textContent = message;
+                
+                // Set background color based on type
+                switch (type) {
+                    case 'error':
+                        notification.style.backgroundColor = '#dc3545';
+                        break;
+                    case 'warning':
+                        notification.style.backgroundColor = '#ffc107';
+                        notification.style.color = '#212529';
+                        break;
+                    default:
+                        notification.style.backgroundColor = '#28a745';
+                        notification.style.color = 'white';
+                }
+                
+                // Show notification
+                notification.classList.remove('hidden');
+                notification.classList.add('show');
+                
+                // Hide after 3 seconds
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    notification.classList.add('hidden');
+                }, 3000);
+            }
+        }
+        
+        // Initialize widget when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new TestInvestmentEmailWidget();
+        });
+    </script>
+</body>
+</html>

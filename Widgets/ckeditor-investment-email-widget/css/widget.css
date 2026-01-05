@@ -1,0 +1,256 @@
+/* Widget Container Styles */
+.widget-container {
+    font-family: Arial, sans-serif;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f5f5f5;
+}
+
+.widget-header {
+    margin-bottom: 20px;
+}
+
+.widget-header h1 {
+    color: #333;
+    font-size: 24px;
+    margin: 0;
+}
+
+/* Controls Section */
+.controls {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+    background-color: white;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.control-group label {
+    font-weight: bold;
+    color: #555;
+}
+
+.control-group select,
+.control-group input[type="text"] {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+/* Subject Input with Copy Button */
+.control-group:has(#subject) {
+    position: relative;
+}
+
+#copy-subject {
+    position: absolute;
+    right: 5px;
+    top: 28px;
+    padding: 6px 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+#copy-subject:hover {
+    background-color: #0056b3;
+}
+
+/* Editor Container */
+.editor-container {
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+/* CKEditor Custom Styles */
+.ck-editor__editable {
+    min-height: 400px;
+    padding: 15px;
+}
+
+/* Email Content Styles (Outlook-safe) */
+.email-content {
+    font-family: Arial, sans-serif;
+    line-height: 1.4;
+    color: #333;
+}
+
+.email-content p {
+    margin-bottom: 15px;
+}
+
+.email-content h2 {
+    font-size: 20px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.email-content h3 {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+/* Deal Callout Box */
+.deal-callout {
+    border-left: 4px solid #003A8F;
+    background-color: #f6f8fb;
+    padding: 12px;
+    margin: 16px 0;
+}
+
+.deal-callout strong {
+    color: #003A8F;
+}
+
+/* Property Image */
+.property-image {
+    max-width: 100%;
+    height: auto;
+    margin: 15px 0;
+    border: 1px solid #ddd;
+}
+
+/* Recap Table */
+.recap-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+}
+
+.recap-table th,
+.recap-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.recap-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+/* Links Section */
+.links-section {
+    margin: 20px 0;
+}
+
+.links-section h3 {
+    margin-bottom: 10px;
+}
+
+.link-item {
+    margin-bottom: 5px;
+}
+
+.link-item a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.link-item a:hover {
+    text-decoration: underline;
+}
+
+/* Action Buttons */
+.actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.copy-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.copy-btn.primary {
+    background-color: #28a745;
+    color: white;
+}
+
+.copy-btn.primary:hover {
+    background-color: #218838;
+}
+
+.refresh-btn {
+    padding: 10px 20px;
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.refresh-btn:hover {
+    background-color: #5a6268;
+}
+
+/* Notification */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px;
+    background-color: #28a745;
+    color: white;
+    border-radius: 4px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 1000;
+}
+
+.notification.show {
+    opacity: 1;
+}
+
+.notification.hidden {
+    opacity: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .widget-container {
+        padding: 10px;
+    }
+    
+    .controls {
+        padding: 10px;
+    }
+    
+    .actions {
+        flex-direction: column;
+    }
+    
+    .copy-btn,
+    .refresh-btn {
+        width: 100%;
+    }
+}
