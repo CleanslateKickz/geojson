@@ -1,304 +1,163 @@
 /**
- * Email templates for different property types
+ * Email Template Generator
+ * Creates Outlook-compatible HTML for investment emails.
  */
 
-/**
- * Generate subject line for email
- * @param {Object} data - Normalized property data
- * @returns {string} Email subject line
- */
 export function generateSubjectLine(data) {
-    if (!data) return 'New Investment Opportunity';
+    // E.g., "New Listing: Walgreens - Medford, OR | 9.00% Cap"
+    const parts = ['New Listing:'];
+    if (data.propertyName) parts.push(data.propertyName);
     
-    const location = data.city ? data.city : '';
-    const capRate = data.formattedCapRate;
-    const tenant = data.primaryTenant || data.propertyName;
+    // Extract City/State from address if possible
+    if (data.address) {
+        const addressParts = data.address.split(',');
+        if (addressParts.length >= 2) {
+            // City, State
+            parts.push(`- ${addressParts[1].trim()}, ${addressParts[2]?.trim().split(' ')[0] || ''}`);
+        }
+    }
     
-    return `New ${capRate} Cap | ${tenant} | ${location}`;
+    if (data.capRate) parts.push(`| ${data.capRate} Cap`);
+    
+    return parts.join(' ');
 }
 
-/**
- * Generate opening paragraph based on property type and characteristics
- * @param {Object} data - Normalized property data
- * @returns {string} Opening paragraph HTML
- */
-export function generateOpeningParagraph(data) {
-    if (!data) return '';
+export function generateEmailTemplate(templateType, data) {
+    // We currently only support one main 'investment' template, 
+    // but structure allows for more.
     
-    const { propertyName, primaryTenant, city, state, formattedCapRate, isSTNL, isNetLease } = data;
-    
-    let paragraph = `<p>We have a new opportunity in ${city}, ${state} - `;
-    
-    if (isSTNL) {
-        paragraph += `a Single Tenant Net Lease (STNL) `;
-    } else if (isNetLease) {
-        paragraph += `a net lease `;
-    }
-    
-    paragraph += `investment with ${primaryTenant}. `;
-    
-    // Add key selling points
-    if (data.isHighCapRate) {
-        paragraph += `This property offers an attractive ${formattedCapRate} cap rate. `;
-    }
-    
-    if (data.isLongLease) {
-        paragraph += `With ${data.yearsRemaining} years remaining on the lease, this provides stable, long-term income. `;
-    }
-    
-    if (data.hasAssumableLoan) {
-        paragraph += `The property features an assumable loan, providing financing advantages. `;
-    }
-    
-    paragraph += `Please see details below.</p>`;
-    
-    return paragraph;
-}
+    const p = {
+        propertyName: data.propertyName || 'Property Name',
+        address: data.address || 'Address, City, State Zip',
+        description: data.description ? data.description.replace(/\n/g, '<br>') : 'No description provided.',
+        askingPrice: data.askingPrice || 'Call for Price',
+        capRate: data.capRate || 'N/A',
+        leaseTerm: data.leaseTerm || 'N/A',
+        buildingSize: data.buildingSize || 'N/A',
+        landSize: data.landSize || 'N/A',
+        leaseExpiration: data.leaseExpiration || 'N/A',
+        mainImageUrl: data.mainImageUrl || 'https://via.placeholder.com/600x400.png?text=Property+Image',
+        links: []
+    };
 
-/**
- * Generate hero image HTML
- * @param {Object} data - Normalized property data
- * @returns {string} Hero image HTML
- */
-export function generateHeroImage(data) {
-    if (!data || !data.primaryImage) return '';
-    
-    return `
-        <div style="text-align: center; margin: 20px 0;">
-            <img src="${data.primaryImage}" alt="${data.propertyName}" style="max-width: 100%; height: auto; border: 1px solid #ddd;" />
-            <p style="font-size: 12px; color: #666; margin-top: 5px;">${data.propertyName} - ${data.fullAddress}</p>
-        </div>
+    // Build links array
+    if (data.omLink) p.links.push({ label: 'Download OM', url: data.omLink });
+    if (data.costarLink) p.links.push({ label: 'View on CoStar', url: data.costarLink });
+    if (data.crexiLink) p.links.push({ label: 'View on Crexi', url: data.crexiLink });
+
+    // Helper for table rows
+    const createMetricRow = (label, value) => `
+        <tr>
+            <td style="padding: 8px 0; color: #555555; font-size: 14px;">${label}:</td>
+            <td style="padding: 8px 0; font-weight: bold; font-size: 14px; text-align: right;">${value}</td>
+        </tr>
     `;
-}
 
-/**
- * Generate deal callout box with key highlights
- * @param {Object} data - Normalized property data
- * @returns {string} Deal callout HTML
- */
-export function generateDealCallout(data) {
-    if (!data) return '';
-    
-    let highlights = [];
-    
-    if (data.isHighCapRate) {
-        highlights.push(`<strong>High Cap Rate:</strong> ${data.formattedCapRate}`);
-    }
-    
-    if (data.isLongLease) {
-        highlights.push(`<strong>Long Lease:</strong> ${data.yearsRemaining} years remaining`);
-    }
-    
-    if (data.isSTNL) {
-        highlights.push(`<strong>Single Tenant:</strong> ${data.primaryTenant}`);
-    }
-    
-    if (data.hasAssumableLoan) {
-        highlights.push(`<strong>Assumable Loan</strong> available`);
-    }
-    
-    if (data.leaseTerm) {
-        highlights.push(`<strong>Lease Term:</strong> ${data.leaseTerm}`);
-    }
-    
-    if (highlights.length === 0) {
-        highlights.push(`<strong>Investment Opportunity:</strong> ${data.propertyName}`);
-    }
-    
     return `
-        <div style="border-left: 4px solid #003A8F; background-color: #f6f8fb; padding: 12px; margin: 16px 0;">
-            <h3 style="margin-top: 0;">Deal Highlights</h3>
-            ${highlights.map(h => `<p style="margin-bottom: 5px;">${h}</p>`).join('')}
-        </div>
-    `;
-}
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>${p.propertyName}</title>
+    </head>
+    <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+        <table align="center" border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse: collapse; background-color: #ffffff; border: 1px solid #dddddd; margin-top: 20px;">
+            
+            <!-- Header -->
+            <tr>
+                <td align="center" style="padding: 30px 20px;">
+                    <h1 style="font-size: 24px; margin: 0; color: #333333;">${p.propertyName}</h1>
+                    <p style="font-size: 16px; margin: 5px 0 0 0; color: #666666;">${p.address}</p>
+                </td>
+            </tr>
 
-/**
- * Generate recap table with property details
- * @param {Object} data - Normalized property data
- * @returns {string} Recap table HTML
- */
-export function generateRecapTable(data) {
-    if (!data) return '';
-    
-    return `
-        <h3>Property Details</h3>
-        <table style="width: 100%; border-collapse: collapse; margin: 15px 0;">
+            <!-- Main Image -->
             <tr>
-                <td style="border: 1px solid #ddd; padding: 8px; font-weight: bold; background-color: #f2f2f2;">Property</td>
-                <td style="border: 1px solid #ddd; padding: 8px;">${data.propertyName}</td>
-                <td style="border: 1px solid #ddd; padding: 8px; font-weight: bold; background-color: #f2f2f2;">Tenant</td>
-                <td style="border: 1px solid #ddd; padding: 8px;">${data.primaryTenant}</td>
+                <td align="center" style="padding: 0 20px;">
+                    <img src="${p.mainImageUrl}" alt="${p.propertyName}" width="560" style="display: block; border-radius: 4px; max-width: 100%; height: auto;" />
+                </td>
             </tr>
+
+            <!-- Content -->
             <tr>
-                <td style="border: 1px solid #ddd; padding: 8px; font-weight: bold; background-color: #f2f2f2;">Address</td>
-                <td style="border: 1px solid #ddd; padding: 8px;" colspan="3">${data.fullAddress}</td>
+                <td bgcolor="#ffffff" style="padding: 30px 40px;">
+                    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                        
+                        <!-- Description -->
+                        <tr>
+                            <td style="color: #333333; font-family: Arial, sans-serif; font-size: 16px; line-height: 1.6;">
+                                ${p.description}
+                            </td>
+                        </tr>
+
+                        <!-- Divider -->
+                        <tr>
+                            <td style="padding: 30px 0;">
+                                <hr style="border: 0; border-top: 1px solid #eeeeee;" />
+                            </td>
+                        </tr>
+
+                        <!-- Investment Highlights (2 Columns) -->
+                        <tr>
+                            <td>
+                                <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                    <tr>
+                                        <!-- Left Column -->
+                                        <td width="250" valign="top">
+                                            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                                ${createMetricRow('Asking Price', p.askingPrice)}
+                                                ${createMetricRow('Cap Rate', p.capRate)}
+                                                ${createMetricRow('Lease Term', p.leaseTerm)}
+                                                ${createMetricRow('Lease Expiration', p.leaseExpiration)}
+                                            </table>
+                                        </td>
+                                        
+                                        <!-- Spacer -->
+                                        <td width="20" style="font-size: 0; line-height: 0;">&nbsp;</td>
+                                        
+                                        <!-- Right Column -->
+                                        <td width="250" valign="top">
+                                            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                                ${createMetricRow('Building Size', p.buildingSize)}
+                                                ${createMetricRow('Land Size', p.landSize)}
+                                                ${createMetricRow('Lease Type', data.leaseType || 'N/A')}
+                                                ${createMetricRow('Tenancy', data.tenancy || 'N/A')}
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+
+                        <!-- Links Section -->
+                        ${p.links.length > 0 ? `
+                        <tr>
+                            <td style="padding-top: 30px; text-align: center;">
+                                <table border="0" cellpadding="0" cellspacing="0" align="center">
+                                    <tr>
+                                        ${p.links.map(link => `
+                                            <td style="padding: 0 10px;">
+                                                <a href="${link.url}" style="background-color: #007bff; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 14px; display: inline-block;">${link.label}</a>
+                                            </td>
+                                        `).join('')}
+                                    </tr>
+                                </table>
+                            </td>
+                        ` : ''}
+                        </tr>
+
+                    </table>
+                </td>
             </tr>
+            
+            <!-- Footer -->
             <tr>
-                <td style="border: 1px solid #ddd; padding: 8px; font-weight: bold; background-color: #f2f2f2;">Price</td>
-                <td style="border: 1px solid #ddd; padding: 8px;">${data.formattedPrice}</td>
-                <td style="border: 1px solid #ddd; padding: 8px; font-weight: bold; background-color: #f2f2f2;">Cap Rate</td>
-                <td style="border: 1px solid #ddd; padding: 8px;">${data.formattedCapRate}</td>
-            </tr>
-            <tr>
-                <td style="border: 1px solid #ddd; padding: 8px; font-weight: bold; background-color: #f2f2f2;">Building Size</td>
-                <td style="border: 1px solid #ddd; padding: 8px;">${data.formattedRBA} SF</td>
-                <td style="border: 1px solid #ddd; padding: 8px; font-weight: bold; background-color: #f2f2f2;">Price/SF</td>
-                <td style="border: 1px solid #ddd; padding: 8px;">${data.formattedPricePerSF}</td>
-            </tr>
-            <tr>
-                <td style="border: 1px solid #ddd; padding: 8px; font-weight: bold; background-color: #f2f2f2;">Lease Type</td>
-                <td style="border: 1px solid #ddd; padding: 8px;">${data.leaseType}</td>
-                <td style="border: 1px solid #ddd; padding: 8px; font-weight: bold; background-color: #f2f2f2;">Lease Expiration</td>
-                <td style="border: 1px solid #ddd; padding: 8px;">${data.leaseExpiration || 'N/A'}</td>
+                <td bgcolor="#f8f9fa" style="padding: 20px; text-align: center; color: #999999; font-size: 12px; border-top: 1px solid #eeeeee;">
+                    <p style="margin: 0;">Sent via Investment Email Generator</p>
+                </td>
             </tr>
         </table>
+    </body>
+    </html>
     `;
-}
-
-/**
- * Generate links section
- * @param {Object} data - Normalized property data
- * @returns {string} Links section HTML
- */
-export function generateLinksSection(data) {
-    if (!data) return '';
-    
-    let links = [];
-    
-    if (data.costarUrl) {
-        links.push(`<a href="${data.costarUrl}" style="color: #007bff; text-decoration: none;">CoStar Listing</a>`);
-    }
-    
-    if (data.crexiUrl) {
-        links.push(`<a href="${data.crexiUrl}" style="color: #007bff; text-decoration: none;">Crexi Listing</a>`);
-    }
-    
-    if (data.omUrl) {
-        links.push(`<a href="${data.omUrl}" style="color: #007bff; text-decoration: none;">Offering Memorandum</a>`);
-    }
-    
-    if (links.length === 0) return '';
-    
-    return `
-        <h3>Additional Information</h3>
-        <p>${links.join(' | ')}</p>
-    `;
-}
-
-/**
- * Generate closing paragraph
- * @param {Object} data - Normalized property data
- * @returns {string} Closing paragraph HTML
- */
-export function generateClosingParagraph(data) {
-    if (!data) return '';
-    
-    return `
-        <p>Please let me know if you would like to review underwriting, rent schedules, or schedule a site visit. This property represents a solid investment opportunity with strong fundamentals.</p>
-        <p>Best regards,<br>Your Investment Team</p>
-    `;
-}
-
-/**
- * Generate Net Lease email template
- * @param {Object} data - Normalized property data
- * @returns {string} Complete email HTML
- */
-export function generateNetLeaseTemplate(data) {
-    if (!data) return '';
-    
-    return `
-        ${generateOpeningParagraph(data)}
-        ${generateHeroImage(data)}
-        ${generateDealCallout(data)}
-        ${generateRecapTable(data)}
-        ${generateLinksSection(data)}
-        ${generateClosingParagraph(data)}
-    `;
-}
-
-/**
- * Generate QSR (Quick Service Restaurant) email template
- * @param {Object} data - Normalized property data
- * @returns {string} Complete email HTML
- */
-export function generateQSRTemplate(data) {
-    if (!data) return '';
-    
-    // Add QSR-specific highlights
-    let qsrHighlights = '';
-    if (data.primaryTenant) {
-        qsrHighlights = `
-            <div style="border-left: 4px solid #003A8F; background-color: #f6f8fb; padding: 12px; margin: 16px 0;">
-                <h3 style="margin-top: 0;">QSR Investment Highlights</h3>
-                <p style="margin-bottom: 5px;"><strong>Brand Recognition:</strong> ${data.primaryTenant} provides strong brand recognition and customer traffic</p>
-                <p style="margin-bottom: 5px;"><strong>Drive-Thru Presence:</strong> Property features drive-thru capabilities for enhanced revenue</p>
-                <p style="margin-bottom: 5px;"><strong>Prime Location:</strong> Strategically located with high visibility and traffic counts</p>
-            </div>
-        `;
-    }
-    
-    return `
-        ${generateOpeningParagraph(data)}
-        ${generateHeroImage(data)}
-        ${qsrHighlights}
-        ${generateDealCallout(data)}
-        ${generateRecapTable(data)}
-        ${generateLinksSection(data)}
-        ${generateClosingParagraph(data)}
-    `;
-}
-
-/**
- * Generate Big Box email template
- * @param {Object} data - Normalized property data
- * @returns {string} Complete email HTML
- */
-export function generateBigBoxTemplate(data) {
-    if (!data) return '';
-    
-    // Add Big Box-specific highlights
-    let bigBoxHighlights = '';
-    if (data.rba && data.rba > 25000) {
-        bigBoxHighlights = `
-            <div style="border-left: 4px solid #003A8F; background-color: #f6f8fb; padding: 12px; margin: 16px 0;">
-                <h3 style="margin-top: 0;">Big Box Investment Highlights</h3>
-                <p style="margin-bottom: 5px;"><strong>Large Format:</strong> ${data.formattedRBA} SF provides multiple redevelopment or re-tenanting options</p>
-                <p style="margin-bottom: 5px;"><strong>Premium Location:</strong> High-traffic retail corridor with strong demographics</p>
-                <p style="margin-bottom: 5px;"><strong>Anchor Potential:</strong> Property serves as an anchor tenant for the retail center</p>
-            </div>
-        `;
-    }
-    
-    return `
-        ${generateOpeningParagraph(data)}
-        ${generateHeroImage(data)}
-        ${bigBoxHighlights}
-        ${generateDealCallout(data)}
-        ${generateRecapTable(data)}
-        ${generateLinksSection(data)}
-        ${generateClosingParagraph(data)}
-    `;
-}
-
-/**
- * Template selector function
- * @param {string} templateType - Type of template to generate
- * @param {Object} data - Normalized property data
- * @returns {string} Complete email HTML
- */
-export function generateEmailTemplate(templateType, data) {
-    if (!data) return '';
-    
-    switch (templateType) {
-        case 'net-lease':
-            return generateNetLeaseTemplate(data);
-        case 'qsr':
-            return generateQSRTemplate(data);
-        case 'big-box':
-            return generateBigBoxTemplate(data);
-        default:
-            return generateNetLeaseTemplate(data);
-    }
 }
