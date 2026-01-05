@@ -1,181 +1,108 @@
 /**
- * Grist data handling and normalization for the investment email widget
+ * Grist Integration Handler
+ * Maps Grist columns to the widget's internal data structure.
  */
 
-/**
- * Initialize Grist integration
- */
+// Define the required/optional columns for the widget
+const REQUIRED_ACCESS = 'read table';
+
 export function initializeGrist() {
     return new Promise((resolve) => {
         grist.ready({
-            requiredAccess: 'read table',
             columns: [
-                'Property_Name',
-                'Address',
-                'City',
-                'State',
-                'Zip',
-                'Price',
-                'Cap_Rate',
-                'RBA',
-                'Land_Size',
-                'Notes',
-                'Lease_Term',
-                'Lease_Commencement',
-                'Lease_Expiration',
-                'Date_Listed',
-                'Property_Type',
-                'photo_url',
-                'CoStar',
-                'Crexi',
-                'OM',
-                'Lease_Options',
-                'Rent_Bumps',
-                'Tenancy',
-                'Tenant_s_',
-                'For_Sale_Status',
-                'Last_Sale_Date',
-                'Last_Sale_Price',
-                'Lease_Type',
-                'Price_SF'
-            ]
+                { name: "Property_Name", type: "Text", optional: true },
+                { name: "Address", type: "Text", optional: true },
+                { name: "Price", type: "Numeric", optional: true },
+                { name: "Cap_Rate", type: "Numeric", optional: true },
+                { name: "Lease_Term", type: "Text", optional: true },
+                { name: "RBA", type: "Numeric", optional: true },
+                { name: "Notes", type: "Text", optional: true },
+                { name: "photo_url", type: "Text", optional: true },
+                { name: "Land_Size", type: "Numeric", optional: true },
+                { name: "Lease_Expiration", type: "Date", optional: true },
+                { name: "Lease_Type", type: "Choice", optional: true },
+                { name: "Tenancy", type: "Choice", optional: true },
+                { name: "Tenant_s_", type: "ChoiceList", optional: true },
+                { name: "CoStar", type: "Text", optional: true },
+                { name: "Crexi", type: "Text", optional: true },
+                { name: "OM", type: "Text", optional: true },
+                { name: "For_Sale_Status", type: "Bool", optional: true }
+            ],
+            requiredAccess: REQUIRED_ACCESS
         });
-        
-        grist.onRecord(resolve);
+        resolve();
     });
 }
 
-/**
- * Normalize Grist record data for template use
- * @param {Object} record - Grist record object
- * @returns {Object} Normalized property data
- */
-export function normalizeRecord(record) {
-    if (!record) return null;
-    
-    // Extract city, state, zip from address if not provided separately
-    const addressParts = record.Address ? record.Address.split(', ') : ['', '', ''];
-    const city = record.City || (addressParts[1] || '');
-    const stateZip = addressParts[2] || '';
-    const state = record.State || (stateZip.split(' ')[0] || '');
-    const zip = record.Zip || (stateZip.split(' ')[1] || '');
-    
-    // Format currency values
-    const formatCurrency = (value) => {
-        if (!value) return '$0';
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0
-        }).format(value);
-    };
-    
-    // Format percentage
-    const formatPercent = (value) => {
-        if (!value) return '0.0%';
-        return `${(value * 100).toFixed(2)}%`;
-    };
-    
-    // Format numbers with commas
-    const formatNumber = (value) => {
-        if (!value) return '0';
-        return new Intl.NumberFormat('en-US').format(value);
-    };
-    
-    // Parse photo URLs
-    const photoUrls = record.photo_url ? 
-        (typeof record.photo_url === 'string' ? record.photo_url.split(' ') : [record.photo_url]) 
-        : [];
-    
-    // Parse tenants
-    const tenants = record.Tenant_s_ ? 
-        (Array.isArray(record.Tenant_s_) ? record.Tenant_s_ : [record.Tenant_s_]) 
-        : [];
-    
-    // Parse lease options
-    const leaseOptions = record.Lease_Options || '';
-    
-    // Check for assumable loan in notes
-    const hasAssumableLoan = record.Notes && 
-        (record.Notes.toLowerCase().includes('assumable') || 
-         record.Notes.toLowerCase().includes('assumable loan'));
-    
-    // Calculate years remaining on lease
-    const today = new Date();
-    const leaseExpiration = record.Lease_Expiration ? new Date(record.Lease_Expiration) : null;
-    const yearsRemaining = leaseExpiration ? 
-        Math.max(0, Math.floor((leaseExpiration - today) / (365.25 * 24 * 60 * 60 * 1000))) : 0;
-    
-    return {
-        // Basic property info
-        propertyName: record.Property_Name || '',
-        address: record.Address || '',
-        city: city,
-        state: state,
-        zip: zip,
-        fullAddress: record.Address || '',
-        
-        // Financial details
-        price: record.Price || 0,
-        formattedPrice: formatCurrency(record.Price),
-        capRate: record.Cap_Rate || 0,
-        formattedCapRate: formatPercent(record.Cap_Rate),
-        pricePerSF: record.Price_SF || (record.Price && record.RBA ? record.Price / record.RBA : 0),
-        formattedPricePerSF: formatCurrency(record.Price_SF || (record.Price && record.RBA ? record.Price / record.RBA : 0)),
-        
-        // Physical details
-        rba: record.RBA || 0,
-        formattedRBA: formatNumber(record.RBA),
-        landSize: record.Land_Size || 0,
-        formattedLandSize: formatNumber(record.Land_Size),
-        propertyType: record.Property_Type || '',
-        tenancy: record.Tenancy || '',
-        
-        // Lease details
-        leaseTerm: record.Lease_Term || '',
-        leaseCommencement: record.Lease_Commencement,
-        leaseExpiration: record.Lease_Expiration,
-        yearsRemaining: yearsRemaining,
-        leaseType: record.Lease_Type || '',
-        leaseOptions: leaseOptions,
-        rentBumps: record.Rent_Bumps || '',
-        
-        // Images
-        photoUrls: photoUrls,
-        primaryImage: photoUrls.length > 0 ? photoUrls[0] : '',
-        
-        // Links
-        costarUrl: record.CoStar || '',
-        crexiUrl: record.Crexi || '',
-        omUrl: record.OM || '',
-        
-        // Additional info
-        notes: record.Notes || '',
-        tenants: tenants.join(', '),
-        primaryTenant: tenants.length > 0 ? tenants[0] : '',
-        forSaleStatus: record.For_Sale_Status || false,
-        lastSaleDate: record.Last_Sale_Date,
-        lastSalePrice: record.Last_Sale_Price || 0,
-        formattedLastSalePrice: formatCurrency(record.Last_Sale_Price),
-        dateListed: record.Date_Listed,
-        
-        // Computed flags for template logic
-        hasAssumableLoan: hasAssumableLoan,
-        isHighCapRate: record.Cap_Rate && record.Cap_Rate > 0.07, // 7%+ is considered high
-        isLongLease: yearsRemaining > 10, // 10+ years is considered long
-        isNetLease: record.Lease_Type && record.Lease_Type.toLowerCase().includes('n'),
-        isSTNL: record.Tenancy && record.Tenancy.toLowerCase().includes('stnl')
-    };
-}
-
-/**
- * Listen for record changes in Grist
- * @param {Function} callback - Function to call when record changes
- */
 export function onRecordChange(callback) {
     grist.onRecord((record) => {
-        const normalizedData = normalizeRecord(record);
-        callback(normalizedData);
+        if (!record) return;
+        const mappedData = normalizeRecord(record);
+        callback(mappedData);
     });
+}
+
+/**
+ * Maps raw Grist record to a normalized object.
+ * Handles formatting (currency, percentages, dates) where possible.
+ */
+function normalizeRecord(rec) {
+    // Helper to format currency
+    const formatCurrency = (val) => {
+        if (val === undefined || val === null) return '';
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
+    };
+
+    // Helper to format percentage
+    const formatPercent = (val) => {
+        if (val === undefined || val === null) return '';
+        // If it's 0.09, return 9.00%. If it's 9, return 9%. 
+        // Grist usually sends raw numbers. Assuming 0.09 for 9%.
+        // Wait, prompt says "9.00%", which might be a formatted string or raw number 0.09.
+        // Let's assume raw number.
+        return (val * 100).toFixed(2) + '%';
+    };
+    
+    // Helper to format date
+    const formatDate = (val) => {
+        if (!val) return '';
+        // Grist sends dates as seconds since epoch or formatted string depending on config.
+        // But usually in JS API it comes as a timestamp or object.
+        // Safe check:
+        const d = new Date(val * 1000); // Grist dates are seconds
+        if (isNaN(d.getTime())) return String(val); // Fallback if it's a string
+        return d.toLocaleDateString('en-US');
+    };
+
+    // Helper for arrays (ChoiceList)
+    const formatList = (val) => {
+        if (Array.isArray(val)) {
+            // Filter out 'L' codes if Grist sends ['L', 'Label'] format (unlikely in mapping mode, but possible)
+            // Usually mapped records give the values directly.
+            return val.join(', ');
+        }
+        return val || '';
+    };
+
+    return {
+        propertyName: rec.Property_Name || '',
+        address: rec.Address || '',
+        askingPrice: formatCurrency(rec.Price),
+        capRate: typeof rec.Cap_Rate === 'number' ? formatPercent(rec.Cap_Rate) : (rec.Cap_Rate || ''),
+        leaseTerm: rec.Lease_Term || '',
+        buildingSize: rec.RBA ? `${rec.RBA.toLocaleString()} SF` : '',
+        description: rec.Notes || '',
+        mainImageUrl: (rec.photo_url || '').split(' ')[0], // Take first image if multiple
+        landSize: rec.Land_Size ? `${rec.Land_Size} Acres` : '',
+        leaseExpiration: formatDate(rec.Lease_Expiration),
+        leaseType: rec.Lease_Type || '',
+        tenancy: rec.Tenancy || '',
+        tenant: formatList(rec.Tenant_s_),
+        costarLink: rec.CoStar || '',
+        crexiLink: rec.Crexi || '',
+        omLink: rec.OM || '',
+        // Raw values for logic if needed
+        _rawPrice: rec.Price,
+        _rawCap: rec.Cap_Rate
+    };
 }
