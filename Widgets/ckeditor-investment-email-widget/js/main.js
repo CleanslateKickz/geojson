@@ -1,163 +1,61 @@
-import {
-	ClassicEditor,
-	Alignment,
-	Autoformat,
-	AutoImage,
-	AutoLink,
-	Autosave,
-	Bold,
-	CloudServices,
-	Essentials,
-	FindAndReplace,
-	FontBackgroundColor,
-	FontColor,
-	FontFamily,
-	FontSize,
-	FullPage,
-	Fullscreen,
-	GeneralHtmlSupport,
-	Heading,
-	HorizontalLine,
-	HtmlEmbed,
-	ImageBlock,
-	ImageCaption,
-	ImageEditing,
-	ImageInline,
-	ImageInsertViaUrl,
-	ImageResize,
-	ImageStyle,
-	ImageTextAlternative,
-	ImageToolbar,
-	ImageUpload,
-	ImageUtils,
-	Indent,
-	IndentBlock,
-	Italic,
-	Link,
-	LinkImage,
-	List,
-	ListProperties,
-	MediaEmbed,
-	PageBreak,
-	Paragraph,
-	PasteFromOffice,
-	PlainTableOutput,
-	RemoveFormat,
-	SourceEditing,
-	SpecialCharacters,
-	SpecialCharactersArrows,
-	SpecialCharactersCurrency,
-	SpecialCharactersEssentials,
-	SpecialCharactersLatin,
-	SpecialCharactersMathematical,
-	SpecialCharactersText,
-	Strikethrough,
-	Style,
-	Table,
-	TableCaption,
-	TableCellProperties,
-	TableColumnResize,
-	TableLayout,
-	TableProperties,
-	TableToolbar,
-	TextTransformation,
-	Underline
-} from 'ckeditor5';
-
 import { initializeGrist, onRecordChange } from './grist-handler.js';
 import { generateSubjectLine, generateEmailTemplate } from './templates.js';
 
-const LICENSE_KEY = 'GPL';
+// Access CKEditor from the global window object (loaded via CDN)
+const { BalloonEditor, Essentials, Paragraph, Bold, Italic, Link, Table, TableToolbar, Heading, List, Alignment, Autoformat, BlockQuote } = window.CKEDITOR;
+
+const LICENSE_KEY = 'GPL'; // Use your license key if you have one
 
 const editorConfig = {
-	toolbar: {
-		items: [
-			'undo', 'redo', '|',
-			'sourceEditing', '|',
-			'heading', 'style', '|',
-			'fontSize', 'fontFamily', 'fontColor', 'fontBackgroundColor', '|',
-			'bold', 'italic', 'underline', '|',
-			'link', 'insertTable', '|',
-			'alignment', '|',
-			'bulletedList', 'numberedList', 'outdent', 'indent'
-		],
-		shouldNotGroupWhenFull: false
-	},
-	plugins: [
-		Alignment, Autoformat, AutoImage, AutoLink, Autosave, Bold, CloudServices, Essentials,
-		FindAndReplace, FontBackgroundColor, FontColor, FontFamily, FontSize, FullPage, Fullscreen,
-		GeneralHtmlSupport, Heading, HorizontalLine, HtmlEmbed, ImageBlock, ImageCaption, ImageEditing,
-		ImageInline, ImageInsertViaUrl, ImageResize, ImageStyle, ImageTextAlternative, ImageToolbar,
-		ImageUpload, ImageUtils, Indent, IndentBlock, Italic, Link, LinkImage, List, ListProperties,
-		MediaEmbed, PageBreak, Paragraph, PasteFromOffice, PlainTableOutput, RemoveFormat, SourceEditing,
-		SpecialCharacters, SpecialCharactersArrows, SpecialCharactersCurrency, SpecialCharactersEssentials,
-		SpecialCharactersLatin, SpecialCharactersMathematical, SpecialCharactersText, Strikethrough,
-		Style, Table, TableCaption, TableCellProperties, TableColumnResize, TableLayout, TableProperties,
-		TableToolbar, TextTransformation, Underline
-	],
-	fontFamily: { supportAllValues: true },
-	fontSize: { options: [10, 12, 14, 'default', 18, 20, 22], supportAllValues: true },
-	heading: {
-		options: [
-			{ model: 'paragraph', title: 'Paragraph', class: 'ck-heading_paragraph' },
-			{ model: 'heading1', view: 'h2', title: 'Heading 1', class: 'ck-heading_heading1' },
-			{ model: 'heading2', view: 'h3', title: 'Heading 2', class: 'ck-heading_heading2' },
-			{ model: 'heading3', view: 'h4', title: 'Heading 3', class: 'ck-heading_heading3' }
-		]
-	},
-	htmlSupport: {
-		allow: [
-			{ name: /^.*$/, styles: true, attributes: true, classes: true }
-		]
-	},
-	image: {
-		toolbar: [
-			'toggleImageCaption', 'imageTextAlternative', '|',
-			'imageStyle:inline', 'imageStyle:wrapText', 'imageStyle:breakText', '|',
-			'resizeImage'
-		]
-	},
-	licenseKey: LICENSE_KEY,
-	link: {
-		addTargetToExternalLinks: true,
-		defaultProtocol: 'https://'
-	},
-	table: {
-		contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells', 'tableProperties', 'tableCellProperties']
-	}
+    toolbar: {
+        items: [
+            'undo', 'redo', '|',
+            'heading', '|',
+            'bold', 'italic', 'link', '|',
+            'bulletedList', 'numberedList', '|',
+            'insertTable', 'blockQuote', '|',
+            'alignment'
+        ],
+        shouldNotGroupWhenFull: false
+    },
+    plugins: [
+        Essentials, Paragraph, Bold, Italic, Link, Table, TableToolbar, 
+        Heading, List, Alignment, Autoformat, BlockQuote
+    ],
+    heading: {
+        options: [
+            { model: 'paragraph', title: 'Paragraph', class: 'ck-heading_paragraph' },
+            { model: 'heading1', view: 'h2', title: 'Heading 1', class: 'ck-heading_heading1' },
+            { model: 'heading2', view: 'h3', title: 'Heading 2', class: 'ck-heading_heading2' },
+            { model: 'heading3', view: 'h4', title: 'Heading 3', class: 'ck-heading_heading3' }
+        ]
+    },
+    table: {
+        contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells']
+    },
+    licenseKey: LICENSE_KEY,
+    placeholder: 'Select a template to generate email content...'
 };
 
 // Global State
 let editorInstance = null;
 let currentGristData = null;
+let currentTemplate = 'followUp'; // Default template
 
 // UI Elements
 const ui = {
-    inputs: {
-        propertyName: document.getElementById('propertyName'),
-        address: document.getElementById('address'),
-        askingPrice: document.getElementById('askingPrice'),
-        capRate: document.getElementById('capRate'),
-        leaseTerm: document.getElementById('leaseTerm'),
-        leaseExpiration: document.getElementById('leaseExpiration'),
-        buildingSize: document.getElementById('buildingSize'),
-        landSize: document.getElementById('landSize'),
-        leaseType: document.getElementById('leaseType'),
-        description: document.getElementById('description'),
-        mainImageUrl: document.getElementById('mainImageUrl')
-    },
     subject: document.getElementById('emailSubject'),
-    resetBtn: document.getElementById('resetTemplateBtn'),
     copySubjectBtn: document.getElementById('copySubjectBtn'),
     copyEmailBtn: document.getElementById('copyEmailBtn'),
-    status: document.getElementById('statusMessage')
+    status: document.getElementById('statusMessage'),
+    templateButtons: document.querySelectorAll('.template-item')
 };
 
 // Application Initialization
 async function init() {
     try {
-        // 1. Initialize Editor
-        editorInstance = await ClassicEditor.create(document.querySelector('#editor'), editorConfig);
+        // 1. Initialize Balloon Editor
+        editorInstance = await BalloonEditor.create(document.querySelector('#editor'), editorConfig);
         
         // 2. Initialize Grist
         await initializeGrist();
@@ -165,10 +63,6 @@ async function init() {
         // 3. Setup Grist Listener
         onRecordChange((data) => {
             currentGristData = data;
-            populateInputs(data);
-            
-            // Only auto-update editor if it's empty or user hasn't heavily edited?
-            // For now, we always regenerate on record switch to show the new property.
             regenerateTemplate(); 
             showStatus('Loaded record: ' + (data.propertyName || 'New Property'), 'info');
         });
@@ -182,54 +76,32 @@ async function init() {
     }
 }
 
-function populateInputs(data) {
-    for (const [key, el] of Object.entries(ui.inputs)) {
-        if (el && data[key] !== undefined) {
-            el.value = data[key];
-        }
-    }
-}
-
-function getFormData() {
-    const data = {};
-    for (const [key, el] of Object.entries(ui.inputs)) {
-        if (el) data[key] = el.value;
-    }
-    // Preserve links from original Grist data as they aren't in inputs
-    if (currentGristData) {
-        data.omLink = currentGristData.omLink;
-        data.costarLink = currentGristData.costarLink;
-        data.crexiLink = currentGristData.crexiLink;
-        data.tenancy = currentGristData.tenancy;
-    }
-    return data;
-}
-
 function regenerateTemplate() {
-    if (!editorInstance) return;
-    
-    const data = getFormData();
+    if (!editorInstance || !currentGristData) return;
     
     // Update Subject
-    ui.subject.value = generateSubjectLine(data);
+    ui.subject.value = generateSubjectLine(currentTemplate, currentGristData);
     
-    // Update Editor
-    const html = generateEmailTemplate('default', data);
+    // Update Editor Content
+    const html = generateEmailTemplate(currentTemplate, currentGristData);
     editorInstance.setData(html);
 }
 
 function setupEventListeners() {
-    // Reset Button
-    ui.resetBtn.addEventListener('click', () => {
-        regenerateTemplate();
-        showStatus('Template reset to current inputs.', 'success');
-    });
-
-    // Inputs Change -> Optional: Could auto-update subject or wait for reset?
-    // Let's auto-update Subject, but NOT the body to avoid overwriting edits.
-    Object.values(ui.inputs).forEach(input => {
-        input.addEventListener('input', () => {
-            ui.subject.value = generateSubjectLine(getFormData());
+    // Template Switching
+    ui.templateButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Remove active class from all
+            ui.templateButtons.forEach(b => b.classList.remove('active'));
+            // Add active class to clicked
+            btn.classList.add('active');
+            
+            // Set current template
+            currentTemplate = btn.dataset.template;
+            
+            // Regenerate content
+            regenerateTemplate();
+            showStatus(`Switched to ${currentTemplate} template`, 'success');
         });
     });
 
