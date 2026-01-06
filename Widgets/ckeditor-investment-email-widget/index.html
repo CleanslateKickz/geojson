@@ -14,87 +14,68 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     
     <!-- Styles -->
-    <link rel="stylesheet" href="ckeditor5/ckeditor5.css">
+    <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/47.3.0/ckeditor5.css" crossorigin>
     <link rel="stylesheet" href="css/widget.css">
 </head>
 <body>
     <div class="app-container">
-        <!-- Left Pane: Controls -->
+        <!-- Left Pane: Template Library -->
         <div class="controls-pane">
             <header class="controls-header">
-                <h2>Investment Email Generator</h2>
-                <p>Edit property details to customize the email template.</p>
+                <h2>Message Templates</h2>
+                <p>Select a template to generate content.</p>
             </header>
 
             <main class="controls-main">
-                <!-- Property Information Form -->
-                <div class="form-section">
-                    <h3>Property Information</h3>
-                    
-                    <div class="form-group">
-                        <label for="propertyName">Property Name</label>
-                        <input type="text" id="propertyName">
+                <div class="template-category">
+                    <h3>Communication</h3>
+                    <div class="template-list">
+                        <button class="template-item active" data-template="followUp">
+                            <span class="icon">📞</span>
+                            <div class="info">
+                                <span class="name">Follow-up</span>
+                                <span class="desc">Check in regarding specific property</span>
+                            </div>
+                        </button>
+                        <button class="template-item" data-template="introduction">
+                            <span class="icon">👋</span>
+                            <div class="info">
+                                <span class="name">Introduction</span>
+                                <span class="desc">General broker introduction</span>
+                            </div>
+                        </button>
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="address">Address</label>
-                        <input type="text" id="address">
-                    </div>
-                    
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="askingPrice">Asking Price</label>
-                            <input type="text" id="askingPrice">
-                        </div>
-                        <div class="form-group">
-                            <label for="capRate">Cap Rate</label>
-                            <input type="text" id="capRate">
-                        </div>
-                    </div>
+                </div>
 
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="leaseTerm">Lease Term</label>
-                            <input type="text" id="leaseTerm">
-                        </div>
-                        <div class="form-group">
-                            <label for="leaseExpiration">Lease Expiration</label>
-                            <input type="text" id="leaseExpiration">
-                        </div>
-                    </div>
-
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="buildingSize">Building Size (RBA)</label>
-                            <input type="text" id="buildingSize">
-                        </div>
-                        <div class="form-group">
-                            <label for="landSize">Land Size (Acres)</label>
-                            <input type="text" id="landSize">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="leaseType">Lease Type</label>
-                        <input type="text" id="leaseType">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="description">Highlights / Notes</label>
-                        <textarea id="description" rows="6"></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="mainImageUrl">Main Image URL</label>
-                        <input type="text" id="mainImageUrl" placeholder="https://...">
+                <div class="template-category">
+                    <h3>Property</h3>
+                    <div class="template-list">
+                        <button class="template-item" data-template="investment">
+                            <span class="icon">🏢</span>
+                            <div class="info">
+                                <span class="name">Investment Detail</span>
+                                <span class="desc">Full property highlights & table</span>
+                            </div>
+                        </button>
+                        <button class="template-item" data-template="onMarket">
+                            <span class="icon">🚀</span>
+                            <div class="info">
+                                <span class="name">Just Listed</span>
+                                <span class="desc">New on-market announcement</span>
+                            </div>
+                        </button>
+                        <button class="template-item" data-template="marketUpdate">
+                            <span class="icon">📊</span>
+                            <div class="info">
+                                <span class="name">Market Update</span>
+                                <span class="desc">General market trends</span>
+                            </div>
+                        </button>
                     </div>
                 </div>
             </main>
             
             <footer class="controls-footer">
-                <button id="resetTemplateBtn" class="btn btn-secondary" style="width: 100%;">
-                    &#8635; Reset Editor to Template
-                </button>
                 <div id="statusMessage" class="status-message"></div>
             </footer>
         </div>
@@ -112,7 +93,7 @@
             </div>
             
             <div class="editor-content">
-                <div class="editor-container editor-container_classic-editor" id="editor-container">
+                <div class="editor-container editor-container_balloon-editor" id="editor-container">
                     <div class="editor-container__editor">
                         <div id="editor"></div>
                     </div>
@@ -121,15 +102,8 @@
         </div>
     </div>
 
-    <!-- Import Map for CKEditor -->
-    <script type="importmap">
-    {
-        "imports": {
-            "ckeditor5": "./ckeditor5/ckeditor5.js",
-            "ckeditor5/": "./ckeditor5/"
-        }
-    }
-    </script>
+    <!-- CKEditor from CDN (Balloon Editor) -->
+    <script src="https://cdn.ckeditor.com/ckeditor5/47.3.0/ckeditor5.umd.js" crossorigin></script>
 
     <!-- Main Application Logic -->
     <script type="module" src="./js/main.js"></script>
