@@ -1003,9 +1003,9 @@
             </a>
             ` : ''}
             ${record.OM ? `
-              <button class="action-btn secondary om-btn" data-record-id="${record.id}" onclick="event.stopPropagation(); handleOmClick('${record.id}')">
+              <a href="${escapeHtml(record.OM)}" target="_blank" rel="noopener noreferrer" class="action-btn secondary" onclick="event.stopPropagation()">
                 <img src="${OM_LOGO_URL}" alt="OM" class="logo-button">
-            </button>
+            </a>
             ` : ''}
             </div>
             </div>
@@ -1015,72 +1015,107 @@
   `;
             };
             
+            const normalizeKey = (key) => {
+                return String(key || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+            };
+
+            const normalizeCellValue = (value) => {
+                if (value === undefined || value === null) return undefined;
+                if (Array.isArray(value)) {
+                    const parts = value
+                        .map((item) => (item === undefined || item === null ? '' : String(item).trim()))
+                        .filter(Boolean);
+                    return parts.length ? parts.join(', ') : undefined;
+                }
+                if (typeof value === 'object') {
+                    const maybeList = value.L;
+                    if (Array.isArray(maybeList)) {
+                        const parts = maybeList.map((item) => (item === undefined || item === null ? '' : String(item).trim())).filter(Boolean);
+                        return parts.length ? parts.join(', ') : undefined;
+                    }
+                    return value;
+                }
+                if (typeof value === 'string') {
+                    const s = value.trim();
+                    if (!s) return undefined;
+                    if (s.startsWith('[') && s.endsWith(']')) {
+                        try {
+                            const parsed = JSON.parse(s);
+                            if (Array.isArray(parsed)) {
+                                const parts = parsed.map((item) => (item === undefined || item === null ? '' : String(item).trim())).filter(Boolean);
+                                return parts.length ? parts.join(', ') : undefined;
+                            }
+                        } catch (_e) {}
+                    }
+                    return s;
+                }
+                return value;
+            };
+
+            const getField = (record, ...names) => {
+                if (!record) return undefined;
+                const keys = Object.keys(record);
+                for (const name of names) {
+                    if (Object.prototype.hasOwnProperty.call(record, name)) {
+                        const v = normalizeCellValue(record[name]);
+                        if (v !== undefined && v !== null && v !== '') return v;
+                    }
+                    const want = normalizeKey(name);
+                    const match = keys.find((k) => normalizeKey(k) === want);
+                    if (match) {
+                        const v = normalizeCellValue(record[match]);
+                        if (v !== undefined && v !== null && v !== '') return v;
+                    }
+                }
+                return undefined;
+            };
+
             // Handle OM button click
             function handleOmClick(recordId) {
                 const record = allRecords.find(r => String(r.id) === String(recordId));
-                if (record && record.OM) {
-                    // Directly open the URL
-                    window.open(record.OM, '_blank', 'noopener,noreferrer');
-                }
+                const url = record ? getField(record, 'OM', 'omUrl') : undefined;
+                if (!url) return;
+                const a = document.createElement('a');
+                a.href = String(url);
+                a.target = '_blank';
+                a.rel = 'noopener noreferrer';
+                a.click();
             }
             
             function normalize(record) {
-                const get = (...names) => {
-                    for (const n of names) {
-                        let v = record[n];
-                        if (v === undefined || v === null) continue;
-                        if (Array.isArray(v)) {
-                            const parts = v
-                                .map((item) => {
-                                    if (item === undefined || item === null) return '';
-                                    if (typeof item === 'string') return item.trim();
-                                    if (typeof item === 'number' || typeof item === 'boolean') return String(item);
-                                    return String(item);
-                                })
-                                .filter(Boolean);
-                            if (parts.length > 0) return parts.join(', ');
-                            continue;
-                        }
-                        if (typeof v === 'string') {
-                            v = v.trim();
-                            if (!v) continue;
-                        }
-                        return v;
-                    }
-                    return undefined;
-                };
                 const id = String(record.id);
-                const propertyName = get('Property_Name','propertyName') || 'Property';
-                const address = get('Address','address') || '';
-                const city = get('City','city') || extractCity(address) || '';
-                const state = get('State','state') || '';
-                const zip = get('Zip','zip') || '';
-                const priceVal = get('Price','price');
+                const propertyName = getField(record, 'Property_Name', 'propertyName') || 'Property';
+                const address = getField(record, 'Address', 'address') || '';
+                const city = getField(record, 'City', 'city') || extractCity(address) || '';
+                const state = getField(record, 'State', 'state') || '';
+                const zip = getField(record, 'Zip', 'zip') || '';
+                const priceVal = getField(record, 'Price', 'price');
                 const price = priceVal != null ? Number(priceVal) : null;
-                const capRateVal = get('Cap_Rate','capRate');
+                const capRateVal = getField(record, 'Cap_Rate', 'capRate');
                 const capRate = capRateVal != null ? Number(capRateVal) : null;
-                let noiVal = get('NOI','noi');
+                let noiVal = getField(record, 'NOI', 'noi');
                 let noi = noiVal != null ? Number(noiVal) : null;
                 if (noi == null && price != null && capRate != null) {
                     noi = price * capRate;
                 }
-                const rbaVal = get('RBA','Building_Size','rba');
+                const rbaVal = getField(record, 'RBA', 'Building_Size', 'rba');
                 const rba = rbaVal != null ? Number(rbaVal) : null;
-                const landSize = get('Land_Size','landSize');
-                const landUnit = get('Land_Unit','landUnit') || (typeof landSize === 'string' && landSize.toUpperCase().includes('AC') ? 'AC' : (landSize ? 'SF' : ''));
-                const leaseTerm = get('Lease_Term','Lease_Term_Remaining','leaseTermRemaining');
-                const leaseType = get('Lease_Type','leaseType','Property_Type') || '';
-                const leaseExpiration = get('Lease_Expiration','leaseExpiration') || '';
-                const leaseOptions = get('Lease_Options','leaseOptions') || '';
-                const rentBumps = get('Rent_Bumps','rentBumps') || '';
-                const tenantName = get('Tenant_s_','Tenant(s)','Tenants','Tenant','Tenant_Name','tenantName') || '';
-                const dateListed = get('Date_Listed','dateListed') || '';
+                const landSize = getField(record, 'Land_Size', 'landSize');
+                const landUnit = getField(record, 'Land_Unit', 'landUnit') || (typeof landSize === 'string' && landSize.toUpperCase().includes('AC') ? 'AC' : (landSize ? 'SF' : ''));
+                const leaseTerm = getField(record, 'Lease_Term', 'Lease_Term_Remaining', 'leaseTermRemaining');
+                const leaseType = getField(record, 'Lease_Type', 'leaseType', 'Property_Type') || '';
+                const leaseExpiration = getField(record, 'Lease_Expiration', 'leaseExpiration') || '';
+                const leaseOptions = getField(record, 'Lease_Options', 'leaseOptions') || '';
+                const rentBumps = getField(record, 'Rent_Bumps', 'rentBumps') || '';
+                const tenantName = getField(record, 'Tenant_s_', 'Tenant(s)', 'Tenants', 'Tenant', 'Tenant_Name', 'tenantName') || '';
+                const dateListed = getField(record, 'Date_Listed', 'dateListed') || '';
                 const imageUrls = extractImageUrls(record);
-                const omUrl = get('OM','omUrl');
-                const listingUrl = get('Listing_URL','listingUrl');
-                const costar = get('CoStar');
-                const crexi = get('Crexi');
-                return { id, propertyName, address, city, state, zip, price, capRate, noi, rba, landSize, landUnit, leaseTerm, leaseType, leaseExpiration, leaseOptions, rentBumps, tenantName, imageUrls, omUrl, listingUrl, costar, crexi, notes: get('Notes','notes'), dateListed };
+                const omUrl = getField(record, 'OM', 'omUrl');
+                const listingUrl = getField(record, 'Listing_URL', 'listingUrl');
+                const costar = getField(record, 'CoStar');
+                const crexi = getField(record, 'Crexi');
+                const tenancy = getField(record, 'Tenancy');
+                return { id, propertyName, address, city, state, zip, price, capRate, noi, rba, landSize, landUnit, leaseTerm, leaseType, leaseExpiration, leaseOptions, rentBumps, tenantName, imageUrls, omUrl, listingUrl, costar, crexi, tenancy, notes: getField(record, 'Notes', 'notes'), dateListed };
             }
             // Populate filters
             function populateFilters(records) {
@@ -1095,7 +1130,7 @@
                     typeFilter.appendChild(option);
                 });
 
-                const tenancies = [...new Set(records.map(r => r.Tenancy).filter(Boolean))].sort();
+                const tenancies = [...new Set(records.map(r => getField(r, 'Tenancy')).filter(Boolean).map(v => String(v).trim()).filter(Boolean))].sort();
                 const tenancyFilter = document.getElementById('tenancy-filter');
                 if (tenancyFilter) {
                     tenancyFilter.innerHTML = '<option value="all">All Tenancy</option>';
@@ -1132,7 +1167,7 @@
                           (record.Address && record.Address.toLowerCase().includes(searchTerm));
 
                     const matchesType = typeFilter === 'all' || record.Property_Type === typeFilter;
-                    const matchesTenancy = tenancyFilter === 'all' || record.Tenancy === tenancyFilter;
+                    const matchesTenancy = tenancyFilter === 'all' || String(getField(record, 'Tenancy') || '') === tenancyFilter;
                     const matchesCity = cityFilter === 'all' || extractCity(record.Address) === cityFilter;
 
                     return matchesSearch && matchesType && matchesTenancy && matchesCity;
@@ -1370,14 +1405,13 @@
                 
                 // Add OM button if available
                 if (d.omUrl) {
-                    const omBtn = document.createElement('button');
-                    omBtn.className = 'om';
-                    omBtn.innerHTML = 'View Offering Memorandum';
-                    omBtn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        window.open(d.omUrl, '_blank', 'noopener,noreferrer');
-                    });
-                    actions.appendChild(omBtn);
+                    const omLink = document.createElement('a');
+                    omLink.className = 'om';
+                    omLink.href = String(d.omUrl);
+                    omLink.target = '_blank';
+                    omLink.rel = 'noopener noreferrer';
+                    omLink.textContent = 'View Offering Memorandum';
+                    actions.appendChild(omLink);
                 }
                 
                 // Add listing button if available
