@@ -15,7 +15,7 @@
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   
-  <!-- Custom Config for nicer fonts/colors -->
+  <!-- Custom Config -->
   <script>
     tailwind.config = {
       theme: {
@@ -38,7 +38,6 @@
   </script>
 
   <style>
-    /* Smooth transitions for interactive elements */
     body {
       background: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%);
       min-height: 100vh;
@@ -48,7 +47,6 @@
       transition: all 0.2s ease-in-out;
     }
 
-    /* Copy success animation */
     @keyframes check-pop {
       0% { transform: scale(1); }
       50% { transform: scale(1.2); }
@@ -63,9 +61,8 @@
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useEffect, useRef } = React;
+    const { useState, useRef } = React;
 
-    // Icons as components for cleaner JSX
     const ResetIcon = () => (
       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -88,20 +85,15 @@
       const [tenantName, setTenantName] = useState('');
       const [address, setAddress] = useState('');
       const [copied, setCopied] = useState(false);
-      
-      // Ref for the address input to manage cursor if we programmatically set value
       const addressInputRef = useRef(null);
 
       const formatAddress = (input) => {
         if (!input) return '';
-
-        // 1. Remove ZIP code (5 digits or 5+4 format) at the end
+        // Remove ZIP code (5 digits or 5+4 format) at the end
         let cleaned = input.replace(/\s*\b\d{5}(-\d{4})?\b\s*$/, '').trim();
-        
-        // 2. Standardize spacing and commas
+        // Standardize spacing
         cleaned = cleaned.replace(/\s{2,}/g, ' ').replace(/,+/g, ',').replace(/,\s*$/, '');
         
-        // 3. Common address abbreviations dictionary
         const abbreviations = {
           'north': 'N', 'south': 'S', 'east': 'E', 'west': 'W',
           'northeast': 'NE', 'northwest': 'NW', 'southeast': 'SE', 'southwest': 'SW',
@@ -112,47 +104,67 @@
           'number': '#', 'building': 'Bldg',
         };
         
-        // 4. Apply abbreviations (case-insensitive)
         for (const [full, abbrev] of Object.entries(abbreviations)) {
           const regex = new RegExp(`\\b${full}\\b`, 'gi');
           cleaned = cleaned.replace(regex, abbrev);
         }
         
-        // 5. Capitalize words
         const words = cleaned.split(' ');
         const capitalizedWords = words.map(word => {
-          // Keep all-caps abbreviations (N, SW, CA) or short codes as is
           if (/^[A-Z]{1,4}$/.test(word)) return word;
-          // Capitalize first letter of regular words
           return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
         });
         
         return capitalizedWords.join(' ');
       };
 
+      // 1. Handle standard typing and general input changes
       const handleAddressChange = (e) => {
         let newValue = e.target.value;
         
-        // --- SMART COMMA LOGIC ---
-        // If there are no commas in the input, we check if it looks like 
-        // "StreetName City, State" and insert a comma after the street.
+        // --- SMART FIX FOR CONCATENATED TEXT ---
+        // If the user somehow pasted a block like "HwyNashua" (where the paste handler might have missed it
+        // or they typed it manually), this regex fixes it.
+        // It looks for: Street Suffix (Hwy, St) -> Optional Space -> Capital Letter (City)
+        const streetSuffixRegex = /\b(St|Ave|Blvd|Rd|Ln|Dr|Ct|Pl|Cir|Ter|Hwy|Pkwy|Way)\s*([A-Z])/i;
         
-        if (!newValue.includes(',')) {
-          // Regex looks for:
-          // 1. A word boundary followed by a street suffix (Hwy, St, Ave, etc.) - case insensitive
-          // 2. Followed by one or more spaces
-          // 3. Followed by a Capitalized word (start of city)
-          // Example match: "... Hwy Nashua"
-          const streetSuffixRegex = /\b(St|Ave|Blvd|Rd|Ln|Dr|Ct|Pl|Cir|Ter|Hwy|Pkwy|Way)\s+([A-Z][a-z]+)/i;
-          
-          // Only apply if we found a match. 
-          // We replace "Hwy Nashua" with "Hwy, Nashua"
-          if (streetSuffixRegex.test(newValue)) {
-            newValue = newValue.replace(streetSuffixRegex, '$1, $2');
-          }
+        if (streetSuffixRegex.test(newValue)) {
+          newValue = newValue.replace(streetSuffixRegex, '$1, $2');
         }
 
         setAddress(newValue);
+      };
+
+      // 2. Handle the specific "Paste" action
+      const handlePaste = (e) => {
+        const pastedText = e.clipboardData.getData('text');
+        
+        // USER REQUEST: "If there are commas in the pasted content, then it shouldn't do anything 
+        // -- but if there aren't any commas, it should automatically add the ', ' to the end."
+        
+        if (!pastedText.includes(',')) {
+          e.preventDefault(); // Stop the default paste behavior
+          
+          const textToInsert = pastedText + ', ';
+          const input = e.target;
+          const start = input.selectionStart;
+          const end = input.selectionEnd;
+          const currentValue = address;
+          
+          // Construct the new string with the comma appended
+          const before = currentValue.substring(0, start);
+          const after = currentValue.substring(end, currentValue.length);
+          const newValue = before + textToInsert + after;
+          
+          setAddress(newValue);
+          
+          // Move cursor to after the newly pasted text
+          setTimeout(() => {
+            input.selectionStart = input.selectionEnd = start + textToInsert.length;
+            input.focus();
+          }, 0);
+        }
+        // If there IS a comma, we let the default behavior happen (which triggers handleAddressChange)
       };
 
       const formatOutput = () => {
@@ -184,7 +196,7 @@
         <div className="min-h-screen flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-lg rounded-2xl shadow-xl overflow-hidden border border-gray-100">
             
-            {/* Header Section with Reset Button */}
+            {/* Header with Reset */}
             <div className="px-8 py-6 border-b border-gray-100 flex justify-between items-center bg-white">
               <h1 className="text-2xl font-bold text-gray-800 tracking-tight">
                 Property Formatter
@@ -192,7 +204,6 @@
               <button
                 onClick={handleReset}
                 className="group flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
-                title="Clear all fields"
               >
                 <ResetIcon />
                 <span>Reset</span>
@@ -205,41 +216,37 @@
                 <label htmlFor="tenant" className="block text-sm font-medium text-gray-700">
                   Tenant / Property Name
                 </label>
-                <div className="relative">
-                  <input
-                    id="tenant"
-                    type="text"
-                    placeholder="e.g. Smith Properties LLC"
-                    value={tenantName}
-                    onChange={(e) => setTenantName(e.target.value)}
-                    className="input-transition w-full p-3 pl-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent shadow-sm"
-                  />
-                </div>
+                <input
+                  id="tenant"
+                  type="text"
+                  placeholder="e.g. Smith Properties LLC"
+                  value={tenantName}
+                  onChange={(e) => setTenantName(e.target.value)}
+                  className="input-transition w-full p-3 pl-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent shadow-sm"
+                />
               </div>
 
-              {/* Address Input */}
+              {/* Address Input with onPaste Handler */}
               <div className="space-y-2">
                 <label htmlFor="address" className="block text-sm font-medium text-gray-700">
                   Property Address
                 </label>
-                <div className="relative">
-                  <input
-                    ref={addressInputRef}
-                    id="address"
-                    type="text"
-                    placeholder="e.g. 272 Daniel Webster Hwy, Nashua, NH 03060"
-                    value={address}
-                    onChange={handleAddressChange}
-                    className="input-transition w-full p-3 pl-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent shadow-sm"
-                  />
-                  {/* Helper text for the auto-comma feature */}
-                  <p className="text-xs text-gray-400 mt-1.5 pl-1">
-                    Tip: Pasting separate parts? We'll auto-add commas if needed.
-                  </p>
-                </div>
+                <input
+                  ref={addressInputRef}
+                  id="address"
+                  type="text"
+                  placeholder="e.g. 272 Daniel Webster Hwy, Nashua, NH 03060"
+                  value={address}
+                  onChange={handleAddressChange}
+                  onPaste={handlePaste}
+                  className="input-transition w-full p-3 pl-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent shadow-sm"
+                />
+                <p className="text-xs text-gray-400 pl-1">
+                  Tip: Pasting parts without commas? We'll add ', ' automatically.
+                </p>
               </div>
 
-              {/* Output Preview Card */}
+              {/* Output Preview */}
               <div 
                 className={`
                   relative mt-6 p-5 rounded-xl border-2 border-dashed text-center transition-all duration-300 cursor-pointer
@@ -249,7 +256,6 @@
                   }
                 `}
                 onClick={handleCopy}
-                title={output ? "Click to copy" : ""}
               >
                 <div className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-2">
                   Preview
@@ -266,7 +272,7 @@
               </div>
             </div>
 
-            {/* Footer Action */}
+            {/* Footer Button */}
             <div className="px-8 py-6 bg-gray-50 border-t border-gray-100">
               <button
                 onClick={handleCopy}
