@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skip Tracer Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        @import url('https://rsms.me/inter/inter.css');
+        html { font-family: 'Inter', sans-serif; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Smooth Transitions */
+        .card-hover {
+            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .card-hover:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border-color: #3b82f6; /* Blue-500 */
+        }
+
+        /* Logo Constraints */
+        .logo-img {
+            object-fit: contain;
+            width: 48px;
+            height: 48px;
+            transition: transform 0.2s;
+        }
+        .card-hover:hover .logo-img {
+            transform: scale(1.1);
+        }
+
+        /* Input Focus Ring */
+        .input-focused:focus-within {
+            ring: 2px;
+            ring-color: #3b82f6;
+            border-color: #3b82f6;
+            background-color: #fff;
+        }
+
+        /* Tab Animation */
+        .tab-indicator {
+            transition: all 0.3s ease;
+        }
+        
+        /* Loading/Active State for Button */
+        .btn-active:active {
+            transform: scale(0.98);
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        grist: {
+                            DEFAULT: '#194e7e', // Grist Blue
+                            light: '#4a8bc2',
+                        },
+                        slate: {
+                            850: '#1e293b', // Slightly darker
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="h-full flex overflow-hidden text-slate-800 antialiased bg-slate-50 selection:bg-blue-100 selection:text-blue-900">
+
+    <!-- Mobile Overlay -->
+    <div id="mobileOverlay" class="fixed inset-0 bg-black/50 z-20 hidden md:hidden glass"></div>
+
+    <!-- Sidebar -->
+    <aside id="inputPanel" class="bg-white border-r border-slate-200 w-full md:w-[360px] flex flex-col fixed md:relative z-30 h-full shadow-2xl md:shadow-lg transition-transform duration-300 ease-out translate-x-0">
+        
+        <!-- Header -->
+        <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-white shrink-0 z-10">
+            <div class="flex items-center gap-3">
+                <div class="p-2.5 bg-blue-50 text-blue-600 rounded-xl shadow-sm">
+                    <i class="ph ph-radar text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg text-slate-900 leading-none tracking-tight">Skip Tracer</h1>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pro Edition</span>
+                </div>
+            </div>
+            <button id="closePanelBtn" class="md:hidden p-2 text-slate-400 hover:bg-slate-100 rounded-lg transition-colors">
+                <i class="ph ph-x text-xl"></i>
+            </button>
+        </div>
+
+        <!-- Scrollable Form Area -->
+        <div class="flex-1 overflow-y-auto p-5 space-y-6 scroll-smooth">
+            
+            <!-- Input Group: Name -->
+            <div class="space-y-1.5">
+                <label for="name" class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Subject Name</label>
+                <div class="relative group input-focused rounded-lg transition-all">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-500">
+                        <i class="ph ph-user text-lg"></i>
+                    </div>
+                    <input type="text" id="name" placeholder="First & Last Name" 
+                        class="block w-full pl-10 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:bg-white transition-colors placeholder:text-slate-400 font-medium">
+                </div>
+            </div>
+
+            <!-- Input Group: Address -->
+            <div class="space-y-1.5">
+                <label for="address" class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Full Address</label>
+                <div class="relative group input-focused rounded-lg transition-all">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-500">
+                        <i class="ph ph-house-line text-lg"></i>
+                    </div>
+                    <input type="text" id="address" placeholder="Street, City, State ZIP" 
+                        class="block w-full pl-10 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:bg-white transition-colors placeholder:text-slate-400 font-medium">
+                </div>
+            </div>
+
+            <!-- Input Group: Phone -->
+            <div class="space-y-1.5">
+                <label for="phone" class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Phone Number</label>
+                <div class="relative group input-focused rounded-lg transition-all">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-500">
+                        <i class="ph ph-phone text-lg"></i>
+                    </div>
+                    <input type="tel" id="phone" placeholder="(555) 000-0000" 
+                        class="block w-full pl-10 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:bg-white transition-colors placeholder:text-slate-400 font-medium">
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="pt-4 border-t border-slate-100 space-y-3">
+                <button id="launchAllBtn" class="w-full btn-active flex justify-center items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white py-3 px-4 rounded-lg text-sm font-bold shadow-lg shadow-slate-200/50 transition-all">
+                    <i class="ph ph-rocket-launch text-yellow-400 text-lg"></i>
+                    <span>Launch All Searches</span>
+                </button>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <button id="launchPeopleBtn" class="btn-active flex justify-center items-center gap-2 bg-white border border-slate-200 hover:border-blue-300 hover:text-blue-600 text-slate-600 py-2.5 px-3 rounded-lg text-xs font-bold transition-all shadow-sm">
+                        <i class="ph ph-users"></i> People
+                    </button>
+                    <button id="launchPhoneBtn" class="btn-active flex justify-center items-center gap-2 bg-white border border-slate-200 hover:border-emerald-300 hover:text-emerald-600 text-slate-600 py-2.5 px-3 rounded-lg text-xs font-bold transition-all shadow-sm">
+                        <i class="ph ph-phone-call"></i> Phone
+                    </button>
+                </div>
+
+                <button id="clearBtn" class="w-full flex justify-center items-center gap-2 text-[11px] font-bold text-slate-400 hover:text-red-500 uppercase tracking-wide transition-colors py-2 mt-2">
+                    <i class="ph ph-trash"></i> Clear Form
+                </button>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="p-4 bg-slate-50 border-t border-slate-200 text-center">
+            <p class="text-[10px] text-slate-400 font-medium">Grist Widget v3.1 • Optimized for Speed</p>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-full bg-slate-50/50 relative overflow-hidden">
+        
+        <!-- Mobile Toggle -->
+        <div class="md:hidden absolute top-4 left-4 z-10">
+            <button id="openPanelBtn" class="bg-white p-2.5 rounded-lg shadow-md text-slate-700 border border-slate-200 btn-active">
+                <i class="ph ph-list text-xl"></i>
+            </button>
+        </div>
+
+        <!-- Notification Toast -->
+        <div id="toastContainer" class="absolute top-4 right-4 z-40 flex flex-col gap-2 pointer-events-none">
+            <!-- Toasts injected here -->
+        </div>
+
+        <!-- Scrollable View -->
+        <div class="flex-1 overflow-y-auto p-4 md:p-8 lg:p-10 scroll-smooth">
+            <div class="max-w-7xl mx-auto space-y-8">
+                
+                <!-- Tabs Navigation -->
+                <div class="bg-slate-200/80 p-1 rounded-xl flex shadow-inner w-full max-w-md mx-auto backdrop-blur-sm">
+                    <button id="tabPeople" class="flex-1 py-2.5 px-4 rounded-lg text-sm font-bold uppercase tracking-wide transition-all duration-200 flex items-center justify-center gap-2 bg-white text-slate-800 shadow-sm ring-1 ring-black/5">
+                        <i class="ph ph-users text-lg"></i>
+                        People & Address
+                    </button>
+                    <button id="tabPhone" class="flex-1 py-2.5 px-4 rounded-lg text-sm font-bold uppercase tracking-wide transition-all duration-200 flex items-center justify-center gap-2 text-slate-500 hover:text-slate-700 hover:bg-white/50">
+                        <i class="ph ph-phone-call text-lg"></i>
+                        Phone Lookup
+                    </button>
+                </div>
+
+                <!-- Header & Context -->
+                <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200 pb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-800" id="activeViewTitle">People Tools</h2>
+                        <p class="text-sm text-slate-500 mt-1">Target: <span id="currentTargetDisplay" class="font-semibold text-slate-700">No data entered</span></p>
+                    </div>
+                    <div class="flex gap-2">
+                        <!-- Status Indicators -->
+                        <span id="countIndicator" class="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-bold border border-slate-200">
+                            0 Tools
+                        </span>
+                    </div>
+                </div>
+
+                <!-- People Grid View -->
+                <div id="viewPeople" class="block animate-fade-in">
+                    <div id="peopleGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                        <!-- Items injected by JS -->
+                    </div>
+                    <!-- Empty State -->
+                    <div id="peopleEmpty" class="hidden flex-col items-center justify-center py-20 bg-white rounded-2xl border border-dashed border-slate-300">
+                        <div class="bg-slate-50 p-4 rounded-full mb-4">
+                            <i class="ph ph-user-focus text-4xl text-slate-300"></i>
+                        </div>
+                        <p class="text-sm font-bold text-slate-500">Enter a Name to Activate Search Tools</p>
+                    </div>
+                </div>
+
+                <!-- Phone Grid View -->
+                <div id="viewPhone" class="hidden animate-fade-in">
+                    <div id="phoneGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                        <!-- Items injected by JS -->
+                    </div>
+                    <!-- Empty State -->
+                    <div id="phoneEmpty" class="hidden flex-col items-center justify-center py-20 bg-white rounded-2xl border border-dashed border-slate-300">
+                        <div class="bg-slate-50 p-4 rounded-full mb-4">
+                            <i class="ph ph-phone-slash text-4xl text-slate-300"></i>
+                        </div>
+                        <p class="text-sm font-bold text-slate-500">Enter a Phone Number to Activate Reverse Lookups</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- Data: State Mapping for ClustrMaps ---
+            const usStates = {
+                'AL': 'Alabama', 'AK': 'Alaska', 'AS': 'American Samoa', 'AZ': 'Arizona', 'AR': 'Arkansas', 
+                'CA': 'California', 'CO': 'Colorado', 'CT': 'Connecticut', 'DE': 'Delaware', 'DC': 'District of Columbia', 
+                'FM': 'Federated States of Micronesia', 'FL': 'Florida', 'GA': 'Georgia', 'GU': 'Guam', 
+                'HI': 'Hawaii', 'ID': 'Idaho', 'IL': 'Illinois', 'IN': 'Indiana', 'IA': 'Iowa', 
+                'KS': 'Kansas', 'KY': 'Kentucky', 'LA': 'Louisiana', 'ME': 'Maine', 'MH': 'Marshall Islands', 
+                'MD': 'Maryland', 'MA': 'Massachusetts', 'MI': 'Michigan', 'MN': 'Minnesota', 'MS': 'Mississippi', 
+                'MO': 'Missouri', 'MT': 'Montana', 'NE': 'Nebraska', 'NV': 'Nevada', 'NH': 'New Hampshire', 
+                'NJ': 'New Jersey', 'NM': 'New Mexico', 'NY': 'New York', 'NC': 'North Carolina', 
+                'ND': 'North Dakota', 'MP': 'Northern Mariana Islands', 'OH': 'Ohio', 'OK': 'Oklahoma', 
+                'OR': 'Oregon', 'PW': 'Palau', 'PA': 'Pennsylvania', 'PR': 'Puerto Rico', 'RI': 'Rhode Island', 
+                'SC': 'South Carolina', 'SD': 'South Dakota', 'TN': 'Tennessee', 'TX': 'Texas', 
+                'UT': 'Utah', 'VT': 'Vermont', 'VI': 'Virgin Islands', 'VA': 'Virginia', 
+                'WA': 'Washington', 'WV': 'West Virginia', 'WI': 'Wisconsin', 'WY': 'Wyoming'
+            };
+
+            const getFullStateName = (abbr) => {
+                if(!abbr) return '';
+                return usStates[abbr.toUpperCase()] || abbr;
+            };
+
+            // --- Data: Search Sites ---
+            const sites = [
+                {
+                    id: 'truepeople',
+                    name: 'TruePeopleSearch',
+                    type: 'person',
+                    logo: 'https://play-lh.googleusercontent.com/aNUH0g2ASIp8tN9OnJpccMxQJDkZLPxrKWhw2OnGkDNA2WLePAOU9iWSXkSt5P3OY_0',
+                    desc: 'Comprehensive Results',
+                    // Using example pattern: name=First+Last, citystatezip=City+State
+                    personUrl: ({f, l, c, s}) => {
+                        const nameParam = encodeURIComponent(`${f} ${l}`);
+                        const locParam = encodeURIComponent(`${c} ${s}`);
+                        return `https://www.truepeoplesearch.com/results?name=${nameParam}&citystatezip=${locParam}`;
+                    }
+                },
+                {
+                    id: 'clustrmaps',
+                    name: 'ClustrMaps',
+                    type: 'person',
+                    logo: 'https://cdn-1.webcatalog.io/catalog/clustrmaps/clustrmaps-icon-filled-256.webp?v=1714778165443',
+                    desc: 'Web & Location Intel',
+                    // State is now spelled out (e.g., Arizona) per user request
+                    personUrl: ({f, l, c, s}) => {
+                        const fullState = getFullStateName(s);
+                        return `https://clustrmaps.com/search?q=${encodeURIComponent(f)}%20${encodeURIComponent(l)}%20${encodeURIComponent(c)},%20${encodeURIComponent(fullState)}`;
+                    }
+                },
+                {
+                    id: 'familytree',
+                    name: 'FamilyTreeNow',
+                    type: 'both',
+                    logo: 'https://www.familytreenow.com/images/logo/80x80.jpg?v1',
+                    desc: 'Genealogy & Records',
+                    personUrl: ({f, l, c, s}) => `https://www.familytreenow.com/search/genealogy/results?first=${encodeURIComponent(f)}&last=${encodeURIComponent(l)}&citystatezip=${encodeURIComponent(c)},%20${s}`,
+                    phoneUrl: ({ac, ex, ln}) => `https://www.familytreenow.com/search/genealogy/results?phoneno=(${ac})${ex}-${ln}`
+                },
+                {
+                    id: 'zaba',
+                    name: 'Zaba Search',
+                    type: 'both',
+                    logo: 'https://www3.technologyevaluation.com/getattachment/e96d3cb8-779e-4798-965d-30963a64fa24/zabasearch-logo.png?lang=en-US&width=220&height=260&ext=.png&source=tw2',
+                    desc: 'Free People Search',
+                    personUrl: ({f, l, s, c}) => `https://www.zabasearch.com/people/${encodeURIComponent(f)}-${encodeURIComponent(l)}/${s}/${c}/`,
+                    phoneUrl: ({p}) => `https://www.zabasearch.com/phone/${p}`
+                },
+                {
+                    id: 'searchpeoplefree',
+                    name: 'SearchPeopleFree',
+                    type: 'both',
+                    logo: 'https://cdn-icons-png.flaticon.com/512/5080/5080806.png',
+                    desc: 'Public Directory',
+                    personUrl: ({f, l, s, c}) => `https://www.searchpeoplefree.com/find/${encodeURIComponent(f)}-${encodeURIComponent(l)}/${s}/${c}`,
+                    phoneUrl: ({ac, ex, ln}) => `https://www.searchpeoplefree.com/phone-lookup/${ac}-${ex}-${ln}`
+                },
+                {
+                    id: 'usphonebook',
+                    name: 'US PhoneBook',
+                    type: 'both',
+                    logo: 'https://www.usphonebook.com/usphonebook/img/phone-search-lookup.png',
+                    desc: 'US Numbers Only',
+                    personUrl: ({f, l, s, c}) => `https://www.usphonebook.com/${encodeURIComponent(f)}-${encodeURIComponent(l)}/${s}/${c}`,
+                    phoneUrl: ({ac, ex, ln}) => `https://www.usphonebook.com/phone-search/${ac}-${ex}-${ln}`
+                },
+                {
+                    id: 'fastpeople',
+                    name: 'Fast People Search',
+                    type: 'both',
+                    logo: 'https://strapi.thunderbit.com/uploads/fastpeoplesearch_1a2a5b5828.jpg',
+                    desc: 'Fast Results',
+                    personUrl: ({f, l, c, s}) => `https://www.fastpeoplesearch.com/name/${encodeURIComponent(f)}-${encodeURIComponent(l)}_${c}-${s}`,
+                    phoneUrl: ({ac, ex, ln}) => `https://www.fastpeoplesearch.com/${ac}-${ex}-${ln}`
+                },
+                {
+                    id: 'cyberbg',
+                    name: 'CyberBgChecks',
+                    type: 'both',
+                    logo: 'https://images.squarespace-cdn.com/content/v1/6334b6e61bddcb0faba70ec7/6814598e-5027-43d5-be7f-ca9748f01814/Remove+information+from+Cyber+Background+Checks.png',
+                    desc: 'Background Checks',
+                    personUrl: ({f, l, s, c}) => `https://www.cyberbackgroundchecks.com/people/${encodeURIComponent(f)}-${encodeURIComponent(l)}/${s}/${c}`,
+                    phoneUrl: ({ac, ex, ln}) => `https://www.cyberbackgroundchecks.com/phone/${ac}-${ex}-${ln}`
+                },
+                {
+                    id: 'smartbg',
+                    name: 'SmartBgChecks',
+                    type: 'both',
+                    logo: 'https://investigators-toolbox.com/wp-content/uploads/2020/05/Smartbackground.jpg',
+                    desc: 'Detailed Reports',
+                    personUrl: ({f, l, c, s}) => `https://www.smartbackgroundchecks.com/people/${encodeURIComponent(f)}-${encodeURIComponent(l)}/${c}/${s}`,
+                    phoneUrl: ({p}) => `https://www.smartbackgroundchecks.com/phone${p}`
+                },
+                {
+                    id: 'reversephonecheck',
+                    name: 'ReversePhoneCheck',
+                    type: 'phone',
+                    logo: 'https://strapi.thunderbit.com/uploads/Clean_Shot_2025_03_26_at_09_59_31_2x_fc8c03743b.png',
+                    desc: 'Detailed Phone Report',
+                    phoneUrl: ({ac, ex, ln}) => {
+                        const lnFirst2 = ln.substring(0, 2);
+                        const lnLast2 = ln.substring(2, 4);
+                        return `https://www.reversephonecheck.com/1-${ac}/${ex}/${lnFirst2}/?number=${lnLast2}`;
+                    }
+                },
+                {
+                    id: 'reversephonelookup',
+                    name: 'ReversePhoneLookup',
+                    type: 'phone',
+                    logo: '', 
+                    icon: 'ph-phone-outgoing',
+                    desc: 'Caller ID Lookup',
+                    phoneUrl: ({p}) => `https://www.reversephonelookup.com/number/${p}/`
+                }
+            ];
+
+            // --- State ---
+            let currentRecord = null;
+            let activeTab = 'people';
+            
+            // --- DOM Elements ---
+            const ui = {
+                inputPanel: document.getElementById('inputPanel'),
+                openPanelBtn: document.getElementById('openPanelBtn'),
+                closePanelBtn: document.getElementById('closePanelBtn'),
+                mobileOverlay: document.getElementById('mobileOverlay'),
+                inputs: {
+                    name: document.getElementById('name'),
+                    address: document.getElementById('address'),
+                    phone: document.getElementById('phone'),
+                },
+                launchAllBtn: document.getElementById('launchAllBtn'),
+                launchPeopleBtn: document.getElementById('launchPeopleBtn'),
+                launchPhoneBtn: document.getElementById('launchPhoneBtn'),
+                clearBtn: document.getElementById('clearBtn'),
+                peopleGrid: document.getElementById('peopleGrid'),
+                phoneGrid: document.getElementById('phoneGrid'),
+                peopleEmpty: document.getElementById('peopleEmpty'),
+                phoneEmpty: document.getElementById('phoneEmpty'),
+                viewPeople: document.getElementById('viewPeople'),
+                viewPhone: document.getElementById('viewPhone'),
+                tabPeople: document.getElementById('tabPeople'),
+                tabPhone: document.getElementById('tabPhone'),
+                currentTargetDisplay: document.getElementById('currentTargetDisplay'),
+                activeViewTitle: document.getElementById('activeViewTitle'),
+                countIndicator: document.getElementById('countIndicator'),
+                toastContainer: document.getElementById('toastContainer')
+            };
+
+            // --- Grist Integration ---
+            grist.ready({
+                requiredAccess: 'full',
+                columns: ['Name', 'Owner_Address', 'Phone'],
+                selection: true
+            });
+
+            grist.onRecord((record, mappings) => {
+                const mapped = grist.mapColumnNames(record, mappings);
+                currentRecord = mapped;
+
+                if (mapped) {
+                    ui.inputs.name.value = mapped.Name || '';
+                    ui.inputs.address.value = mapped.Owner_Address || '';
+                    ui.inputs.phone.value = mapped.Phone || '';
+                    
+                    updateGrids();
+                } else {
+                    resetForm();
+                }
+            });
+
+            // --- Helper Functions ---
+            
+            const parseAddress = (str) => {
+                if (!str) return { street: '', city: '', state: '', zip: '' };
+                // Attempt to split by comma
+                const parts = str.split(',');
+                const street = parts[0] ? parts[0].trim() : '';
+                
+                let city = '', state = '', zip = '';
+                
+                if (parts.length > 1) {
+                    // Last part is usually State ZIP or City State ZIP
+                    const lastPart = parts[parts.length - 1].trim();
+                    const stateMatch = lastPart.match(/\b([A-Za-z]{2})\b/);
+                    
+                    if (stateMatch) {
+                        state = stateMatch[1].toUpperCase();
+                        // Extract Zip if exists after state
+                        const zipMatch = lastPart.match(/\b(\d{5}(?:-\d{4})?)\b/);
+                        if (zipMatch) zip = zipMatch[1];
+                        
+                        // Everything before state in the last part (or the second to last part) is City
+                        const cityPart = lastPart.split(stateMatch[0])[0].replace(/,/g, '').trim();
+                        city = cityPart || (parts.length > 2 ? parts[parts.length - 2].trim() : '');
+                    } else {
+                        // No state found, assume simple format
+                        city = parts[parts.length - 1].trim();
+                    }
+                }
+                
+                return { street, city, state, zip };
+            };
+
+            const parseName = (str) => {
+                if (!str) return { first: '', last: '' };
+                const parts = str.trim().split(/\s+/);
+                if (parts.length < 2) return { first: str, last: '' };
+                const last = parts.pop();
+                const first = parts.join(' ');
+                return { first, last };
+            };
+
+            const parsePhone = (str) => {
+                if (!str) return null;
+                const cleaned = str.replace(/\D/g, '');
+                if (cleaned.length !== 10) return null;
+                return {
+                    full: cleaned,
+                    ac: cleaned.substring(0, 3),
+                    ex: cleaned.substring(3, 6),
+                    ln: cleaned.substring(6, 10)
+                };
+            };
+
+            const resetForm = () => {
+                Object.values(ui.inputs).forEach(i => i.value = '');
+                updateGrids();
+            };
+
+            const showToast = (msg, type = 'info') => {
+                const toast = document.createElement('div');
+                const bgClass = type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-white border-slate-200 text-slate-800';
+                const icon = type === 'success' ? 'ph-check-circle text-emerald-500' : 'ph-info text-blue-500';
+                
+                toast.className = `${bgClass} border shadow-lg rounded-lg p-3 flex items-center gap-3 transform transition-all duration-300 translate-x-full opacity-0 min-w-[300px]`;
+                toast.innerHTML = `
+                    <i class="ph ${icon} text-xl"></i>
+                    <div class="text-sm font-bold">${msg}</div>
+                `;
+                
+                ui.toastContainer.appendChild(toast);
+                
+                // Animate in
+                requestAnimationFrame(() => {
+                    toast.classList.remove('translate-x-full', 'opacity-0');
+                });
+
+                // Remove after delay
+                setTimeout(() => {
+                    toast.classList.add('opacity-0', 'translate-y-[-10px]');
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            };
+
+            const togglePanel = (show) => {
+                if (show) {
+                    ui.inputPanel.classList.remove('-translate-x-full');
+                    ui.mobileOverlay.classList.remove('hidden');
+                } else {
+                    ui.inputPanel.classList.add('-translate-x-full');
+                    ui.mobileOverlay.classList.add('hidden');
+                }
+            };
+
+            const switchTab = (tab) => {
+                activeTab = tab;
+                if (tab === 'people') {
+                    ui.viewPeople.classList.remove('hidden');
+                    ui.viewPhone.classList.add('hidden');
+                    ui.activeViewTitle.textContent = "People & Address Tools";
+                    
+                    ui.tabPeople.classList.remove('text-slate-500', 'hover:text-slate-700', 'hover:bg-white/50');
+                    ui.tabPeople.classList.add('bg-white', 'text-slate-800', 'shadow-sm', 'ring-1', 'ring-black/5');
+                    
+                    ui.tabPhone.classList.add('text-slate-500', 'hover:text-slate-700', 'hover:bg-white/50');
+                    ui.tabPhone.classList.remove('bg-white', 'text-slate-800', 'shadow-sm', 'ring-1', 'ring-black/5');
+                } else {
+                    ui.viewPhone.classList.remove('hidden');
+                    ui.viewPeople.classList.add('hidden');
+                    ui.activeViewTitle.textContent = "Reverse Phone Tools";
+
+                    ui.tabPhone.classList.remove('text-slate-500', 'hover:text-slate-700', 'hover:bg-white/50');
+                    ui.tabPhone.classList.add('bg-white', 'text-slate-800', 'shadow-sm', 'ring-1', 'ring-black/5');
+
+                    ui.tabPeople.classList.add('text-slate-500', 'hover:text-slate-700', 'hover:bg-white/50');
+                    ui.tabPeople.classList.remove('bg-white', 'text-slate-800', 'shadow-sm', 'ring-1', 'ring-black/5');
+                }
+                updateGrids(); // Update summary text
+            };
+
+            // --- Grid Rendering ---
+
+            const renderGridItem = (site) => {
+                const btn = document.createElement('button');
+                btn.className = `card-hover bg-white border border-slate-200 rounded-xl p-4 flex flex-col items-center text-center relative overflow-hidden group`;
+                
+                // Logo or Icon
+                let logoHtml = '';
+                if (site.logo) {
+                    logoHtml = `<img src="${site.logo}" alt="${site.name}" class="logo-img mb-3 opacity-90 group-hover:opacity-100">`;
+                } else {
+                    const iconClass = site.icon || 'ph-magnifying-glass';
+                    logoHtml = `<div class="w-12 h-12 rounded-full bg-slate-50 text-slate-400 flex items-center justify-center mb-3 group-hover:bg-blue-50 group-hover:text-blue-500 transition-colors">
+                                    <i class="ph ${iconClass} text-2xl"></i>
+                                 </div>`;
+                }
+
+                btn.innerHTML = `
+                    <div class="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+                    ${logoHtml}
+                    <h4 class="font-bold text-sm text-slate-800 leading-tight mb-1 relative z-10">${site.name}</h4>
+                    <p class="text-[10px] text-slate-400 font-medium uppercase tracking-wide relative z-10">${site.desc}</p>
+                    <i class="ph ph-arrow-up-right absolute top-3 right-3 text-slate-200 group-hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-all transform translate-x-[-4px] translate-y-[4px] group-hover:translate-x-0 group-hover:translate-y-0 text-lg"></i>
+                `;
+                
+                btn.onclick = () => launchSite(site);
+                return btn;
+            };
+
+            const updateGrids = () => {
+                const nameData = parseName(ui.inputs.name.value);
+                const addressData = parseAddress(ui.inputs.address.value);
+                const phoneData = parsePhone(ui.inputs.phone.value);
+
+                // Header Updates
+                ui.currentTargetDisplay.textContent = activeTab === 'people' 
+                    ? (nameData.first ? `${nameData.first} ${nameData.last}` : 'No name')
+                    : (phoneData ? `(${phoneData.ac}) ${phoneData.ex}-${phoneData.ln}` : 'No phone');
+
+                // Clear grids
+                ui.peopleGrid.innerHTML = '';
+                ui.phoneGrid.innerHTML = '';
+
+                let hasPeople = !!nameData.first;
+                let hasPhone = !!phoneData;
+
+                // Render People Sites
+                let peopleCount = 0;
+                if (hasPeople) {
+                    ui.peopleEmpty.classList.add('hidden');
+                    ui.peopleEmpty.classList.remove('flex');
+                    sites.forEach(site => {
+                        if (site.type === 'person' || site.type === 'both') {
+                            ui.peopleGrid.appendChild(renderGridItem(site));
+                            peopleCount++;
+                        }
+                    });
+                    ui.countIndicator.textContent = `${peopleCount} Tools`;
+                } else {
+                    ui.peopleEmpty.classList.remove('hidden');
+                    ui.peopleEmpty.classList.add('flex');
+                    ui.countIndicator.textContent = `0 Tools`;
+                }
+
+                // Render Phone Sites
+                let phoneCount = 0;
+                if (hasPhone) {
+                    ui.phoneEmpty.classList.add('hidden');
+                    ui.phoneEmpty.classList.remove('flex');
+                    sites.forEach(site => {
+                        if (site.type === 'phone' || site.type === 'both') {
+                            ui.phoneGrid.appendChild(renderGridItem(site));
+                            phoneCount++;
+                        }
+                    });
+                    ui.countIndicator.textContent = `${phoneCount} Tools`;
+                } else {
+                    ui.phoneEmpty.classList.remove('hidden');
+                    ui.phoneEmpty.classList.add('flex');
+                    ui.countIndicator.textContent = `0 Tools`;
+                }
+            };
+
+            // --- Search Logic ---
+            
+            const openUrl = (url) => window.open(url, '_blank', 'noopener,noreferrer');
+
+            const launchSite = (site) => {
+                const nameData = parseName(ui.inputs.name.value);
+                const addressData = parseAddress(ui.inputs.address.value);
+                const phoneData = parsePhone(ui.inputs.phone.value);
+
+                let url = '';
+
+                const f = nameData ? nameData.first : '';
+                const l = nameData ? nameData.last : '';
+                const c = addressData ? addressData.city : '';
+                const s = addressData ? addressData.state : '';
+                
+                const p = phoneData ? phoneData.full : '';
+                const ac = phoneData ? phoneData.ac : '';
+                const ex = phoneData ? phoneData.ex : '';
+                const ln = phoneData ? phoneData.ln : '';
+
+                try {
+                    if ((site.type === 'person' || site.type === 'both') && nameData.first && site.personUrl) {
+                        url = site.personUrl({ f, l, s, c, first: f, last: l });
+                    } 
+                    else if ((site.type === 'phone' || site.type === 'both') && phoneData && site.phoneUrl) {
+                        url = site.phoneUrl({ p, ac, ex, ln });
+                    }
+                    
+                    if (url) {
+                        openUrl(url);
+                    } else {
+                        showToast(`Missing data for ${site.name}`, 'error');
+                    }
+                } catch (e) {
+                    console.error("Error generating URL for", site.name, e);
+                    showToast("Error launching search", 'error');
+                }
+            };
+
+            const launchCategory = (type) => {
+                let count = 0;
+                sites.forEach(site => {
+                    if (site.type === type || site.type === 'both') {
+                        if (type === 'person' && !ui.inputs.name.value) return;
+                        if (type === 'phone' && !ui.inputs.phone.value) return;
+
+                        launchSite(site);
+                        count++;
+                    }
+                });
+                
+                if (count > 0) {
+                    showToast(`Launched ${count} searches!`);
+                } else {
+                    showToast('Please enter the required data first.');
+                }
+            };
+
+            const launchAll = () => {
+                const launchedPeople = launchCategory('person');
+                // Slight delay to prevent browser popup blocking issues
+                setTimeout(() => launchCategory('phone'), 150); 
+            };
+
+            // --- Event Listeners ---
+            ui.launchAllBtn.addEventListener('click', launchAll);
+            ui.launchPeopleBtn.addEventListener('click', () => launchCategory('person'));
+            ui.launchPhoneBtn.addEventListener('click', () => launchCategory('phone'));
+            ui.clearBtn.addEventListener('click', resetForm);
+            
+            // Tab Switching
+            ui.tabPeople.addEventListener('click', () => switchTab('people'));
+            ui.tabPhone.addEventListener('click', () => switchTab('phone'));
+
+            // Input listeners
+            Object.values(ui.inputs).forEach(input => {
+                input.addEventListener('input', updateGrids);
+            });
+            
+            // Mobile Panel
+            ui.openPanelBtn.addEventListener('click', () => togglePanel(true));
+            ui.closePanelBtn.addEventListener('click', () => togglePanel(false));
+            ui.mobileOverlay.addEventListener('click', () => togglePanel(false));
+
+            // Init
+            if (window.innerWidth < 768) {
+                ui.inputPanel.classList.add('-translate-x-full'); // Hide sidebar initially on mobile
+            }
+            switchTab('people');
+        });
+    </script>
+</body>
+</html>
