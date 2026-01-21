@@ -1,0 +1,1567 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skip Tracer Pro & Phone Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        @import url('https://rsms.me/inter/inter.css');
+        html { font-family: 'Inter', sans-serif; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Smooth Transitions */
+        .card-hover {
+            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .card-hover:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border-color: #3b82f6;
+        }
+
+        /* Logo Constraints */
+        .logo-img {
+            object-fit: contain;
+            width: 48px;
+            height: 48px;
+            transition: transform 0.2s;
+        }
+        .card-hover:hover .logo-img {
+            transform: scale(1.1);
+        }
+
+        /* Input Focus Ring */
+        .input-focused:focus-within {
+            ring: 2px;
+            ring-color: #3b82f6;
+            border-color: #3b82f6;
+            background-color: #fff;
+        }
+
+        /* Tab Animation */
+        .tab-indicator {
+            transition: all 0.3s ease;
+        }
+        
+        /* Loading/Active State for Button */
+        .btn-active:active {
+            transform: scale(0.98);
+        }
+
+        /* Phone Card Styles */
+        .phone-card {
+            background-color: #f8f9fa;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 8px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+        .phone-card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .phone-number {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            flex: 1;
+            min-width: 0;
+        }
+        .phone-link {
+            font-size: 13px;
+            font-weight: 500;
+            color: #374151;
+            text-decoration: none;
+        }
+        .phone-note {
+            color: #6b7280;
+            font-size: 10px;
+            line-height: 1.2;
+        }
+        .phone-note p {
+            margin: 0;
+        }
+        .phone-actions {
+            display: flex;
+            gap: 3px;
+        }
+        .phone-action-btn {
+            background-color: #fff;
+            border: 1px solid #e1e5e9;
+            border-radius: 4px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        .phone-action-btn:hover {
+            background-color: #e9ecef;
+        }
+        .phone-action-btn a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .action-icon {
+            width: 14px;
+            height: 14px;
+            object-fit: contain;
+        }
+        .wrong-phone {
+            background-color: #fee2e2;
+            border-color: #fecaca;
+        }
+        .wrong-phone-label {
+            color: #b91c1c;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        /* Check Potential Phone Section */
+        .check-container {
+            border-top: 1px solid #e5e7eb;
+            padding-top: 12px;
+            margin-top: 12px;
+        }
+        .check-container h3 {
+            font-size: 11px;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+        .check-input-group {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .check-input-group input {
+            flex: 1 1 100px;
+        }
+        .check-btn {
+            padding: 5px 10px;
+            background-color: #3b82f6;
+            color: white;
+            font-weight: 500;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+        .check-btn:hover {
+            background-color: #2563eb;
+        }
+        .result-box {
+            background-color: #f8f9fa;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 8px;
+            font-size: 12px;
+            line-height: 1.4;
+            margin-top: 8px;
+            min-height: 40px;
+        }
+        .add-buttons {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+        }
+        .add-btn {
+            padding: 4px 8px;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+        .add-btn:hover {
+            background-color: #2563eb;
+        }
+
+        /* Dialer Styles */
+        .dialer-container {
+            border-top: 1px solid #e5e7eb;
+            padding-top: 10px;
+            margin-top: 10px;
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+        .dialer-input {
+            flex-grow: 1;
+            padding: 6px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 13px;
+            background: #fff;
+        }
+        .dialer-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+        }
+        .dialer-actions {
+            display: flex;
+            gap: 3px;
+        }
+        .dialer-btn {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #e1e5e9;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        .dialer-btn:hover {
+            background-color: #f3f4f6;
+        }
+        .dialer-btn img {
+            width: 16px;
+            height: 16px;
+            object-fit: contain;
+        }
+
+        /* SMS Widget Styles */
+        .sms-template-select {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            background-color: #fff;
+            font-size: 13px;
+        }
+        .sms-template-select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+        }
+        .sms-button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        .sms-swap-btn {
+            padding: 4px 8px;
+            background: #f8f9fa;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .sms-swap-btn:hover {
+            border-color: #d1d5db;
+            background-color: #f1f3f5;
+        }
+        .sms-swap-btn.active {
+            background: #3b82f6;
+            color: #fff;
+            border-color: #2563eb;
+            font-weight: 600;
+        }
+        .sms-preview-section {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            min-height: 0;
+        }
+        .sms-preview-box {
+            background-color: #f8f9fa;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 12px 16px;
+            font-size: 14px;
+            line-height: 1.6;
+            flex-grow: 1;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            min-height: 120px;
+        }
+        .sms-send-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background-color: #3b82f6;
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+        .sms-send-btn:hover { background-color: #2563eb; }
+        .sms-send-btn.disabled { background-color: #a1a1aa; cursor: not-allowed; }
+        .sms-send-btn svg { width: 16px; height: 16px; }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .phone-cards-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        grist: {
+                            DEFAULT: '#194e7e',
+                            light: '#4a8bc2',
+                        },
+                        slate: {
+                            850: '#1e293b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="h-full flex overflow-hidden text-slate-800 antialiased bg-slate-50 selection:bg-blue-100 selection:text-blue-900">
+
+    <!-- Mobile Overlay -->
+    <div id="mobileOverlay" class="fixed inset-0 bg-black/50 z-20 hidden md:hidden glass"></div>
+
+    <!-- Sidebar -->
+    <aside id="inputPanel" class="bg-white border-r border-slate-200 w-full md:w-[380px] flex flex-col fixed md:relative z-30 h-full shadow-2xl md:shadow-lg transition-transform duration-300 ease-out translate-x-0">
+        
+        <!-- Header -->
+        <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-white shrink-0 z-10">
+            <div class="flex items-center gap-2.5">
+                <div class="p-2 bg-blue-50 text-blue-600 rounded-lg shadow-sm">
+                    <i class="ph ph-radar text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-base text-slate-900 leading-none tracking-tight">Skip Tracer</h1>
+                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Pro + Phone Manager</span>
+                </div>
+            </div>
+            <button id="closePanelBtn" class="md:hidden p-2 text-slate-400 hover:bg-slate-100 rounded-lg transition-colors">
+                <i class="ph ph-x text-lg"></i>
+            </button>
+        </div>
+
+        <!-- Scrollable Form Area -->
+        <div class="flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth">
+            
+            <!-- Input Group: Name -->
+            <div class="space-y-1">
+                <label for="name" class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Subject Name</label>
+                <div class="relative group input-focused rounded-lg transition-all">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-500">
+                        <i class="ph ph-user text-base"></i>
+                    </div>
+                    <input type="text" id="name" placeholder="First & Last Name" 
+                        class="block w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:bg-white transition-colors placeholder:text-slate-400 font-medium">
+                </div>
+            </div>
+
+            <!-- Input Group: Address -->
+            <div class="space-y-1">
+                <label for="address" class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Full Address</label>
+                <div class="relative group input-focused rounded-lg transition-all">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-500">
+                        <i class="ph ph-house-line text-base"></i>
+                    </div>
+                    <input type="text" id="address" placeholder="Street, City, State ZIP" 
+                        class="block w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:bg-white transition-colors placeholder:text-slate-400 font-medium">
+                </div>
+            </div>
+
+            <!-- Input Group: Phone -->
+            <div class="space-y-1">
+                <label for="phone" class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Phone Number</label>
+                <div class="relative group input-focused rounded-lg transition-all">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-500">
+                        <i class="ph ph-phone text-base"></i>
+                    </div>
+                    <input type="tel" id="phone" placeholder="(555) 000-0000" 
+                        class="block w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:bg-white transition-colors placeholder:text-slate-400 font-medium">
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="pt-3 border-t border-slate-100 space-y-2">
+                <button id="launchAllBtn" class="w-full btn-active flex justify-center items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white py-2.5 px-4 rounded-lg text-sm font-bold shadow-lg shadow-slate-200/50 transition-all">
+                    <i class="ph ph-rocket-launch text-yellow-400"></i>
+                    <span>Launch All Searches</span>
+                </button>
+                
+                <div class="grid grid-cols-2 gap-2">
+                    <button id="launchPeopleBtn" class="btn-active flex justify-center items-center gap-1.5 bg-white border border-slate-200 hover:border-blue-300 hover:text-blue-600 text-slate-600 py-2 px-3 rounded-lg text-xs font-bold transition-all shadow-sm">
+                        <i class="ph ph-users text-sm"></i> People
+                    </button>
+                    <button id="launchPhoneBtn" class="btn-active flex justify-center items-center gap-1.5 bg-white border border-slate-200 hover:border-emerald-300 hover:text-emerald-600 text-slate-600 py-2 px-3 rounded-lg text-xs font-bold transition-all shadow-sm">
+                        <i class="ph ph-phone-call text-sm"></i> Phone
+                    </button>
+                </div>
+
+                <button id="clearBtn" class="w-full flex justify-center items-center gap-1.5 text-[10px] font-bold text-slate-400 hover:text-red-500 uppercase tracking-wide transition-colors py-1.5 mt-1">
+                    <i class="ph ph-trash text-sm"></i> Clear Form
+                </button>
+            </div>
+
+            <!-- Phone Management Section -->
+            <div class="pt-3 border-t border-slate-100 space-y-3">
+                <div class="flex items-center gap-2">
+                    <i class="ph ph-phone-list text-blue-500"></i>
+                    <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Phone Management</h3>
+                </div>
+
+                <!-- Check Potential Phone -->
+                <div class="check-container">
+                    <h3>Check Potential Phone</h3>
+                    <div class="check-input-group">
+                        <input type="text" id="check-phone" class="dialer-input" placeholder="Enter phone...">
+                        <button id="check-btn" class="check-btn">Check</button>
+                    </div>
+                    <div id="check-result" class="result-box"></div>
+                </div>
+
+                <!-- Phone Cards Container -->
+                <div id="phone-container" class="phone-cards-container flex flex-col gap-2">
+                    <div class="text-center text-xs text-slate-400 italic py-4">Please select a record to see phone numbers.</div>
+                </div>
+
+                <!-- Inline Dialer -->
+                <div class="dialer-container">
+                    <input type="text" id="dialer-input" class="dialer-input" placeholder="Enter phone...">
+                    <div class="dialer-actions">
+                        <button class="dialer-btn" id="dialer-webex-btn" title="Call with Webex">
+                            <img src="https://img.icons8.com/fluent/512/webex.png" alt="Webex">
+                        </button>
+                        <button class="dialer-btn" id="dialer-tel-btn" title="Call with Phone Link">
+                            <img src="https://static.wikia.nocookie.net/logopedia/images/b/b2/Microsoft_Phone_Link_%282022%29.svg" alt="Phone Link">
+                        </button>
+                        <button class="dialer-btn" id="dialer-sms-btn" title="Message with SMS">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/IMessage_logo.svg/1024px-IMessage_logo.svg.png" alt="SMS">
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="p-3 bg-slate-50 border-t border-slate-200 text-center">
+            <p class="text-[9px] text-slate-400 font-medium">Unified Widget v1.0 • Skip Tracer + Phone Manager</p>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-full bg-slate-50/50 relative overflow-hidden">
+        
+        <!-- Mobile Toggle -->
+        <div class="md:hidden absolute top-4 left-4 z-10">
+            <button id="openPanelBtn" class="bg-white p-2 rounded-lg shadow-md text-slate-700 border border-slate-200 btn-active">
+                <i class="ph ph-list text-lg"></i>
+            </button>
+        </div>
+
+        <!-- Notification Toast -->
+        <div id="toastContainer" class="absolute top-4 right-4 z-40 flex flex-col gap-2 pointer-events-none">
+            <!-- Toasts injected here -->
+        </div>
+
+        <!-- Scrollable View -->
+        <div class="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 scroll-smooth">
+            <div class="max-w-7xl mx-auto space-y-6">
+                
+                <!-- Tabs Navigation -->
+                <div class="bg-slate-200/80 p-1 rounded-xl flex shadow-inner w-full max-w-lg mx-auto backdrop-blur-sm">
+                    <button id="tabPeople" class="flex-1 py-2 px-3 rounded-lg text-xs font-bold uppercase tracking-wide transition-all duration-200 flex items-center justify-center gap-1.5 bg-white text-slate-800 shadow-sm ring-1 ring-black/5">
+                        <i class="ph ph-users text-base"></i>
+                        People & Address
+                    </button>
+                    <button id="tabPhone" class="flex-1 py-2 px-3 rounded-lg text-xs font-bold uppercase tracking-wide transition-all duration-200 flex items-center justify-center gap-1.5 text-slate-500 hover:text-slate-700 hover:bg-white/50">
+                        <i class="ph ph-phone-call text-base"></i>
+                        Phone Lookup
+                    </button>
+                    <button id="tabSms" class="flex-1 py-2 px-3 rounded-lg text-xs font-bold uppercase tracking-wide transition-all duration-200 flex items-center justify-center gap-1.5 text-slate-500 hover:text-slate-700 hover:bg-white/50">
+                        <i class="ph ph-chat-circle-text text-base"></i>
+                        SMS Templates
+                    </button>
+                </div>
+
+                <!-- Header & Context -->
+                <div class="flex flex-col md:flex-row md:items-end justify-between gap-3 border-b border-slate-200 pb-3">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800" id="activeViewTitle">People Tools</h2>
+                        <p class="text-sm text-slate-500 mt-0.5">Target: <span id="currentTargetDisplay" class="font-semibold text-slate-700">No data entered</span></p>
+                    </div>
+                    <div class="flex gap-2">
+                        <!-- Status Indicators -->
+                        <span id="countIndicator" class="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-bold border border-slate-200">
+                            0 Tools
+                        </span>
+                    </div>
+                </div>
+
+                <!-- People Grid View -->
+                <div id="viewPeople" class="block animate-fade-in">
+                    <div id="peopleGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+                        <!-- Items injected by JS -->
+                    </div>
+                    <!-- Empty State -->
+                    <div id="peopleEmpty" class="hidden flex-col items-center justify-center py-16 bg-white rounded-2xl border border-dashed border-slate-300">
+                        <div class="bg-slate-50 p-4 rounded-full mb-3">
+                            <i class="ph ph-user-focus text-3xl text-slate-300"></i>
+                        </div>
+                        <p class="text-sm font-bold text-slate-500">Enter a Name to Activate Search Tools</p>
+                    </div>
+                </div>
+
+                <!-- Phone Grid View -->
+                <div id="viewPhone" class="hidden animate-fade-in">
+                    <div id="phoneGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+                        <!-- Items injected by JS -->
+                    </div>
+                    <!-- Empty State -->
+                    <div id="phoneEmpty" class="hidden flex-col items-center justify-center py-16 bg-white rounded-2xl border border-dashed border-slate-300">
+                        <div class="bg-slate-50 p-4 rounded-full mb-3">
+                            <i class="ph ph-phone-slash text-3xl text-slate-300"></i>
+                        </div>
+                        <p class="text-sm font-bold text-slate-500">Enter a Phone Number to Activate Reverse Lookups</p>
+                    </div>
+                </div>
+
+                <!-- SMS Templates View -->
+                <div id="viewSms" class="hidden animate-fade-in">
+                    <div id="sms-no-record" class="flex-col items-center justify-center py-16 bg-white rounded-2xl border border-dashed border-slate-300">
+                        <div class="bg-slate-50 p-4 rounded-full mb-3">
+                            <i class="ph ph-chat-circle-dots text-3xl text-slate-300"></i>
+                        </div>
+                        <p class="text-sm font-bold text-slate-500">Please select a record to use SMS templates</p>
+                    </div>
+                    <div id="sms-main-content" style="display: none;">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <!-- Left Column: Controls -->
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Template</label>
+                                    <select id="sms-template-select" class="sms-template-select"></select>
+                                </div>
+                                <div id="sms-property-selector-placeholder" style="display: none;">
+                                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Property</label>
+                                    <select id="sms-property-select" class="sms-template-select"></select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Property Focus</label>
+                                    <div id="sms-property-focus-group" class="sms-button-group">
+                                        <button class="sms-swap-btn active" data-value="retail investment properties">Retail Investment</button>
+                                        <button class="sms-swap-btn" data-value="Multi-tenant retail properties">Multi-Tenant</button>
+                                        <button class="sms-swap-btn" data-value="Single Tenant Investments">Single Tenant</button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Property Identifier</label>
+                                    <div id="sms-property-identifier-group" class="sms-button-group">
+                                        <button class="sms-swap-btn active" data-value="Property_Name">Name</button>
+                                        <button class="sms-swap-btn" data-value="Tenants">Tenants</button>
+                                        <button class="sms-swap-btn" data-value="Property_Type">Type</button>
+                                        <button class="sms-swap-btn" data-value="Secondary_Type">Secondary Type</button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Send to</label>
+                                    <select id="sms-phone-select" class="sms-template-select"></select>
+                                </div>
+                            </div>
+                            <!-- Right Column: Preview & Actions -->
+                            <div class="flex flex-col gap-4">
+                                <div class="sms-preview-section">
+                                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Preview</label>
+                                    <div id="sms-preview-box" class="sms-preview-box"></div>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <a id="sms-send-link" class="sms-send-btn disabled" href="#" target="_blank">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="white">
+                                            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                                        </svg>
+                                        Send SMS
+                                    </a>
+                                    <div id="sms-copy-row" style="display: none;" class="flex items-center gap-2">
+                                        <button id="sms-copy-btn" class="px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors">
+                                            Copy to clipboard
+                                        </button>
+                                        <span id="sms-copy-msg" class="text-xs text-green-600" style="display: none;">Copied!</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- Data: State Mapping for ClustrMaps ---
+            const usStates = {
+                'AL': 'Alabama', 'AK': 'Alaska', 'AS': 'American Samoa', 'AZ': 'Arizona', 'AR': 'Arkansas', 
+                'CA': 'California', 'CO': 'Colorado', 'CT': 'Connecticut', 'DE': 'Delaware', 'DC': 'District of Columbia', 
+                'FM': 'Federated States of Micronesia', 'FL': 'Florida', 'GA': 'Georgia', 'GU': 'Guam', 
+                'HI': 'Hawaii', 'ID': 'Idaho', 'IL': 'Illinois', 'IN': 'Indiana', 'IA': 'Iowa', 
+                'KS': 'Kansas', 'KY': 'Kentucky', 'LA': 'Louisiana', 'ME': 'Maine', 'MH': 'Marshall Islands', 
+                'MD': 'Maryland', 'MA': 'Massachusetts', 'MI': 'Michigan', 'MN': 'Minnesota', 'MS': 'Mississippi', 
+                'MO': 'Missouri', 'MT': 'Montana', 'NE': 'Nebraska', 'NV': 'Nevada', 'NH': 'New Hampshire', 
+                'NJ': 'New Jersey', 'NM': 'New Mexico', 'NY': 'New York', 'NC': 'North Carolina', 
+                'ND': 'North Dakota', 'MP': 'Northern Mariana Islands', 'OH': 'Ohio', 'OK': 'Oklahoma', 
+                'OR': 'Oregon', 'PW': 'Palau', 'PA': 'Pennsylvania', 'PR': 'Puerto Rico', 'RI': 'Rhode Island', 
+                'SC': 'South Carolina', 'SD': 'South Dakota', 'TN': 'Tennessee', 'TX': 'Texas', 
+                'UT': 'Utah', 'VT': 'Vermont', 'VI': 'Virgin Islands', 'VA': 'Virginia', 
+                'WA': 'Washington', 'WV': 'West Virginia', 'WI': 'Wisconsin', 'WY': 'Wyoming'
+            };
+
+            const getFullStateName = (abbr) => {
+                if(!abbr) return '';
+                return usStates[abbr.toUpperCase()] || abbr;
+            };
+
+            // --- Data: Search Sites ---
+            const sites = [
+                {
+                    id: 'truepeople',
+                    name: 'TruePeopleSearch',
+                    type: 'person',
+                    logo: 'https://play-lh.googleusercontent.com/aNUH0g2ASIp8tN9OnJpccMxQJDkZLPxrKWhw2OnGkDNA2WLePAOU9iWSXkSt5P3OY_0',
+                    desc: 'Comprehensive Results',
+                    personUrl: ({f, l, c, s}) => {
+                        const nameParam = encodeURIComponent(`${f} ${l}`);
+                        const locParam = encodeURIComponent(`${c} ${s}`);
+                        return `https://www.truepeoplesearch.com/results?name=${nameParam}&citystatezip=${locParam}`;
+                    }
+                },
+                {
+                    id: 'clustrmaps',
+                    name: 'ClustrMaps',
+                    type: 'person',
+                    logo: 'https://cdn-1.webcatalog.io/catalog/clustrmaps/clustrmaps-icon-filled-256.webp?v=1714778165443',
+                    desc: 'Web & Location Intel',
+                    personUrl: ({f, l, c, s}) => {
+                        const fullState = getFullStateName(s);
+                        return `https://clustrmaps.com/search?q=${encodeURIComponent(f)}%20${encodeURIComponent(l)}%20${encodeURIComponent(c)},%20${encodeURIComponent(fullState)}`;
+                    }
+                },
+                {
+                    id: 'familytree',
+                    name: 'FamilyTreeNow',
+                    type: 'both',
+                    logo: 'https://www.familytreenow.com/images/logo/80x80.jpg?v1',
+                    desc: 'Genealogy & Records',
+                    personUrl: ({f, l, c, s}) => `https://www.familytreenow.com/search/genealogy/results?first=${encodeURIComponent(f)}&last=${encodeURIComponent(l)}&citystatezip=${encodeURIComponent(c)},%20${s}`,
+                    phoneUrl: ({ac, ex, ln}) => `https://www.familytreenow.com/search/genealogy/results?phoneno=(${ac})${ex}-${ln}`
+                },
+                {
+                    id: 'zaba',
+                    name: 'Zaba Search',
+                    type: 'both',
+                    logo: 'https://www3.technologyevaluation.com/getattachment/e96d3cb8-779e-4798-965d-30963a64fa24/zabasearch-logo.png?lang=en-US&width=220&height=260&ext=.png&source=tw2',
+                    desc: 'Free People Search',
+                    personUrl: ({f, l, s, c}) => `https://www.zabasearch.com/people/${encodeURIComponent(f)}-${encodeURIComponent(l)}/${s}/${c}/`,
+                    phoneUrl: ({p}) => `https://www.zabasearch.com/phone/${p}`
+                },
+                {
+                    id: 'searchpeoplefree',
+                    name: 'SearchPeopleFree',
+                    type: 'both',
+                    logo: 'https://cdn-icons-png.flaticon.com/512/5080/5080806.png',
+                    desc: 'Public Directory',
+                    personUrl: ({f, l, s, c}) => `https://www.searchpeoplefree.com/find/${encodeURIComponent(f)}-${encodeURIComponent(l)}/${s}/${c}`,
+                    phoneUrl: ({ac, ex, ln}) => `https://www.searchpeoplefree.com/phone-lookup/${ac}-${ex}-${ln}`
+                },
+                {
+                    id: 'usphonebook',
+                    name: 'US PhoneBook',
+                    type: 'both',
+                    logo: 'https://www.usphonebook.com/usphonebook/img/phone-search-lookup.png',
+                    desc: 'US Numbers Only',
+                    personUrl: ({f, l, s, c}) => `https://www.usphonebook.com/${encodeURIComponent(f)}-${encodeURIComponent(l)}/${s}/${c}`,
+                    phoneUrl: ({ac, ex, ln}) => `https://www.usphonebook.com/phone-search/${ac}-${ex}-${ln}`
+                },
+                {
+                    id: 'fastpeople',
+                    name: 'Fast People Search',
+                    type: 'both',
+                    logo: 'https://strapi.thunderbit.com/uploads/fastpeoplesearch_1a2a5b5828.jpg',
+                    desc: 'Fast Results',
+                    personUrl: ({f, l, c, s}) => `https://www.fastpeoplesearch.com/name/${encodeURIComponent(f)}-${encodeURIComponent(l)}_${c}-${s}`,
+                    phoneUrl: ({ac, ex, ln}) => `https://www.fastpeoplesearch.com/${ac}-${ex}-${ln}`
+                },
+                {
+                    id: 'cyberbg',
+                    name: 'CyberBgChecks',
+                    type: 'both',
+                    logo: 'https://images.squarespace-cdn.com/content/v1/6334b6e61bddcb0faba70ec7/6814598e-5027-43d5-be7f-ca9748f01814/Remove+information+from+Cyber+Background+Checks.png',
+                    desc: 'Background Checks',
+                    personUrl: ({f, l, s, c}) => `https://www.cyberbackgroundchecks.com/people/${encodeURIComponent(f)}-${encodeURIComponent(l)}/${s}/${c}`,
+                    phoneUrl: ({ac, ex, ln}) => `https://www.cyberbackgroundchecks.com/phone/${ac}-${ex}-${ln}`
+                },
+                {
+                    id: 'smartbg',
+                    name: 'SmartBgChecks',
+                    type: 'both',
+                    logo: 'https://investigators-toolbox.com/wp-content/uploads/2020/05/Smartbackground.jpg',
+                    desc: 'Detailed Reports',
+                    personUrl: ({f, l, c, s}) => `https://www.smartbackgroundchecks.com/people/${encodeURIComponent(f)}-${encodeURIComponent(l)}/${c}/${s}`,
+                    phoneUrl: ({p}) => `https://www.smartbackgroundchecks.com/phone${p}`
+                },
+                {
+                    id: 'reversephonecheck',
+                    name: 'ReversePhoneCheck',
+                    type: 'phone',
+                    logo: 'https://strapi.thunderbit.com/uploads/Clean_Shot_2025_03_26_at_09_59_31_2x_fc8c03743b.png',
+                    desc: 'Detailed Phone Report',
+                    phoneUrl: ({ac, ex, ln}) => {
+                        const lnFirst2 = ln.substring(0, 2);
+                        const lnLast2 = ln.substring(2, 4);
+                        return `https://www.reversephonecheck.com/1-${ac}/${ex}/${lnFirst2}/?number=${lnLast2}`;
+                    }
+                },
+                {
+                    id: 'reversephonelookup',
+                    name: 'ReversePhoneLookup',
+                    type: 'phone',
+                    logo: '', 
+                    icon: 'ph-phone-outgoing',
+                    desc: 'Caller ID Lookup',
+                    phoneUrl: ({p}) => `https://www.reversephonelookup.com/number/${p}/`
+                }
+            ];
+
+            // --- SMS Templates ---
+            const SMS_TEMPLATES = {
+                standard: { name: "Standard Introduction", text: "Hi {{firstName}}, this is Sam Gfroerer with M&M. I just tried giving you a quick call — I specialize in {{propertyFocus}} and wanted to connect regarding your {{propertyIdentifier}} in {{propertyCity}}. Let me know if there's a good time to chat, or feel free to text back. Looking forward to connecting!" },
+                followUp: { name: "Brief Follow-up", text: "Hi {{firstName}}, Sam from M&M here. Just called about your {{propertyIdentifier}} in {{propertyCity}}. I help investors with {{propertyFocus}}. Free to connect via text!" },
+                valueProp: { name: "Value Proposition", text: "Hi {{firstName}}, this is Sam with M&M. I specialize in maximizing returns on {{propertyFocus}} like your {{propertyIdentifier}} in {{propertyCity}}. Let's connect soon." }
+            };
+
+            // --- State ---
+            let currentRecord = null;
+            let activeTab = 'people';
+            let g_relatedProperties = [];
+            let lastMessageSent = "";
+
+            const PHONE_COLUMN_KEYS = ['Phone', 'Phone_2', 'Phone_3', 'Phone_4'];
+            const PHONE_FIELDS = [
+                { phone: 'Phone', notes: 'Phone_1_Notes' },
+                { phone: 'Phone_2', notes: 'Phone_2_Notes' },
+                { phone: 'Phone_3', notes: 'Phone_3_Notes' },
+                { phone: 'Phone_4', notes: 'Phone_4_Notes' }
+            ];
+            
+            // --- DOM Elements ---
+            const ui = {
+                inputPanel: document.getElementById('inputPanel'),
+                openPanelBtn: document.getElementById('openPanelBtn'),
+                closePanelBtn: document.getElementById('closePanelBtn'),
+                mobileOverlay: document.getElementById('mobileOverlay'),
+                inputs: {
+                    name: document.getElementById('name'),
+                    address: document.getElementById('address'),
+                    phone: document.getElementById('phone'),
+                },
+                launchAllBtn: document.getElementById('launchAllBtn'),
+                launchPeopleBtn: document.getElementById('launchPeopleBtn'),
+                launchPhoneBtn: document.getElementById('launchPhoneBtn'),
+                clearBtn: document.getElementById('clearBtn'),
+                peopleGrid: document.getElementById('peopleGrid'),
+                phoneGrid: document.getElementById('phoneGrid'),
+                peopleEmpty: document.getElementById('peopleEmpty'),
+                phoneEmpty: document.getElementById('phoneEmpty'),
+                viewPeople: document.getElementById('viewPeople'),
+                viewPhone: document.getElementById('viewPhone'),
+                viewSms: document.getElementById('viewSms'),
+                tabPeople: document.getElementById('tabPeople'),
+                tabPhone: document.getElementById('tabPhone'),
+                tabSms: document.getElementById('tabSms'),
+                currentTargetDisplay: document.getElementById('currentTargetDisplay'),
+                activeViewTitle: document.getElementById('activeViewTitle'),
+                countIndicator: document.getElementById('countIndicator'),
+                toastContainer: document.getElementById('toastContainer'),
+                // Phone Manager Elements
+                phoneContainer: document.getElementById('phone-container'),
+                checkPhone: document.getElementById('check-phone'),
+                checkBtn: document.getElementById('check-btn'),
+                checkResult: document.getElementById('check-result'),
+                dialerInput: document.getElementById('dialer-input'),
+                dialerWebexBtn: document.getElementById('dialer-webex-btn'),
+                dialerTelBtn: document.getElementById('dialer-tel-btn'),
+                dialerSmsBtn: document.getElementById('dialer-sms-btn'),
+                // SMS Elements
+                smsNoRecord: document.getElementById('sms-no-record'),
+                smsMainContent: document.getElementById('sms-main-content'),
+                smsTemplateSelect: document.getElementById('sms-template-select'),
+                smsPropertySelect: document.getElementById('sms-property-select'),
+                smsPropertySelectorPlaceholder: document.getElementById('sms-property-selector-placeholder'),
+                smsPropertyFocusGroup: document.getElementById('sms-property-focus-group'),
+                smsPropertyIdentifierGroup: document.getElementById('sms-property-identifier-group'),
+                smsPhoneSelect: document.getElementById('sms-phone-select'),
+                smsPreviewBox: document.getElementById('sms-preview-box'),
+                smsSendLink: document.getElementById('sms-send-link'),
+                smsCopyRow: document.getElementById('sms-copy-row'),
+                smsCopyBtn: document.getElementById('sms-copy-btn'),
+                smsCopyMsg: document.getElementById('sms-copy-msg'),
+            };
+
+            // --- Grist Integration ---
+            grist.ready({
+                requiredAccess: 'full',
+                columns: ['Name', 'Owner_Address', 'Phone', 'Phone_2', 'Phone_3', 'Phone_4', 
+                         'Phone_1_Notes', 'Phone_2_Notes', 'Phone_3_Notes', 'Phone_4_Notes', 'Wrong_Phone'],
+                selection: true
+            });
+
+            grist.onRecord(async (record, mappings) => {
+                const mapped = grist.mapColumnNames(record, mappings);
+                currentRecord = mapped;
+
+                if (mapped) {
+                    ui.inputs.name.value = mapped.Name || '';
+                    ui.inputs.address.value = mapped.Owner_Address || '';
+                    ui.inputs.phone.value = mapped.Phone || '';
+                    
+                    // Fetch related properties for SMS
+                    if (mapped.id) {
+                        await fetchAndFilterProperties(mapped.id);
+                    }
+                    
+                    updateGrids();
+                    renderPhoneWidget();
+                    renderSmsWidget();
+                } else {
+                    resetForm();
+                    renderPhoneWidget();
+                    renderSmsWidget();
+                }
+            });
+
+            // --- Helper Functions ---
+            
+            const parseAddress = (str) => {
+                if (!str) return { street: '', city: '', state: '', zip: '' };
+                const parts = str.split(',');
+                const street = parts[0] ? parts[0].trim() : '';
+                
+                let city = '', state = '', zip = '';
+                
+                if (parts.length > 1) {
+                    const lastPart = parts[parts.length - 1].trim();
+                    const stateMatch = lastPart.match(/\b([A-Za-z]{2})\b/);
+                    
+                    if (stateMatch) {
+                        state = stateMatch[1].toUpperCase();
+                        const zipMatch = lastPart.match(/\b(\d{5}(?:-\d{4})?)\b/);
+                        if (zipMatch) zip = zipMatch[1];
+                        
+                        const cityPart = lastPart.split(stateMatch[0])[0].replace(/,/g, '').trim();
+                        city = cityPart || (parts.length > 2 ? parts[parts.length - 2].trim() : '');
+                    } else {
+                        city = parts[parts.length - 1].trim();
+                    }
+                }
+                
+                return { street, city, state, zip };
+            };
+
+            const parseName = (str) => {
+                if (!str) return { first: '', last: '' };
+                const parts = str.trim().split(/\s+/);
+                if (parts.length < 2) return { first: str, last: '' };
+                const last = parts.pop();
+                const first = parts.join(' ');
+                return { first, last };
+            };
+
+            const parsePhone = (str) => {
+                if (!str) return null;
+                const cleaned = str.replace(/\D/g, '');
+                if (cleaned.length !== 10) return null;
+                return {
+                    full: cleaned,
+                    ac: cleaned.substring(0, 3),
+                    ex: cleaned.substring(3, 6),
+                    ln: cleaned.substring(6, 10)
+                };
+            };
+
+            const sanitizePhone = (phone) => (phone && typeof phone === 'string') ? phone.replace(/\D/g, '') : '';
+
+            const formatPhoneNumber = (phoneStr) => {
+                if (!phoneStr) return '';
+                const cleaned = ('' + phoneStr).replace(/\D/g, '');
+                const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+                if (match) {
+                    return `(${match[1]}) ${match[2]}-${match[3]}`;
+                }
+                return phoneStr;
+            };
+
+            const parseWrongPhones = (str) => {
+                if (!str) return [];
+                const items = str.split(';').map(s => s.trim()).filter(s => s);
+                return items.map(item => {
+                    const parenIndex = item.lastIndexOf(' (');
+                    let number, note;
+                    if (parenIndex !== -1 && item.endsWith(')')) {
+                        number = item.substring(0, parenIndex).trim();
+                        note = item.substring(parenIndex + 2, item.length - 1).trim();
+                    } else {
+                        number = item;
+                        note = '';
+                    }
+                    return {number, note};
+                });
+            };
+
+            const getFirstName = (fullName) => (fullName && typeof fullName === 'string') ? fullName.split(' ')[0] : '[First Name]';
+
+            const columnarToRowFormat = (data) => {
+                if (!data || !data.id || !Array.isArray(data.id)) return [];
+                const keys = Object.keys(data);
+                return data.id.map((id, i) => {
+                    const row = { id, fields: {} };
+                    for (const key of keys) if (key !== 'id') row.fields[key] = data[key][i];
+                    return row;
+                });
+            };
+
+            const resetForm = () => {
+                Object.values(ui.inputs).forEach(i => i.value = '');
+                updateGrids();
+            };
+
+            const showToast = (msg, type = 'info') => {
+                const toast = document.createElement('div');
+                const bgClass = type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-white border-slate-200 text-slate-800';
+                const icon = type === 'success' ? 'ph-check-circle text-emerald-500' : 'ph-info text-blue-500';
+                
+                toast.className = `${bgClass} border shadow-lg rounded-lg p-3 flex items-center gap-3 transform transition-all duration-300 translate-x-full opacity-0 min-w-[280px]`;
+                toast.innerHTML = `
+                    <i class="ph ${icon} text-lg"></i>
+                    <div class="text-sm font-bold">${msg}</div>
+                `;
+                
+                ui.toastContainer.appendChild(toast);
+                
+                requestAnimationFrame(() => {
+                    toast.classList.remove('translate-x-full', 'opacity-0');
+                });
+
+                setTimeout(() => {
+                    toast.classList.add('opacity-0', 'translate-y-[-10px]');
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            };
+
+            const togglePanel = (show) => {
+                if (show) {
+                    ui.inputPanel.classList.remove('-translate-x-full');
+                    ui.mobileOverlay.classList.remove('hidden');
+                } else {
+                    ui.inputPanel.classList.add('-translate-x-full');
+                    ui.mobileOverlay.classList.add('hidden');
+                }
+            };
+
+            const switchTab = (tab) => {
+                activeTab = tab;
+                if (tab === 'people') {
+                    ui.viewPeople.classList.remove('hidden');
+                    ui.viewPhone.classList.add('hidden');
+                    ui.viewSms.classList.add('hidden');
+                    ui.activeViewTitle.textContent = "People & Address Tools";
+                    
+                    ui.tabPeople.classList.remove('text-slate-500', 'hover:text-slate-700', 'hover:bg-white/50');
+                    ui.tabPeople.classList.add('bg-white', 'text-slate-800', 'shadow-sm', 'ring-1', 'ring-black/5');
+                    
+                    ui.tabPhone.classList.add('text-slate-500', 'hover:text-slate-700', 'hover:bg-white/50');
+                    ui.tabPhone.classList.remove('bg-white', 'text-slate-800', 'shadow-sm', 'ring-1', 'ring-black/5');
+                    
+                    ui.tabSms.classList.add('text-slate-500', 'hover:text-slate-700', 'hover:bg-white/50');
+                    ui.tabSms.classList.remove('bg-white', 'text-slate-800', 'shadow-sm', 'ring-1', 'ring-black/5');
+                } else if (tab === 'phone') {
+                    ui.viewPhone.classList.remove('hidden');
+                    ui.viewPeople.classList.add('hidden');
+                    ui.viewSms.classList.add('hidden');
+                    ui.activeViewTitle.textContent = "Reverse Phone Tools";
+
+                    ui.tabPhone.classList.remove('text-slate-500', 'hover:text-slate-700', 'hover:bg-white/50');
+                    ui.tabPhone.classList.add('bg-white', 'text-slate-800', 'shadow-sm', 'ring-1', 'ring-black/5');
+
+                    ui.tabPeople.classList.add('text-slate-500', 'hover:text-slate-700', 'hover:bg-white/50');
+                    ui.tabPeople.classList.remove('bg-white', 'text-slate-800', 'shadow-sm', 'ring-1', 'ring-black/5');
+
+                    ui.tabSms.classList.add('text-slate-500', 'hover:text-slate-700', 'hover:bg-white/50');
+                    ui.tabSms.classList.remove('bg-white', 'text-slate-800', 'shadow-sm', 'ring-1', 'ring-black/5');
+                } else if (tab === 'sms') {
+                    ui.viewSms.classList.remove('hidden');
+                    ui.viewPeople.classList.add('hidden');
+                    ui.viewPhone.classList.add('hidden');
+                    ui.activeViewTitle.textContent = "SMS Templates";
+
+                    ui.tabSms.classList.remove('text-slate-500', 'hover:text-slate-700', 'hover:bg-white/50');
+                    ui.tabSms.classList.add('bg-white', 'text-slate-800', 'shadow-sm', 'ring-1', 'ring-black/5');
+
+                    ui.tabPeople.classList.add('text-slate-500', 'hover:text-slate-700', 'hover:bg-white/50');
+                    ui.tabPeople.classList.remove('bg-white', 'text-slate-800', 'shadow-sm', 'ring-1', 'ring-black/5');
+
+                    ui.tabPhone.classList.add('text-slate-500', 'hover:text-slate-700', 'hover:bg-white/50');
+                    ui.tabPhone.classList.remove('bg-white', 'text-slate-800', 'shadow-sm', 'ring-1', 'ring-black/5');
+                }
+                updateGrids();
+            };
+
+            // --- Grid Rendering ---
+            const renderGridItem = (site) => {
+                const btn = document.createElement('button');
+                btn.className = `card-hover bg-white border border-slate-200 rounded-xl p-4 flex flex-col items-center text-center relative overflow-hidden group`;
+                
+                let logoHtml = '';
+                if (site.logo) {
+                    logoHtml = `<img src="${site.logo}" alt="${site.name}" class="logo-img mb-3 opacity-90 group-hover:opacity-100">`;
+                } else {
+                    const iconClass = site.icon || 'ph-magnifying-glass';
+                    logoHtml = `<div class="w-12 h-12 rounded-full bg-slate-50 text-slate-400 flex items-center justify-center mb-3 group-hover:bg-blue-50 group-hover:text-blue-500 transition-colors">
+                                    <i class="ph ${iconClass} text-2xl"></i>
+                                 </div>`;
+                }
+
+                btn.innerHTML = `
+                    <div class="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+                    ${logoHtml}
+                    <h4 class="font-bold text-sm text-slate-800 leading-tight mb-1 relative z-10">${site.name}</h4>
+                    <p class="text-[10px] text-slate-400 font-medium uppercase tracking-wide relative z-10">${site.desc}</p>
+                    <i class="ph ph-arrow-up-right absolute top-3 right-3 text-slate-200 group-hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-all transform translate-x-[-4px] translate-y-[4px] group-hover:translate-x-0 group-hover:translate-y-0 text-lg"></i>
+                `;
+                
+                btn.onclick = () => launchSite(site);
+                return btn;
+            };
+
+            const updateGrids = () => {
+                const nameData = parseName(ui.inputs.name.value);
+                const addressData = parseAddress(ui.inputs.address.value);
+                const phoneData = parsePhone(ui.inputs.phone.value);
+
+                ui.currentTargetDisplay.textContent = activeTab === 'people' 
+                    ? (nameData.first ? `${nameData.first} ${nameData.last}` : 'No name')
+                    : (activeTab === 'phone' ? (phoneData ? `(${phoneData.ac}) ${phoneData.ex}-${phoneData.ln}` : 'No phone')
+                    : 'SMS Templates');
+
+                ui.peopleGrid.innerHTML = '';
+                ui.phoneGrid.innerHTML = '';
+
+                let hasPeople = !!nameData.first;
+                let hasPhone = !!phoneData;
+
+                let peopleCount = 0;
+                if (hasPeople) {
+                    ui.peopleEmpty.classList.add('hidden');
+                    ui.peopleEmpty.classList.remove('flex');
+                    sites.forEach(site => {
+                        if (site.type === 'person' || site.type === 'both') {
+                            ui.peopleGrid.appendChild(renderGridItem(site));
+                            peopleCount++;
+                        }
+                    });
+                    ui.countIndicator.textContent = `${peopleCount} Tools`;
+                } else {
+                    ui.peopleEmpty.classList.remove('hidden');
+                    ui.peopleEmpty.classList.add('flex');
+                    ui.countIndicator.textContent = `0 Tools`;
+                }
+
+                let phoneCount = 0;
+                if (hasPhone) {
+                    ui.phoneEmpty.classList.add('hidden');
+                    ui.phoneEmpty.classList.remove('flex');
+                    sites.forEach(site => {
+                        if (site.type === 'phone' || site.type === 'both') {
+                            ui.phoneGrid.appendChild(renderGridItem(site));
+                            phoneCount++;
+                        }
+                    });
+                    ui.countIndicator.textContent = `${phoneCount} Tools`;
+                } else {
+                    ui.phoneEmpty.classList.remove('hidden');
+                    ui.phoneEmpty.classList.add('flex');
+                    ui.countIndicator.textContent = `0 Tools`;
+                }
+
+                if (activeTab === 'sms') {
+                    ui.countIndicator.textContent = 'SMS Templates';
+                }
+            };
+
+            // --- Search Logic ---
+            const openUrl = (url) => window.open(url, '_blank', 'noopener,noreferrer');
+
+            const launchSite = (site) => {
+                const nameData = parseName(ui.inputs.name.value);
+                const addressData = parseAddress(ui.inputs.address.value);
+                const phoneData = parsePhone(ui.inputs.phone.value);
+
+                let url = '';
+
+                const f = nameData ? nameData.first : '';
+                const l = nameData ? nameData.last : '';
+                const c = addressData ? addressData.city : '';
+                const s = addressData ? addressData.state : '';
+                
+                const p = phoneData ? phoneData.full : '';
+                const ac = phoneData ? phoneData.ac : '';
+                const ex = phoneData ? phoneData.ex : '';
+                const ln = phoneData ? phoneData.ln : '';
+
+                try {
+                    if ((site.type === 'person' || site.type === 'both') && nameData.first && site.personUrl) {
+                        url = site.personUrl({ f, l, s, c, first: f, last: l });
+                    } 
+                    else if ((site.type === 'phone' || site.type === 'both') && phoneData && site.phoneUrl) {
+                        url = site.phoneUrl({ p, ac, ex, ln });
+                    }
+                    
+                    if (url) {
+                        openUrl(url);
+                    } else {
+                        showToast(`Missing data for ${site.name}`, 'error');
+                    }
+                } catch (e) {
+                    console.error("Error generating URL for", site.name, e);
+                    showToast("Error launching search", 'error');
+                }
+            };
+
+            const launchCategory = (type) => {
+                let count = 0;
+                sites.forEach(site => {
+                    if (site.type === type || site.type === 'both') {
+                        if (type === 'person' && !ui.inputs.name.value) return;
+                        if (type === 'phone' && !ui.inputs.phone.value) return;
+
+                        launchSite(site);
+                        count++;
+                    }
+                });
+                
+                if (count > 0) {
+                    showToast(`Launched ${count} searches!`);
+                } else {
+                    showToast('Please enter the required data first.');
+                }
+            };
+
+            const launchAll = () => {
+                const launchedPeople = launchCategory('person');
+                setTimeout(() => launchCategory('phone'), 150); 
+            };
+
+            // --- Phone Widget Functions ---
+            const renderPhoneCard = (phoneVal, notesVal, isWrong, field = null) => {
+                const formattedPhone = formatPhoneNumber(phoneVal);
+                const formattedPhoneDigits = sanitizePhone(phoneVal);
+                const notesDisplay = notesVal ? `<div class="phone-note">${marked.parseInline(notesVal)}</div>` : '';
+                let actions = '';
+                if (isWrong) {
+                    actions = `
+                        <div class="phone-actions">
+                            <button class="phone-action-btn remove-wrong" data-number="${phoneVal}" data-note="${notesVal || ''}" title="Remove">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="action-icon">
+                                    <path d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"/>
+                                </svg>
+                            </button>
+                        </div>`;
+                } else {
+                    actions = `
+                        <div class="phone-actions">
+                            <button class="phone-action-btn" title="Call with Webex">
+                                <a href="sip:${formattedPhoneDigits}">
+                                    <img src="https://img.icons8.com/fluent/512/webex.png" alt="Webex" class="action-icon">
+                                </a>
+                            </button>
+                            <button class="phone-action-btn" title="Call with Phone Link">
+                                <a href="tel:${formattedPhoneDigits}">
+                                    <img src="https://static.wikia.nocookie.net/logopedia/images/b/b2/Microsoft_Phone_Link_%282022%29.svg" alt="Phone Link" class="action-icon">
+                                </a>
+                            </button>
+                            <button class="phone-action-btn" title="Message with SMS">
+                                <a href="sms:${formattedPhoneDigits}">
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/IMessage_logo.svg/1024px-IMessage_logo.svg.png" alt="SMS" class="action-icon">
+                                </a>
+                            </button>`;
+                    if (field) {
+                        actions += `
+                            <button class="phone-action-btn mark-wrong" data-field="${field}" title="Mark as Wrong">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="action-icon">
+                                    <path d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"/>
+                                </svg>
+                            </button>`;
+                    }
+                    actions += `</div>`;
+                }
+                const cardClass = isWrong ? 'phone-card wrong-phone' : 'phone-card';
+                const labelClass = isWrong ? 'wrong-phone-label' : 'phone-link';
+                const labelContent = isWrong ? `${formattedPhone}${notesVal ? ` (${notesVal})` : ''}` : formattedPhone;
+                const link = isWrong ? `<span class="${labelClass}">${labelContent}</span>` : `<a href="tel:${formattedPhoneDigits}" class="${labelClass}">${labelContent}</a>`;
+                return `
+                    <div class="${cardClass}">
+                        <div class="phone-number">
+                            ${link}
+                            ${isWrong ? '' : notesDisplay}
+                        </div>
+                        ${actions}
+                    </div>`;
+            };
+
+            const renderPhoneWidget = () => {
+                if (!currentRecord) {
+                    ui.phoneContainer.innerHTML = `<div class="text-center text-xs text-slate-400 italic py-4">Please select a record to see phone numbers.</div>`;
+                    return;
+                }
+                let content = '';
+                let hasPhones = false;
+                PHONE_FIELDS.forEach(field => {
+                    const phoneVal = currentRecord[field.phone];
+                    if (phoneVal && String(phoneVal).trim()) {
+                        const notesVal = field.notes ? currentRecord[field.notes] : null;
+                        content += renderPhoneCard(phoneVal, notesVal, false, field.phone);
+                        hasPhones = true;
+                    }
+                });
+                const wrongStr = currentRecord.Wrong_Phone;
+                if (wrongStr && String(wrongStr).trim()) {
+                    const wrongList = parseWrongPhones(wrongStr);
+                    wrongList.forEach(wrong => {
+                        content += renderPhoneCard(wrong.number, wrong.note, true);
+                        hasPhones = true;
+                    });
+                }
+                ui.phoneContainer.innerHTML = hasPhones ? content : `<div class="text-center text-xs text-slate-400 italic py-4">No phone numbers found for this record.</div>`;
+                attachPhoneActionListeners();
+            };
+
+            const attachPhoneActionListeners = () => {
+                document.querySelectorAll('.mark-wrong').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        const field = btn.dataset.field;
+                        const phone = currentRecord[field];
+                        const noteField = field === 'Phone' ? 'Phone_1_Notes' : field + '_Notes';
+                        const oldNote = currentRecord[noteField] || '';
+                        const newNote = prompt('Reason for marking as wrong?', oldNote);
+                        if (newNote === null) return;
+                        const entry = formatPhoneNumber(phone) + (newNote ? ` (${newNote})` : '') + '; ';
+                        const newWrong = (currentRecord.Wrong_Phone || '') + entry;
+                        const updates = { [field]: null, [noteField]: null, Wrong_Phone: newWrong };
+                        await grist.docApi.applyUserActions([['UpdateRecord', 'Owners', currentRecord.id, updates]]);
+                        currentRecord[field] = null;
+                        currentRecord[noteField] = null;
+                        currentRecord.Wrong_Phone = newWrong;
+                        renderPhoneWidget();
+                    });
+                });
+                document.querySelectorAll('.remove-wrong').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        const number = btn.dataset.number;
+                        const note = btn.dataset.note;
+                        let wrongs = parseWrongPhones(currentRecord.Wrong_Phone);
+                        wrongs = wrongs.filter(w => !(w.number === number && w.note === note));
+                        const newWrong = wrongs.map(w => w.number + (w.note ? ` (${w.note})` : '')).join('; ');
+                        await grist.docApi.applyUserActions([['UpdateRecord', 'Owners', currentRecord.id, {Wrong_Phone: newWrong}]]);
+                        currentRecord.Wrong_Phone = newWrong;
+                        renderPhoneWidget();
+                    });
+                });
+            };
+
+            // --- Dialer Handlers ---
+            const handleDial = (action) => {
+                const raw = (ui.dialerInput.value || '').trim();
+                if (!raw) return;
+                const digits = sanitizePhone(raw);
+                if (digits.length < 10) {
+                    alert('Please enter a valid 10-digit phone number');
+                    return;
+                }
+                const num = `${digits}`;
+                if (action === 'webex') window.open(`sip:${num}`, '_blank');
+                if (action === 'tel') window.open(`tel:${num}`, '_blank');
+                if (action === 'sms') window.open(`sms:${num}`, '_blank');
+            };
+
+            // --- Check Potential Phone Handlers ---
+            const formatPhoneInput = (e) => {
+                const input = e.target;
+                let val = input.value.replace(/\D/g, '').slice(0, 10);
+                let formatted = '';
+                if (val.length > 0) formatted = '(' + val.slice(0, 3);
+                if (val.length > 3) formatted += ') ' + val.slice(3, 6);
+                if (val.length > 6) formatted += '-' + val.slice(6);
+                input.value = formatted;
+            };
+
+            ui.checkBtn.addEventListener('click', async () => {
+                const phone = ui.checkPhone.value.trim();
+                if (!phone) {
+                    ui.checkResult.innerHTML = 'Please enter a phone number.';
+                    return;
+                }
+                const normalized = sanitizePhone(phone);
+                if (normalized.length < 10) {
+                    ui.checkResult.innerHTML = 'Please enter a valid 10-digit phone number.';
+                    return;
+                }
+                const savedPhones = [];
+                PHONE_COLUMN_KEYS.forEach(key => {
+                    const p = currentRecord[key];
+                    if (p) {
+                        const noteField = key === 'Phone' ? 'Phone_1_Notes' : key + '_Notes';
+                        savedPhones.push({norm: sanitizePhone(p), orig: p, field: key, note: currentRecord[noteField] || '' });
+                    }
+                });
+                const wrongPhones = parseWrongPhones(currentRecord.Wrong_Phone || '').map(w => ({
+                    norm: sanitizePhone(w.number), orig: w.number, note: w.note
+                }));
+                const matches = [];
+                savedPhones.forEach(s => {
+                    if (s.norm === normalized) matches.push(`Already saved in ${s.field}${s.note ? `: ${s.note}` : ''}`);
+                });
+                wrongPhones.forEach(w => {
+                    if (w.norm === normalized) matches.push(`Wrong number${w.note ? `: ${w.note}` : ''}`);
+                });
+                if (matches.length > 0) {
+                    ui.checkResult.innerHTML = matches.join('<br>');
+                } else {
+                    const formatted = formatPhoneNumber(phone);
+                    let html = renderPhoneCard(formatted, '', false, null);
+                    html += '<div class="add-buttons">';
+                    const available = PHONE_COLUMN_KEYS.find(key => !currentRecord[key]);
+                    if (available) {
+                        html += `<button class="add-btn" id="add-saved-btn">Add to ${available}</button>`;
+                    } else {
+                        html += 'No available saved slots.<br>';
+                    }
+                    html += `<button class="add-btn" id="add-wrong-btn">Add as Wrong</button></div>`;
+                    ui.checkResult.innerHTML = html;
+                    document.getElementById('add-saved-btn')?.addEventListener('click', async () => {
+                        const updates = { [available]: formatted };
+                        const noteField = available === 'Phone' ? 'Phone_1_Notes' : available + '_Notes';
+                        await grist.docApi.applyUserActions([['UpdateRecord', 'Owners', currentRecord.id, updates]]);
+                        currentRecord[available] = formatted;
+                        ui.checkPhone.value = '';
+                        ui.checkResult.innerHTML = 'Added to saved.';
+                        renderPhoneWidget();
+                    });
+                    document.getElementById('add-wrong-btn')?.addEventListener('click', async () => {
+                        const entry = formatted + '; ';
+                        const newWrong = (currentRecord.Wrong_Phone || '') + entry;
+                        await grist.docApi.applyUserActions([['UpdateRecord', 'Owners', currentRecord.id, {Wrong_Phone: newWrong}]]);
+                        currentRecord.Wrong_Phone = newWrong;
+                        ui.checkPhone.value = '';
+                        ui.checkResult.innerHTML = 'Added as wrong.';
+                        renderPhoneWidget();
+                    });
+                }
+            });
+
+            ui.checkPhone.addEventListener('input', formatPhoneInput);
+            ui.dialerInput.addEventListener('input', formatPhoneInput);
+            ui.dialerWebexBtn.addEventListener('click', () => handleDial('webex'));
+            ui.dialerTelBtn.addEventListener('click', () => handleDial('tel'));
+            ui.dialerSmsBtn.addEventListener('click', () => handleDial('sms'));
+
+            // --- SMS Widget Functions ---
+            const fetchAndFilterProperties = async (ownerId) => {
+                try {
+                    const columnarData = await grist.docApi.fetchTable('Properties_');
+                    const allProperties = columnarToRowFormat(columnarData);
+                    g_relatedProperties = allProperties.filter(prop => {
+                        const ownerRefList = prop.fields.Name;
+                        return ownerRefList && Array.isArray(ownerRefList) && ownerRefList.includes(ownerId);
+                    });
+                } catch (err) {
+                    console.error("Error fetching properties:", err);
+                    g_relatedProperties = [];
+                }
+            };
+
+            const renderSmsWidget = () => {
+                if (!currentRecord) {
+                    ui.smsNoRecord.style.display = 'flex';
+                    ui.smsMainContent.style.display = 'none';
+                    ui.smsCopyRow.style.display = 'none';
+                    return;
+                }
+                ui.smsNoRecord.style.display = 'none';
+                ui.smsMainContent.style.display = 'block';
+
+                const phoneOptions = PHONE_COLUMN_KEYS
+                .map(key => ({ key, value: currentRecord[key] }))
+                .filter(item => item.value)
+                .map(item => `<option value="${item.value}">${item.key.replace(/_/g, ' ')}: ${item.value}</option>`)
+                .join('') || '<option value="" disabled>No phone numbers found</option>';
+                ui.smsPhoneSelect.innerHTML = phoneOptions;
+
+                if (g_relatedProperties.length > 0) {
+                    ui.smsPropertySelectorPlaceholder.style.display = 'block';
+                    ui.smsPropertySelect.innerHTML = g_relatedProperties.map((prop, index) => {
+                        const displayName = prop.fields.Address_Concatenate || prop.fields.Property_Name || `Property ID ${prop.id}`;
+                        return `<option value="${index}">${displayName}</option>`;
+                    }).join('');
+                } else {
+                    ui.smsPropertySelectorPlaceholder.style.display = 'none';
+                }
+
+                updateSmsPreview();
+            };
+
+            const updateSmsPreview = () => {
+                if (!currentRecord) return;
+
+                const selectedTemplateKey = ui.smsTemplateSelect.value;
+                const selectedPropertyFocus = ui.smsPropertyFocusGroup.querySelector('.active').dataset.value;
+                const selectedPropertyIdentifierKey = ui.smsPropertyIdentifierGroup.querySelector('.active').dataset.value;
+                const selectedPhoneNumber = ui.smsPhoneSelect.value;
+                const selectedPropertyIndex = ui.smsPropertySelect.value !== '' ? parseInt(ui.smsPropertySelect.value, 10) : -1;
+                const selectedProperty = selectedPropertyIndex >= 0 ? g_relatedProperties[selectedPropertyIndex] : null;
+
+                const firstName = getFirstName(currentRecord.Name);
+                let propertyIdentifierValue = '';
+                let propertyCityValue = '';
+
+                if (selectedProperty) {
+                    propertyIdentifierValue = selectedProperty.fields[selectedPropertyIdentifierKey] || '';
+                    propertyCityValue = selectedProperty.fields.City || '';
+                    if (Array.isArray(propertyIdentifierValue)) propertyIdentifierValue = propertyIdentifierValue[1] || '';
+                    if (Array.isArray(propertyCityValue)) propertyCityValue = propertyCityValue[1] || '';
+                }
+
+                let message = SMS_TEMPLATES[selectedTemplateKey].text;
+                message = message.replace(/{{firstName}}/g, firstName);
+                message = message.replace(/{{propertyFocus}}/g, selectedPropertyFocus);
+                message = message.replace(/{{propertyIdentifier}}/g, propertyIdentifierValue);
+                message = message.replace(/{{propertyCity}}/g, propertyCityValue);
+                ui.smsPreviewBox.textContent = message;
+
+                const sanitizedPhone = sanitizePhone(selectedPhoneNumber);
+                if (sanitizedPhone && selectedProperty) {
+                    ui.smsSendLink.href = `sms:${sanitizedPhone}?&body=${encodeURIComponent(message)}`;
+                    ui.smsSendLink.classList.remove('disabled');
+                    ui.smsSendLink.title = `Send SMS to ${selectedPhoneNumber}`;
+                } else {
+                    ui.smsSendLink.href = '#';
+                    ui.smsSendLink.classList.add('disabled');
+                    ui.smsSendLink.title = !sanitizedPhone ? 'No valid phone number selected' : 'A property must be selected';
+                }
+
+                ui.smsCopyRow.style.display = 'none';
+                ui.smsCopyMsg.style.display = 'none';
+                lastMessageSent = "";
+            };
+
+            const handleSmsButtonClick = (event) => {
+                const button = event.target.closest('.sms-swap-btn');
+                if (!button) return;
+                const group = button.parentElement;
+                group.querySelector('.active')?.classList.remove('active');
+                button.classList.add('active');
+                updateSmsPreview();
+            };
+
+            ui.smsSendLink.addEventListener('click', function(e) {
+                if (ui.smsSendLink.classList.contains('disabled')) {
+                    e.preventDefault();
+                    return;
+                }
+                const msg = ui.smsPreviewBox.textContent;
+                if (msg && msg.length > 0) {
+                    lastMessageSent = `Just sent this text: "${msg}"`;
+                    ui.smsCopyRow.style.display = 'flex';
+                    ui.smsCopyMsg.style.display = 'none';
+                }
+            });
+
+            ui.smsCopyBtn.addEventListener('click', function() {
+                if (!lastMessageSent) return;
+                navigator.clipboard.writeText(lastMessageSent).then(() => {
+                    ui.smsCopyMsg.style.display = 'inline';
+                    setTimeout(() => { ui.smsCopyMsg.style.display = 'none'; }, 1500);
+                });
+            });
+
+            // --- Event Listeners ---
+            ui.launchAllBtn.addEventListener('click', launchAll);
+            ui.launchPeopleBtn.addEventListener('click', () => launchCategory('person'));
+            ui.launchPhoneBtn.addEventListener('click', () => launchCategory('phone'));
+            ui.clearBtn.addEventListener('click', resetForm);
+            
+            // Tab Switching
+            ui.tabPeople.addEventListener('click', () => switchTab('people'));
+            ui.tabPhone.addEventListener('click', () => switchTab('phone'));
+            ui.tabSms.addEventListener('click', () => switchTab('sms'));
+
+            // Input listeners
+            Object.values(ui.inputs).forEach(input => {
+                input.addEventListener('input', updateGrids);
+            });
+            
+            // Mobile Panel
+            ui.openPanelBtn.addEventListener('click', () => togglePanel(true));
+            ui.closePanelBtn.addEventListener('click', () => togglePanel(false));
+            ui.mobileOverlay.addEventListener('click', () => togglePanel(false));
+
+            // SMS Widget Listeners
+            ui.smsTemplateSelect.innerHTML = Object.keys(SMS_TEMPLATES)
+                .map(key => `<option value="${key}">${SMS_TEMPLATES[key].name}</option>`)
+                .join('');
+
+            ui.smsTemplateSelect.addEventListener('change', updateSmsPreview);
+            ui.smsPropertySelect.addEventListener('change', updateSmsPreview);
+            ui.smsPhoneSelect.addEventListener('change', updateSmsPreview);
+            ui.smsPropertyFocusGroup.addEventListener('click', handleSmsButtonClick);
+            ui.smsPropertyIdentifierGroup.addEventListener('click', handleSmsButtonClick);
+
+            // Init
+            if (window.innerWidth < 768) {
+                ui.inputPanel.classList.add('-translate-x-full');
+            }
+            switchTab('people');
+        });
+    </script>
+</body>
+</html>
