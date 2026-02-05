@@ -494,6 +494,23 @@
             }, 3000);
         }
 
+        /* --- Global Helper for Open Button --- */
+        window.handleBizOpen = function(event, url, name) {
+            event.preventDefault(); // Stop default anchor behavior if any
+            
+            // Copy to clipboard
+            navigator.clipboard.writeText(name).then(() => {
+                showToast(`Copied & Opening: ${name.substring(0, 15)}${name.length > 15 ? '...' : ''}`);
+                
+                // Open link in new tab
+                window.open(url, '_blank');
+            }).catch(err => {
+                console.error('Clipboard failed', err);
+                // Even if copy fails, open the link
+                window.open(url, '_blank');
+            });
+        };
+
         /* --- Business Search Logic --- */
         function initBusinessSearch() {
             const ui = {
@@ -510,17 +527,10 @@
                 clearSaved: document.getElementById('bs_clearSaved')
             };
 
-            // State Data with Updated URLs
+            // COMPREHENSIVE STATE DATA
             const stateData = {
-                'MICHIGAN': { 
-                    sosUrl: 'https://mibusinessregistry.lara.state.mi.us/search/business',
-                    param: 'SearchTerm' // Assuming generic param for visual completeness, usually these sites accept GET params
-                },
-                'SOUTH DAKOTA': { 
-                    sosUrl: 'https://sosenterprise.sd.gov/BusinessServices/Business/FilingSearch.aspx',
-                    // SD often uses POST or complex ViewState, but we provide the direct link
-                    directLink: true 
-                },
+                'ALABAMA': { sosUrl: 'https://arc-sos.state.al.us/CGI/CORPNAME.MBR/INPUT' },
+                'ALASKA': { sosUrl: 'https://www.commerce.alaska.gov/cbp/main/search/entities' },
                 'ARIZONA': { 
                     multi: true,
                     links: [
@@ -528,51 +538,120 @@
                         { label: 'AZ Trademarks/Names', url: 'https://apps.azsos.gov/apps/tntp/se.html', param: 'SearchTerm' }
                     ]
                 },
-                // Generic fallbacks for other states (simplified list for demo, usually full list exists)
+                'ARKANSAS': { sosUrl: 'https://www.sos.arkansas.gov/corps/search_all.php' },
                 'CALIFORNIA': { sosUrl: 'https://bizfileonline.sos.ca.gov/search/business' },
-                'FLORIDA': { sosUrl: 'http://search.sunbiz.org/Inquiry/CorporationSearch/ByName' },
+                'COLORADO': { sosUrl: 'https://www.sos.state.co.us/biz/BusinessEntityCriteriaExt.do?resetTransTyp=Y' },
+                'CONNECTICUT': { sosUrl: 'https://www.concord-sots.ct.gov/CONCORD/online?sn=WebBusinessExternal' },
+                'DELAWARE': { sosUrl: 'https://icis.corp.delaware.gov/Ecorp/EntitySearch/NameSearch.aspx' },
+                'DISTRICT OF COLUMBIA': { sosUrl: 'https://corponline.dcra.dc.gov/Home.aspx' },
+                'FLORIDA': { sosUrl: 'https://dos.myflorida.com/sunbiz/' },
+                'GEORGIA': { sosUrl: 'https://ecorp.sos.ga.gov/BusinessSearch' },
+                'HAWAII': { sosUrl: 'https://hbe.ehawaii.gov/documents/search.html' },
+                'IDAHO': { sosUrl: 'https://sosbiz.idaho.gov/search/business' },
+                'ILLINOIS': { sosUrl: 'https://www.ilsos.gov/corporatellc/' },
+                'INDIANA': { sosUrl: 'https://bsd.sos.in.gov/publicbusinesssearch' },
+                'IOWA': { sosUrl: 'https://sos.iowa.gov/search/business/search.aspx' },
+                'KANSAS': { sosUrl: 'https://www.sos.ks.gov/eforms/BusinessEntity/Search.aspx' },
+                'KENTUCKY': { sosUrl: 'https://sosbes.sos.ky.gov/BusSearchNProfile/search.aspx' },
+                'LOUISIANA': { sosUrl: 'https://coraweb.sos.la.gov/CommercialSearch/CommercialSearch.aspx' },
+                'MAINE': { sosUrl: 'https://www10.informe.org/bdl/online/entity' },
+                'MARYLAND': { sosUrl: 'https://egov.maryland.gov/BusinessExpress/EntitySearch' },
+                'MASSACHUSETTS': { sosUrl: 'https://corp.sec.state.ma.us/Corp/CorpSearch/CorpSearch.aspx' },
+                'MICHIGAN': { sosUrl: 'https://mibusinessregistry.lara.state.mi.us/search/business' },
+                'MINNESOTA': { sosUrl: 'https://mblsportal.sos.state.mn.us/Business/Search' },
+                'MISSISSIPPI': { sosUrl: 'https://corp.sos.ms.gov/corp/portal/c/page/corpBusinessIdSearch/portal.aspx' },
+                'MISSOURI': { sosUrl: 'https://bsd.sos.mo.gov/BusinessEntity/BESearch.aspx' },
+                'MONTANA': { sosUrl: 'https://biz.sosmt.gov/search/business' },
+                'NEBRASKA': { sosUrl: 'https://www.nebraska.gov/sos/corp/corpsearch.cgi' },
+                'NEVADA': { sosUrl: 'https://esos.nv.gov/EntitySearch/OnlineEntitySearch' },
+                'NEW HAMPSHIRE': { sosUrl: 'https://quickstart.sos.nh.gov/online/BusinessInquire' },
+                'NEW JERSEY': { sosUrl: 'https://www.njportal.com/DOR/BusinessNameSearch/Search/BusinessName' },
+                'NEW MEXICO': { sosUrl: 'https://portal.sos.state.nm.us/BFS/online/Account/SearchBusiness' },
+                'NEW YORK': { sosUrl: 'https://apps.dos.ny.gov/publicInquiry/' },
+                'NORTH CAROLINA': { sosUrl: 'https://www.sosnc.gov/search/index/corp' },
+                'NORTH DAKOTA': { sosUrl: 'https://firststop.sos.nd.gov/search/business' },
+                'OHIO': { sosUrl: 'https://businesssearch.ohiosos.gov/' },
+                'OKLAHOMA': { sosUrl: 'https://www.sos.ok.gov/corp/corpinquiryfind.aspx' },
+                'OREGON': { sosUrl: 'https://egov.sos.state.or.us/br/pkg_web_name_srch_inq.do_name_srch' },
+                'PENNSYLVANIA': { sosUrl: 'https://file.dos.pa.gov/search/business' },
+                'RHODE ISLAND': { sosUrl: 'https://business.sos.ri.gov/CorpWeb/CorpSearch/CorpSearch.aspx' },
+                'SOUTH CAROLINA': { sosUrl: 'https://businessfilings.sc.gov/BusinessFiling/Entity/Search' },
+                'SOUTH DAKOTA': { sosUrl: 'https://sosenterprise.sd.gov/BusinessServices/Business/FilingSearch.aspx', directLink: true },
+                'TENNESSEE': { sosUrl: 'https://tncab.tnsos.gov/business-entity-search' },
                 'TEXAS': { sosUrl: 'https://mycpa.cpa.state.tx.us/coa/' },
-                'NEW YORK': { sosUrl: 'https://apps.dos.ny.gov/publicInquiry/' }
+                'UTAH': { sosUrl: 'https://secure.utah.gov/bes/' },
+                'VERMONT': { sosUrl: 'https://sos.vermont.gov/corporations/search/' },
+                'VIRGINIA': { sosUrl: 'https://cis.scc.virginia.gov/' },
+                'WASHINGTON': { sosUrl: 'https://ccfs.sos.wa.gov/#/' },
+                'WEST VIRGINIA': { sosUrl: 'https://apps.sos.wv.gov/business/corporations/' },
+                'WISCONSIN': { sosUrl: 'https://www.wdfi.org/apps/CorpSearch/Search.aspx' },
+                'WYOMING': { sosUrl: 'https://wyobiz.wyo.gov/Business/FilingSearch.aspx' }
             };
 
             const abbreviations = {
-                'MI': 'MICHIGAN', 'SD': 'SOUTH DAKOTA', 'AZ': 'ARIZONA', 
-                'CA': 'CALIFORNIA', 'FL': 'FLORIDA', 'TX': 'TEXAS', 'NY': 'NEW YORK'
+                'AL': 'ALABAMA', 'AK': 'ALASKA', 'AZ': 'ARIZONA', 'AR': 'ARKANSAS', 'CA': 'CALIFORNIA',
+                'CO': 'COLORADO', 'CT': 'CONNECTICUT', 'DE': 'DELAWARE', 'DC': 'DISTRICT OF COLUMBIA',
+                'FL': 'FLORIDA', 'GA': 'GEORGIA', 'HI': 'HAWAII', 'ID': 'IDAHO', 'IL': 'ILLINOIS',
+                'IN': 'INDIANA', 'IA': 'IOWA', 'KS': 'KANSAS', 'KY': 'KENTUCKY', 'LA': 'LOUISIANA',
+                'ME': 'MAINE', 'MD': 'MARYLAND', 'MA': 'MASSACHUSETTS', 'MI': 'MICHIGAN', 'MN': 'MINNESOTA',
+                'MS': 'MISSISSIPPI', 'MO': 'MISSOURI', 'MT': 'MONTANA', 'NE': 'NEBRASKA', 'NV': 'NEVADA',
+                'NH': 'NEW HAMPSHIRE', 'NJ': 'NEW JERSEY', 'NM': 'NEW MEXICO', 'NY': 'NEW YORK',
+                'NC': 'NORTH CAROLINA', 'ND': 'NORTH DAKOTA', 'OH': 'OHIO', 'OK': 'OKLAHOMA',
+                'OR': 'OREGON', 'PA': 'PENNSYLVANIA', 'RI': 'RHODE ISLAND', 'SC': 'SOUTH CAROLINA',
+                'SD': 'SOUTH DAKOTA', 'TN': 'TENNESSEE', 'TX': 'TEXAS', 'UT': 'UTAH', 'VT': 'VERMONT',
+                'VA': 'VIRGINIA', 'WA': 'WASHINGTON', 'WV': 'WEST VIRGINIA', 'WI': 'WISCONSIN',
+                'WY': 'WYOMING'
             };
 
             // Helper: Find State
             function findState(addr) {
                 const upper = addr.toUpperCase();
-                // Check direct keys
-                for(let key in stateData) {
-                    if(upper.includes(key)) return key;
+                
+                // 1. Check Abbreviations First (using Regex to avoid partial matches like "AL" in "ALASKA")
+                for (const abbr in abbreviations) {
+                    const regex = new RegExp(`\\b${abbr}\\b`);
+                    if (regex.test(upper)) {
+                        return abbreviations[abbr];
+                    }
                 }
-                // Check abbreviations
-                for(let abbr in abbreviations) {
-                    if(upper.includes(abbr)) return abbreviations[abbr];
+
+                // 2. Check Full State Names
+                for (const key in stateData) {
+                    if (upper.includes(key)) {
+                        return key;
+                    }
                 }
+                
                 return null;
             }
 
             // Helper: Generate Link HTML
             function createLinkCard(url, text, label, isPrimary = false) {
-                const btnClass = isPrimary 
-                    ? 'bg-brand-600 border-brand-600 text-white hover:bg-brand-700' 
-                    : 'bg-white border-slate-200 text-slate-700 hover:border-brand-500 hover:text-brand-600';
+                const openBtnClass = isPrimary
+                    ? 'bg-brand-600 border-brand-600 text-white hover:bg-brand-700 shadow-md'
+                    : 'bg-white border-slate-200 text-slate-700 hover:border-brand-500 hover:text-brand-600 shadow-sm';
                 
+                // Escape single quotes in business name to prevent breaking the onclick attribute
+                const safeText = text.replace(/'/g, "\\'");
+
                 return `
-                    <div class="flex flex-col sm:flex-row gap-2 items-start sm:items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-lg group hover:border-brand-300 transition-colors">
-                        <div class="overflow-hidden mr-2">
-                            <div class="text-xs font-semibold text-slate-500 mb-0.5">${label}</div>
-                            <a href="${url}" target="_blank" class="text-sm text-brand-600 font-medium hover:underline truncate block max-w-[250px]">${url}</a>
+                    <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-lg group hover:border-brand-300 transition-colors">
+                        <div class="overflow-hidden w-full sm:w-auto">
+                            <div class="text-xs font-semibold text-slate-500 mb-1.5">${label}</div>
+                            <!-- Clickable URL text (Copies Name) -->
+                            <div onclick="navigator.clipboard.writeText('${safeText}'); showToast('Copied: ${safeText}');" 
+                                 class="text-sm text-brand-600 font-medium hover:text-brand-800 hover:underline truncate cursor-pointer select-all bg-brand-50/50 p-2 rounded border border-transparent hover:border-brand-200 transition-colors" 
+                                 title="Click to Copy Business Name">
+                                 ${url}
+                            </div>
+                            <p class="text-[10px] text-slate-400 mt-1 flex items-center"><i class="fa-solid fa-clipboard mr-1"></i>Click link or button to copy</p>
                         </div>
-                        <div class="flex gap-2 shrink-0 w-full sm:w-auto mt-2 sm:mt-0">
-                            <button onclick="navigator.clipboard.writeText('${text}'); showToast('Name copied');" class="flex-1 sm:flex-none px-3 py-1.5 text-xs font-medium border border-slate-200 rounded bg-white text-slate-600 hover:bg-slate-50">
-                                Copy Name
+                        <div class="flex gap-3 shrink-0 w-full sm:w-auto mt-2 sm:mt-0">
+                            <!-- Open Button Now also copies name -->
+                            <button onclick="handleBizOpen(event, '${url}', '${safeText}')" 
+                                class="flex-1 sm:flex-none px-6 py-3 text-sm font-bold rounded-lg shadow hover:shadow-md text-center ${openBtnClass} transition-all transform active:scale-95">
+                                Open <i class="fa-solid fa-external-link-alt ml-1.5"></i>
                             </button>
-                            <a href="${url}" target="_blank" class="flex-1 sm:flex-none px-3 py-1.5 text-xs font-medium rounded text-center ${btnClass}">
-                                Open <i class="fa-solid fa-arrow-up-right-from-square ml-1"></i>
-                            </a>
                         </div>
                     </div>
                 `;
@@ -607,9 +686,7 @@
                 // Handle Multi-State (Arizona)
                 if(data.multi) {
                     data.links.forEach((link, idx) => {
-                        // Construct URL with param if possible (best effort)
                         let finalUrl = link.url;
-                        // Some AZ links use POST, so we can't always append, but we try for the main one
                         if(!link.url.includes('?')) {
                             finalUrl += `?search_term=${encodeURIComponent(name)}`; 
                         }
@@ -619,11 +696,10 @@
                 // Handle Single State
                 else {
                     let finalUrl = data.sosUrl;
-                    // Append name param if simple GET request site
                     if(!data.directLink && !finalUrl.includes('?')) {
                         finalUrl += `?search_term=${encodeURIComponent(name)}`;
                     }
-                    ui.linksWrapper.innerHTML = createLinkCard(finalUrl, name, 'Official Registry', true);
+                    ui.linksWrapper.innerHTML += createLinkCard(finalUrl, name, 'Official Registry', true);
                 }
 
                 saveSearch(name, stateKey);
@@ -718,8 +794,6 @@
                 if(window.innerWidth < 768) {
                     ui.panel.classList.toggle('mobile-open');
                 } else {
-                    // Desktop logic: maybe collapse width? For now, let's just do mobile slide
-                    // The provided code had a translation logic, let's implement simple mobile toggle
                     ui.panel.classList.toggle('-translate-x-full');
                 }
             }
