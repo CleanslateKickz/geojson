@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investment Email Generator</title>
+    
+    <!-- Grist Plugin API -->
+    <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="./ckeditor5/ckeditor5.css">
+    <link rel="stylesheet" href="css/widget.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Left Pane: Template Library -->
+        <div class="controls-pane">
+            <header class="controls-header">
+                <h2>Message Templates</h2>
+                <p>Select a template, or create your own.</p>
+            </header>
+
+            <main class="controls-main">
+                <div id="templateCategories"></div>
+            </main>
+            
+            <footer class="controls-footer">
+                <div class="controls-footer-actions">
+                    <button id="newTemplateBtn" class="btn btn-secondary btn-sm">New</button>
+                    <button id="renameTemplateBtn" class="btn btn-secondary btn-sm">Rename</button>
+                    <button id="duplicateTemplateBtn" class="btn btn-secondary btn-sm">Duplicate</button>
+                    <button id="deleteTemplateBtn" class="btn btn-secondary btn-sm">Delete</button>
+                </div>
+                <div class="controls-footer-actions" style="margin-top: 8px;">
+                    <button id="exportTemplatesBtn" class="btn btn-secondary btn-sm">Export</button>
+                    <button id="importTemplatesBtn" class="btn btn-secondary btn-sm">Import</button>
+                </div>
+                <div id="statusMessage" class="status-message" style="margin-top: 10px;"></div>
+            </footer>
+        </div>
+
+        <!-- Right Pane: Editor -->
+        <div class="editor-pane">
+            <div class="editor-header">
+                <div class="form-group" style="margin-bottom: 0; flex-grow: 1; margin-right: 16px;">
+                    <input type="text" id="emailSubject" placeholder="Email Subject" style="font-weight: 500;">
+                </div>
+                <div class="actions-group">
+                    <span id="modeBadge" class="mode-badge">Email</span>
+                    <select id="fieldInsertSelect" class="select select-sm"></select>
+                    <button id="insertFieldBtn" class="btn btn-secondary btn-sm">Insert</button>
+                    <button id="refreshFromTemplateBtn" class="btn btn-secondary btn-sm">Refresh</button>
+                    <button id="editTemplateBtn" class="btn btn-secondary btn-sm">Edit Template</button>
+                    <button id="saveTemplateBtn" class="btn btn-primary btn-sm" style="display: none;">Save Template</button>
+                    <button id="cancelTemplateEditBtn" class="btn btn-secondary btn-sm" style="display: none;">Cancel</button>
+                    <button id="saveAsTemplateBtn" class="btn btn-secondary btn-sm">Save as Template</button>
+                    <button id="copySubjectBtn" class="btn btn-secondary btn-sm">Copy Subject</button>
+                    <button id="copyEmailBtn" class="btn btn-primary btn-sm">Copy Email Body</button>
+                </div>
+            </div>
+            
+            <div class="editor-content">
+                <div class="editor-container editor-container_balloon-editor" id="editor-container">
+                    <div class="editor-container__editor">
+                        <div id="editor"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CKEditor (local build) -->
+    <script src="./ckeditor5/ckeditor5.umd.js"></script>
+
+    <!-- Main Application Logic -->
+    <script type="module" src="./js/main.js"></script>
+</body>
+</html>
