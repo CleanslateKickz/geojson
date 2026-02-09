@@ -15,31 +15,30 @@
 /* --- DESIGN SYSTEM --- */
 :root {
     --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-    --color-bg: #f3f4f6;
+    --color-bg: #f9fafb;
     --color-bg-pane: #ffffff;
     --color-border: #e5e7eb;
+    --color-border-hover: #d1d5db;
     --color-text-primary: #111827;
-    --color-text-secondary: #6b7280;
+    --color-text-secondary: #4b5563;
     --color-text-muted: #9ca3af;
     --color-primary: #2563eb;
     --color-primary-hover: #1d4ed8;
     --color-active-bg: #eff6ff;
     --color-success: #10b981;
     --color-danger: #ef4444;
-    --color-success-bg: #ecfdf5;
-    --color-danger-bg: #fef2f2;
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
     --radius-sm: 4px;
-    --radius-md: 8px;
-    --radius-lg: 12px;
+    --radius-md: 6px;
+    --radius-lg: 10px;
 }
 
 /* --- GENERAL & LAYOUT --- */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
     font-family: var(--font-sans);
-    font-size: 14px;
+    font-size: 13px;
     line-height: 1.5;
     color: var(--color-text-primary);
     background-color: var(--color-bg);
@@ -55,7 +54,7 @@ body {
 
 /* --- SIDEBAR --- */
 .sidebar {
-    width: 300px;
+    width: 280px;
     background-color: var(--color-bg-pane);
     border-right: 1px solid var(--color-border);
     display: flex;
@@ -66,7 +65,7 @@ body {
 }
 
 .sidebar.hidden {
-    margin-left: -300px;
+    margin-left: -280px;
 }
 
 .sidebar-header {
@@ -90,16 +89,15 @@ body {
 }
 
 .sidebar-footer {
-    padding: 16px;
+    padding: 12px;
     border-top: 1px solid var(--color-border);
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+    background-color: #f9fafb;
 }
 
-.footer-row {
-    display: flex;
-    gap: 8px;
+.sidebar-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
 }
 
 /* --- MAIN CONTENT --- */
@@ -113,30 +111,32 @@ body {
 
 /* App Header */
 .app-header {
-    padding: 12px 20px;
+    padding: 8px 16px;
     border-bottom: 1px solid var(--color-border);
     display: flex;
     justify-content: space-between;
     align-items: center;
     background-color: #ffffff;
+    min-height: 48px;
 }
 
 .header-left, .header-right {
     display: flex;
-    gap: 12px;
+    gap: 8px;
     align-items: center;
 }
 
 /* Metadata Fields */
 .email-metadata {
-    padding: 12px 20px;
+    padding: 8px 16px;
     border-bottom: 1px solid var(--color-border);
+    background-color: #ffffff;
 }
 
 .metadata-row {
     display: flex;
     align-items: center;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
 }
 
 .metadata-row:last-child {
@@ -144,8 +144,8 @@ body {
 }
 
 .metadata-row label {
-    width: 80px;
-    font-size: 13px;
+    width: 60px;
+    font-size: 12px;
     font-weight: 500;
     color: var(--color-text-secondary);
 }
@@ -153,30 +153,39 @@ body {
 .metadata-row input {
     flex-grow: 1;
     border: 1px solid transparent;
-    padding: 6px 8px;
-    font-size: 14px;
+    padding: 4px 8px;
+    font-size: 13px;
     border-radius: var(--radius-sm);
-    transition: border-color 0.2s;
+    transition: background-color 0.2s;
 }
 
 .metadata-row input:hover {
-    background-color: #f9fafb;
+    background-color: #f3f4f6;
 }
 
 .metadata-row input:focus {
     outline: none;
-    border-color: var(--color-primary);
-    background-color: #ffffff;
+    background-color: #f3f4f6;
 }
 
 #emailSubject {
     font-weight: 600;
 }
 
+.details-toggle {
+    font-size: 11px;
+    color: var(--color-primary);
+    cursor: pointer;
+    text-decoration: underline;
+    margin-left: 60px;
+    margin-top: 4px;
+    display: inline-block;
+}
+
 /* Toolbar */
 .editor-toolbar {
-    padding: 8px 16px;
-    background-color: #f9fafb;
+    padding: 6px 12px;
+    background-color: #ffffff;
     border-bottom: 1px solid var(--color-border);
     display: flex;
     align-items: center;
@@ -188,13 +197,12 @@ body {
     display: flex;
     align-items: center;
     gap: 2px;
+    padding: 0 4px;
+    border-right: 1px solid var(--color-border);
 }
 
-.toolbar-divider {
-    width: 1px;
-    height: 20px;
-    background-color: var(--color-border);
-    margin: 0 8px;
+.toolbar-group:last-child {
+    border-right: none;
 }
 
 .toolbar-spacer {
@@ -202,8 +210,8 @@ body {
 }
 
 .tool-btn {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -212,11 +220,11 @@ body {
     border-radius: var(--radius-sm);
     cursor: pointer;
     color: var(--color-text-secondary);
-    transition: background-color 0.2s;
+    transition: all 0.2s;
 }
 
 .tool-btn:hover {
-    background-color: #e5e7eb;
+    background-color: #f3f4f6;
     color: var(--color-text-primary);
 }
 
@@ -226,19 +234,18 @@ body {
 }
 
 .select-toolbar {
-    padding: 4px 8px;
+    padding: 2px 6px;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     background-color: #ffffff;
     font-size: 12px;
-    font-weight: 500;
 }
 
 /* Editor Body */
 .editor-container {
     flex-grow: 1;
     overflow-y: auto;
-    padding: 40px 20px;
+    padding: 20px;
     background-color: #f3f4f6;
     display: flex;
     justify-content: center;
@@ -247,87 +254,90 @@ body {
 #editor {
     width: 100%;
     max-width: 800px;
-    min-height: 800px;
+    min-height: 100%;
     background-color: #ffffff;
-    padding: 60px 80px;
-    box-shadow: var(--shadow-md);
+    padding: 40px 60px;
+    box-shadow: var(--shadow-sm);
     border-radius: 2px;
     outline: none;
-    font-size: 15px;
+    font-size: 14px;
     line-height: 1.6;
     color: var(--color-text-primary);
 }
 
-#editor:empty:before {
-    content: 'Start typing or paste content here...';
-    color: var(--color-text-muted);
-    pointer-events: none;
-}
-
 /* Attachments Area */
-.attachments-area {
-    padding: 16px 20px;
+.attachments-section {
     border-top: 1px solid var(--color-border);
     background-color: #ffffff;
 }
 
 .attachments-header {
+    padding: 8px 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
+    cursor: pointer;
+    user-select: none;
+    background-color: #f9fafb;
+}
+
+.attachments-header:hover {
+    background-color: #f3f4f6;
 }
 
 .attachments-header h3 {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
     color: var(--color-text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.attachments-content {
+    padding: 12px 16px;
+}
+
+.attachments-content.collapsed {
+    display: none;
 }
 
 .drop-zone {
-    border: 2px dashed var(--color-border);
+    border: 1px dashed var(--color-border);
     border-radius: var(--radius-md);
-    padding: 16px;
+    padding: 12px;
     text-align: center;
     cursor: pointer;
     transition: all 0.2s;
+    color: var(--color-text-muted);
 }
 
-.drop-zone:hover, .drop-zone.drag-over {
+.drop-zone:hover {
     border-color: var(--color-primary);
     background-color: var(--color-active-bg);
 }
 
-.drop-zone-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    color: var(--color-text-secondary);
-}
-
 .file-list {
-    margin-top: 12px;
+    margin-top: 8px;
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 6px;
 }
 
 .file-item {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 6px 10px;
-    background-color: #f9fafb;
+    gap: 6px;
+    padding: 4px 8px;
+    background-color: #f3f4f6;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
-    font-size: 12px;
+    font-size: 11px;
 }
 
 .file-remove {
     cursor: pointer;
     color: var(--color-text-muted);
-    font-weight: 700;
 }
 
 .file-remove:hover {
@@ -339,9 +349,9 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    padding: 8px 14px;
-    font-size: 13px;
+    gap: 4px;
+    padding: 6px 10px;
+    font-size: 12px;
     font-weight: 500;
     border-radius: var(--radius-md);
     cursor: pointer;
@@ -367,6 +377,7 @@ body {
 
 .btn-secondary:hover {
     background-color: #f9fafb;
+    border-color: var(--color-border-hover);
 }
 
 .btn-ghost {
@@ -379,169 +390,95 @@ body {
     color: var(--color-text-primary);
 }
 
-.btn-full {
-    width: 100%;
-}
+.btn-sm { padding: 4px 8px; font-size: 11px; }
 
-.btn-sm {
-    padding: 4px 10px;
-    font-size: 12px;
-}
-
-.icon-btn {
-    background: transparent;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-    color: var(--color-text-secondary);
-}
-
-.select {
-    padding: 6px 10px;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    background-color: #ffffff;
-    font-size: 13px;
-}
-
-.select-sm {
-    padding: 4px 8px;
-    font-size: 12px;
-}
-
-.mode-badge {
-    padding: 4px 10px;
+.pill {
+    padding: 2px 8px;
     border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
     background-color: #f3f4f6;
     color: var(--color-text-secondary);
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
 }
 
-.mode-badge.template {
+.pill.active {
     background-color: var(--color-active-bg);
     color: var(--color-primary);
 }
 
-/* Template Item */
 .template-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 10px;
+    gap: 10px;
+    padding: 8px 12px;
     border-radius: var(--radius-md);
     cursor: pointer;
     transition: background-color 0.2s;
 }
 
-.template-item:hover {
-    background-color: #f9fafb;
+.template-item:hover { background-color: #f3f4f6; }
+.template-item.active { background-color: var(--color-active-bg); }
+
+.template-item .info { display: flex; flex-direction: column; }
+.template-item .name { font-size: 13px; font-weight: 500; }
+.template-item .desc { font-size: 11px; color: var(--color-text-muted); }
+
+.template-category h3 {
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    letter-spacing: 0.05em;
+    margin: 12px 0 4px 8px;
 }
 
-.template-item.active {
-    background-color: var(--color-active-bg);
-}
+/* Icons styling */
+svg { flex-shrink: 0; }
 
-.template-item .icon {
-    font-size: 18px;
-}
+.hidden { display: none !important; }
 
-.template-item .info {
-    display: flex;
-    flex-direction: column;
+/* Status Toast */
+.status-message {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 8px 16px;
+    background-color: #1f2937;
+    color: #ffffff;
+    border-radius: var(--radius-lg);
+    font-size: 12px;
+    box-shadow: var(--shadow-md);
+    z-index: 2000;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
 }
-
-.template-item .name {
-    font-size: 13px;
-    font-weight: 600;
-}
-
-.template-item .desc {
-    font-size: 11px;
-    color: var(--color-text-secondary);
-}
+.status-message.show { opacity: 1; }
 
 /* Context Menu */
 .context-menu {
     position: fixed;
-    background-color: #ffffff;
+    background: #ffffff;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-md);
     padding: 4px;
     z-index: 1000;
-    min-width: 120px;
 }
-
 .context-menu-item {
     display: block;
     width: 100%;
-    padding: 8px 12px;
+    padding: 6px 12px;
     text-align: left;
     background: transparent;
     border: none;
-    font-size: 13px;
+    font-size: 12px;
     cursor: pointer;
     border-radius: var(--radius-sm);
 }
-
-.context-menu-item:hover {
-    background-color: #f3f4f6;
-}
-
-.context-menu-item.danger {
-    color: var(--color-danger);
-}
-
-.hidden {
-    display: none !important;
-}
-
-/* Status Message */
-.status-message {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 10px 20px;
-    border-radius: var(--radius-lg);
-    font-size: 13px;
-    font-weight: 500;
-    box-shadow: var(--shadow-md);
-    z-index: 2000;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s;
-}
-
-.status-message.show {
-    opacity: 1;
-}
-
-.status-message.success { background-color: var(--color-success); color: #ffffff; }
-.status-message.error { background-color: var(--color-danger); color: #ffffff; }
-.status-message.info { background-color: #1f2937; color: #ffffff; }
-
-/* Custom Template Categories Styling */
-.template-category {
-    margin-bottom: 16px;
-}
-
-.template-category h3 {
-    font-size: 11px;
-    text-transform: uppercase;
-    color: var(--color-text-muted);
-    letter-spacing: 0.05em;
-    margin-bottom: 8px;
-    padding-left: 4px;
-}
-
-.template-list {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
+.context-menu-item:hover { background-color: #f3f4f6; }
+.context-menu-item.danger { color: var(--color-danger); }
     </style>
 </head>
 <body>
@@ -550,63 +487,62 @@ body {
         <aside id="sidebar" class="sidebar hidden">
             <header class="sidebar-header">
                 <h2>Message Templates</h2>
-                <button id="closeSidebarBtn" class="icon-btn">&times;</button>
+                <button id="closeSidebarBtn" class="btn btn-ghost btn-sm" style="padding: 4px;">&times;</button>
             </header>
             <div class="sidebar-content">
-                <div id="templateCategories">
-                    <!-- Templates categories and items will be injected here -->
-                </div>
+                <div id="templateCategories"></div>
             </div>
             <footer class="sidebar-footer">
-                <button id="newTemplateBtn" class="btn btn-secondary btn-full btn-sm">New Template</button>
-                <div class="footer-row">
-                    <button id="exportTemplatesBtn" class="btn btn-ghost btn-full btn-sm">Export</button>
-                    <button id="importTemplatesBtn" class="btn btn-ghost btn-full btn-sm">Import</button>
+                <div class="sidebar-actions">
+                    <button id="newTemplateBtn" class="btn btn-secondary btn-sm">New</button>
+                    <button id="duplicateTemplateBtn_s" class="btn btn-secondary btn-sm">Duplicate</button>
+                    <button id="exportTemplatesBtn" class="btn btn-ghost btn-sm">Export</button>
+                    <button id="importTemplatesBtn" class="btn btn-ghost btn-sm">Import</button>
                 </div>
             </footer>
         </aside>
 
-        <!-- Main Workspace -->
+        <!-- Main -->
         <main class="main-content">
-            <!-- App Header -->
             <header class="app-header">
                 <div class="header-left">
                     <button id="toggleSidebarBtn" class="btn btn-secondary btn-sm">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
                         Templates
                     </button>
-                    <select id="attachmentColumnSelect" class="select select-sm">
-                        <option value="">-- Attachment Column --</option>
+                    <select id="attachmentColumnSelect" class="select-toolbar" style="height: 28px;">
+                        <option value="">-- No Grist Attachment --</option>
                     </select>
                 </div>
                 <div class="header-right">
-                    <span id="modeBadge" class="mode-badge email">Email</span>
+                    <span id="modeBadge" class="pill active">Email</span>
                     <button id="copySubjectBtn" class="btn btn-ghost btn-sm">Copy Subject</button>
                     <button id="copyEmailBtn" class="btn btn-ghost btn-sm">Copy Body</button>
                     <button id="downloadEmlBtn" class="btn btn-primary btn-sm">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
                         Download .EML
                     </button>
                 </div>
             </header>
 
-            <!-- Email Metadata -->
             <div class="email-metadata">
-                <div class="metadata-row">
-                    <label>To</label>
-                    <input type="text" id="emailTo" placeholder="Recipients...">
-                </div>
-                <div class="metadata-row">
-                    <label>Cc</label>
-                    <input type="text" id="emailCc" placeholder="Cc...">
+                <div id="extraDetails" class="hidden">
+                    <div class="metadata-row">
+                        <label>To</label>
+                        <input type="text" id="emailTo" placeholder="Recipients...">
+                    </div>
+                    <div class="metadata-row">
+                        <label>Cc</label>
+                        <input type="text" id="emailCc" placeholder="Cc...">
+                    </div>
                 </div>
                 <div class="metadata-row">
                     <label>Subject</label>
-                    <input type="text" id="emailSubject" placeholder="Enter subject line...">
+                    <input type="text" id="emailSubject" placeholder="Subject...">
                 </div>
+                <span id="toggleDetailsBtn" class="details-toggle">Show Details</span>
             </div>
 
-            <!-- Editor Toolbar -->
             <div class="editor-toolbar">
                 <div class="toolbar-group">
                     <select id="formatBlock" class="select-toolbar">
@@ -614,105 +550,95 @@ body {
                         <option value="h1">Heading 1</option>
                         <option value="h2">Heading 2</option>
                         <option value="h3">Heading 3</option>
-                        <option value="pre">Code</option>
                     </select>
                 </div>
-                <div class="toolbar-divider"></div>
                 <div class="toolbar-group">
-                    <button class="tool-btn" data-command="bold" title="Bold"><b>B</b></button>
-                    <button class="tool-btn" data-command="italic" title="Italic"><i>I</i></button>
-                    <button class="tool-btn" data-command="underline" title="Underline"><u>U</u></button>
-                    <button class="tool-btn" data-command="strikeThrough" title="Strikethrough"><s>S</s></button>
+                    <button class="tool-btn" data-command="bold"><b>B</b></button>
+                    <button class="tool-btn" data-command="italic"><i>I</i></button>
+                    <button class="tool-btn" data-command="underline"><u>U</u></button>
+                    <button class="tool-btn" data-command="strikeThrough"><s>S</s></button>
                 </div>
-                <div class="toolbar-divider"></div>
                 <div class="toolbar-group">
                     <button id="textColorBtn" class="tool-btn" title="Text Color">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h16M7 16l5-12 5 12M6.5 14h11"/></svg>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h16M7 16l5-12 5 12M6.5 14h11"/></svg>
                     </button>
-                    <button id="bgColorBtn" class="tool-btn" title="Highlight Color">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l4 4-4 4-4-4 4-4zM5 12l-2 2 9 9 9-9-2-2"/></svg>
+                    <button id="bgColorBtn" class="tool-btn" title="Background Color">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l4 4-4 4-4-4 4-4zM5 12l-2 2 9 9 9-9-2-2"/></svg>
                     </button>
                     <input type="color" id="colorInput" style="display: none;">
                 </div>
-                <div class="toolbar-divider"></div>
                 <div class="toolbar-group">
-                    <button class="tool-btn" data-command="justifyLeft" title="Align Left">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 10H3M21 6H3M21 14H3M17 18H3"/></svg>
+                    <button class="tool-btn" data-command="justifyLeft">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 10H3M21 6H3M21 14H3M17 18H3"/></svg>
                     </button>
-                    <button class="tool-btn" data-command="justifyCenter" title="Align Center">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10H6M21 6H3M21 14H3M18 18H6"/></svg>
+                    <button class="tool-btn" data-command="justifyCenter">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10H6M21 6H3M21 14H3M18 18H6"/></svg>
                     </button>
                 </div>
-                <div class="toolbar-divider"></div>
                 <div class="toolbar-group">
-                    <button class="tool-btn" data-command="insertOrderedList" title="Ordered List">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 6h11M10 12h11M10 18h11M4 6h1v4M4 10h2M4 18h2.5M3 15.5a2.5 2.5 0 0 1 5 0 2.5 2.5 0 0 1-5 0z"/></svg>
+                    <button class="tool-btn" data-command="insertUnorderedList">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
                     </button>
-                    <button class="tool-btn" data-command="insertUnorderedList" title="Unordered List">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+                    <button class="tool-btn" data-command="insertOrderedList">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="10" y1="6" x2="21" y2="6"></line><line x1="10" y1="12" x2="21" y2="12"></line><line x1="10" y1="18" x2="21" y2="18"></line><path d="M4 6h1v4"></path><path d="M4 10h2"></path><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"></path></svg>
                     </button>
                 </div>
-                <div class="toolbar-divider"></div>
                 <div class="toolbar-group">
                     <button class="tool-btn" data-command="removeFormat" title="Clear Formatting">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19L9 10.5M10.5 19l8.5-8.5M2 2l20 20"/></svg>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
                     </button>
                 </div>
                 <div class="toolbar-spacer"></div>
-                <div class="toolbar-group">
-                    <select id="fieldInsertSelect" class="select-toolbar">
-                        <option value="">-- Insert Field --</option>
-                    </select>
-                    <button id="insertFieldBtn" class="btn btn-secondary btn-sm" style="height: 28px; padding: 0 8px;">Insert</button>
-                    <button id="refreshFromTemplateBtn" class="btn btn-secondary btn-sm" style="height: 28px; padding: 0 8px;">Refresh</button>
-
-                    <button id="editTemplateBtn" class="btn btn-secondary btn-sm" style="height: 28px; padding: 0 8px;">Edit Template</button>
-                    <button id="saveTemplateBtn" class="btn btn-primary btn-sm hidden" style="height: 28px; padding: 0 8px;">Save Template</button>
-                    <button id="cancelTemplateEditBtn" class="btn btn-secondary btn-sm hidden" style="height: 28px; padding: 0 8px;">Cancel</button>
-
-                    <button id="saveAsTemplateBtn" class="btn btn-secondary btn-sm" style="height: 28px; padding: 0 8px;">Save as New</button>
+                <div class="toolbar-group" style="border-right: none;">
+                    <select id="fieldInsertSelect" class="select-toolbar" style="max-width: 120px;"></select>
+                    <button id="insertFieldBtn" class="btn btn-secondary btn-sm" style="padding: 2px 6px;">Insert</button>
+                    <button id="refreshFromTemplateBtn" class="btn btn-ghost btn-sm" title="Refresh from Template">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                    </button>
+                    <div style="width: 1px; height: 16px; background: var(--color-border); margin: 0 4px;"></div>
+                    <button id="editTemplateBtn" class="btn btn-secondary btn-sm">Edit Template</button>
+                    <button id="saveTemplateBtn" class="btn btn-primary btn-sm hidden">Save</button>
+                    <button id="cancelTemplateEditBtn" class="btn btn-secondary btn-sm hidden">Cancel</button>
+                    <button id="saveAsTemplateBtn" class="btn btn-secondary btn-sm">Save As</button>
                 </div>
             </div>
 
-            <!-- Editor Workspace -->
             <div class="editor-container">
                 <div id="editor" contenteditable="true"></div>
             </div>
 
-            <!-- Attachments -->
-            <div class="attachments-area">
-                <div class="attachments-header">
-                    <h3>Attachments</h3>
-                    <button id="addAttachmentBtn" class="btn btn-ghost btn-sm">Add File</button>
-                </div>
-                <div id="dropZone" class="drop-zone">
-                    <div class="drop-zone-content">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-                        <span>Drop files here or click to upload</span>
+            <div class="attachments-section">
+                <header id="attachmentsToggle" class="attachments-header">
+                    <h3>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                        Attachments (<span id="attachmentCount">0</span>)
+                    </h3>
+                    <svg id="attachmentsChevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                </header>
+                <div id="attachmentsContent" class="attachments-content collapsed">
+                    <div id="dropZone" class="drop-zone">
+                        Drop files or click to add
                     </div>
+                    <div id="fileList" class="file-list"></div>
+                    <input type="file" id="fileInput" multiple class="hidden">
                 </div>
-                <div id="fileList" class="file-list"></div>
-                <input type="file" id="fileInput" multiple style="display: none;">
             </div>
         </main>
     </div>
 
-    <!-- Context Menu for Templates -->
     <div id="templateContextMenu" class="context-menu hidden">
         <button id="renameTemplateBtn" class="context-menu-item">Rename</button>
         <button id="duplicateTemplateBtn" class="context-menu-item">Duplicate</button>
-        <div class="toolbar-divider" style="width: 100%; height: 1px; margin: 4px 0;"></div>
+        <div style="height: 1px; background: var(--color-border); margin: 4px 0;"></div>
         <button id="deleteTemplateBtn" class="context-menu-item danger">Delete</button>
     </div>
 
-    <!-- Status Message -->
-    <div id="statusMessage" class="status-message info"></div>
+    <div id="statusMessage" class="status-message"></div>
 
     <script>
 /**
  * Email Templates & Placeholder Logic
  */
-
 const placeholderFields = [
     { key: 'propertyName', label: 'Property Name', token: '{{propertyName}}' },
     { key: 'address', label: 'Address', token: '{{address}}' },
@@ -736,24 +662,14 @@ const placeholderFields = [
 ];
 
 function escapeHtml(value) {
-    return String(value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
+    return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 function computeData(raw) {
     const description = raw?.description || '';
     const descriptionHtml = description ? escapeHtml(description).replace(/\n/g, '<br>') : '';
     const today = new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: '2-digit' }).format(new Date());
-
-    return {
-        ...raw,
-        description_html: descriptionHtml,
-        today
-    };
+    return { ...raw, description_html: descriptionHtml, today };
 }
 
 function renderTextTemplate(text, data) {
@@ -797,30 +713,17 @@ function getDefaultTemplates() {
                 <div style="font-family: Arial, sans-serif; max-width: 600px; color: #374151;">
                     <p>Hi [Name],</p>
                     <p>I wanted to put this amazing opportunity in front of you that recently became available.</p>
-
                     <div style="background-color: #eff6ff; border-left: 4px solid #2563eb; padding: 20px; margin: 20px 0;">
                         <div style="font-size: 18px; font-weight: 700; color: #111827; margin-bottom: 4px;">{{propertyName}}</div>
                         <div style="font-size: 14px; color: #1d4ed8; font-weight: 500; margin-bottom: 8px;">{{address}}</div>
                         <div style="font-size: 13px; font-style: italic; color: #6b7280;">{{propertyType}} • Built {{dateListed}}</div>
                     </div>
-
                     <p>I've attached the offering memorandum for your review, and here are the key terms of this deal:</p>
-
                     <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
-                        <tr>
-                            <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; width: 140px; font-weight: 700;">Asking Price:</td>
-                            <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb;">{{askingPrice}}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; font-weight: 700;">Cap Rate:</td>
-                            <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb;">{{capRate}}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; font-weight: 700;">Lease Term:</td>
-                            <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb;">{{leaseTerm}}</td>
-                        </tr>
+                        <tr><td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; width: 140px; font-weight: 700;">Asking Price:</td><td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb;">{{askingPrice}}</td></tr>
+                        <tr><td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; font-weight: 700;">Cap Rate:</td><td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb;">{{capRate}}</td></tr>
+                        <tr><td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; font-weight: 700;">Lease Term:</td><td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb;">{{leaseTerm}}</td></tr>
                     </table>
-
                     <div style="margin: 20px 0;">
                         <div style="font-weight: 700; margin-bottom: 10px;">Recent Improvements:</div>
                         <ul style="margin: 0; padding-left: 20px;">
@@ -829,9 +732,7 @@ function getDefaultTemplates() {
                             <li style="margin-bottom: 6px;">Attractive rent escalations: {{rentBumps}}</li>
                         </ul>
                     </div>
-
                     <p>If you're interested in this property or would like to discuss current market conditions, feel free to give me a call anytime.</p>
-
                     <p style="margin-top: 30px;">Best regards,<br><b>[Your Name]</b></p>
                 </div>
             `.trim()
@@ -858,12 +759,8 @@ function getDefaultTemplates() {
 }
 
 /**
- * Grist Integration Handler
- * Maps Grist columns to the widget's internal data structure.
+ * Grist Integration
  */
-
-const REQUIRED_ACCESS = 'read table';
-
 function initializeGrist() {
     return new Promise((resolve) => {
         grist.ready({
@@ -887,7 +784,7 @@ function initializeGrist() {
                 { name: "Lease_Options", type: "Text", optional: true },
                 { name: "Rent_Bumps", type: "Text", optional: true }
             ],
-            requiredAccess: REQUIRED_ACCESS
+            requiredAccess: 'read table'
         });
         resolve();
     });
@@ -901,15 +798,8 @@ function onRecordChange(callback) {
     });
 }
 
-/**
- * Maps raw Grist record to a normalized object.
- */
 function normalizeRecord(rec, mappings) {
-    const formatCurrency = (val) => {
-        if (val === undefined || val === null) return '';
-        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
-    };
-
+    const formatCurrency = (val) => (val === undefined || val === null) ? '' : new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
     const formatPercent = (val) => {
         if (val === undefined || val === null) return '';
         const num = typeof val === 'number' ? val : Number(val);
@@ -917,124 +807,54 @@ function normalizeRecord(rec, mappings) {
         const pct = num <= 1 ? num * 100 : num;
         return pct.toFixed(2) + '%';
     };
-
     const formatDate = (val) => {
         if (val === undefined || val === null || val === '') return '';
-        let d;
-        if (val instanceof Date) {
-            d = val;
-        } else if (typeof val === 'string') {
-            d = new Date(val);
-        } else if (typeof val === 'number') {
-            if (val > 1e12) d = new Date(val);
-            else if (val > 1e9) d = new Date(val * 1000);
-            else d = new Date(val * 86400000);
-        }
+        let d = (val instanceof Date) ? val : new Date(val);
+        if (typeof val === 'number') d = (val > 1e12) ? new Date(val) : (val > 1e9) ? new Date(val * 1000) : new Date(val * 86400000);
         if (!d || isNaN(d.getTime())) return String(val);
         return new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: '2-digit' }).format(d);
     };
-
     return {
-        propertyName: rec.Property_Name || '',
-        address: rec.Address || '',
-        dateListed: formatDate(rec.Date_Listed),
-        propertyType: rec.Property_Type || '',
-        askingPrice: formatCurrency(rec.Price),
-        capRate: typeof rec.Cap_Rate === 'number' ? formatPercent(rec.Cap_Rate) : (rec.Cap_Rate || ''),
-        leaseTerm: rec.Lease_Term || '',
-        buildingSize: rec.RBA ? `${rec.RBA.toLocaleString()} SF` : '',
-        description: rec.Notes || '',
-        mainImageUrl: (rec.photo_url || '').split(' ')[0],
-        costarLink: rec.CoStar || '',
-        crexiLink: rec.Crexi || '',
-        omLink: rec.OM || '',
-        landSize: rec.Land_Size ? `${rec.Land_Size} Acres` : '',
-        leaseCommencement: formatDate(rec.Lease_Commencement),
-        leaseExpiration: formatDate(rec.Lease_Expiration),
-        leaseOptions: rec.Lease_Options || '',
-        rentBumps: rec.Rent_Bumps || '',
-        // Raw values
-        _rawPrice: rec.Price,
-        _rawCap: rec.Cap_Rate
+        propertyName: rec.Property_Name || '', address: rec.Address || '', dateListed: formatDate(rec.Date_Listed), propertyType: rec.Property_Type || '',
+        askingPrice: formatCurrency(rec.Price), capRate: typeof rec.Cap_Rate === 'number' ? formatPercent(rec.Cap_Rate) : (rec.Cap_Rate || ''),
+        leaseTerm: rec.Lease_Term || '', buildingSize: rec.RBA ? `${rec.RBA.toLocaleString()} SF` : '', description: rec.Notes || '',
+        mainImageUrl: (rec.photo_url || '').split(' ')[0], costarLink: rec.CoStar || '', crexiLink: rec.Crexi || '', omLink: rec.OM || '',
+        landSize: rec.Land_Size ? `${rec.Land_Size} Acres` : '', leaseCommencement: formatDate(rec.Lease_Commencement),
+        leaseExpiration: formatDate(rec.Lease_Expiration), leaseOptions: rec.Lease_Options || '', rentBumps: rec.Rent_Bumps || ''
     };
 }
 
-// MAIN APP LOGIC
-
+// APP CORE
 const STORAGE_KEY = 'gristEmailTemplates.v2';
 const STORAGE_ACTIVE_ID_KEY = 'gristEmailTemplates.activeId.v2';
 const STORAGE_ATTACHMENT_COL_KEY = 'gristEmailTemplates.attachmentCol.v2';
 
-// State
-let currentGristData = null;
-let currentGristRecord = null;
-let lastRecordSignature = null;
-let templates = [];
-let activeTemplateId = null;
-let mode = 'email';
-let isDirty = false;
-let attachments = [];
-let selectedAttachmentCol = localStorage.getItem(STORAGE_ATTACHMENT_COL_KEY) || '';
+let currentGristData = null, currentGristRecord = null, lastRecordSignature = null, templates = [], activeTemplateId = null, mode = 'email', isDirty = false, attachments = [], selectedAttachmentCol = localStorage.getItem(STORAGE_ATTACHMENT_COL_KEY) || '';
 
-// DOM Elements
 const ui = {
-    sidebar: document.getElementById('sidebar'),
-    toggleSidebarBtn: document.getElementById('toggleSidebarBtn'),
-    closeSidebarBtn: document.getElementById('closeSidebarBtn'),
-    templateCategories: document.getElementById('templateCategories'),
-    newTemplateBtn: document.getElementById('newTemplateBtn'),
-    exportTemplatesBtn: document.getElementById('exportTemplatesBtn'),
-    importTemplatesBtn: document.getElementById('importTemplatesBtn'),
-
-    emailTo: document.getElementById('emailTo'),
-    emailCc: document.getElementById('emailCc'),
-    emailSubject: document.getElementById('emailSubject'),
-
-    editor: document.getElementById('editor'),
-    formatBlock: document.getElementById('formatBlock'),
-    textColorBtn: document.getElementById('textColorBtn'),
-    bgColorBtn: document.getElementById('bgColorBtn'),
-    colorInput: document.getElementById('colorInput'),
-
-    fieldInsertSelect: document.getElementById('fieldInsertSelect'),
-    insertFieldBtn: document.getElementById('insertFieldBtn'),
-    refreshFromTemplateBtn: document.getElementById('refreshFromTemplateBtn'),
-    editTemplateBtn: document.getElementById('editTemplateBtn'),
-    saveTemplateBtn: document.getElementById('saveTemplateBtn'),
-    cancelTemplateEditBtn: document.getElementById('cancelTemplateEditBtn'),
-    saveAsTemplateBtn: document.getElementById('saveAsTemplateBtn'),
-
-    copySubjectBtn: document.getElementById('copySubjectBtn'),
-    copyEmailBtn: document.getElementById('copyEmailBtn'),
-    downloadEmlBtn: document.getElementById('downloadEmlBtn'),
-
-    attachmentColumnSelect: document.getElementById('attachmentColumnSelect'),
-    dropZone: document.getElementById('dropZone'),
-    fileInput: document.getElementById('fileInput'),
-    fileList: document.getElementById('fileList'),
-    addAttachmentBtn: document.getElementById('addAttachmentBtn'),
-
-    modeBadge: document.getElementById('modeBadge'),
-    statusMessage: document.getElementById('statusMessage'),
-
-    contextMenu: document.getElementById('templateContextMenu'),
-    renameTemplateBtn: document.getElementById('renameTemplateBtn'),
-    duplicateTemplateBtn: document.getElementById('duplicateTemplateBtn'),
-    deleteTemplateBtn: document.getElementById('deleteTemplateBtn')
+    sidebar: document.getElementById('sidebar'), toggleSidebarBtn: document.getElementById('toggleSidebarBtn'), closeSidebarBtn: document.getElementById('closeSidebarBtn'),
+    templateCategories: document.getElementById('templateCategories'), newTemplateBtn: document.getElementById('newTemplateBtn'), exportTemplatesBtn: document.getElementById('exportTemplatesBtn'), importTemplatesBtn: document.getElementById('importTemplatesBtn'),
+    emailTo: document.getElementById('emailTo'), emailCc: document.getElementById('emailCc'), emailSubject: document.getElementById('emailSubject'),
+    toggleDetailsBtn: document.getElementById('toggleDetailsBtn'), extraDetails: document.getElementById('extraDetails'),
+    editor: document.getElementById('editor'), formatBlock: document.getElementById('formatBlock'), textColorBtn: document.getElementById('textColorBtn'), bgColorBtn: document.getElementById('bgColorBtn'), colorInput: document.getElementById('colorInput'),
+    fieldInsertSelect: document.getElementById('fieldInsertSelect'), insertFieldBtn: document.getElementById('insertFieldBtn'), refreshFromTemplateBtn: document.getElementById('refreshFromTemplateBtn'),
+    editTemplateBtn: document.getElementById('editTemplateBtn'), saveTemplateBtn: document.getElementById('saveTemplateBtn'), cancelTemplateEditBtn: document.getElementById('cancelTemplateEditBtn'), saveAsTemplateBtn: document.getElementById('saveAsTemplateBtn'),
+    copySubjectBtn: document.getElementById('copySubjectBtn'), copyEmailBtn: document.getElementById('copyEmailBtn'), downloadEmlBtn: document.getElementById('downloadEmlBtn'),
+    attachmentColumnSelect: document.getElementById('attachmentColumnSelect'), attachmentsToggle: document.getElementById('attachmentsToggle'), attachmentsContent: document.getElementById('attachmentsContent'), attachmentsChevron: document.getElementById('attachmentsChevron'),
+    dropZone: document.getElementById('dropZone'), fileInput: document.getElementById('fileInput'), fileList: document.getElementById('fileList'),
+    modeBadge: document.getElementById('modeBadge'), statusMessage: document.getElementById('statusMessage'), attachmentCount: document.getElementById('attachmentCount'),
+    contextMenu: document.getElementById('templateContextMenu'), renameTemplateBtn: document.getElementById('renameTemplateBtn'), duplicateTemplateBtn: document.getElementById('duplicateTemplateBtn'), deleteTemplateBtn: document.getElementById('deleteTemplateBtn'),
+    duplicateTemplateBtn_s: document.getElementById('duplicateTemplateBtn_s')
 };
 
 let contextMenuTargetId = null;
-
-// --- INITIALIZATION ---
 
 async function init() {
     setupEventListeners();
     loadTemplates();
     populateFieldSelect();
-
-    const preferredActiveId = localStorage.getItem(STORAGE_ACTIVE_ID_KEY);
-    activeTemplateId = templates.some(t => t.id === preferredActiveId) ? preferredActiveId : (templates[0]?.id || null);
-
+    activeTemplateId = localStorage.getItem(STORAGE_ACTIVE_ID_KEY);
+    if (!templates.some(t => t.id === activeTemplateId)) activeTemplateId = templates[0]?.id || null;
     renderTemplateList();
 
     if (window.parent === window) {
@@ -1043,541 +863,258 @@ async function init() {
     } else {
         await initializeGrist();
         onRecordChange((data, record) => {
-            const signature = JSON.stringify(data);
-            if (signature === lastRecordSignature) return;
-            lastRecordSignature = signature;
-            currentGristData = data;
-            currentGristRecord = record;
-
+            const sig = JSON.stringify(data);
+            if (sig === lastRecordSignature) return;
+            lastRecordSignature = sig; currentGristData = data; currentGristRecord = record;
             updateAttachmentColumnSelect(record);
-
-            if (mode === 'email' && !isDirty) {
-                regenerateFromTemplate();
-            } else if (isDirty) {
-                showStatus('Record changed. Click Refresh to update.', 'info');
-            }
+            if (mode === 'email' && !isDirty) regenerateFromTemplate();
+            else if (isDirty) showStatus('Record changed. Refresh to update.', 'info');
         });
     }
 }
 
-// --- TEMPLATE LOGIC ---
-
 function loadTemplates() {
-    try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) {
-            templates = JSON.parse(raw);
-        } else {
-            templates = getDefaultTemplates();
-            saveTemplates();
-        }
-    } catch (e) {
-        templates = getDefaultTemplates();
-    }
+    try { templates = JSON.parse(localStorage.getItem(STORAGE_KEY)) || getDefaultTemplates(); } catch (e) { templates = getDefaultTemplates(); }
+    if (!localStorage.getItem(STORAGE_KEY)) saveTemplates();
 }
-
-function saveTemplates() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(templates));
-}
+function saveTemplates() { localStorage.setItem(STORAGE_KEY, JSON.stringify(templates)); }
 
 function renderTemplateList() {
     ui.templateCategories.innerHTML = '';
     const categories = [...new Set(templates.map(t => t.category || 'Other'))];
-
     categories.forEach(cat => {
-        const catDiv = document.createElement('div');
-        catDiv.className = 'template-category';
-        catDiv.innerHTML = `<h3>${cat}</h3>`;
-
+        const catDiv = document.createElement('div'); catDiv.className = 'template-category'; catDiv.innerHTML = `<h3>${cat}</h3>`;
         const list = document.createElement('div');
-        list.className = 'template-list';
-
         templates.filter(t => (t.category || 'Other') === cat).forEach(t => {
             const item = document.createElement('div');
             item.className = `template-item ${t.id === activeTemplateId ? 'active' : ''}`;
-            item.innerHTML = `
-                <span class="icon">${t.icon || '📄'}</span>
-                <div class="info">
-                    <span class="name">${t.name}</span>
-                    <span class="desc">${t.description || ''}</span>
-                </div>
-            `;
+            item.innerHTML = `<span class="icon">${t.icon || '📄'}</span><div class="info"><span class="name">${t.name}</span><span class="desc">${t.description || ''}</span></div>`;
             item.onclick = () => switchTemplate(t.id);
             item.oncontextmenu = (e) => showContextMenu(e, t.id);
             list.appendChild(item);
         });
-
-        catDiv.appendChild(list);
-        ui.templateCategories.appendChild(catDiv);
+        catDiv.appendChild(list); ui.templateCategories.appendChild(catDiv);
     });
 }
 
 function switchTemplate(id) {
-    if (mode === 'template' && isDirty) {
-        if (!confirm('Discard unsaved template changes?')) return;
-    }
-    activeTemplateId = id;
-    localStorage.setItem(STORAGE_ACTIVE_ID_KEY, id);
-    setMode('email');
-    renderTemplateList();
-    regenerateFromTemplate();
-    showStatus('Template applied', 'success');
+    if (mode === 'template' && isDirty && !confirm('Discard unsaved changes?')) return;
+    activeTemplateId = id; localStorage.setItem(STORAGE_ACTIVE_ID_KEY, id);
+    setMode('email'); renderTemplateList(); regenerateFromTemplate();
 }
 
 function regenerateFromTemplate() {
     const tpl = templates.find(t => t.id === activeTemplateId);
     if (!tpl || !currentGristData) return;
-
     ui.emailSubject.value = renderTextTemplate(tpl.subject, currentGristData);
     ui.editor.innerHTML = renderHtmlTemplate(tpl.bodyHtml, currentGristData);
     isDirty = false;
 }
 
-// --- EDITOR LOGIC ---
-
-function format(command, value = null) {
-    document.execCommand(command, false, value);
-    ui.editor.focus();
-}
+function format(cmd, val = null) { document.execCommand(cmd, false, val); ui.editor.focus(); }
 
 function setupEventListeners() {
     ui.toggleSidebarBtn.onclick = () => ui.sidebar.classList.toggle('hidden');
     ui.closeSidebarBtn.onclick = () => ui.sidebar.classList.add('hidden');
-
-    document.querySelectorAll('.tool-btn[data-command]').forEach(btn => {
-        btn.onclick = () => format(btn.dataset.command);
-    });
-
+    document.querySelectorAll('.tool-btn[data-command]').forEach(btn => btn.onclick = () => format(btn.dataset.command));
     ui.formatBlock.onchange = (e) => format('formatBlock', e.target.value);
-
-    ui.textColorBtn.onclick = () => {
-        ui.colorInput.oninput = () => format('foreColor', ui.colorInput.value);
-        ui.colorInput.click();
-    };
-
-    ui.bgColorBtn.onclick = () => {
-        ui.colorInput.oninput = () => format('hiliteColor', ui.colorInput.value);
-        ui.colorInput.click();
-    };
-
+    ui.textColorBtn.onclick = () => { ui.colorInput.oninput = () => format('foreColor', ui.colorInput.value); ui.colorInput.click(); };
+    ui.bgColorBtn.onclick = () => { ui.colorInput.oninput = () => format('hiliteColor', ui.colorInput.value); ui.colorInput.click(); };
     ui.insertFieldBtn.onclick = () => {
-        const token = ui.fieldInsertSelect.value;
-        if (!token) return;
-
+        const val = ui.fieldInsertSelect.value; if (!val) return;
         if (document.activeElement === ui.emailSubject) {
-            const start = ui.emailSubject.selectionStart;
-            const end = ui.emailSubject.selectionEnd;
-            ui.emailSubject.value = ui.emailSubject.value.slice(0, start) + token + ui.emailSubject.value.slice(end);
-        } else {
-            ui.editor.focus();
-            format('insertText', token);
-        }
+            const s = ui.emailSubject.selectionStart, e = ui.emailSubject.selectionEnd;
+            ui.emailSubject.value = ui.emailSubject.value.slice(0, s) + val + ui.emailSubject.value.slice(e);
+        } else { ui.editor.focus(); format('insertText', val); }
     };
-
-    ui.refreshFromTemplateBtn.onclick = () => {
-        if (confirm('Refresh email from template? Current changes will be lost.')) {
-            regenerateFromTemplate();
-        }
+    ui.toggleDetailsBtn.onclick = () => {
+        const hidden = ui.extraDetails.classList.toggle('hidden');
+        ui.toggleDetailsBtn.textContent = hidden ? 'Show Details' : 'Hide Details';
     };
+    ui.attachmentsToggle.onclick = () => {
+        const collapsed = ui.attachmentsContent.classList.toggle('collapsed');
+        ui.attachmentsChevron.style.transform = collapsed ? 'rotate(0deg)' : 'rotate(180deg)';
+    };
+    ui.refreshFromTemplateBtn.onclick = () => confirm('Refresh from template?') && regenerateFromTemplate();
     ui.editTemplateBtn.onclick = enterTemplateEdit;
     ui.saveTemplateBtn.onclick = saveTemplateEdit;
     ui.cancelTemplateEditBtn.onclick = cancelTemplateEdit;
     ui.saveAsTemplateBtn.onclick = saveAsNewTemplate;
-
-    ui.copySubjectBtn.onclick = () => {
-        navigator.clipboard.writeText(ui.emailSubject.value);
-        showStatus('Subject copied', 'success');
-    };
-
+    ui.copySubjectBtn.onclick = () => { navigator.clipboard.writeText(ui.emailSubject.value); showStatus('Subject copied', 'success'); };
     ui.copyEmailBtn.onclick = copyEmailBody;
     ui.downloadEmlBtn.onclick = downloadEml;
-
-    ui.addAttachmentBtn.onclick = () => ui.fileInput.click();
-    ui.fileInput.onchange = (e) => handleFiles(e.target.files);
     ui.dropZone.onclick = () => ui.fileInput.click();
-    ui.dropZone.ondragover = (e) => { e.preventDefault(); ui.dropZone.classList.add('drag-over'); };
-    ui.dropZone.ondragleave = () => ui.dropZone.classList.remove('drag-over');
-    ui.dropZone.ondrop = (e) => {
-        e.preventDefault();
-        ui.dropZone.classList.remove('drag-over');
-        handleFiles(e.dataTransfer.files);
-    };
-
-    ui.attachmentColumnSelect.onchange = (e) => {
-        selectedAttachmentCol = e.target.value;
-        localStorage.setItem(STORAGE_ATTACHMENT_COL_KEY, selectedAttachmentCol);
-        showStatus('Attachment column updated', 'info');
-    };
-
+    ui.dropZone.ondragover = (e) => { e.preventDefault(); ui.dropZone.style.borderColor = 'var(--color-primary)'; };
+    ui.dropZone.ondragleave = () => { ui.dropZone.style.borderColor = ''; };
+    ui.dropZone.ondrop = (e) => { e.preventDefault(); ui.dropZone.style.borderColor = ''; handleFiles(e.dataTransfer.files); };
+    ui.fileInput.onchange = (e) => handleFiles(e.target.files);
+    ui.attachmentColumnSelect.onchange = (e) => { selectedAttachmentCol = e.target.value; localStorage.setItem(STORAGE_ATTACHMENT_COL_KEY, selectedAttachmentCol); };
     ui.newTemplateBtn.onclick = createNewTemplate;
     ui.renameTemplateBtn.onclick = renameTemplate;
     ui.duplicateTemplateBtn.onclick = duplicateTemplate;
+    ui.duplicateTemplateBtn_s.onclick = () => { contextMenuTargetId = activeTemplateId; duplicateTemplate(); };
     ui.deleteTemplateBtn.onclick = deleteTemplate;
-
-    ui.editor.oninput = () => { if (mode === 'email') isDirty = true; };
-
-    document.addEventListener('click', (e) => {
-        if (!ui.contextMenu.contains(e.target)) {
-            ui.contextMenu.classList.add('hidden');
-        }
-    });
-
     ui.exportTemplatesBtn.onclick = exportTemplates;
     ui.importTemplatesBtn.onclick = importTemplates;
-
-    // Handle paste fidelity
-    ui.editor.onpaste = (e) => {
-        // We let the browser handle it for maximum fidelity as requested.
-        // No e.preventDefault() here.
-        isDirty = true;
+    ui.editor.oninput = () => { if (mode === 'email') isDirty = true; };
+    ui.editor.ondragover = (e) => {
+        if (e.dataTransfer.types.includes('Files')) {
+            e.preventDefault();
+            ui.editor.style.boxShadow = 'inset 0 0 0 2px var(--color-primary)';
+        }
     };
+    ui.editor.ondragleave = () => { ui.editor.style.boxShadow = ''; };
+    ui.editor.ondrop = (e) => {
+        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            e.preventDefault();
+            ui.editor.style.boxShadow = '';
+            handleFiles(e.dataTransfer.files);
+            showStatus('Files attached', 'success');
+        }
+    };
+    document.addEventListener('click', (e) => !ui.contextMenu.contains(e.target) && ui.contextMenu.classList.add('hidden'));
+}
+
+function setMode(m) {
+    mode = m; ui.modeBadge.textContent = mode.toUpperCase();
+    const isTpl = mode === 'template';
+    [ui.saveTemplateBtn, ui.cancelTemplateEditBtn].forEach(el => el.classList.toggle('hidden', !isTpl));
+    [ui.editTemplateBtn, ui.refreshFromTemplateBtn, ui.saveAsTemplateBtn].forEach(el => el.classList.toggle('hidden', isTpl));
 }
 
 function enterTemplateEdit() {
-    const tpl = templates.find(t => t.id === activeTemplateId);
-    if (!tpl) return;
-    setMode('template');
-    ui.emailSubject.value = tpl.subject;
-    ui.editor.innerHTML = tpl.bodyHtml;
-    showStatus('Editing template...', 'info');
+    const tpl = templates.find(t => t.id === activeTemplateId); if (!tpl) return;
+    setMode('template'); ui.emailSubject.value = tpl.subject; ui.editor.innerHTML = tpl.bodyHtml;
 }
-
-function cancelTemplateEdit() {
-    setMode('email');
-    regenerateFromTemplate();
-}
-
+function cancelTemplateEdit() { setMode('email'); regenerateFromTemplate(); }
 function saveTemplateEdit() {
-    const tplIdx = templates.findIndex(t => t.id === activeTemplateId);
-    if (tplIdx === -1) return;
-
-    templates[tplIdx].subject = ui.emailSubject.value;
-    templates[tplIdx].bodyHtml = ui.editor.innerHTML;
-    saveTemplates();
-    setMode('email');
-    renderTemplateList();
-    showStatus('Template saved', 'success');
+    const idx = templates.findIndex(t => t.id === activeTemplateId); if (idx === -1) return;
+    templates[idx].subject = ui.emailSubject.value; templates[idx].bodyHtml = ui.editor.innerHTML;
+    saveTemplates(); setMode('email'); renderTemplateList(); showStatus('Template saved', 'success');
 }
-
 function saveAsNewTemplate() {
-    const name = prompt('Template Name:', 'New Template');
-    if (!name) return;
-    const category = prompt('Category:', 'Custom') || 'Custom';
-
-    const newTpl = {
-        id: 't_' + Date.now(),
-        name,
-        category,
-        icon: '⭐',
-        subject: ui.emailSubject.value,
-        bodyHtml: ui.editor.innerHTML
-    };
-
-    templates.push(newTpl);
-    saveTemplates();
-    activeTemplateId = newTpl.id;
-    setMode('email');
-    renderTemplateList();
-    showStatus('Saved as new template', 'success');
+    const name = prompt('Template Name:', 'New Template'); if (!name) return;
+    const newTpl = { id: 't_' + Date.now(), name, category: 'Custom', icon: '⭐', subject: ui.emailSubject.value, bodyHtml: ui.editor.innerHTML };
+    templates.push(newTpl); saveTemplates(); activeTemplateId = newTpl.id; setMode('email'); renderTemplateList();
 }
-
 function createNewTemplate() {
-    const name = prompt('Template Name:', 'New Template');
-    if (!name) return;
-    const newTpl = {
-        id: 't_' + Date.now(),
-        name,
-        category: 'Custom',
-        icon: '📄',
-        subject: '{{propertyName}}',
-        bodyHtml: '<p>Body content...</p>'
-    };
-    templates.push(newTpl);
-    saveTemplates();
-    activeTemplateId = newTpl.id;
-    renderTemplateList();
-    enterTemplateEdit();
+    const name = prompt('Template Name:', 'New Template'); if (!name) return;
+    const newTpl = { id: 't_' + Date.now(), name, category: 'Custom', icon: '📄', subject: '{{propertyName}}', bodyHtml: '<p>Content...</p>' };
+    templates.push(newTpl); saveTemplates(); activeTemplateId = newTpl.id; renderTemplateList(); enterTemplateEdit();
 }
-
-function setMode(newMode) {
-    mode = newMode;
-    ui.modeBadge.textContent = mode.toUpperCase();
-    ui.modeBadge.className = `mode-badge ${mode}`;
-
-    if (mode === 'template') {
-        ui.saveTemplateBtn.style.display = 'inline-flex';
-        ui.cancelTemplateEditBtn.style.display = 'inline-flex';
-        ui.editTemplateBtn.style.display = 'none';
-        ui.refreshFromTemplateBtn.style.display = 'none';
-        ui.saveAsTemplateBtn.style.display = 'none';
-    } else {
-        ui.saveTemplateBtn.style.display = 'none';
-        ui.cancelTemplateEditBtn.style.display = 'none';
-        ui.editTemplateBtn.style.display = 'inline-flex';
-        ui.refreshFromTemplateBtn.style.display = 'inline-flex';
-        ui.saveAsTemplateBtn.style.display = 'inline-flex';
-    }
-}
-
-// --- ATTACHMENTS ---
 
 function handleFiles(files) {
-    Array.from(files).forEach(file => {
-        attachments.push({
-            name: file.name,
-            type: file.type,
-            file: file
-        });
-    });
+    Array.from(files).forEach(f => attachments.push({ name: f.name, type: f.type, file: f }));
     renderFileList();
 }
-
 function renderFileList() {
-    ui.fileList.innerHTML = '';
-    attachments.forEach((att, idx) => {
-        const div = document.createElement('div');
-        div.className = 'file-item';
-        div.innerHTML = `
-            <span>${att.name}</span>
-            <span class="file-remove" data-index="${idx}">&times;</span>
-        `;
-        div.querySelector('.file-remove').onclick = () => removeAttachment(idx);
-        ui.fileList.appendChild(div);
+    ui.fileList.innerHTML = ''; ui.attachmentCount.textContent = attachments.length;
+    attachments.forEach((att, i) => {
+        const d = document.createElement('div'); d.className = 'file-item';
+        d.innerHTML = `<span>${att.name}</span><span class="file-remove" onclick="removeAttachment(${i})">&times;</span>`;
+        ui.fileList.appendChild(d);
     });
 }
+window.removeAttachment = (i) => { attachments.splice(i, 1); renderFileList(); };
 
-function removeAttachment(idx) {
-    attachments.splice(idx, 1);
-    renderFileList();
-}
-
-function updateAttachmentColumnSelect(record) {
-    const currentVal = selectedAttachmentCol;
+function updateAttachmentColumnSelect(rec) {
     ui.attachmentColumnSelect.innerHTML = '<option value="">-- No Grist Attachment --</option>';
-
-    Object.keys(record).forEach(col => {
+    Object.keys(rec).forEach(col => {
         if (col.startsWith('gristHelper') || col === 'id') return;
-        const opt = document.createElement('option');
-        opt.value = col;
-        opt.textContent = col;
-        if (col === currentVal) opt.selected = true;
+        const opt = document.createElement('option'); opt.value = col; opt.textContent = col;
+        if (col === selectedAttachmentCol) opt.selected = true;
         ui.attachmentColumnSelect.appendChild(opt);
     });
 }
 
-// --- UI HELPERS ---
-
 function populateFieldSelect() {
-    ui.fieldInsertSelect.innerHTML = '<option value="">-- Insert Field --</option>';
+    ui.fieldInsertSelect.innerHTML = '<option value="">-- Field --</option>';
     placeholderFields.forEach(f => {
-        const opt = document.createElement('option');
-        opt.value = f.token;
-        opt.textContent = f.label;
+        const opt = document.createElement('option'); opt.value = f.token; opt.textContent = f.label;
         ui.fieldInsertSelect.appendChild(opt);
     });
 }
 
-function showStatus(msg, type) {
-    ui.statusMessage.textContent = msg;
-    ui.statusMessage.className = `status-message ${type} show`;
+function showStatus(msg) {
+    ui.statusMessage.textContent = msg; ui.statusMessage.className = 'status-message show';
     setTimeout(() => ui.statusMessage.classList.remove('show'), 3000);
 }
 
 function showContextMenu(e, id) {
-    e.preventDefault();
-    contextMenuTargetId = id;
-    ui.contextMenu.style.top = `${e.clientY}px`;
-    ui.contextMenu.style.left = `${e.clientX}px`;
+    e.preventDefault(); contextMenuTargetId = id;
+    ui.contextMenu.style.top = `${e.clientY}px`; ui.contextMenu.style.left = `${e.clientX}px`;
     ui.contextMenu.classList.remove('hidden');
 }
 
 function renameTemplate() {
-    const tpl = templates.find(t => t.id === contextMenuTargetId);
-    if (!tpl) return;
-    const newName = prompt('New Name:', tpl.name);
-    if (newName) {
-        tpl.name = newName;
-        saveTemplates();
-        renderTemplateList();
-    }
+    const tpl = templates.find(t => t.id === contextMenuTargetId); if (!tpl) return;
+    const n = prompt('New Name:', tpl.name); if (n) { tpl.name = n; saveTemplates(); renderTemplateList(); }
 }
-
 function duplicateTemplate() {
-    const tpl = templates.find(t => t.id === contextMenuTargetId);
-    if (!tpl) return;
-    const newTpl = { ...tpl, id: 't_' + Date.now(), name: tpl.name + ' (Copy)' };
-    templates.push(newTpl);
-    saveTemplates();
+    const tpl = templates.find(t => t.id === contextMenuTargetId); if (!tpl) return;
+    const nt = { ...tpl, id: 't_' + Date.now(), name: tpl.name + ' (Copy)' };
+    templates.push(nt); saveTemplates(); renderTemplateList();
+}
+function deleteTemplate() {
+    const tpl = templates.find(t => t.id === contextMenuTargetId); if (!tpl || !confirm('Delete template?')) return;
+    templates = templates.filter(t => t.id !== contextMenuTargetId); saveTemplates();
+    if (activeTemplateId === contextMenuTargetId) { activeTemplateId = templates[0]?.id || null; regenerateFromTemplate(); }
     renderTemplateList();
 }
 
-function deleteTemplate() {
-    const tpl = templates.find(t => t.id === contextMenuTargetId);
-    if (!tpl) return;
-    if (confirm(`Delete template "${tpl.name}"?`)) {
-        templates = templates.filter(t => t.id !== contextMenuTargetId);
-        saveTemplates();
-        if (activeTemplateId === contextMenuTargetId) {
-            activeTemplateId = templates[0]?.id || null;
-            regenerateFromTemplate();
-        }
-        renderTemplateList();
-    }
-}
-
-// --- EXPORT / IMPORT ---
-
-async function exportTemplates() {
-    const json = JSON.stringify(templates, null, 2);
-    try {
-        await navigator.clipboard.writeText(json);
-        showStatus('Templates copied to clipboard', 'success');
-    } catch (e) {
-        showStatus('Failed to copy', 'error');
-    }
-}
-
+function exportTemplates() { navigator.clipboard.writeText(JSON.stringify(templates, null, 2)).then(() => showStatus('Copied to clipboard')); }
 function importTemplates() {
-    const input = prompt('Paste templates JSON:');
-    if (!input) return;
-    try {
-        const parsed = JSON.parse(input);
-        if (Array.isArray(parsed)) {
-            templates = parsed;
-            saveTemplates();
-            renderTemplateList();
-            showStatus('Templates imported', 'success');
-        }
-    } catch (e) {
-        showStatus('Invalid JSON', 'error');
-    }
+    const i = prompt('Paste templates JSON:'); if (!i) return;
+    try { templates = JSON.parse(i); saveTemplates(); renderTemplateList(); showStatus('Imported'); } catch (e) { alert('Invalid JSON'); }
 }
-
-// --- COPY & DOWNLOAD ---
 
 function copyEmailBody() {
-    const html = ui.editor.innerHTML;
-    const text = ui.editor.innerText;
-
+    const h = ui.editor.innerHTML, t = ui.editor.innerText;
     if (navigator.clipboard && window.ClipboardItem) {
-        const htmlBlob = new Blob([html], { type: 'text/html' });
-        const textBlob = new Blob([text], { type: 'text/plain' });
-        const item = new ClipboardItem({
-            'text/html': htmlBlob,
-            'text/plain': textBlob
-        });
-        navigator.clipboard.write([item]).then(() => {
-            showStatus('Body copied (HTML + Text)', 'success');
-        }).catch(() => {
-            navigator.clipboard.writeText(html).then(() => {
-                showStatus('Body copied (HTML only)', 'success');
-            });
-        });
-    } else {
-        navigator.clipboard.writeText(html).then(() => {
-            showStatus('Body copied (HTML only)', 'success');
-        });
-    }
+        const i = new ClipboardItem({ 'text/html': new Blob([h], { type: 'text/html' }), 'text/plain': new Blob([t], { type: 'text/plain' }) });
+        navigator.clipboard.write([i]).then(() => showStatus('Body copied')).catch(() => navigator.clipboard.writeText(h).then(() => showStatus('HTML copied')));
+    } else navigator.clipboard.writeText(h).then(() => showStatus('HTML copied'));
 }
 
 async function downloadEml() {
-    showStatus('Generating EML...', 'info');
-
-    const to = ui.emailTo.value;
-    const cc = ui.emailCc.value;
-    const subject = ui.emailSubject.value || 'Investment Opportunity';
-    const html = ui.editor.innerHTML;
-    const text = ui.editor.innerText;
-
-    const allAttachments = [...attachments];
-
+    showStatus('Generating...');
+    const to = ui.emailTo.value, cc = ui.emailCc.value, sub = ui.emailSubject.value || 'Investment Opportunity', html = ui.editor.innerHTML, text = ui.editor.innerText;
+    const atts = [...attachments];
     if (selectedAttachmentCol && currentGristRecord && currentGristRecord[selectedAttachmentCol]) {
-        let gristFiles = currentGristRecord[selectedAttachmentCol];
-        if (!Array.isArray(gristFiles)) gristFiles = [gristFiles];
-
-        for (const fileId of gristFiles) {
-            if (typeof fileId !== 'number') continue;
+        let files = currentGristRecord[selectedAttachmentCol]; if (!Array.isArray(files)) files = [files];
+        for (const fid of files) {
+            if (typeof fid !== 'number') continue;
             try {
-                const fileData = await grist.docApi.getAttachment(fileId);
-                const fileBlob = new Blob([fileData], { type: 'application/octet-stream' });
-                allAttachments.push({
-                    name: `OM_${currentGristData?.propertyName || 'Property'}_${fileId}.pdf`,
-                    file: fileBlob
-                });
-            } catch (e) {
-                console.error('Failed to fetch Grist attachment', fileId, e);
-            }
+                const data = await grist.docApi.getAttachment(fid);
+                atts.push({ name: `Attachment_${fid}.pdf`, file: new Blob([data], { type: 'application/octet-stream' }) });
+            } catch (e) { console.error(e); }
         }
     }
-
-    try {
-        const emlContent = await buildEML(to, cc, subject, html, text, allAttachments);
-        const blob = new Blob([emlContent], { type: 'message/rfc822' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${subject.replace(/[^a-z0-9]/gi, '_')}.eml`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        showStatus('Download started', 'success');
-    } catch (e) {
-        console.error(e);
-        showStatus('Error generating EML', 'error');
-    }
+    const eml = await buildEML(to, cc, sub, html, text, atts);
+    const url = URL.createObjectURL(new Blob([eml], { type: 'message/rfc822' }));
+    const a = document.createElement('a'); a.href = url; a.download = `${sub.replace(/[^a-z0-9]/gi, '_')}.eml`; a.click(); URL.revokeObjectURL(url);
 }
 
-async function buildEML(to, cc, subject, html, text, attachmentsList) {
-    const boundary = `----=_NextPart_${Math.random().toString(36).substring(2, 15)}`;
-    const innerBoundary = `----=_InnerPart_${Math.random().toString(36).substring(2, 15)}`;
-
-    let headers = `MIME-Version: 1.0\r\n`;
-    headers += `Date: ${new Date().toUTCString()}\r\n`;
-    headers += `Subject: ${subject}\r\n`;
-    if (to) headers += `To: ${to}\r\n`;
-    if (cc) headers += `Cc: ${cc}\r\n`;
-    headers += `From: <sender@example.com>\r\n`;
-
+async function buildEML(to, cc, sub, html, text, atts) {
+    const b = `----=_NextPart_${Math.random().toString(36).substring(2, 15)}`, ib = `----=_InnerPart_${Math.random().toString(36).substring(2, 15)}`;
+    let h = `MIME-Version: 1.0\r\nDate: ${new Date().toUTCString()}\r\nSubject: ${sub}\r\n`;
+    if (to) h += `To: ${to}\r\n`; if (cc) h += `Cc: ${cc}\r\n`; h += `From: <sender@example.com>\r\n`;
     let body = "";
-
-    if (attachmentsList.length === 0) {
-        headers += `Content-Type: multipart/alternative; boundary="${boundary}"\r\n\r\n`;
-        body += `--${boundary}\r\nContent-Type: text/plain; charset="utf-8"\r\n\r\n${text}\r\n\r\n`;
-        body += `--${boundary}\r\nContent-Type: text/html; charset="utf-8"\r\n\r\n<html><body>${html}</body></html>\r\n\r\n`;
-        body += `--${boundary}--\r\n`;
+    if (atts.length === 0) {
+        h += `Content-Type: multipart/alternative; boundary="${b}"\r\n\r\n`;
+        body += `--${b}\r\nContent-Type: text/plain; charset="utf-8"\r\n\r\n${text}\r\n\r\n--${b}\r\nContent-Type: text/html; charset="utf-8"\r\n\r\n<html><body>${html}</body></html>\r\n\r\n--${b}--\r\n`;
     } else {
-        headers += `Content-Type: multipart/mixed; boundary="${boundary}"\r\n\r\n`;
-
-        body += `--${boundary}\r\nContent-Type: multipart/alternative; boundary="${innerBoundary}"\r\n\r\n`;
-        body += `--${innerBoundary}\r\nContent-Type: text/plain; charset="utf-8"\r\n\r\n${text}\r\n\r\n`;
-        body += `--${innerBoundary}\r\nContent-Type: text/html; charset="utf-8"\r\n\r\n<html><body>${html}</body></html>\r\n\r\n`;
-        body += `--${innerBoundary}--\r\n\r\n`;
-
-        for (const att of attachmentsList) {
-            const base64 = await blobToBase64(att.file);
-            body += `--${boundary}\r\n`;
-            body += `Content-Type: ${att.type || 'application/octet-stream'}; name="${att.name}"\r\n`;
-            body += `Content-Transfer-Encoding: base64\r\n`;
-            body += `Content-Disposition: attachment; filename="${att.name}"\r\n\r\n`;
-            body += `${base64}\r\n\r\n`;
+        h += `Content-Type: multipart/mixed; boundary="${b}"\r\n\r\n--${b}\r\nContent-Type: multipart/alternative; boundary="${ib}"\r\n\r\n`;
+        body += `--${ib}\r\nContent-Type: text/plain; charset="utf-8"\r\n\r\n${text}\r\n\r\n--${ib}\r\nContent-Type: text/html; charset="utf-8"\r\n\r\n<html><body>${html}</body></html>\r\n\r\n--${ib}--\r\n\r\n`;
+        for (const a of atts) {
+            const b64 = await new Promise(r => { const rd = new FileReader(); rd.onload = () => r(rd.result.split(',')[1]); rd.readAsDataURL(a.file); });
+            body += `--${b}\r\nContent-Type: ${a.type || 'application/octet-stream'}; name="${a.name}"\r\nContent-Transfer-Encoding: base64\r\nContent-Disposition: attachment; filename="${a.name}"\r\n\r\n${b64}\r\n\r\n`;
         }
-        body += `--${boundary}--\r\n`;
+        body += `--${b}--\r\n`;
     }
-
-    return headers + body;
+    return h + body;
 }
 
-function blobToBase64(blob) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result.split(',')[1]);
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-    });
-}
-
-// Start
 init();
     </script>
 </body>
