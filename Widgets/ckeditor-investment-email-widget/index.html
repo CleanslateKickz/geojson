@@ -10,1112 +10,1116 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
+
     <style>
-/* --- DESIGN SYSTEM --- */
-:root {
-    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-    --color-bg: #f9fafb;
-    --color-bg-pane: #ffffff;
-    --color-border: #e5e7eb;
-    --color-border-hover: #d1d5db;
-    --color-text-primary: #111827;
-    --color-text-secondary: #4b5563;
-    --color-text-muted: #9ca3af;
-    --color-primary: #2563eb;
-    --color-primary-hover: #1d4ed8;
-    --color-active-bg: #eff6ff;
-    --color-success: #10b981;
-    --color-danger: #ef4444;
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    --radius-sm: 4px;
-    --radius-md: 6px;
-    --radius-lg: 10px;
-}
+        /* --- DESIGN SYSTEM --- */
+        :root {
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            --color-bg: #f9fafb;
+            --color-bg-pane: #ffffff;
+            --color-border: #e5e7eb;
+            --color-border-hover: #d1d5db;
+            --color-text-primary: #111827;
+            --color-text-secondary: #4b5563;
+            --color-text-muted: #9ca3af;
+            --color-primary: #2563eb;
+            --color-primary-hover: #1d4ed8;
+            --color-active-bg: #eff6ff;
+            --color-success: #10b981;
+            --color-danger: #ef4444;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --radius-sm: 4px;
+            --radius-md: 6px;
+            --radius-lg: 10px;
+        }
 
-/* --- GENERAL & LAYOUT --- */
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-    font-family: var(--font-sans);
-    font-size: 13px;
-    line-height: 1.5;
-    color: var(--color-text-primary);
-    background-color: var(--color-bg);
-    height: 100vh;
-    overflow: hidden;
-}
+        /* --- GENERAL & LAYOUT --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: var(--font-sans);
+            font-size: 13px;
+            line-height: 1.5;
+            color: var(--color-text-primary);
+            background-color: var(--color-bg);
+            height: 100vh;
+            overflow: hidden;
+        }
 
-.app-container {
-    display: flex;
-    height: 100%;
-    position: relative;
-}
+        .app-container {
+            display: flex;
+            height: 100%;
+            position: relative;
+        }
 
-/* --- SIDEBAR --- */
-.sidebar {
-    width: 280px;
-    background-color: var(--color-bg-pane);
-    border-right: 1px solid var(--color-border);
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    transition: transform 0.3s ease, margin-left 0.3s ease;
-    z-index: 100;
-}
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 280px;
+            background-color: var(--color-bg-pane);
+            border-right: 1px solid var(--color-border);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            transition: transform 0.3s ease, margin-left 0.3s ease;
+            z-index: 100;
+        }
 
-.sidebar.hidden {
-    margin-left: -280px;
-}
+        .sidebar.hidden {
+            margin-left: -280px;
+        }
 
-.sidebar-header {
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--color-border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+        .sidebar-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-.sidebar-header h2 {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--color-text-primary);
-}
+        .sidebar-header h2 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--color-text-primary);
+        }
 
-.sidebar-content {
-    flex-grow: 1;
-    overflow-y: auto;
-    padding: 12px;
-}
+        .sidebar-content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
 
-.sidebar-footer {
-    padding: 12px;
-    border-top: 1px solid var(--color-border);
-    background-color: #f9fafb;
-}
+        .sidebar-footer {
+            padding: 12px;
+            border-top: 1px solid var(--color-border);
+            background-color: #f9fafb;
+        }
 
-.sidebar-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-}
+        .sidebar-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
 
-/* --- MAIN CONTENT --- */
-.main-content {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    background-color: #ffffff;
-}
+        /* --- MAIN CONTENT --- */
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background-color: #ffffff;
+        }
 
-/* App Header */
-.app-header {
-    padding: 8px 16px;
-    border-bottom: 1px solid var(--color-border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #ffffff;
-    min-height: 48px;
-}
+        /* App Header */
+        .app-header {
+            padding: 8px 16px;
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #ffffff;
+            min-height: 48px;
+        }
 
-.header-left, .header-right {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-}
+        .header-left, .header-right {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
 
-/* Metadata Fields */
-.email-metadata {
-    padding: 8px 16px;
-    border-bottom: 1px solid var(--color-border);
-    background-color: #ffffff;
-}
+        /* Metadata Fields */
+        .email-metadata {
+            padding: 8px 16px;
+            border-bottom: 1px solid var(--color-border);
+            background-color: #ffffff;
+        }
 
-.metadata-row {
-    display: flex;
-    align-items: center;
-    margin-bottom: 4px;
-}
+        .metadata-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+        }
 
-.metadata-row:last-child {
-    margin-bottom: 0;
-}
+        .metadata-row:last-child {
+            margin-bottom: 0;
+        }
 
-.metadata-row label {
-    width: 60px;
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--color-text-secondary);
-}
+        .metadata-row label {
+            width: 60px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--color-text-secondary);
+        }
 
-.metadata-row input {
-    flex-grow: 1;
-    border: 1px solid transparent;
-    padding: 4px 8px;
-    font-size: 13px;
-    border-radius: var(--radius-sm);
-    transition: background-color 0.2s;
-}
+        .metadata-row input {
+            flex-grow: 1;
+            border: 1px solid transparent;
+            padding: 4px 8px;
+            font-size: 13px;
+            border-radius: var(--radius-sm);
+            transition: background-color 0.2s;
+        }
 
-.metadata-row input:hover {
-    background-color: #f3f4f6;
-}
+        .metadata-row input:hover {
+            background-color: #f3f4f6;
+        }
 
-.metadata-row input:focus {
-    outline: none;
-    background-color: #f3f4f6;
-}
+        .metadata-row input:focus {
+            outline: none;
+            background-color: #f3f4f6;
+        }
 
-#emailSubject {
-    font-weight: 600;
-}
+        #emailSubject {
+            font-weight: 600;
+        }
 
-.details-toggle {
-    font-size: 11px;
-    color: var(--color-primary);
-    cursor: pointer;
-    text-decoration: underline;
-    margin-left: 60px;
-    margin-top: 4px;
-    display: inline-block;
-}
+        .details-toggle {
+            font-size: 11px;
+            color: var(--color-primary);
+            cursor: pointer;
+            text-decoration: underline;
+            margin-left: 60px;
+            margin-top: 4px;
+            display: inline-block;
+        }
 
-/* Toolbar */
-.editor-toolbar {
-    padding: 6px 12px;
-    background-color: #ffffff;
-    border-bottom: 1px solid var(--color-border);
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    overflow-x: auto;
-}
+        /* Toolbar */
+        .editor-toolbar {
+            padding: 6px 12px;
+            background-color: #ffffff;
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            overflow-x: auto;
+        }
 
-.toolbar-group {
-    display: flex;
-    align-items: center;
-    gap: 2px;
-    padding: 0 4px;
-    border-right: 1px solid var(--color-border);
-}
+        .toolbar-group {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            padding: 0 4px;
+            border-right: 1px solid var(--color-border);
+        }
 
-.toolbar-group:last-child {
-    border-right: none;
-}
+        .toolbar-group:last-child {
+            border-right: none;
+        }
 
-.toolbar-spacer {
-    flex-grow: 1;
-}
+        .toolbar-spacer {
+            flex-grow: 1;
+        }
 
-.tool-btn {
-    width: 28px;
-    height: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: none;
-    background: transparent;
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    color: var(--color-text-secondary);
-    transition: all 0.2s;
-}
+        .tool-btn {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            background: transparent;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            color: var(--color-text-secondary);
+            transition: all 0.2s;
+        }
 
-.tool-btn:hover {
-    background-color: #f3f4f6;
-    color: var(--color-text-primary);
-}
+        .tool-btn:hover {
+            background-color: #f3f4f6;
+            color: var(--color-text-primary);
+        }
 
-.tool-btn.active {
-    background-color: var(--color-active-bg);
-    color: var(--color-primary);
-}
+        .tool-btn.active {
+            background-color: var(--color-active-bg);
+            color: var(--color-primary);
+        }
 
-.select-toolbar {
-    padding: 2px 6px;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    background-color: #ffffff;
-    font-size: 12px;
-}
+        .select-toolbar {
+            padding: 2px 6px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            background-color: #ffffff;
+            font-size: 12px;
+        }
 
-/* Editor Body */
-.editor-container {
-    flex-grow: 1;
-    overflow-y: auto;
-    padding: 20px;
-    background-color: #f3f4f6;
-    display: flex;
-    justify-content: center;
-}
+        /* Editor Body */
+        .editor-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background-color: #f3f4f6;
+            display: flex;
+            justify-content: center;
+        }
 
-#editor {
-    width: 100%;
-    max-width: 800px;
-    min-height: 100%;
-    background-color: #ffffff;
-    padding: 40px 60px;
-    box-shadow: var(--shadow-sm);
-    border-radius: 2px;
-    outline: none;
-    font-size: 14px;
-    line-height: 1.6;
-    color: var(--color-text-primary);
-}
+        #editor {
+            width: 100%;
+            max-width: 800px;
+            min-height: 100%;
+            background-color: #ffffff;
+            padding: 40px 60px;
+            box-shadow: var(--shadow-sm);
+            border-radius: 2px;
+            outline: none;
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--color-text-primary);
+        }
 
-/* Attachments Area */
-.attachments-section {
-    border-top: 1px solid var(--color-border);
-    background-color: #ffffff;
-}
+        /* Attachments Area */
+        .attachments-section {
+            border-top: 1px solid var(--color-border);
+            background-color: #ffffff;
+        }
 
-.attachments-header {
-    padding: 8px 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-    user-select: none;
-    background-color: #f9fafb;
-}
+        .attachments-header {
+            padding: 8px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            background-color: #f9fafb;
+        }
 
-.attachments-header:hover {
-    background-color: #f3f4f6;
-}
+        .attachments-header:hover {
+            background-color: #f3f4f6;
+        }
 
-.attachments-header h3 {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--color-text-secondary);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
+        .attachments-header h3 {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
 
-.attachments-content {
-    padding: 12px 16px;
-}
+        .attachments-content {
+            padding: 12px 16px;
+        }
 
-.attachments-content.collapsed {
-    display: none;
-}
+        .attachments-content.collapsed {
+            display: none;
+        }
 
-.drop-zone {
-    border: 1px dashed var(--color-border);
-    border-radius: var(--radius-md);
-    padding: 12px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    color: var(--color-text-muted);
-}
+        .drop-zone {
+            border: 1px dashed var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--color-text-muted);
+        }
 
-.drop-zone:hover {
-    border-color: var(--color-primary);
-    background-color: var(--color-active-bg);
-}
+        .drop-zone:hover {
+            border-color: var(--color-primary);
+            background-color: var(--color-active-bg);
+        }
 
-.file-list {
-    margin-top: 8px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-}
+        .file-list {
+            margin-top: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
 
-.file-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 8px;
-    background-color: #f3f4f6;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    font-size: 11px;
-}
+        .file-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 8px;
+            background-color: #f3f4f6;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            font-size: 11px;
+        }
 
-.file-remove {
-    cursor: pointer;
-    color: var(--color-text-muted);
-}
+        .file-remove {
+            cursor: pointer;
+            color: var(--color-text-muted);
+        }
 
-.file-remove:hover {
-    color: var(--color-danger);
-}
+        .file-remove:hover {
+            color: var(--color-danger);
+        }
 
-/* --- COMPONENTS --- */
-.btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    padding: 6px 10px;
-    font-size: 12px;
-    font-weight: 500;
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    border: 1px solid transparent;
-    transition: all 0.2s;
-    white-space: nowrap;
-}
+        /* --- COMPONENTS --- */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 6px 10px;
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
 
-.btn-primary {
-    background-color: var(--color-primary);
-    color: #ffffff;
-}
+        .btn-primary {
+            background-color: var(--color-primary);
+            color: #ffffff;
+        }
 
-.btn-primary:hover {
-    background-color: var(--color-primary-hover);
-}
+        .btn-primary:hover {
+            background-color: var(--color-primary-hover);
+        }
 
-.btn-secondary {
-    background-color: #ffffff;
-    border-color: var(--color-border);
-    color: var(--color-text-primary);
-}
+        .btn-secondary {
+            background-color: #ffffff;
+            border-color: var(--color-border);
+            color: var(--color-text-primary);
+        }
 
-.btn-secondary:hover {
-    background-color: #f9fafb;
-    border-color: var(--color-border-hover);
-}
+        .btn-secondary:hover {
+            background-color: #f9fafb;
+            border-color: var(--color-border-hover);
+        }
 
-.btn-ghost {
-    background-color: transparent;
-    color: var(--color-text-secondary);
-}
+        .btn-ghost {
+            background-color: transparent;
+            color: var(--color-text-secondary);
+        }
 
-.btn-ghost:hover {
-    background-color: #f3f4f6;
-    color: var(--color-text-primary);
-}
+        .btn-ghost:hover {
+            background-color: #f3f4f6;
+            color: var(--color-text-primary);
+        }
 
-.btn-sm { padding: 4px 8px; font-size: 11px; }
+        .btn-sm { padding: 4px 8px; font-size: 11px; }
 
-.pill {
-    padding: 2px 8px;
-    border-radius: 999px;
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    background-color: #f3f4f6;
-    color: var(--color-text-secondary);
-}
+        .pill {
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            background-color: #f3f4f6;
+            color: var(--color-text-secondary);
+        }
 
-.pill.active {
-    background-color: var(--color-active-bg);
-    color: var(--color-primary);
-}
+        .pill.active {
+            background-color: var(--color-active-bg);
+            color: var(--color-primary);
+        }
 
-.template-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 12px;
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
+        .template-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
 
-.template-item:hover { background-color: #f3f4f6; }
-.template-item.active { background-color: var(--color-active-bg); }
+        .template-item:hover { background-color: #f3f4f6; }
+        .template-item.active { background-color: var(--color-active-bg); }
 
-.template-item .info { display: flex; flex-direction: column; }
-.template-item .name { font-size: 13px; font-weight: 500; }
-.template-item .desc { font-size: 11px; color: var(--color-text-muted); }
+        .template-item .info { display: flex; flex-direction: column; }
+        .template-item .name { font-size: 13px; font-weight: 500; }
+        .template-item .desc { font-size: 11px; color: var(--color-text-muted); }
 
-.template-category h3 {
-    font-size: 10px;
-    text-transform: uppercase;
-    color: var(--color-text-muted);
-    letter-spacing: 0.05em;
-    margin: 12px 0 4px 8px;
-}
+        .template-category h3 {
+            font-size: 10px;
+            text-transform: uppercase;
+            color: var(--color-text-muted);
+            letter-spacing: 0.05em;
+            margin: 12px 0 4px 8px;
+        }
 
-/* Icons styling */
-svg { flex-shrink: 0; }
+        /* Icons styling */
+        svg { flex-shrink: 0; }
 
-.hidden { display: none !important; }
+        .hidden { display: none !important; }
 
-/* Status Toast */
-.status-message {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 8px 16px;
-    background-color: #1f2937;
-    color: #ffffff;
-    border-radius: var(--radius-lg);
-    font-size: 12px;
-    box-shadow: var(--shadow-md);
-    z-index: 2000;
-    opacity: 0;
-    transition: opacity 0.3s;
-    pointer-events: none;
-}
-.status-message.show { opacity: 1; }
+        /* Status Toast */
+        .status-message {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 8px 16px;
+            background-color: #1f2937;
+            color: #ffffff;
+            border-radius: var(--radius-lg);
+            font-size: 12px;
+            box-shadow: var(--shadow-md);
+            z-index: 2000;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        .status-message.show { opacity: 1; }
 
-/* Context Menu */
-.context-menu {
-    position: fixed;
-    background: #ffffff;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-md);
-    padding: 4px;
-    z-index: 1000;
-}
-.context-menu-item {
-    display: block;
-    width: 100%;
-    padding: 6px 12px;
-    text-align: left;
-    background: transparent;
-    border: none;
-    font-size: 12px;
-    cursor: pointer;
-    border-radius: var(--radius-sm);
-}
-.context-menu-item:hover { background-color: #f3f4f6; }
-.context-menu-item.danger { color: var(--color-danger); }
+        /* Context Menu */
+        .context-menu {
+            position: fixed;
+            background: #ffffff;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+            padding: 4px;
+            z-index: 1000;
+        }
+        .context-menu-item {
+            display: block;
+            width: 100%;
+            padding: 6px 12px;
+            text-align: left;
+            background: transparent;
+            border: none;
+            font-size: 12px;
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+        }
+        .context-menu-item:hover { background-color: #f3f4f6; }
+        .context-menu-item.danger { color: var(--color-danger); }
     </style>
-</head>
-<body>
-    <div class="app-container">
-        <!-- Sidebar -->
-        <aside id="sidebar" class="sidebar hidden">
-            <header class="sidebar-header">
-                <h2>Message Templates</h2>
-                <button id="closeSidebarBtn" class="btn btn-ghost btn-sm" style="padding: 4px;">&times;</button>
-            </header>
-            <div class="sidebar-content">
-                <div id="templateCategories"></div>
-            </div>
-            <footer class="sidebar-footer">
-                <div class="sidebar-actions">
-                    <button id="newTemplateBtn" class="btn btn-secondary btn-sm">New</button>
-                    <button id="duplicateTemplateBtn_s" class="btn btn-secondary btn-sm">Duplicate</button>
-                    <button id="exportTemplatesBtn" class="btn btn-ghost btn-sm">Export</button>
-                    <button id="importTemplatesBtn" class="btn btn-ghost btn-sm">Import</button>
-                </div>
-            </footer>
-        </aside>
-
-        <!-- Main -->
-        <main class="main-content">
-            <header class="app-header">
-                <div class="header-left">
-                    <button id="toggleSidebarBtn" class="btn btn-secondary btn-sm">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
-                        Templates
-                    </button>
-                    <select id="attachmentColumnSelect" class="select-toolbar" style="height: 28px;">
-                        <option value="">-- No Grist Attachment --</option>
-                    </select>
-                </div>
-                <div class="header-right">
-                    <span id="modeBadge" class="pill active">Email</span>
-                    <button id="copySubjectBtn" class="btn btn-ghost btn-sm">Copy Subject</button>
-                    <button id="copyEmailBtn" class="btn btn-ghost btn-sm">Copy Body</button>
-                    <button id="downloadEmlBtn" class="btn btn-primary btn-sm">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-                        Download .EML
-                    </button>
-                </div>
-            </header>
-
-            <div class="email-metadata">
-                <div id="extraDetails" class="hidden">
-                    <div class="metadata-row">
-                        <label>To</label>
-                        <input type="text" id="emailTo" placeholder="Recipients...">
-                    </div>
-                    <div class="metadata-row">
-                        <label>Cc</label>
-                        <input type="text" id="emailCc" placeholder="Cc...">
-                    </div>
-                </div>
-                <div class="metadata-row">
-                    <label>Subject</label>
-                    <input type="text" id="emailSubject" placeholder="Subject...">
-                </div>
-                <span id="toggleDetailsBtn" class="details-toggle">Show Details</span>
-            </div>
-
-            <div class="editor-toolbar">
-                <div class="toolbar-group">
-                    <select id="formatBlock" class="select-toolbar">
-                        <option value="p">Paragraph</option>
-                        <option value="h1">Heading 1</option>
-                        <option value="h2">Heading 2</option>
-                        <option value="h3">Heading 3</option>
-                    </select>
-                </div>
-                <div class="toolbar-group">
-                    <button class="tool-btn" data-command="bold"><b>B</b></button>
-                    <button class="tool-btn" data-command="italic"><i>I</i></button>
-                    <button class="tool-btn" data-command="underline"><u>U</u></button>
-                    <button class="tool-btn" data-command="strikeThrough"><s>S</s></button>
-                </div>
-                <div class="toolbar-group">
-                    <button id="textColorBtn" class="tool-btn" title="Text Color">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h16M7 16l5-12 5 12M6.5 14h11"/></svg>
-                    </button>
-                    <button id="bgColorBtn" class="tool-btn" title="Background Color">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l4 4-4 4-4-4 4-4zM5 12l-2 2 9 9 9-9-2-2"/></svg>
-                    </button>
-                    <input type="color" id="colorInput" style="display: none;">
-                </div>
-                <div class="toolbar-group">
-                    <button class="tool-btn" data-command="justifyLeft">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 10H3M21 6H3M21 14H3M17 18H3"/></svg>
-                    </button>
-                    <button class="tool-btn" data-command="justifyCenter">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10H6M21 6H3M21 14H3M18 18H6"/></svg>
-                    </button>
-                </div>
-                <div class="toolbar-group">
-                    <button class="tool-btn" data-command="insertUnorderedList">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
-                    </button>
-                    <button class="tool-btn" data-command="insertOrderedList">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="10" y1="6" x2="21" y2="6"></line><line x1="10" y1="12" x2="21" y2="12"></line><line x1="10" y1="18" x2="21" y2="18"></line><path d="M4 6h1v4"></path><path d="M4 10h2"></path><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"></path></svg>
-                    </button>
-                </div>
-                <div class="toolbar-group">
-                    <button class="tool-btn" data-command="removeFormat" title="Clear Formatting">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-                    </button>
-                </div>
-                <div class="toolbar-spacer"></div>
-                <div class="toolbar-group" style="border-right: none;">
-                    <select id="fieldInsertSelect" class="select-toolbar" style="max-width: 120px;"></select>
-                    <button id="insertFieldBtn" class="btn btn-secondary btn-sm" style="padding: 2px 6px;">Insert</button>
-                    <button id="refreshFromTemplateBtn" class="btn btn-ghost btn-sm" title="Refresh from Template">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-                    </button>
-                    <div style="width: 1px; height: 16px; background: var(--color-border); margin: 0 4px;"></div>
-                    <button id="editTemplateBtn" class="btn btn-secondary btn-sm">Edit Template</button>
-                    <button id="saveTemplateBtn" class="btn btn-primary btn-sm hidden">Save</button>
-                    <button id="cancelTemplateEditBtn" class="btn btn-secondary btn-sm hidden">Cancel</button>
-                    <button id="saveAsTemplateBtn" class="btn btn-secondary btn-sm">Save As</button>
-                </div>
-            </div>
-
-            <div class="editor-container">
-                <div id="editor" contenteditable="true"></div>
-            </div>
-
-            <div class="attachments-section">
-                <header id="attachmentsToggle" class="attachments-header">
-                    <h3>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-                        Attachments (<span id="attachmentCount">0</span>)
-                    </h3>
-                    <svg id="attachmentsChevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </head>
+    <body>
+        <div class="app-container">
+            <!-- Sidebar -->
+            <aside id="sidebar" class="sidebar hidden">
+                <header class="sidebar-header">
+                    <h2>Message Templates</h2>
+                    <button id="closeSidebarBtn" class="btn btn-ghost btn-sm" style="padding: 4px;">&times;</button>
                 </header>
-                <div id="attachmentsContent" class="attachments-content collapsed">
-                    <div id="dropZone" class="drop-zone">
-                        Drop files or click to add
-                    </div>
-                    <div id="fileList" class="file-list"></div>
-                    <input type="file" id="fileInput" multiple class="hidden">
+                <div class="sidebar-content">
+                    <div id="templateCategories"></div>
                 </div>
-            </div>
-        </main>
-    </div>
+                <footer class="sidebar-footer">
+                    <div class="sidebar-actions">
+                        <button id="newTemplateBtn" class="btn btn-secondary btn-sm">New</button>
+                        <button id="duplicateTemplateBtn_s" class="btn btn-secondary btn-sm">Duplicate</button>
+                        <button id="exportTemplatesBtn" class="btn btn-ghost btn-sm">Export</button>
+                        <button id="importTemplatesBtn" class="btn btn-ghost btn-sm">Import</button>
+                    </div>
+                </footer>
+            </aside>
 
-    <div id="templateContextMenu" class="context-menu hidden">
-        <button id="renameTemplateBtn" class="context-menu-item">Rename</button>
-        <button id="duplicateTemplateBtn" class="context-menu-item">Duplicate</button>
-        <div style="height: 1px; background: var(--color-border); margin: 4px 0;"></div>
-        <button id="deleteTemplateBtn" class="context-menu-item danger">Delete</button>
-    </div>
+            <!-- Main -->
+            <main class="main-content">
+                <header class="app-header">
+                    <div class="header-left">
+                        <button id="toggleSidebarBtn" class="btn btn-secondary btn-sm">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+                            Templates
+                        </button>
+                        <select id="attachmentColumnSelect" class="select-toolbar" style="height: 28px;">
+                            <option value="">-- No Grist Attachment --</option>
+                        </select>
+                    </div>
+                    <div class="header-right">
+                        <span id="modeBadge" class="pill active">Email</span>
+                        <button id="copySubjectBtn" class="btn btn-ghost btn-sm">Copy Subject</button>
+                        <button id="copyEmailBtn" class="btn btn-ghost btn-sm">Copy Body</button>
+                        <button id="downloadEmlBtn" class="btn btn-primary btn-sm">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                            Download .EML
+                        </button>
+                    </div>
+                </header>
 
-    <div id="statusMessage" class="status-message"></div>
+                <div class="email-metadata">
+                    <div id="extraDetails" class="hidden">
+                        <div class="metadata-row">
+                            <label>To</label>
+                            <input type="text" id="emailTo" placeholder="Recipients...">
+                        </div>
+                        <div class="metadata-row">
+                            <label>Cc</label>
+                            <input type="text" id="emailCc" placeholder="Cc...">
+                        </div>
+                    </div>
+                    <div class="metadata-row">
+                        <label>Subject</label>
+                        <input type="text" id="emailSubject" placeholder="Subject...">
+                    </div>
+                    <span id="toggleDetailsBtn" class="details-toggle">Show Details</span>
+                </div>
 
-    <script>
-/**
+                <div class="editor-toolbar">
+                    <div class="toolbar-group">
+                        <select id="formatBlock" class="select-toolbar">
+                            <option value="p">Paragraph</option>
+                            <option value="h1">Heading 1</option>
+                            <option value="h2">Heading 2</option>
+                            <option value="h3">Heading 3</option>
+                        </select>
+                    </div>
+                    <div class="toolbar-group">
+                        <button class="tool-btn" data-command="bold"><b>B</b></button>
+                        <button class="tool-btn" data-command="italic"><i>I</i></button>
+                        <button class="tool-btn" data-command="underline"><u>U</u></button>
+                        <button class="tool-btn" data-command="strikeThrough"><s>S</s></button>
+                    </div>
+                    <div class="toolbar-group">
+                        <button id="textColorBtn" class="tool-btn" title="Text Color">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h16M7 16l5-12 5 12M6.5 14h11"/></svg>
+                        </button>
+                        <button id="bgColorBtn" class="tool-btn" title="Background Color">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l4 4-4 4-4-4 4-4zM5 12l-2 2 9 9 9-9-2-2"/></svg>
+                        </button>
+                        <input type="color" id="colorInput" style="display: none;">
+                    </div>
+                    <div class="toolbar-group">
+                        <button class="tool-btn" data-command="justifyLeft">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 10H3M21 6H3M21 14H3M17 18H3"/></svg>
+                        </button>
+                        <button class="tool-btn" data-command="justifyCenter">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10H6M21 6H3M21 14H3M18 18H6"/></svg>
+                        </button>
+                    </div>
+                    <div class="toolbar-group">
+                        <button class="tool-btn" data-command="insertUnorderedList">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+                        </button>
+                        <button class="tool-btn" data-command="insertOrderedList">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="10" y1="6" x2="21" y2="6"></line><line x1="10" y1="12" x2="21" y2="12"></line><line x1="10" y1="18" x2="21" y2="18"></line><path d="M4 6h1v4"></path><path d="M4 10h2"></path><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"></path></svg>
+                        </button>
+                    </div>
+                    <div class="toolbar-group">
+                        <button class="tool-btn" data-command="removeFormat" title="Clear Formatting">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                    <div class="toolbar-spacer"></div>
+                    <div class="toolbar-group" style="border-right: none;">
+                        <select id="fieldInsertSelect" class="select-toolbar" style="max-width: 120px;"></select>
+                        <button id="insertFieldBtn" class="btn btn-secondary btn-sm" style="padding: 2px 6px;">Insert</button>
+                        <button id="refreshFromTemplateBtn" class="btn btn-ghost btn-sm" title="Refresh from Template">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                        </button>
+                        <div style="width: 1px; height: 16px; background: var(--color-border); margin: 0 4px;"></div>
+                        <button id="editTemplateBtn" class="btn btn-secondary btn-sm">Edit Template</button>
+                        <button id="saveTemplateBtn" class="btn btn-primary btn-sm hidden">Save</button>
+                        <button id="cancelTemplateEditBtn" class="btn btn-secondary btn-sm hidden">Cancel</button>
+                        <button id="saveAsTemplateBtn" class="btn btn-secondary btn-sm">Save As</button>
+                    </div>
+                </div>
+
+                <div class="editor-container">
+                    <div id="editor" contenteditable="true"></div>
+                </div>
+
+                <div class="attachments-section">
+                    <header id="attachmentsToggle" class="attachments-header">
+                        <h3>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                            Attachments (<span id="attachmentCount">0</span>)
+                        </h3>
+                        <svg id="attachmentsChevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                    </header>
+                    <div id="attachmentsContent" class="attachments-content collapsed">
+                        <div id="dropZone" class="drop-zone">
+                            Drop files or click to add
+                        </div>
+                        <div id="fileList" class="file-list"></div>
+                        <input type="file" id="fileInput" multiple class="hidden">
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <div id="templateContextMenu" class="context-menu hidden">
+            <button id="renameTemplateBtn" class="context-menu-item">Rename</button>
+            <button id="duplicateTemplateBtn" class="context-menu-item">Duplicate</button>
+            <div style="height: 1px; background: var(--color-border); margin: 4px 0;"></div>
+            <button id="deleteTemplateBtn" class="context-menu-item danger">Delete</button>
+        </div>
+
+        <div id="statusMessage" class="status-message"></div>
+
+        <script>
+            /**
  * Email Templates & Placeholder Logic
  */
-const placeholderFields = [
-    { key: 'propertyName', label: 'Property Name', token: '{{propertyName}}' },
-    { key: 'address', label: 'Address', token: '{{address}}' },
-    { key: 'dateListed', label: 'Date Listed', token: '{{dateListed}}' },
-    { key: 'propertyType', label: 'Property Type', token: '{{propertyType}}' },
-    { key: 'askingPrice', label: 'Asking Price', token: '{{askingPrice}}' },
-    { key: 'capRate', label: 'Cap Rate', token: '{{capRate}}' },
-    { key: 'leaseTerm', label: 'Lease Term', token: '{{leaseTerm}}' },
-    { key: 'buildingSize', label: 'Building Size', token: '{{buildingSize}}' },
-    { key: 'landSize', label: 'Land Size', token: '{{landSize}}' },
-    { key: 'leaseCommencement', label: 'Lease Commencement', token: '{{leaseCommencement}}' },
-    { key: 'leaseExpiration', label: 'Lease Expiration', token: '{{leaseExpiration}}' },
-    { key: 'leaseOptions', label: 'Lease Options', token: '{{leaseOptions}}' },
-    { key: 'rentBumps', label: 'Rent Bumps', token: '{{rentBumps}}' },
-    { key: 'mainImageUrl', label: 'Main Image URL', token: '{{mainImageUrl}}' },
-    { key: 'costarLink', label: 'CoStar Link', token: '{{costarLink}}' },
-    { key: 'crexiLink', label: 'Crexi Link', token: '{{crexiLink}}' },
-    { key: 'omLink', label: 'OM Link', token: '{{omLink}}' },
-    { key: 'description_html', label: 'Description (HTML)', token: '{{description_html}}' },
-    { key: 'today', label: 'Today', token: '{{today}}' }
-];
+            const placeholderFields = [
+                { key: 'propertyName', label: 'Property Name', token: '{{propertyName}}' },
+                { key: 'address', label: 'Address', token: '{{address}}' },
+                { key: 'dateListed', label: 'Date Listed', token: '{{dateListed}}' },
+                { key: 'propertyType', label: 'Property Type', token: '{{propertyType}}' },
+                { key: 'askingPrice', label: 'Asking Price', token: '{{askingPrice}}' },
+                { key: 'capRate', label: 'Cap Rate', token: '{{capRate}}' },
+                { key: 'leaseTerm', label: 'Lease Term', token: '{{leaseTerm}}' },
+                { key: 'buildingSize', label: 'Building Size', token: '{{buildingSize}}' },
+                { key: 'landSize', label: 'Land Size', token: '{{landSize}}' },
+                { key: 'leaseCommencement', label: 'Lease Commencement', token: '{{leaseCommencement}}' },
+                { key: 'leaseExpiration', label: 'Lease Expiration', token: '{{leaseExpiration}}' },
+                { key: 'leaseOptions', label: 'Lease Options', token: '{{leaseOptions}}' },
+                { key: 'rentBumps', label: 'Rent Bumps', token: '{{rentBumps}}' },
+                { key: 'mainImageUrl', label: 'Main Image URL', token: '{{mainImageUrl}}' },
+                { key: 'costarLink', label: 'CoStar Link', token: '{{costarLink}}' },
+                { key: 'crexiLink', label: 'Crexi Link', token: '{{crexiLink}}' },
+                { key: 'omLink', label: 'OM Link', token: '{{omLink}}' },
+                { key: 'description_html', label: 'Description (HTML)', token: '{{description_html}}' },
+                { key: 'today', label: 'Today', token: '{{today}}' }
+            ];
 
-function escapeHtml(value) {
-    return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
+            function escapeHtml(value) {
+                return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+            }
 
-function computeData(raw) {
-    const description = raw?.description || '';
-    const descriptionHtml = description ? escapeHtml(description).replace(/\n/g, '<br>') : '';
-    const today = new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: '2-digit' }).format(new Date());
-    return { ...raw, description_html: descriptionHtml, today };
-}
+            function computeData(raw) {
+                const description = raw?.description || '';
+                const descriptionHtml = description ? escapeHtml(description).replace(/\n/g, '<br>') : '';
+                const today = new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: '2-digit' }).format(new Date());
+                return { ...raw, description_html: descriptionHtml, today };
+            }
 
-function renderTextTemplate(text, data) {
-    const ctx = computeData(data || {});
-    return String(text || '').replace(/\{\{\s*([\w.]+)\s*\}\}/g, (_m, key) => {
-        const val = ctx[key];
-        return val === undefined || val === null ? '' : String(val);
-    });
-}
+            function renderTextTemplate(text, data) {
+                const ctx = computeData(data || {});
+                return String(text || '').replace(/\{\{\s*([\w.]+)\s*\}\}/g, (_m, key) => {
+                    const val = ctx[key];
+                    return val === undefined || val === null ? '' : String(val);
+                });
+            }
 
-function renderHtmlTemplate(html, data) {
-    const ctx = computeData(data || {});
-    const rawKeys = new Set(['description_html']);
-    return String(html || '').replace(/\{\{\s*([\w.]+)\s*\}\}/g, (_m, key) => {
-        const val = ctx[key];
-        if (val === undefined || val === null) return '';
-        if (rawKeys.has(key)) return String(val);
-        return escapeHtml(val);
-    });
-}
+            function renderHtmlTemplate(html, data) {
+                const ctx = computeData(data || {});
+                const rawKeys = new Set(['description_html']);
+                return String(html || '').replace(/\{\{\s*([\w.]+)\s*\}\}/g, (_m, key) => {
+                    const val = ctx[key];
+                    if (val === undefined || val === null) return '';
+                    if (rawKeys.has(key)) return String(val);
+                    return escapeHtml(val);
+                });
+            }
 
-function getDefaultTemplates() {
-    return [
-        {
-            id: 'default_blank',
-            name: 'Blank (Paste from Outlook)',
-            category: 'Custom',
-            icon: '✉️',
-            description: 'Start from your own rich draft',
-            subject: '{{propertyName}}',
-            bodyHtml: '<p>Paste your content here...</p>'
-        },
-        {
-            id: 'default_investment_summary',
-            name: 'Investment Summary (Rich)',
-            category: 'Listings',
-            icon: '🏢',
-            description: 'Modern property highlight',
-            subject: 'Investment Opportunity: {{propertyName}}',
-            bodyHtml: `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; color: #374151;">
-                    <p>Hi [Name],</p>
-                    <p>I wanted to put this amazing opportunity in front of you that recently became available.</p>
-                    <div style="background-color: #eff6ff; border-left: 4px solid #2563eb; padding: 20px; margin: 20px 0;">
-                        <div style="font-size: 18px; font-weight: 700; color: #111827; margin-bottom: 4px;">{{propertyName}}</div>
-                        <div style="font-size: 14px; color: #1d4ed8; font-weight: 500; margin-bottom: 8px;">{{address}}</div>
-                        <div style="font-size: 13px; font-style: italic; color: #6b7280;">{{propertyType}} • Built {{dateListed}}</div>
-                    </div>
-                    <p>I've attached the offering memorandum for your review, and here are the key terms of this deal:</p>
-                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
-                        <tr><td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; width: 140px; font-weight: 700;">Asking Price:</td><td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb;">{{askingPrice}}</td></tr>
-                        <tr><td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; font-weight: 700;">Cap Rate:</td><td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb;">{{capRate}}</td></tr>
-                        <tr><td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; font-weight: 700;">Lease Term:</td><td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb;">{{leaseTerm}}</td></tr>
-                    </table>
-                    <div style="margin: 20px 0;">
-                        <div style="font-weight: 700; margin-bottom: 10px;">Recent Improvements:</div>
-                        <ul style="margin: 0; padding-left: 20px;">
-                            <li style="margin-bottom: 6px;">Strong visibility and core location fundamentals</li>
-                            <li style="margin-bottom: 6px;">Clean underwriting and straightforward diligence</li>
-                            <li style="margin-bottom: 6px;">Attractive rent escalations: {{rentBumps}}</li>
-                        </ul>
-                    </div>
-                    <p>If you're interested in this property or would like to discuss current market conditions, feel free to give me a call anytime.</p>
-                    <p style="margin-top: 30px;">Best regards,<br><b>[Your Name]</b></p>
-                </div>
-            `.trim()
-        },
-        {
-            id: 'default_follow_up',
-            name: 'Follow-up',
-            category: 'Communication',
-            icon: '📞',
-            description: 'Simple follow-up with placeholders',
-            subject: 'Following up — {{propertyName}}',
-            bodyHtml: `
-                <div style="font-family: Arial, sans-serif; font-size: 15px; color: #111827;">
-                    <p>Hi [Name],</p>
-                    <p>Following up on <b>{{propertyName}}</b> in {{address}}. Would you like me to send a quick underwriting snapshot?</p>
-                    <div style="border-left: 4px solid #2563eb; background-color: #eff6ff; padding: 12px; margin: 16px 0;">
-                        <b>Key terms:</b> {{capRate}} cap • {{leaseTerm}} remaining
-                    </div>
-                    <p>Thanks,</p>
-                </div>
-            `.trim()
-        }
-    ];
-}
+            function getDefaultTemplates() {
+                return [
+                    {
+                        id: 'default_blank',
+                        name: 'Blank (Paste from Outlook)',
+                        category: 'Custom',
+                        icon: '✉️',
+                        description: 'Start from your own rich draft',
+                        subject: '{{propertyName}}',
+                        bodyHtml: '<p>Paste your content here...</p>'
+                    },
+                    {
+                        id: 'default_investment_summary',
+                        name: 'Investment Summary (Rich)',
+                        category: 'Listings',
+                        icon: '🏢',
+                        description: 'Modern property highlight',
+                        subject: 'Investment Opportunity: {{propertyName}}',
+                        bodyHtml: `
+                            <div style="font-family: Arial, sans-serif; max-width: 600px; color: #374151;">
+                                <p>Hi [Name],</p>
+                                <p>I wanted to put this amazing opportunity in front of you that recently became available.</p>
+                                <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0;">
+                                  <tr>
+                                    <td style="background-color: #eff6ff; border-left: 4px solid #2563eb; padding: 20px;">
+                                      <div style="font-size: 18px; font-weight: 700; color: #111827; margin-bottom: 4px;">{{propertyName}}</div>
+                                      <div style="font-size: 14px; color: #1d4ed8; font-weight: 500; margin-bottom: 8px;">{{address}}</div>
+                                      <div style="font-size: 13px; font-style: italic; color: #6b7280;">{{propertyType}} • Built {{dateListed}}</div>
+            </td>
+            </tr>
+            </table>
+                                <p>I've attached the offering memorandum for your review, and here are the key terms of this deal:</p>
+                                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                                    <tr><td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; width: 140px; font-weight: 700;">Asking Price:</td><td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb;">{{askingPrice}}</td></tr>
+                                    <tr><td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; font-weight: 700;">Cap Rate:</td><td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb;">{{capRate}}</td></tr>
+                                    <tr><td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; font-weight: 700;">Lease Term:</td><td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb;">{{leaseTerm}}</td></tr>
+            </table>
+                                <div style="margin: 20px 0;">
+                                    <div style="font-weight: 700; margin-bottom: 10px;">Recent Improvements:</div>
+                                    <ul style="margin: 0; padding-left: 20px;">
+                                        <li style="margin-bottom: 6px;">Strong visibility and core location fundamentals</li>
+                                        <li style="margin-bottom: 6px;">Clean underwriting and straightforward diligence</li>
+                                        <li style="margin-bottom: 6px;">Attractive rent escalations: {{rentBumps}}</li>
+            </ul>
+            </div>
+                                <p>If you're interested in this property or would like to discuss current market conditions, feel free to give me a call anytime.</p>
+                                <p style="margin-top: 30px;">Best regards,<br><b>[Your Name]</b></p>
+            </div>
+                        `.trim()
+                    },
+                    {
+                        id: 'default_follow_up',
+                        name: 'Follow-up',
+                        category: 'Communication',
+                        icon: '📞',
+                        description: 'Simple follow-up with placeholders',
+                        subject: 'Following up — {{propertyName}}',
+                        bodyHtml: `
+                            <div style="font-family: Arial, sans-serif; font-size: 15px; color: #111827;">
+                                <p>Hi [Name],</p>
+                                <p>Following up on <b>{{propertyName}}</b> in {{address}}. Would you like me to send a quick underwriting snapshot?</p>
+                                <div style="border-left: 4px solid #2563eb; background-color: #eff6ff; padding: 12px; margin: 16px 0;">
+                                    <b>Key terms:</b> {{capRate}} cap • {{leaseTerm}} remaining
+            </div>
+                                <p>Thanks,</p>
+            </div>
+                        `.trim()
+                    }
+                ];
+            }
 
-/**
+            /**
  * Grist Integration
  */
-function initializeGrist() {
-    return new Promise((resolve) => {
-        grist.ready({
-            columns: [
-                { name: "Property_Name", type: "Text", optional: true },
-                { name: "Address", type: "Text", optional: true },
-                { name: "Date_Listed", type: "Date", optional: true },
-                { name: "Property_Type", type: "Choice", optional: true },
-                { name: "Price", type: "Numeric", optional: true },
-                { name: "Cap_Rate", type: "Numeric", optional: true },
-                { name: "Lease_Term", type: "Text", optional: true },
-                { name: "RBA", type: "Numeric", optional: true },
-                { name: "Notes", type: "Text", optional: true },
-                { name: "photo_url", type: "Text", optional: true },
-                { name: "CoStar", type: "Text", optional: true },
-                { name: "Crexi", type: "Text", optional: true },
-                { name: "OM", type: "Text", optional: true },
-                { name: "Land_Size", type: "Numeric", optional: true },
-                { name: "Lease_Commencement", type: "Date", optional: true },
-                { name: "Lease_Expiration", type: "Date", optional: true },
-                { name: "Lease_Options", type: "Text", optional: true },
-                { name: "Rent_Bumps", type: "Text", optional: true }
-            ],
-            requiredAccess: 'read table'
-        });
-        resolve();
-    });
-}
+            function initializeGrist() {
+                return new Promise((resolve) => {
+                    grist.ready({
+                        columns: [
+                            { name: "Property_Name", type: "Text", optional: true },
+                            { name: "Address", type: "Text", optional: true },
+                            { name: "Date_Listed", type: "Date", optional: true },
+                            { name: "Property_Type", type: "Choice", optional: true },
+                            { name: "Price", type: "Numeric", optional: true },
+                            { name: "Cap_Rate", type: "Numeric", optional: true },
+                            { name: "Lease_Term", type: "Text", optional: true },
+                            { name: "RBA", type: "Numeric", optional: true },
+                            { name: "Notes", type: "Text", optional: true },
+                            { name: "photo_url", type: "Text", optional: true },
+                            { name: "CoStar", type: "Text", optional: true },
+                            { name: "Crexi", type: "Text", optional: true },
+                            { name: "OM", type: "Text", optional: true },
+                            { name: "Land_Size", type: "Numeric", optional: true },
+                            { name: "Lease_Commencement", type: "Date", optional: true },
+                            { name: "Lease_Expiration", type: "Date", optional: true },
+                            { name: "Lease_Options", type: "Text", optional: true },
+                            { name: "Rent_Bumps", type: "Text", optional: true }
+                        ],
+                        requiredAccess: 'read table'
+                    });
+                    resolve();
+                });
+            }
 
-function onRecordChange(callback) {
-    grist.onRecord((record, mappings) => {
-        if (!record) return;
-        const mappedData = normalizeRecord(record, mappings);
-        callback(mappedData, record);
-    });
-}
+            function onRecordChange(callback) {
+                grist.onRecord((record, mappings) => {
+                    if (!record) return;
+                    const mappedData = normalizeRecord(record, mappings);
+                    callback(mappedData, record);
+                });
+            }
 
-function normalizeRecord(rec, mappings) {
-    const formatCurrency = (val) => (val === undefined || val === null) ? '' : new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
-    const formatPercent = (val) => {
-        if (val === undefined || val === null) return '';
-        const num = typeof val === 'number' ? val : Number(val);
-        if (!Number.isFinite(num)) return '';
-        const pct = num <= 1 ? num * 100 : num;
-        return pct.toFixed(2) + '%';
-    };
-    const formatDate = (val) => {
-        if (val === undefined || val === null || val === '') return '';
-        let d = (val instanceof Date) ? val : new Date(val);
-        if (typeof val === 'number') d = (val > 1e12) ? new Date(val) : (val > 1e9) ? new Date(val * 1000) : new Date(val * 86400000);
-        if (!d || isNaN(d.getTime())) return String(val);
-        return new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: '2-digit' }).format(d);
-    };
-    return {
-        propertyName: rec.Property_Name || '', address: rec.Address || '', dateListed: formatDate(rec.Date_Listed), propertyType: rec.Property_Type || '',
-        askingPrice: formatCurrency(rec.Price), capRate: typeof rec.Cap_Rate === 'number' ? formatPercent(rec.Cap_Rate) : (rec.Cap_Rate || ''),
-        leaseTerm: rec.Lease_Term || '', buildingSize: rec.RBA ? `${rec.RBA.toLocaleString()} SF` : '', description: rec.Notes || '',
-        mainImageUrl: (rec.photo_url || '').split(' ')[0], costarLink: rec.CoStar || '', crexiLink: rec.Crexi || '', omLink: rec.OM || '',
-        landSize: rec.Land_Size ? `${rec.Land_Size} Acres` : '', leaseCommencement: formatDate(rec.Lease_Commencement),
-        leaseExpiration: formatDate(rec.Lease_Expiration), leaseOptions: rec.Lease_Options || '', rentBumps: rec.Rent_Bumps || ''
-    };
-}
+            function normalizeRecord(rec, mappings) {
+                const formatCurrency = (val) => (val === undefined || val === null) ? '' : new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
+                const formatPercent = (val) => {
+                    if (val === undefined || val === null) return '';
+                    const num = typeof val === 'number' ? val : Number(val);
+                    if (!Number.isFinite(num)) return '';
+                    const pct = num <= 1 ? num * 100 : num;
+                    return pct.toFixed(2) + '%';
+                };
+                const formatDate = (val) => {
+                    if (val === undefined || val === null || val === '') return '';
+                    let d = (val instanceof Date) ? val : new Date(val);
+                    if (typeof val === 'number') d = (val > 1e12) ? new Date(val) : (val > 1e9) ? new Date(val * 1000) : new Date(val * 86400000);
+                    if (!d || isNaN(d.getTime())) return String(val);
+                    return new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: '2-digit' }).format(d);
+                };
+                return {
+                    propertyName: rec.Property_Name || '', address: rec.Address || '', dateListed: formatDate(rec.Date_Listed), propertyType: rec.Property_Type || '',
+                    askingPrice: formatCurrency(rec.Price), capRate: typeof rec.Cap_Rate === 'number' ? formatPercent(rec.Cap_Rate) : (rec.Cap_Rate || ''),
+                    leaseTerm: rec.Lease_Term || '', buildingSize: rec.RBA ? `${rec.RBA.toLocaleString()} SF` : '', description: rec.Notes || '',
+                    mainImageUrl: (rec.photo_url || '').split(' ')[0], costarLink: rec.CoStar || '', crexiLink: rec.Crexi || '', omLink: rec.OM || '',
+                    landSize: rec.Land_Size ? `${rec.Land_Size} Acres` : '', leaseCommencement: formatDate(rec.Lease_Commencement),
+                    leaseExpiration: formatDate(rec.Lease_Expiration), leaseOptions: rec.Lease_Options || '', rentBumps: rec.Rent_Bumps || ''
+                };
+            }
 
-// APP CORE
-const STORAGE_KEY = 'gristEmailTemplates.v2';
-const STORAGE_ACTIVE_ID_KEY = 'gristEmailTemplates.activeId.v2';
-const STORAGE_ATTACHMENT_COL_KEY = 'gristEmailTemplates.attachmentCol.v2';
+            // APP CORE
+            const STORAGE_KEY = 'gristEmailTemplates.v2';
+            const STORAGE_ACTIVE_ID_KEY = 'gristEmailTemplates.activeId.v2';
+            const STORAGE_ATTACHMENT_COL_KEY = 'gristEmailTemplates.attachmentCol.v2';
 
-let currentGristData = null, currentGristRecord = null, lastRecordSignature = null, templates = [], activeTemplateId = null, mode = 'email', isDirty = false, attachments = [], selectedAttachmentCol = localStorage.getItem(STORAGE_ATTACHMENT_COL_KEY) || '';
+            let currentGristData = null, currentGristRecord = null, lastRecordSignature = null, templates = [], activeTemplateId = null, mode = 'email', isDirty = false, attachments = [], selectedAttachmentCol = localStorage.getItem(STORAGE_ATTACHMENT_COL_KEY) || '';
 
-const ui = {
-    sidebar: document.getElementById('sidebar'), toggleSidebarBtn: document.getElementById('toggleSidebarBtn'), closeSidebarBtn: document.getElementById('closeSidebarBtn'),
-    templateCategories: document.getElementById('templateCategories'), newTemplateBtn: document.getElementById('newTemplateBtn'), exportTemplatesBtn: document.getElementById('exportTemplatesBtn'), importTemplatesBtn: document.getElementById('importTemplatesBtn'),
-    emailTo: document.getElementById('emailTo'), emailCc: document.getElementById('emailCc'), emailSubject: document.getElementById('emailSubject'),
-    toggleDetailsBtn: document.getElementById('toggleDetailsBtn'), extraDetails: document.getElementById('extraDetails'),
-    editor: document.getElementById('editor'), formatBlock: document.getElementById('formatBlock'), textColorBtn: document.getElementById('textColorBtn'), bgColorBtn: document.getElementById('bgColorBtn'), colorInput: document.getElementById('colorInput'),
-    fieldInsertSelect: document.getElementById('fieldInsertSelect'), insertFieldBtn: document.getElementById('insertFieldBtn'), refreshFromTemplateBtn: document.getElementById('refreshFromTemplateBtn'),
-    editTemplateBtn: document.getElementById('editTemplateBtn'), saveTemplateBtn: document.getElementById('saveTemplateBtn'), cancelTemplateEditBtn: document.getElementById('cancelTemplateEditBtn'), saveAsTemplateBtn: document.getElementById('saveAsTemplateBtn'),
-    copySubjectBtn: document.getElementById('copySubjectBtn'), copyEmailBtn: document.getElementById('copyEmailBtn'), downloadEmlBtn: document.getElementById('downloadEmlBtn'),
-    attachmentColumnSelect: document.getElementById('attachmentColumnSelect'), attachmentsToggle: document.getElementById('attachmentsToggle'), attachmentsContent: document.getElementById('attachmentsContent'), attachmentsChevron: document.getElementById('attachmentsChevron'),
-    dropZone: document.getElementById('dropZone'), fileInput: document.getElementById('fileInput'), fileList: document.getElementById('fileList'),
-    modeBadge: document.getElementById('modeBadge'), statusMessage: document.getElementById('statusMessage'), attachmentCount: document.getElementById('attachmentCount'),
-    contextMenu: document.getElementById('templateContextMenu'), renameTemplateBtn: document.getElementById('renameTemplateBtn'), duplicateTemplateBtn: document.getElementById('duplicateTemplateBtn'), deleteTemplateBtn: document.getElementById('deleteTemplateBtn'),
-    duplicateTemplateBtn_s: document.getElementById('duplicateTemplateBtn_s')
-};
+            const ui = {
+                sidebar: document.getElementById('sidebar'), toggleSidebarBtn: document.getElementById('toggleSidebarBtn'), closeSidebarBtn: document.getElementById('closeSidebarBtn'),
+                templateCategories: document.getElementById('templateCategories'), newTemplateBtn: document.getElementById('newTemplateBtn'), exportTemplatesBtn: document.getElementById('exportTemplatesBtn'), importTemplatesBtn: document.getElementById('importTemplatesBtn'),
+                emailTo: document.getElementById('emailTo'), emailCc: document.getElementById('emailCc'), emailSubject: document.getElementById('emailSubject'),
+                toggleDetailsBtn: document.getElementById('toggleDetailsBtn'), extraDetails: document.getElementById('extraDetails'),
+                editor: document.getElementById('editor'), formatBlock: document.getElementById('formatBlock'), textColorBtn: document.getElementById('textColorBtn'), bgColorBtn: document.getElementById('bgColorBtn'), colorInput: document.getElementById('colorInput'),
+                fieldInsertSelect: document.getElementById('fieldInsertSelect'), insertFieldBtn: document.getElementById('insertFieldBtn'), refreshFromTemplateBtn: document.getElementById('refreshFromTemplateBtn'),
+                editTemplateBtn: document.getElementById('editTemplateBtn'), saveTemplateBtn: document.getElementById('saveTemplateBtn'), cancelTemplateEditBtn: document.getElementById('cancelTemplateEditBtn'), saveAsTemplateBtn: document.getElementById('saveAsTemplateBtn'),
+                copySubjectBtn: document.getElementById('copySubjectBtn'), copyEmailBtn: document.getElementById('copyEmailBtn'), downloadEmlBtn: document.getElementById('downloadEmlBtn'),
+                attachmentColumnSelect: document.getElementById('attachmentColumnSelect'), attachmentsToggle: document.getElementById('attachmentsToggle'), attachmentsContent: document.getElementById('attachmentsContent'), attachmentsChevron: document.getElementById('attachmentsChevron'),
+                dropZone: document.getElementById('dropZone'), fileInput: document.getElementById('fileInput'), fileList: document.getElementById('fileList'),
+                modeBadge: document.getElementById('modeBadge'), statusMessage: document.getElementById('statusMessage'), attachmentCount: document.getElementById('attachmentCount'),
+                contextMenu: document.getElementById('templateContextMenu'), renameTemplateBtn: document.getElementById('renameTemplateBtn'), duplicateTemplateBtn: document.getElementById('duplicateTemplateBtn'), deleteTemplateBtn: document.getElementById('deleteTemplateBtn'),
+                duplicateTemplateBtn_s: document.getElementById('duplicateTemplateBtn_s')
+            };
 
-let contextMenuTargetId = null;
+            let contextMenuTargetId = null;
 
-async function init() {
-    setupEventListeners();
-    loadTemplates();
-    populateFieldSelect();
-    activeTemplateId = localStorage.getItem(STORAGE_ACTIVE_ID_KEY);
-    if (!templates.some(t => t.id === activeTemplateId)) activeTemplateId = templates[0]?.id || null;
-    renderTemplateList();
+            async function init() {
+                setupEventListeners();
+                loadTemplates();
+                populateFieldSelect();
+                activeTemplateId = localStorage.getItem(STORAGE_ACTIVE_ID_KEY);
+                if (!templates.some(t => t.id === activeTemplateId)) activeTemplateId = templates[0]?.id || null;
+                renderTemplateList();
 
-    if (window.parent === window) {
-        currentGristData = { propertyName: 'Walgreens', address: '123 Main St', askingPrice: '$5,000,000', capRate: '6.50%' };
-        regenerateFromTemplate();
-    } else {
-        await initializeGrist();
-        onRecordChange((data, record) => {
-            const sig = JSON.stringify(data);
-            if (sig === lastRecordSignature) return;
-            lastRecordSignature = sig; currentGristData = data; currentGristRecord = record;
-            updateAttachmentColumnSelect(record);
-            if (mode === 'email' && !isDirty) regenerateFromTemplate();
-            else if (isDirty) showStatus('Record changed. Refresh to update.', 'info');
-        });
-    }
-}
+                if (window.parent === window) {
+                    currentGristData = { propertyName: 'Walgreens', address: '123 Main St', askingPrice: '$5,000,000', capRate: '6.50%' };
+                    regenerateFromTemplate();
+                } else {
+                    await initializeGrist();
+                    onRecordChange((data, record) => {
+                        const sig = JSON.stringify(data);
+                        if (sig === lastRecordSignature) return;
+                        lastRecordSignature = sig; currentGristData = data; currentGristRecord = record;
+                        updateAttachmentColumnSelect(record);
+                        if (mode === 'email' && !isDirty) regenerateFromTemplate();
+                        else if (isDirty) showStatus('Record changed. Refresh to update.', 'info');
+                    });
+                }
+            }
 
-function loadTemplates() {
-    try { templates = JSON.parse(localStorage.getItem(STORAGE_KEY)) || getDefaultTemplates(); } catch (e) { templates = getDefaultTemplates(); }
-    if (!localStorage.getItem(STORAGE_KEY)) saveTemplates();
-}
-function saveTemplates() { localStorage.setItem(STORAGE_KEY, JSON.stringify(templates)); }
+            function loadTemplates() {
+                try { templates = JSON.parse(localStorage.getItem(STORAGE_KEY)) || getDefaultTemplates(); } catch (e) { templates = getDefaultTemplates(); }
+                if (!localStorage.getItem(STORAGE_KEY)) saveTemplates();
+            }
+            function saveTemplates() { localStorage.setItem(STORAGE_KEY, JSON.stringify(templates)); }
 
-function renderTemplateList() {
-    ui.templateCategories.innerHTML = '';
-    const categories = [...new Set(templates.map(t => t.category || 'Other'))];
-    categories.forEach(cat => {
-        const catDiv = document.createElement('div'); catDiv.className = 'template-category'; catDiv.innerHTML = `<h3>${cat}</h3>`;
-        const list = document.createElement('div');
-        templates.filter(t => (t.category || 'Other') === cat).forEach(t => {
-            const item = document.createElement('div');
-            item.className = `template-item ${t.id === activeTemplateId ? 'active' : ''}`;
-            item.innerHTML = `<span class="icon">${t.icon || '📄'}</span><div class="info"><span class="name">${t.name}</span><span class="desc">${t.description || ''}</span></div>`;
-            item.onclick = () => switchTemplate(t.id);
-            item.oncontextmenu = (e) => showContextMenu(e, t.id);
-            list.appendChild(item);
-        });
-        catDiv.appendChild(list); ui.templateCategories.appendChild(catDiv);
-    });
-}
+            function renderTemplateList() {
+                ui.templateCategories.innerHTML = '';
+                const categories = [...new Set(templates.map(t => t.category || 'Other'))];
+                categories.forEach(cat => {
+                    const catDiv = document.createElement('div'); catDiv.className = 'template-category'; catDiv.innerHTML = `<h3>${cat}</h3>`;
+                    const list = document.createElement('div');
+                    templates.filter(t => (t.category || 'Other') === cat).forEach(t => {
+                        const item = document.createElement('div');
+                        item.className = `template-item ${t.id === activeTemplateId ? 'active' : ''}`;
+                        item.innerHTML = `<span class="icon">${t.icon || '📄'}</span><div class="info"><span class="name">${t.name}</span><span class="desc">${t.description || ''}</span></div>`;
+                        item.onclick = () => switchTemplate(t.id);
+                        item.oncontextmenu = (e) => showContextMenu(e, t.id);
+                        list.appendChild(item);
+                    });
+                    catDiv.appendChild(list); ui.templateCategories.appendChild(catDiv);
+                });
+            }
 
-function switchTemplate(id) {
-    if (mode === 'template' && isDirty && !confirm('Discard unsaved changes?')) return;
-    activeTemplateId = id; localStorage.setItem(STORAGE_ACTIVE_ID_KEY, id);
-    setMode('email'); renderTemplateList(); regenerateFromTemplate();
-}
+            function switchTemplate(id) {
+                if (mode === 'template' && isDirty && !confirm('Discard unsaved changes?')) return;
+                activeTemplateId = id; localStorage.setItem(STORAGE_ACTIVE_ID_KEY, id);
+                setMode('email'); renderTemplateList(); regenerateFromTemplate();
+            }
 
-function regenerateFromTemplate() {
-    const tpl = templates.find(t => t.id === activeTemplateId);
-    if (!tpl || !currentGristData) return;
-    ui.emailSubject.value = renderTextTemplate(tpl.subject, currentGristData);
-    ui.editor.innerHTML = renderHtmlTemplate(tpl.bodyHtml, currentGristData);
-    isDirty = false;
-}
+            function regenerateFromTemplate() {
+                const tpl = templates.find(t => t.id === activeTemplateId);
+                if (!tpl || !currentGristData) return;
+                ui.emailSubject.value = renderTextTemplate(tpl.subject, currentGristData);
+                ui.editor.innerHTML = renderHtmlTemplate(tpl.bodyHtml, currentGristData);
+                isDirty = false;
+            }
 
-function format(cmd, val = null) { document.execCommand(cmd, false, val); ui.editor.focus(); }
+            function format(cmd, val = null) { document.execCommand(cmd, false, val); ui.editor.focus(); }
 
-function setupEventListeners() {
-    ui.toggleSidebarBtn.onclick = () => ui.sidebar.classList.toggle('hidden');
-    ui.closeSidebarBtn.onclick = () => ui.sidebar.classList.add('hidden');
-    document.querySelectorAll('.tool-btn[data-command]').forEach(btn => btn.onclick = () => format(btn.dataset.command));
-    ui.formatBlock.onchange = (e) => format('formatBlock', e.target.value);
-    ui.textColorBtn.onclick = () => { ui.colorInput.oninput = () => format('foreColor', ui.colorInput.value); ui.colorInput.click(); };
-    ui.bgColorBtn.onclick = () => { ui.colorInput.oninput = () => format('hiliteColor', ui.colorInput.value); ui.colorInput.click(); };
-    ui.insertFieldBtn.onclick = () => {
-        const val = ui.fieldInsertSelect.value; if (!val) return;
-        if (document.activeElement === ui.emailSubject) {
-            const s = ui.emailSubject.selectionStart, e = ui.emailSubject.selectionEnd;
-            ui.emailSubject.value = ui.emailSubject.value.slice(0, s) + val + ui.emailSubject.value.slice(e);
-        } else { ui.editor.focus(); format('insertText', val); }
-    };
-    ui.toggleDetailsBtn.onclick = () => {
-        const hidden = ui.extraDetails.classList.toggle('hidden');
-        ui.toggleDetailsBtn.textContent = hidden ? 'Show Details' : 'Hide Details';
-    };
-    ui.attachmentsToggle.onclick = () => {
-        const collapsed = ui.attachmentsContent.classList.toggle('collapsed');
-        ui.attachmentsChevron.style.transform = collapsed ? 'rotate(0deg)' : 'rotate(180deg)';
-    };
-    ui.refreshFromTemplateBtn.onclick = () => confirm('Refresh from template?') && regenerateFromTemplate();
-    ui.editTemplateBtn.onclick = enterTemplateEdit;
-    ui.saveTemplateBtn.onclick = saveTemplateEdit;
-    ui.cancelTemplateEditBtn.onclick = cancelTemplateEdit;
-    ui.saveAsTemplateBtn.onclick = saveAsNewTemplate;
-    ui.copySubjectBtn.onclick = () => { navigator.clipboard.writeText(ui.emailSubject.value); showStatus('Subject copied', 'success'); };
-    ui.copyEmailBtn.onclick = copyEmailBody;
-    ui.downloadEmlBtn.onclick = downloadEml;
-    ui.dropZone.onclick = () => ui.fileInput.click();
-    ui.dropZone.ondragover = (e) => { e.preventDefault(); ui.dropZone.style.borderColor = 'var(--color-primary)'; };
-    ui.dropZone.ondragleave = () => { ui.dropZone.style.borderColor = ''; };
-    ui.dropZone.ondrop = (e) => { e.preventDefault(); ui.dropZone.style.borderColor = ''; handleFiles(e.dataTransfer.files); };
-    ui.fileInput.onchange = (e) => handleFiles(e.target.files);
-    ui.attachmentColumnSelect.onchange = (e) => { selectedAttachmentCol = e.target.value; localStorage.setItem(STORAGE_ATTACHMENT_COL_KEY, selectedAttachmentCol); };
-    ui.newTemplateBtn.onclick = createNewTemplate;
-    ui.renameTemplateBtn.onclick = renameTemplate;
-    ui.duplicateTemplateBtn.onclick = duplicateTemplate;
-    ui.duplicateTemplateBtn_s.onclick = () => { contextMenuTargetId = activeTemplateId; duplicateTemplate(); };
-    ui.deleteTemplateBtn.onclick = deleteTemplate;
-    ui.exportTemplatesBtn.onclick = exportTemplates;
-    ui.importTemplatesBtn.onclick = importTemplates;
-    ui.editor.oninput = () => { if (mode === 'email') isDirty = true; };
-    ui.editor.ondragover = (e) => {
-        if (e.dataTransfer.types.includes('Files')) {
-            e.preventDefault();
-            ui.editor.style.boxShadow = 'inset 0 0 0 2px var(--color-primary)';
-        }
-    };
-    ui.editor.ondragleave = () => { ui.editor.style.boxShadow = ''; };
-    ui.editor.ondrop = (e) => {
-        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-            e.preventDefault();
-            ui.editor.style.boxShadow = '';
-            handleFiles(e.dataTransfer.files);
-            showStatus('Files attached', 'success');
-        }
-    };
-    document.addEventListener('click', (e) => !ui.contextMenu.contains(e.target) && ui.contextMenu.classList.add('hidden'));
-}
+            function setupEventListeners() {
+                ui.toggleSidebarBtn.onclick = () => ui.sidebar.classList.toggle('hidden');
+                ui.closeSidebarBtn.onclick = () => ui.sidebar.classList.add('hidden');
+                document.querySelectorAll('.tool-btn[data-command]').forEach(btn => btn.onclick = () => format(btn.dataset.command));
+                ui.formatBlock.onchange = (e) => format('formatBlock', e.target.value);
+                ui.textColorBtn.onclick = () => { ui.colorInput.oninput = () => format('foreColor', ui.colorInput.value); ui.colorInput.click(); };
+                ui.bgColorBtn.onclick = () => { ui.colorInput.oninput = () => format('hiliteColor', ui.colorInput.value); ui.colorInput.click(); };
+                ui.insertFieldBtn.onclick = () => {
+                    const val = ui.fieldInsertSelect.value; if (!val) return;
+                    if (document.activeElement === ui.emailSubject) {
+                        const s = ui.emailSubject.selectionStart, e = ui.emailSubject.selectionEnd;
+                        ui.emailSubject.value = ui.emailSubject.value.slice(0, s) + val + ui.emailSubject.value.slice(e);
+                    } else { ui.editor.focus(); format('insertText', val); }
+                };
+                ui.toggleDetailsBtn.onclick = () => {
+                    const hidden = ui.extraDetails.classList.toggle('hidden');
+                    ui.toggleDetailsBtn.textContent = hidden ? 'Show Details' : 'Hide Details';
+                };
+                ui.attachmentsToggle.onclick = () => {
+                    const collapsed = ui.attachmentsContent.classList.toggle('collapsed');
+                    ui.attachmentsChevron.style.transform = collapsed ? 'rotate(0deg)' : 'rotate(180deg)';
+                };
+                ui.refreshFromTemplateBtn.onclick = () => confirm('Refresh from template?') && regenerateFromTemplate();
+                ui.editTemplateBtn.onclick = enterTemplateEdit;
+                ui.saveTemplateBtn.onclick = saveTemplateEdit;
+                ui.cancelTemplateEditBtn.onclick = cancelTemplateEdit;
+                ui.saveAsTemplateBtn.onclick = saveAsNewTemplate;
+                ui.copySubjectBtn.onclick = () => { navigator.clipboard.writeText(ui.emailSubject.value); showStatus('Subject copied', 'success'); };
+                ui.copyEmailBtn.onclick = copyEmailBody;
+                ui.downloadEmlBtn.onclick = downloadEml;
+                ui.dropZone.onclick = () => ui.fileInput.click();
+                ui.dropZone.ondragover = (e) => { e.preventDefault(); ui.dropZone.style.borderColor = 'var(--color-primary)'; };
+                ui.dropZone.ondragleave = () => { ui.dropZone.style.borderColor = ''; };
+                ui.dropZone.ondrop = (e) => { e.preventDefault(); ui.dropZone.style.borderColor = ''; handleFiles(e.dataTransfer.files); };
+                ui.fileInput.onchange = (e) => handleFiles(e.target.files);
+                ui.attachmentColumnSelect.onchange = (e) => { selectedAttachmentCol = e.target.value; localStorage.setItem(STORAGE_ATTACHMENT_COL_KEY, selectedAttachmentCol); };
+                ui.newTemplateBtn.onclick = createNewTemplate;
+                ui.renameTemplateBtn.onclick = renameTemplate;
+                ui.duplicateTemplateBtn.onclick = duplicateTemplate;
+                ui.duplicateTemplateBtn_s.onclick = () => { contextMenuTargetId = activeTemplateId; duplicateTemplate(); };
+                ui.deleteTemplateBtn.onclick = deleteTemplate;
+                ui.exportTemplatesBtn.onclick = exportTemplates;
+                ui.importTemplatesBtn.onclick = importTemplates;
+                ui.editor.oninput = () => { if (mode === 'email') isDirty = true; };
+                ui.editor.ondragover = (e) => {
+                    if (e.dataTransfer.types.includes('Files')) {
+                        e.preventDefault();
+                        ui.editor.style.boxShadow = 'inset 0 0 0 2px var(--color-primary)';
+                    }
+                };
+                ui.editor.ondragleave = () => { ui.editor.style.boxShadow = ''; };
+                ui.editor.ondrop = (e) => {
+                    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                        e.preventDefault();
+                        ui.editor.style.boxShadow = '';
+                        handleFiles(e.dataTransfer.files);
+                        showStatus('Files attached', 'success');
+                    }
+                };
+                document.addEventListener('click', (e) => !ui.contextMenu.contains(e.target) && ui.contextMenu.classList.add('hidden'));
+            }
 
-function setMode(m) {
-    mode = m; ui.modeBadge.textContent = mode.toUpperCase();
-    const isTpl = mode === 'template';
-    [ui.saveTemplateBtn, ui.cancelTemplateEditBtn].forEach(el => el.classList.toggle('hidden', !isTpl));
-    [ui.editTemplateBtn, ui.refreshFromTemplateBtn, ui.saveAsTemplateBtn].forEach(el => el.classList.toggle('hidden', isTpl));
-}
+            function setMode(m) {
+                mode = m; ui.modeBadge.textContent = mode.toUpperCase();
+                const isTpl = mode === 'template';
+                [ui.saveTemplateBtn, ui.cancelTemplateEditBtn].forEach(el => el.classList.toggle('hidden', !isTpl));
+                [ui.editTemplateBtn, ui.refreshFromTemplateBtn, ui.saveAsTemplateBtn].forEach(el => el.classList.toggle('hidden', isTpl));
+            }
 
-function enterTemplateEdit() {
-    const tpl = templates.find(t => t.id === activeTemplateId); if (!tpl) return;
-    setMode('template'); ui.emailSubject.value = tpl.subject; ui.editor.innerHTML = tpl.bodyHtml;
-}
-function cancelTemplateEdit() { setMode('email'); regenerateFromTemplate(); }
-function saveTemplateEdit() {
-    const idx = templates.findIndex(t => t.id === activeTemplateId); if (idx === -1) return;
-    templates[idx].subject = ui.emailSubject.value; templates[idx].bodyHtml = ui.editor.innerHTML;
-    saveTemplates(); setMode('email'); renderTemplateList(); showStatus('Template saved', 'success');
-}
-function saveAsNewTemplate() {
-    const name = prompt('Template Name:', 'New Template'); if (!name) return;
-    const newTpl = { id: 't_' + Date.now(), name, category: 'Custom', icon: '⭐', subject: ui.emailSubject.value, bodyHtml: ui.editor.innerHTML };
-    templates.push(newTpl); saveTemplates(); activeTemplateId = newTpl.id; setMode('email'); renderTemplateList();
-}
-function createNewTemplate() {
-    const name = prompt('Template Name:', 'New Template'); if (!name) return;
-    const newTpl = { id: 't_' + Date.now(), name, category: 'Custom', icon: '📄', subject: '{{propertyName}}', bodyHtml: '<p>Content...</p>' };
-    templates.push(newTpl); saveTemplates(); activeTemplateId = newTpl.id; renderTemplateList(); enterTemplateEdit();
-}
+            function enterTemplateEdit() {
+                const tpl = templates.find(t => t.id === activeTemplateId); if (!tpl) return;
+                setMode('template'); ui.emailSubject.value = tpl.subject; ui.editor.innerHTML = tpl.bodyHtml;
+            }
+            function cancelTemplateEdit() { setMode('email'); regenerateFromTemplate(); }
+            function saveTemplateEdit() {
+                const idx = templates.findIndex(t => t.id === activeTemplateId); if (idx === -1) return;
+                templates[idx].subject = ui.emailSubject.value; templates[idx].bodyHtml = ui.editor.innerHTML;
+                saveTemplates(); setMode('email'); renderTemplateList(); showStatus('Template saved', 'success');
+            }
+            function saveAsNewTemplate() {
+                const name = prompt('Template Name:', 'New Template'); if (!name) return;
+                const newTpl = { id: 't_' + Date.now(), name, category: 'Custom', icon: '⭐', subject: ui.emailSubject.value, bodyHtml: ui.editor.innerHTML };
+                templates.push(newTpl); saveTemplates(); activeTemplateId = newTpl.id; setMode('email'); renderTemplateList();
+            }
+            function createNewTemplate() {
+                const name = prompt('Template Name:', 'New Template'); if (!name) return;
+                const newTpl = { id: 't_' + Date.now(), name, category: 'Custom', icon: '📄', subject: '{{propertyName}}', bodyHtml: '<p>Content...</p>' };
+                templates.push(newTpl); saveTemplates(); activeTemplateId = newTpl.id; renderTemplateList(); enterTemplateEdit();
+            }
 
-function handleFiles(files) {
-    Array.from(files).forEach(f => attachments.push({ name: f.name, type: f.type, file: f }));
-    renderFileList();
-}
-function renderFileList() {
-    ui.fileList.innerHTML = ''; ui.attachmentCount.textContent = attachments.length;
-    attachments.forEach((att, i) => {
-        const d = document.createElement('div'); d.className = 'file-item';
-        d.innerHTML = `<span>${att.name}</span><span class="file-remove" onclick="removeAttachment(${i})">&times;</span>`;
-        ui.fileList.appendChild(d);
-    });
-}
-window.removeAttachment = (i) => { attachments.splice(i, 1); renderFileList(); };
+            function handleFiles(files) {
+                Array.from(files).forEach(f => attachments.push({ name: f.name, type: f.type, file: f }));
+                renderFileList();
+            }
+            function renderFileList() {
+                ui.fileList.innerHTML = ''; ui.attachmentCount.textContent = attachments.length;
+                attachments.forEach((att, i) => {
+                    const d = document.createElement('div'); d.className = 'file-item';
+                    d.innerHTML = `<span>${att.name}</span><span class="file-remove" onclick="removeAttachment(${i})">&times;</span>`;
+                    ui.fileList.appendChild(d);
+                });
+            }
+            window.removeAttachment = (i) => { attachments.splice(i, 1); renderFileList(); };
 
-function updateAttachmentColumnSelect(rec) {
-    ui.attachmentColumnSelect.innerHTML = '<option value="">-- No Grist Attachment --</option>';
-    Object.keys(rec).forEach(col => {
-        if (col.startsWith('gristHelper') || col === 'id') return;
-        const opt = document.createElement('option'); opt.value = col; opt.textContent = col;
-        if (col === selectedAttachmentCol) opt.selected = true;
-        ui.attachmentColumnSelect.appendChild(opt);
-    });
-}
+            function updateAttachmentColumnSelect(rec) {
+                ui.attachmentColumnSelect.innerHTML = '<option value="">-- No Grist Attachment --</option>';
+                Object.keys(rec).forEach(col => {
+                    if (col.startsWith('gristHelper') || col === 'id') return;
+                    const opt = document.createElement('option'); opt.value = col; opt.textContent = col;
+                    if (col === selectedAttachmentCol) opt.selected = true;
+                    ui.attachmentColumnSelect.appendChild(opt);
+                });
+            }
 
-function populateFieldSelect() {
-    ui.fieldInsertSelect.innerHTML = '<option value="">-- Field --</option>';
-    placeholderFields.forEach(f => {
-        const opt = document.createElement('option'); opt.value = f.token; opt.textContent = f.label;
-        ui.fieldInsertSelect.appendChild(opt);
-    });
-}
+            function populateFieldSelect() {
+                ui.fieldInsertSelect.innerHTML = '<option value="">-- Field --</option>';
+                placeholderFields.forEach(f => {
+                    const opt = document.createElement('option'); opt.value = f.token; opt.textContent = f.label;
+                    ui.fieldInsertSelect.appendChild(opt);
+                });
+            }
 
-function showStatus(msg) {
-    ui.statusMessage.textContent = msg; ui.statusMessage.className = 'status-message show';
-    setTimeout(() => ui.statusMessage.classList.remove('show'), 3000);
-}
+            function showStatus(msg) {
+                ui.statusMessage.textContent = msg; ui.statusMessage.className = 'status-message show';
+                setTimeout(() => ui.statusMessage.classList.remove('show'), 3000);
+            }
 
-function showContextMenu(e, id) {
-    e.preventDefault(); contextMenuTargetId = id;
-    ui.contextMenu.style.top = `${e.clientY}px`; ui.contextMenu.style.left = `${e.clientX}px`;
-    ui.contextMenu.classList.remove('hidden');
-}
+            function showContextMenu(e, id) {
+                e.preventDefault(); contextMenuTargetId = id;
+                ui.contextMenu.style.top = `${e.clientY}px`; ui.contextMenu.style.left = `${e.clientX}px`;
+                ui.contextMenu.classList.remove('hidden');
+            }
 
-function renameTemplate() {
-    const tpl = templates.find(t => t.id === contextMenuTargetId); if (!tpl) return;
-    const n = prompt('New Name:', tpl.name); if (n) { tpl.name = n; saveTemplates(); renderTemplateList(); }
-}
-function duplicateTemplate() {
-    const tpl = templates.find(t => t.id === contextMenuTargetId); if (!tpl) return;
-    const nt = { ...tpl, id: 't_' + Date.now(), name: tpl.name + ' (Copy)' };
-    templates.push(nt); saveTemplates(); renderTemplateList();
-}
-function deleteTemplate() {
-    const tpl = templates.find(t => t.id === contextMenuTargetId); if (!tpl || !confirm('Delete template?')) return;
-    templates = templates.filter(t => t.id !== contextMenuTargetId); saveTemplates();
-    if (activeTemplateId === contextMenuTargetId) { activeTemplateId = templates[0]?.id || null; regenerateFromTemplate(); }
-    renderTemplateList();
-}
+            function renameTemplate() {
+                const tpl = templates.find(t => t.id === contextMenuTargetId); if (!tpl) return;
+                const n = prompt('New Name:', tpl.name); if (n) { tpl.name = n; saveTemplates(); renderTemplateList(); }
+            }
+            function duplicateTemplate() {
+                const tpl = templates.find(t => t.id === contextMenuTargetId); if (!tpl) return;
+                const nt = { ...tpl, id: 't_' + Date.now(), name: tpl.name + ' (Copy)' };
+                templates.push(nt); saveTemplates(); renderTemplateList();
+            }
+            function deleteTemplate() {
+                const tpl = templates.find(t => t.id === contextMenuTargetId); if (!tpl || !confirm('Delete template?')) return;
+                templates = templates.filter(t => t.id !== contextMenuTargetId); saveTemplates();
+                if (activeTemplateId === contextMenuTargetId) { activeTemplateId = templates[0]?.id || null; regenerateFromTemplate(); }
+                renderTemplateList();
+            }
 
-function exportTemplates() { navigator.clipboard.writeText(JSON.stringify(templates, null, 2)).then(() => showStatus('Copied to clipboard')); }
-function importTemplates() {
-    const i = prompt('Paste templates JSON:'); if (!i) return;
-    try { templates = JSON.parse(i); saveTemplates(); renderTemplateList(); showStatus('Imported'); } catch (e) { alert('Invalid JSON'); }
-}
+            function exportTemplates() { navigator.clipboard.writeText(JSON.stringify(templates, null, 2)).then(() => showStatus('Copied to clipboard')); }
+            function importTemplates() {
+                const i = prompt('Paste templates JSON:'); if (!i) return;
+                try { templates = JSON.parse(i); saveTemplates(); renderTemplateList(); showStatus('Imported'); } catch (e) { alert('Invalid JSON'); }
+            }
 
-function copyEmailBody() {
-    const h = ui.editor.innerHTML, t = ui.editor.innerText;
-    if (navigator.clipboard && window.ClipboardItem) {
-        const i = new ClipboardItem({ 'text/html': new Blob([h], { type: 'text/html' }), 'text/plain': new Blob([t], { type: 'text/plain' }) });
-        navigator.clipboard.write([i]).then(() => showStatus('Body copied')).catch(() => navigator.clipboard.writeText(h).then(() => showStatus('HTML copied')));
-    } else navigator.clipboard.writeText(h).then(() => showStatus('HTML copied'));
-}
+            function copyEmailBody() {
+                const h = ui.editor.innerHTML, t = ui.editor.innerText;
+                if (navigator.clipboard && window.ClipboardItem) {
+                    const i = new ClipboardItem({ 'text/html': new Blob([h], { type: 'text/html' }), 'text/plain': new Blob([t], { type: 'text/plain' }) });
+                    navigator.clipboard.write([i]).then(() => showStatus('Body copied')).catch(() => navigator.clipboard.writeText(h).then(() => showStatus('HTML copied')));
+                } else navigator.clipboard.writeText(h).then(() => showStatus('HTML copied'));
+            }
 
-async function downloadEml() {
-    showStatus('Generating...');
-    const to = ui.emailTo.value, cc = ui.emailCc.value, sub = ui.emailSubject.value || 'Investment Opportunity', html = ui.editor.innerHTML, text = ui.editor.innerText;
-    const atts = [...attachments];
-    if (selectedAttachmentCol && currentGristRecord && currentGristRecord[selectedAttachmentCol]) {
-        let files = currentGristRecord[selectedAttachmentCol]; if (!Array.isArray(files)) files = [files];
-        for (const fid of files) {
-            if (typeof fid !== 'number') continue;
-            try {
-                const data = await grist.docApi.getAttachment(fid);
-                atts.push({ name: `Attachment_${fid}.pdf`, file: new Blob([data], { type: 'application/octet-stream' }) });
-            } catch (e) { console.error(e); }
-        }
-    }
-    const eml = await buildEML(to, cc, sub, html, text, atts);
-    const url = URL.createObjectURL(new Blob([eml], { type: 'message/rfc822' }));
-    const a = document.createElement('a'); a.href = url; a.download = `${sub.replace(/[^a-z0-9]/gi, '_')}.eml`; a.click(); URL.revokeObjectURL(url);
-}
+            async function downloadEml() {
+                showStatus('Generating...');
+                const to = ui.emailTo.value, cc = ui.emailCc.value, sub = ui.emailSubject.value || 'Investment Opportunity', html = ui.editor.innerHTML, text = ui.editor.innerText;
+                const atts = [...attachments];
+                if (selectedAttachmentCol && currentGristRecord && currentGristRecord[selectedAttachmentCol]) {
+                    let files = currentGristRecord[selectedAttachmentCol]; if (!Array.isArray(files)) files = [files];
+                    for (const fid of files) {
+                        if (typeof fid !== 'number') continue;
+                        try {
+                            const data = await grist.docApi.getAttachment(fid);
+                            atts.push({ name: `Attachment_${fid}.pdf`, file: new Blob([data], { type: 'application/octet-stream' }) });
+                        } catch (e) { console.error(e); }
+                    }
+                }
+                const eml = await buildEML(to, cc, sub, html, text, atts);
+                const url = URL.createObjectURL(new Blob([eml], { type: 'message/rfc822' }));
+                const a = document.createElement('a'); a.href = url; a.download = `${sub.replace(/[^a-z0-9]/gi, '_')}.eml`; a.click(); URL.revokeObjectURL(url);
+            }
 
-async function buildEML(to, cc, sub, html, text, atts) {
-    const b = `----=_NextPart_${Math.random().toString(36).substring(2, 15)}`, ib = `----=_InnerPart_${Math.random().toString(36).substring(2, 15)}`;
-    let h = `MIME-Version: 1.0\r\nDate: ${new Date().toUTCString()}\r\nSubject: ${sub}\r\n`;
-    if (to) h += `To: ${to}\r\n`; if (cc) h += `Cc: ${cc}\r\n`; h += `From: <sender@example.com>\r\n`;
-    let body = "";
-    if (atts.length === 0) {
-        h += `Content-Type: multipart/alternative; boundary="${b}"\r\n\r\n`;
-        body += `--${b}\r\nContent-Type: text/plain; charset="utf-8"\r\n\r\n${text}\r\n\r\n--${b}\r\nContent-Type: text/html; charset="utf-8"\r\n\r\n<html><body>${html}</body></html>\r\n\r\n--${b}--\r\n`;
-    } else {
-        h += `Content-Type: multipart/mixed; boundary="${b}"\r\n\r\n--${b}\r\nContent-Type: multipart/alternative; boundary="${ib}"\r\n\r\n`;
-        body += `--${ib}\r\nContent-Type: text/plain; charset="utf-8"\r\n\r\n${text}\r\n\r\n--${ib}\r\nContent-Type: text/html; charset="utf-8"\r\n\r\n<html><body>${html}</body></html>\r\n\r\n--${ib}--\r\n\r\n`;
-        for (const a of atts) {
-            const b64 = await new Promise(r => { const rd = new FileReader(); rd.onload = () => r(rd.result.split(',')[1]); rd.readAsDataURL(a.file); });
-            body += `--${b}\r\nContent-Type: ${a.type || 'application/octet-stream'}; name="${a.name}"\r\nContent-Transfer-Encoding: base64\r\nContent-Disposition: attachment; filename="${a.name}"\r\n\r\n${b64}\r\n\r\n`;
-        }
-        body += `--${b}--\r\n`;
-    }
-    return h + body;
-}
+            async function buildEML(to, cc, sub, html, text, atts) {
+                const b = `----=_NextPart_${Math.random().toString(36).substring(2, 15)}`, ib = `----=_InnerPart_${Math.random().toString(36).substring(2, 15)}`;
+                let h = `MIME-Version: 1.0\r\nDate: ${new Date().toUTCString()}\r\nSubject: ${sub}\r\n`;
+                if (to) h += `To: ${to}\r\n`; if (cc) h += `Cc: ${cc}\r\n`; h += `From: <sender@example.com>\r\n`;
+                let body = "";
+                if (atts.length === 0) {
+                    h += `Content-Type: multipart/alternative; boundary="${b}"\r\n\r\n`;
+                    body += `--${b}\r\nContent-Type: text/plain; charset="utf-8"\r\n\r\n${text}\r\n\r\n--${b}\r\nContent-Type: text/html; charset="utf-8"\r\n\r\n<html><body>${html}</body></html>\r\n\r\n--${b}--\r\n`;
+                } else {
+                    h += `Content-Type: multipart/mixed; boundary="${b}"\r\n\r\n--${b}\r\nContent-Type: multipart/alternative; boundary="${ib}"\r\n\r\n`;
+                    body += `--${ib}\r\nContent-Type: text/plain; charset="utf-8"\r\n\r\n${text}\r\n\r\n--${ib}\r\nContent-Type: text/html; charset="utf-8"\r\n\r\n<html><body>${html}</body></html>\r\n\r\n--${ib}--\r\n\r\n`;
+                    for (const a of atts) {
+                        const b64 = await new Promise(r => { const rd = new FileReader(); rd.onload = () => r(rd.result.split(',')[1]); rd.readAsDataURL(a.file); });
+                        body += `--${b}\r\nContent-Type: ${a.type || 'application/octet-stream'}; name="${a.name}"\r\nContent-Transfer-Encoding: base64\r\nContent-Disposition: attachment; filename="${a.name}"\r\n\r\n${b64}\r\n\r\n`;
+                    }
+                    body += `--${b}--\r\n`;
+                }
+                return h + body;
+            }
 
-init();
-    </script>
-</body>
+            init();
+        </script>
+    </body>
 </html>
