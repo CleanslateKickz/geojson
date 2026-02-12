@@ -143,10 +143,11 @@
       const handleAddressChange = (e) => {
         let newValue = e.target.value;
         
-        // FIX: Only add comma when suffix is DIRECTLY followed by TitleCase word (no space)
-        // This handles concatenated pastes like "HwyNashua" but NOT valid "Blvd SE" or "St NE"
-        // Pattern: Street suffix immediately followed by Capital+lowercase (city name start)
-        const streetSuffixRegex = /\b(St|Ave|Blvd|Rd|Ln|Dr|Ct|Pl|Cir|Ter|Hwy|Pkwy|Way)(?=[A-Z][a-z])/gi;
+        // FIX: Add comma when suffix is followed by TitleCase city name (for concatenated text like "HwyNashua")
+        // BUT do NOT match when suffix is part of a larger word (like "Drive" -> "Dr|ive")
+        // (?![a-z]) ensures the suffix is NOT immediately followed by lowercase (rules out "Drive")
+        // (?=[A-Z][a-z]) ensures followed by TitleCase (city name pattern)
+        const streetSuffixRegex = /\b(St|Ave|Blvd|Rd|Ln|Dr|Ct|Pl|Cir|Ter|Hwy|Pkwy|Way)(?![a-z])(?=[A-Z][a-z])/gi;
         
         if (streetSuffixRegex.test(newValue)) {
           newValue = newValue.replace(streetSuffixRegex, '$1, ');
