@@ -1,0 +1,2754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unified Property Widget</title>
+    <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* ============================================
+           CSS VARIABLES & DESIGN SYSTEM
+           ============================================ */
+        :root {
+            /* Colors */
+            --color-primary: #2563eb;
+            --color-primary-hover: #1d4ed8;
+            --color-success: #10b981;
+            --color-success-hover: #059669;
+            --color-bg: #f9fafb;
+            --color-bg-pane: #ffffff;
+            --color-bg-alt: #f3f4f6;
+            --color-border: #e5e7eb;
+            --color-border-hover: #cbd5e1;
+            
+            /* Text Colors */
+            --color-text-primary: #111827;
+            --color-text-secondary: #4b5563;
+            --color-text-muted: #9ca3af;
+            --color-text-light: #ffffff;
+            
+            /* Typography */
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            
+            /* Spacing */
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+            
+            /* Border Radius */
+            --radius-sm: 4px;
+            --radius-md: 6px;
+            --radius-lg: 12px;
+            --radius-full: 999px;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            
+            /* Transitions */
+            --transition-fast: 0.15s ease;
+            --transition-base: 0.3s ease;
+        }
+
+        /* ============================================
+           RESET & BASE STYLES
+           ============================================ */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: var(--font-sans);
+            font-size: 13px;
+            line-height: 1.5;
+            color: var(--color-text-primary);
+            background-color: var(--color-bg);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* ============================================
+           WIDGET CONTAINER
+           ============================================ */
+        .widget-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        /* ============================================
+           TAB NAVIGATION
+           ============================================ */
+        .tab-navigation {
+            display: flex;
+            background-color: var(--color-bg-pane);
+            border-bottom: 1px solid var(--color-border);
+            padding: 0 var(--spacing-md);
+            flex-shrink: 0;
+            height: 48px;
+            align-items: center;
+        }
+
+        .tab-btn {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border: none;
+            background: transparent;
+            color: var(--color-text-secondary);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all var(--transition-fast);
+            height: 100%;
+        }
+
+        .tab-btn:hover {
+            color: var(--color-text-primary);
+            background-color: var(--color-bg-alt);
+        }
+
+        .tab-btn.active {
+            color: var(--color-primary);
+            border-bottom-color: var(--color-primary);
+        }
+
+        .tab-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .tab-content {
+            flex-grow: 1;
+            overflow: hidden;
+            display: none;
+        }
+
+        .tab-content.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ============================================
+           SHARED BUTTONS
+           ============================================ */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-sm) var(--spacing-md);
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            border: 1px solid transparent;
+            white-space: nowrap;
+            transition: all var(--transition-fast);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background-color: var(--color-primary);
+            color: var(--color-text-light);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background-color: var(--color-primary-hover);
+        }
+
+        .btn-secondary {
+            background-color: var(--color-bg-pane);
+            border-color: var(--color-border);
+            color: var(--color-text-primary);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background-color: var(--color-bg-alt);
+            border-color: var(--color-border-hover);
+        }
+
+        .btn-ghost {
+            background-color: transparent;
+            color: var(--color-text-secondary);
+        }
+
+        .btn-ghost:hover:not(:disabled) {
+            background-color: var(--color-bg-alt);
+            color: var(--color-text-primary);
+        }
+
+        .btn-success {
+            background-color: var(--color-success);
+            color: var(--color-text-light);
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background-color: var(--color-success-hover);
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 11px;
+        }
+
+        /* ============================================
+           BROWSE MODE STYLES
+           ============================================ */
+        .browse-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .controls-bar {
+            background: var(--color-bg-pane);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-md);
+            margin: var(--spacing-md);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-sm);
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 240px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 8px 12px 8px 36px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            transition: all var(--transition-fast);
+            background: var(--color-bg-alt);
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            background: var(--color-bg-pane);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+        }
+
+        .search-box svg {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            stroke: var(--color-text-muted);
+        }
+
+        .filter-group {
+            display: flex;
+            gap: var(--spacing-sm);
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 12px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            background: var(--color-bg-pane);
+            color: var(--color-text-secondary);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--color-border-hover);
+            background: var(--color-bg-alt);
+        }
+
+        .filter-btn.active {
+            background: var(--color-primary);
+            color: var(--color-text-light);
+            border-color: var(--color-primary);
+        }
+
+        .filter-select {
+            padding: 8px 12px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            background: var(--color-bg-pane);
+            color: var(--color-text-secondary);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .filter-select:hover {
+            border-color: var(--color-border-hover);
+            background: var(--color-bg-alt);
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+
+        .property-grid {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 0 var(--spacing-md) var(--spacing-md);
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: var(--spacing-md);
+        }
+
+        /* Property Card Styles */
+        .property-card {
+            position: relative;
+            perspective: 1000px;
+            height: 280px;
+            cursor: pointer;
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+
+        .property-card:hover .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-front,
+        .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            background: var(--color-bg-pane);
+            box-shadow: var(--shadow-md);
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Card Front */
+        .card-image-container {
+            position: relative;
+            height: 100%;
+            overflow: hidden;
+            background: var(--color-bg-alt);
+        }
+
+        .card-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .card-overlay-gradient {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0) 100%);
+            pointer-events: none;
+        }
+
+        .property-card:hover .card-image {
+            transform: scale(1.05);
+        }
+
+        .card-badges {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            z-index: 5;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(4px);
+            border-radius: var(--radius-sm);
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--color-text-primary);
+            box-shadow: var(--shadow-sm);
+            text-transform: uppercase;
+        }
+
+        .badge.new {
+            background: var(--color-primary);
+            color: var(--color-text-light);
+        }
+
+        .select-checkbox {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 28px;
+            height: 28px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px);
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            z-index: 10;
+            transform-style: preserve-3d;
+        }
+
+        .select-checkbox:hover {
+            background: var(--color-bg-pane);
+            transform: scale(1.1);
+        }
+
+        .select-checkbox input {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .card-content-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: var(--spacing-md);
+            z-index: 5;
+            color: var(--color-text-light);
+        }
+
+        .property-type {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 4px;
+        }
+
+        .property-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--color-text-light);
+            margin-bottom: 4px;
+            line-height: 1.2;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .property-address {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 8px;
+        }
+
+        .property-address svg {
+            width: 12px;
+            height: 12px;
+            flex-shrink: 0;
+            opacity: 0.8;
+        }
+
+        .card-footer-overlay {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .price {
+            font-size: 16px;
+            font-weight: 700;
+            color: #4ade80;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .cap-rate {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .cap-rate-value {
+            font-weight: 700;
+            color: #60a5fa;
+        }
+
+        /* Card Back */
+        .back-header {
+            background: linear-gradient(135deg, #0f172a, #334155);
+            color: var(--color-text-light);
+            padding: var(--spacing-md);
+        }
+
+        .back-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .back-header p {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .back-content {
+            padding: var(--spacing-md);
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .detail-item {
+            padding: 8px;
+            background: var(--color-bg-alt);
+            border-radius: var(--radius-sm);
+        }
+
+        .detail-label {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--color-text-secondary);
+            margin-bottom: 2px;
+        }
+
+        .detail-value {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--color-text-primary);
+        }
+
+        .description {
+            margin-top: 8px;
+        }
+
+        .description h4 {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .description p {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            line-height: 1.4;
+        }
+
+        .back-footer {
+            padding: 8px var(--spacing-md);
+            border-top: 1px solid var(--color-border);
+            display: flex;
+            gap: 4px;
+        }
+
+        .logo-button {
+            height: 28px;
+            object-fit: contain;
+        }
+
+        /* Status Message */
+        .status-message {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--color-text-secondary);
+            font-size: 14px;
+        }
+
+        .loading-spinner {
+            width: 32px;
+            height: 32px;
+            margin: 0 auto var(--spacing-md);
+            border: 3px solid var(--color-border);
+            border-top-color: var(--color-primary);
+            border-radius: var(--radius-full);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ============================================
+           EMAIL MODE STYLES
+           ============================================ */
+        .email-container {
+            display: flex;
+            height: 100%;
+            position: relative;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background-color: var(--color-bg-pane);
+            border-right: 1px solid var(--color-border);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            transition: transform 0.3s ease;
+            z-index: 100;
+        }
+
+        .sidebar.hidden {
+            margin-left: -280px;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        .sidebar-header {
+            padding: var(--spacing-md);
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-header h2 {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .sidebar-content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        .sidebar-footer {
+            padding: 12px;
+            border-top: 1px solid var(--color-border);
+            background-color: var(--color-bg);
+        }
+
+        .sidebar-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+
+        /* Main Email Content */
+        .email-main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background-color: var(--color-bg-pane);
+        }
+
+        .email-header {
+            padding: 8px var(--spacing-md);
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--color-bg-pane);
+            min-height: 48px;
+        }
+
+        .header-left, .header-right {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .email-metadata {
+            padding: 8px var(--spacing-md);
+            border-bottom: 1px solid var(--color-border);
+            background-color: var(--color-bg-pane);
+        }
+
+        .metadata-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .metadata-row label {
+            width: 60px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--color-text-secondary);
+        }
+
+        .metadata-row input {
+            flex-grow: 1;
+            border: 1px solid transparent;
+            padding: 4px 8px;
+            font-size: 13px;
+            border-radius: var(--radius-sm);
+        }
+
+        .metadata-row input:focus {
+            outline: none;
+            background-color: var(--color-bg-alt);
+        }
+
+        #emailSubject {
+            font-weight: 600;
+        }
+
+        .details-toggle {
+            font-size: 11px;
+            color: var(--color-primary);
+            cursor: pointer;
+            margin-left: 60px;
+            margin-top: 4px;
+            display: inline-block;
+        }
+
+        .editor-toolbar {
+            padding: 6px 12px;
+            background-color: var(--color-bg-pane);
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            overflow-x: auto;
+        }
+
+        .toolbar-group {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            padding: 0 4px;
+            border-right: 1px solid var(--color-border);
+        }
+
+        .toolbar-group:last-child {
+            border-right: none;
+        }
+
+        .toolbar-spacer {
+            flex-grow: 1;
+        }
+
+        .tool-btn {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            background: transparent;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            color: var(--color-text-secondary);
+        }
+
+        .tool-btn:hover {
+            background-color: var(--color-bg-alt);
+        }
+
+        .select-toolbar {
+            padding: 2px 6px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            background-color: var(--color-bg-pane);
+            font-size: 12px;
+        }
+
+        .editor-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background-color: var(--color-bg-alt);
+            display: flex;
+            justify-content: center;
+        }
+
+        #editor {
+            width: 100%;
+            max-width: 800px;
+            min-height: 100%;
+            background-color: var(--color-bg-pane);
+            padding: 40px 60px;
+            box-shadow: var(--shadow-sm);
+            border-radius: 2px;
+            outline: none;
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--color-text-primary);
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            word-break: break-word;
+        }
+
+        .template-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+        }
+
+        .template-item:hover {
+            background-color: var(--color-bg-alt);
+        }
+
+        .template-item.active {
+            background-color: #eff6ff;
+        }
+
+        .template-item .info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .template-item .name {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .pill {
+            padding: 2px 8px;
+            border-radius: var(--radius-full);
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            background-color: var(--color-bg-alt);
+            color: var(--color-text-secondary);
+        }
+
+        /* Context Menu */
+        .context-menu {
+            position: fixed;
+            background: var(--color-bg-pane);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            padding: 4px;
+            z-index: 1000;
+        }
+
+        .context-menu-item {
+            display: block;
+            width: 100%;
+            padding: 6px 12px;
+            text-align: left;
+            background: transparent;
+            border: none;
+            font-size: 12px;
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+        }
+
+        .context-menu-item:hover {
+            background-color: var(--color-bg-alt);
+        }
+
+        /* ============================================
+           AI PROMPT MODE STYLES
+           ============================================ */
+        .ai-prompt-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            padding: var(--spacing-md);
+            gap: var(--spacing-md);
+        }
+
+        .ai-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .title-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .title-group h1 {
+            font-size: 16px;
+            font-weight: 700;
+            margin: 0;
+            color: var(--color-text-primary);
+            letter-spacing: -0.02em;
+        }
+
+        .title-group .subtitle {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            margin-top: 2px;
+        }
+
+        .editor-card {
+            flex-grow: 1;
+            background-color: var(--color-bg-pane);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        textarea {
+            flex-grow: 1;
+            width: 100%;
+            height: 100%;
+            border: none;
+            resize: none;
+            padding: var(--spacing-md);
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            color: var(--color-text-secondary);
+            background-color: var(--color-bg-alt);
+            outline: none;
+            white-space: pre-wrap;
+            overflow-wrap: break-word;
+            overflow-y: auto;
+        }
+
+        textarea::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        textarea::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        textarea::-webkit-scrollbar-thumb {
+            background-color: var(--color-border);
+            border-radius: 4px;
+        }
+
+        textarea::-webkit-scrollbar-thumb:hover {
+            background-color: var(--color-text-muted);
+        }
+
+        textarea:focus-visible {
+            box-shadow: inset 0 0 0 2px #BFDBFE;
+        }
+
+        /* ============================================
+           DETAIL VIEW PANEL
+           ============================================ */
+        .detail-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(4px);
+            z-index: 1200;
+            align-items: stretch;
+            justify-content: flex-end;
+        }
+
+        .detail-overlay.show {
+            display: flex;
+        }
+
+        .detail-panel {
+            width: 100%;
+            max-width: 500px;
+            background: var(--color-bg-pane);
+            height: 100vh;
+            box-shadow: -8px 0 24px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            animation: slideInRight 0.3s ease;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .detail-header {
+            position: relative;
+            height: 160px;
+        }
+
+        .detail-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .detail-gradient {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,.8), rgba(0,0,0,0) 60%, rgba(0,0,0,.3));
+        }
+
+        .detail-close {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 32px;
+            height: 32px;
+            background: rgba(255,255,255,0.2);
+            color: var(--color-text-light);
+            border: none;
+            border-radius: var(--radius-full);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .detail-close:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .detail-title {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            padding: 12px;
+            color: var(--color-text-light);
+            width: 100%;
+        }
+
+        .lease-badge {
+            background: #4f46e5;
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+
+        .detail-title h2 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .detail-title p {
+            color: #e2e8f0;
+            font-size: 13px;
+        }
+
+        .detail-body {
+            padding: 14px;
+            background: var(--color-bg-alt);
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .metric {
+            background: var(--color-bg-pane);
+            border: 1px solid #f1f5f9;
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+        .metric-label {
+            font-size: 9px;
+            color: var(--color-text-secondary);
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 3px;
+        }
+
+        .metric-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--color-text-primary);
+        }
+
+        .metric-value.accent {
+            color: var(--color-success);
+        }
+
+        .sections {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .section {
+            background: var(--color-bg-pane);
+            border: 1px solid #f1f5f9;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--color-text-primary);
+            margin: 0;
+            padding: 10px 10px 6px 10px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .section .kv {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 8px 10px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .section .kv:first-child {
+            border-top: none;
+        }
+
+        .section .kv span:first-child {
+            color: var(--color-text-secondary);
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .section .kv span:last-child {
+            color: var(--color-text-primary);
+            font-weight: 500;
+            font-size: 12px;
+            text-align: right;
+        }
+
+        .highlights {
+            margin-top: 12px;
+        }
+
+        .highlights-body {
+            background: var(--color-bg-pane);
+            border: 1px solid #f1f5f9;
+            border-radius: var(--radius-lg);
+            padding: 10px;
+            color: var(--color-text-secondary);
+            line-height: 1.4;
+            font-size: 12px;
+        }
+
+        .detail-actions {
+            margin-top: 12px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .detail-actions a,
+        .detail-actions button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 12px;
+            border-radius: 9px;
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--color-text-light);
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .detail-actions a.om,
+        .detail-actions button.om {
+            background: #0f172a;
+        }
+
+        .detail-actions a.listing,
+        .detail-actions button.listing {
+            background: #4f46e5;
+        }
+
+        /* ============================================
+           MODAL
+           ============================================ */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal {
+            background: var(--color-bg-pane);
+            border-radius: var(--radius-lg);
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow: auto;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            padding: var(--spacing-lg);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .modal-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--color-text-primary);
+        }
+
+        .modal-body {
+            padding: var(--spacing-lg);
+        }
+
+        .modal-footer {
+            padding: var(--spacing-lg);
+            border-top: 1px solid var(--color-border);
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        /* ============================================
+           STATUS TOAST
+           ============================================ */
+        .status-toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 8px 16px;
+            background-color: #1f2937;
+            color: var(--color-text-light);
+            border-radius: var(--radius-md);
+            font-size: 12px;
+            z-index: 2000;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .status-toast.show {
+            opacity: 1;
+        }
+
+        /* ============================================
+           RESPONSIVE DESIGN
+           ============================================ */
+        @media (max-width: 768px) {
+            .property-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: absolute;
+                left: 0;
+                top: 0;
+                height: 100%;
+                z-index: 200;
+            }
+
+            .detail-header {
+                height: 160px;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sections {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <!-- Tab Navigation -->
+        <nav class="tab-navigation">
+            <button class="tab-btn active" data-tab="browse">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+                Browse
+            </button>
+            <button class="tab-btn" data-tab="email">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                    <polyline points="22,6 12,13 2,6"></polyline>
+                </svg>
+                Email
+            </button>
+            <button class="tab-btn" data-tab="ai-prompt">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                </svg>
+                AI Prompt
+            </button>
+        </nav>
+
+        <!-- Browse Mode -->
+        <div id="browse-tab" class="tab-content active">
+            <div class="browse-container">
+                <div class="controls-bar">
+                    <div class="search-box">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.35-4.35"></path>
+                        </svg>
+                        <input type="text" id="search-input" placeholder="Search properties..." disabled>
+                    </div>
+
+                    <div class="filter-group">
+                        <select id="type-filter" class="filter-select">
+                            <option value="all">All Types</option>
+                        </select>
+
+                        <select id="tenancy-filter" class="filter-select">
+                            <option value="all">All Tenancy</option>
+                        </select>
+
+                        <select id="city-filter" class="filter-select">
+                            <option value="all">All Cities</option>
+                        </select>
+
+                        <button id="export-btn" class="btn btn-secondary">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            <span class="export-label">Export</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="status-message" class="status-message">
+                    <div class="loading-spinner"></div>
+                    Loading properties...
+                </div>
+
+                <div id="property-grid" class="property-grid"></div>
+            </div>
+        </div>
+
+        <!-- Email Mode -->
+        <div id="email-tab" class="tab-content">
+            <div class="email-container">
+                <!-- Sidebar -->
+                <aside id="sidebar" class="sidebar hidden">
+                    <header class="sidebar-header">
+                        <h2>Message Templates</h2>
+                        <button id="closeSidebarBtn" class="btn btn-ghost btn-sm" style="padding: 4px;">&times;</button>
+                    </header>
+                    <div class="sidebar-content"><div id="templateCategories"></div></div>
+                    <footer class="sidebar-footer">
+                        <div class="sidebar-actions">
+                            <button id="newTemplateBtn" class="btn btn-secondary btn-sm">New</button>
+                            <button id="duplicateTemplateBtn" class="btn btn-secondary btn-sm">Duplicate</button>
+                        </div>
+                    </footer>
+                </aside>
+
+                <!-- Main Content -->
+                <main class="email-main-content">
+                    <header class="email-header">
+                        <div class="header-left">
+                            <button id="toggleSidebarBtn" class="btn btn-secondary btn-sm">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M3 12h18M3 6h18M3 18h18"/>
+                                </svg>
+                                Templates
+                            </button>
+                            <select id="attachmentColumnSelect" class="select-toolbar" style="height: 28px;">
+                                <option value="">-- No Attachment --</option>
+                            </select>
+                        </div>
+                        <div class="header-right">
+                            <span id="modeBadge" class="pill">Email</span>
+                            <button id="copySubjectBtn" class="btn btn-ghost btn-sm">Copy Subject</button>
+                            <button id="copyEmailBtn" class="btn btn-ghost btn-sm">Copy Body</button>
+                            <button id="downloadEmlBtn" class="btn btn-primary btn-sm">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+                                </svg>
+                                Download .EML
+                            </button>
+                        </div>
+                    </header>
+
+                    <div class="email-metadata">
+                        <div id="extraDetails" class="hidden">
+                            <div class="metadata-row"><label>To</label><input type="text" id="emailTo" placeholder="Recipients..."></div>
+                            <div class="metadata-row"><label>Cc</label><input type="text" id="emailCc" placeholder="Cc..."></div>
+                        </div>
+                        <div class="metadata-row"><label>Subject</label><input type="text" id="emailSubject" placeholder="Subject..."></div>
+                        <span id="toggleDetailsBtn" class="details-toggle">Show Details</span>
+                    </div>
+
+                    <div class="editor-toolbar">
+                        <div class="toolbar-group">
+                            <select id="formatBlock" class="select-toolbar">
+                                <option value="p">Paragraph</option>
+                                <option value="h1">Heading 1</option>
+                                <option value="h2">Heading 2</option>
+                            </select>
+                        </div>
+                        <div class="toolbar-group">
+                            <button class="tool-btn" data-command="bold"><b>B</b></button>
+                            <button class="tool-btn" data-command="italic"><i>I</i></button>
+                            <button class="tool-btn" data-command="underline"><u>U</u></button>
+                        </div>
+                        <div class="toolbar-group">
+                            <button class="tool-btn" data-command="insertUnorderedList">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="toolbar-spacer"></div>
+                        <div class="toolbar-group" style="border-right: none;">
+                            <select id="fieldInsertSelect" class="select-toolbar" style="max-width: 120px;"></select>
+                            <button id="insertFieldBtn" class="btn btn-secondary btn-sm" style="padding: 2px 6px;">Insert</button>
+                            <button id="refreshFromTemplateBtn" class="btn btn-ghost btn-sm" title="Refresh from Template">Refresh</button>
+                            <div style="width: 1px; height: 16px; background: var(--color-border); margin: 0 4px;"></div>
+                            <button id="editTemplateBtn" class="btn btn-secondary btn-sm">Edit Template</button>
+                            <button id="saveTemplateBtn" class="btn btn-primary btn-sm hidden">Save</button>
+                            <button id="cancelTemplateEditBtn" class="btn btn-secondary btn-sm hidden">Cancel</button>
+                        </div>
+                    </div>
+
+                    <div class="editor-container">
+                        <div id="editor" contenteditable="true"></div>
+                    </div>
+                </main>
+            </div>
+        </div>
+
+        <!-- AI Prompt Mode -->
+        <div id="ai-prompt-tab" class="tab-content">
+            <div class="ai-prompt-container">
+                <header class="ai-header">
+                    <div class="title-group">
+                        <h1>AI Prompt Generator</h1>
+                        <span class="subtitle">Property materials export</span>
+                    </div>
+                    <button id="copyAiPromptBtn" class="btn btn-primary">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                        Copy to Clipboard
+                    </button>
+                </header>
+
+                <div class="editor-card">
+                    <textarea id="ai-output" readonly></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detail View Panel -->
+        <div id="detail-overlay" class="detail-overlay">
+            <div class="detail-panel">
+                <div class="detail-header">
+                    <img id="detail-image" class="detail-image" alt="Property">
+                    <div class="detail-gradient"></div>
+                    <button id="detail-close" class="detail-close">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                    <div class="detail-title">
+                        <div class="detail-badges">
+                            <span id="detail-leaseType" class="lease-badge" style="display:none"></span>
+                        </div>
+                        <h2 id="detail-name"></h2>
+                        <p id="detail-address"></p>
+                    </div>
+                </div>
+
+                <div class="detail-body">
+                    <div class="metrics-grid">
+                        <div class="metric">
+                            <div class="metric-label">List Price</div>
+                            <div id="metric-price" class="metric-value"></div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Cap Rate</div>
+                            <div id="metric-cap" class="metric-value accent"></div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">NOI</div>
+                            <div id="metric-noi" class="metric-value"></div>
+                        </div>
+                    </div>
+
+                    <div class="sections">
+                        <div class="section">
+                            <h3 class="section-title">Lease Details</h3>
+                            <div class="kv"><span>Tenant</span><span id="lease-tenant"></span></div>
+                            <div class="kv"><span>Term Remaining</span><span id="lease-term"></span></div>
+                            <div class="kv"><span>Expiration</span><span id="lease-expiration"></span></div>
+                            <div class="kv"><span>Rent Bumps</span><span id="lease-bumps" class="accent"></span></div>
+                            <div class="kv"><span>Renewal Options</span><span id="lease-options"></span></div>
+                        </div>
+                        <div class="section">
+                            <h3 class="section-title">Site Details</h3>
+                            <div class="kv"><span>Building Size (RBA)</span><span id="site-rba"></span></div>
+                            <div class="kv"><span>Land Size</span><span id="site-land"></span></div>
+                            <div class="kv"><span>Price / SF</span><span id="site-price-sf"></span></div>
+                            <div class="kv"><span>Date Listed</span><span id="site-dateListed"></span></div>
+                        </div>
+                    </div>
+
+                    <div class="highlights">
+                        <h3 class="section-title">Investment Highlights</h3>
+                        <div id="highlights" class="highlights-body"></div>
+                    </div>
+
+                    <div id="detail-actions" class="detail-actions"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Export Modal -->
+        <div id="export-modal" class="modal-overlay">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2>Export Properties</h2>
+                </div>
+                <div class="modal-body">
+                    <p>Export selected properties to HTML format for sharing or printing.</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="closeExportModal()">Cancel</button>
+                    <button class="btn btn-primary" onclick="performExport()">Export Now</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Context Menu -->
+        <div id="templateContextMenu" class="context-menu hidden">
+            <button id="renameTemplateBtn" class="context-menu-item">Rename</button>
+            <button id="duplicateTemplateBtn" class="context-menu-item">Duplicate</button>
+            <button id="deleteTemplateBtn" class="context-menu-item" style="color: #ef4444;">Delete</button>
+        </div>
+
+        <!-- Status Toast -->
+        <div id="statusToast" class="status-toast"></div>
+    </div>
+
+    <script>
+        // ============================================
+        // STATE MANAGEMENT
+        // ============================================
+        const state = {
+            // Data
+            allRecords: [],
+            filteredRecords: [],
+            currentRecord: null,
+            selectedIds: new Set(),
+            
+            // UI State
+            activeTab: 'browse',
+            isSidebarOpen: false,
+            isDetailOpen: false,
+            isDirty: false,
+            
+            // Email Mode State
+            templates: [],
+            activeTemplateId: null,
+            emailMode: 'email',
+            
+            // Filters
+            filters: {
+                search: '',
+                type: 'all',
+                tenancy: 'all',
+                city: 'all'
+            }
+        };
+
+        // ============================================
+        // CONSTANTS
+        // ============================================
+        const STORAGE_KEY = 'gristEmailTemplates.v4';
+        const COSTAR_LOGO_URL = 'https://cleanslatekickz.github.io/geojson/Images/CoStar.png';
+        const CREXI_LOGO_URL = 'https://cdn.freelogovectors.net/wp-content/uploads/2021/11/crexi-logo-freelogovectors.net_.png';
+        const OM_LOGO_URL = 'https://cdn-icons-png.flaticon.com/512/8921/8921005.png';
+
+        const placeholderFields = [
+            { key: 'propertyName', label: 'Property Name', token: '{{propertyName}}' },
+            { key: 'address', label: 'Address', token: '{{address}}' },
+            { key: 'tenants', label: 'Tenants', token: '{{tenants}}' },
+            { key: 'askingPrice', label: 'Asking Price', token: '{{askingPrice}}' },
+            { key: 'capRate', label: 'Cap Rate', token: '{{capRate}}' },
+            { key: 'leaseTerm', label: 'Lease Term', token: '{{leaseTerm}}' },
+            { key: 'description_html', label: 'Notes (HTML)', token: '{{description_html}}' },
+            { key: 'today', label: 'Today', token: '{{today}}' }
+        ];
+
+        // ============================================
+        // UTILITY FUNCTIONS
+        // ============================================
+        function escapeHtml(value) {
+            return String(value).replace(/&/g, '&').replace(/</g, '<').replace(/>/g, '>');
+        }
+
+        function formatCurrency(val) {
+            if (val === null || val === undefined || val === '') return 'Contact for Price';
+            const num = typeof val === 'number' ? val : parseFloat(val);
+            if (!Number.isFinite(num)) return 'Contact for Price';
+            return '$' + num.toLocaleString('en-US', { maximumFractionDigits: 0 });
+        }
+
+        function formatPrice(val) {
+            return formatCurrency(val);
+        }
+
+        function formatCapRate(val) {
+            return formatPercent(val);
+        }
+
+        function formatPercent(val) {
+            if (!val) return 'N/A';
+            const num = typeof val === 'number' ? val : Number(val);
+            if (!Number.isFinite(num)) return 'N/A';
+            const pct = num <= 1 ? num * 100 : num;
+            return pct.toFixed(2) + '%';
+        }
+
+        function formatNumber(val) {
+            if (!val) return '';
+            const num = typeof val === 'number' ? val : parseFloat(val);
+            return num.toLocaleString('en-US', { maximumFractionDigits: 2 });
+        }
+
+        function formatDate(val) {
+            if (!val) return '';
+            const d = new Date(val);
+            return d.toLocaleDateString();
+        }
+
+        function formatDateShort(val) {
+            if (!val) return 'N/A';
+            const d = new Date(val);
+            if (isNaN(d.getTime())) return String(val);
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            const yy = String(d.getFullYear()).slice(-2);
+            return `${mm}/${dd}/${yy}`;
+        }
+
+        function formatSquareFeet(val) {
+            if (!val) return 'N/A';
+            return `${Number(val).toLocaleString()} SF`;
+        }
+
+        function formatLeaseTerm(val) {
+            if (val === null || val === undefined || val === '') return 'N/A';
+            const raw = String(val).trim();
+            if (!raw) return 'N/A';
+            const num = Number(raw);
+            if (Number.isFinite(num)) return `${num} Years`;
+            return raw;
+        }
+
+        function extractCity(address) {
+            if (!address) return '';
+            const parts = address.split(',').map(p => p.trim());
+            return parts[parts.length - 2] || '';
+        }
+
+        function getDaysOnMarket(dateVal) {
+            if (!dateVal) return null;
+            const date = new Date(dateVal);
+            if (isNaN(date.getTime())) return null;
+            const diff = Math.floor((Date.now() - date.getTime()) / 86400000);
+            return diff < 0 ? 0 : diff;
+        }
+
+        function parseMarkdownToHtml(text) {
+            if (!text) return '';
+            const lines = text.split('\n');
+            let html = '';
+            let inList = false;
+
+            lines.forEach(line => {
+                const trimmed = line.trim();
+                const isList = trimmed.startsWith('- ') || trimmed.startsWith('* ');
+                
+                if (isList) {
+                    if (!inList) {
+                        html += '<ul style="margin: 0; padding-left: 20px; margin-bottom: 10px;">';
+                        inList = true;
+                    }
+                    html += `<li>${escapeHtml(trimmed.substring(2))}</li>`;
+                } else {
+                    if (inList) {
+                        html += '</ul>';
+                        inList = false;
+                    }
+                    if (trimmed) {
+                        html += `<p style="margin-bottom: 10px;">${escapeHtml(trimmed)}</p>`;
+                    }
+                }
+            });
+            if (inList) html += '</ul>';
+            return html;
+        }
+
+        function computeData(raw) {
+            const descriptionHtml = parseMarkdownToHtml(raw?.description || '');
+            const today = new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: '2-digit' }).format(new Date());
+            return { ...raw, description_html: descriptionHtml, today };
+        }
+
+        function renderHtmlTemplate(html, data) {
+            const ctx = computeData(data || {});
+            const rawKeys = new Set(['description_html']);
+            return String(html || '').replace(/\{\{\s*([\w.]+)\s*\}\}/g, (_m, key) => {
+                const val = ctx[key];
+                if (val === undefined || val === null) return '';
+                if (rawKeys.has(key)) return String(val);
+                return escapeHtml(val);
+            });
+        }
+
+        function extractImageUrls(record) {
+            const urlFields = [record['IMG URL'], record.photo_url, record.Image_URL, record.Images];
+            const urls = [];
+            
+            for (const field of urlFields) {
+                if (!field) continue;
+                if (Array.isArray(field)) {
+                    urls.push(...field);
+                } else if (typeof field === 'string') {
+                    urls.push(...field.split(/[\s,]+/));
+                }
+            }
+            
+            return [...new Set(urls.filter(url => url && (url.startsWith('http') || url.startsWith('https'))))];
+        }
+
+        function normalizeKey(key) {
+            return String(key || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        }
+
+        function normalizeCellValue(value) {
+            if (value === undefined || value === null) return undefined;
+            if (Array.isArray(value)) {
+                const parts = value
+                    .map((item) => (item === undefined || item === null ? '' : String(item).trim()))
+                    .filter(Boolean);
+                return parts.length ? parts.join(', ') : undefined;
+            }
+            if (typeof value === 'object') {
+                const maybeList = value.L;
+                if (Array.isArray(maybeList)) {
+                    const parts = maybeList.map((item) => (item === undefined || item === null ? '' : String(item).trim())).filter(Boolean);
+                    return parts.length ? parts.join(', ') : undefined;
+                }
+                return value;
+            }
+            if (typeof value === 'string') {
+                const s = value.trim();
+                if (!s) return undefined;
+                if (s.startsWith('[') && s.endsWith(']')) {
+                    try {
+                        const parsed = JSON.parse(s);
+                        if (Array.isArray(parsed)) {
+                            const parts = parsed.map((item) => (item === undefined || item === null ? '' : String(item).trim())).filter(Boolean);
+                            return parts.length ? parts.join(', ') : undefined;
+                        }
+                    } catch (_e) {}
+                }
+                return s;
+            }
+            return value;
+        }
+
+        function getField(record, ...names) {
+            if (!record) return undefined;
+            const keys = Object.keys(record);
+            for (const name of names) {
+                if (Object.prototype.hasOwnProperty.call(record, name)) {
+                    const v = normalizeCellValue(record[name]);
+                    if (v !== undefined && v !== null && v !== '') return v;
+                }
+                const want = normalizeKey(name);
+                const match = keys.find((k) => normalizeKey(k) === want);
+                if (match) {
+                    const v = normalizeCellValue(record[match]);
+                    if (v !== undefined && v !== null && v !== '') return v;
+                }
+            }
+            return undefined;
+        }
+
+        function normalizeRecord(rec) {
+            const formatCurrency = (val) => (val === undefined || val === null) ? '' : new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
+            const formatPercent = (val) => {
+                if (val === undefined || val === null) return '';
+                const num = typeof val === 'number' ? val : Number(val);
+                if (!Number.isFinite(num)) return '';
+                const pct = num <= 1 ? num * 100 : num;
+                return pct.toFixed(2) + '%';
+            };
+            
+            let tenants = '';
+            if (rec.Tenant_s_ && Array.isArray(rec.Tenant_s_)) {
+                tenants = rec.Tenant_s_.join(', ');
+            }
+
+            return {
+                propertyName: rec.Property_Name || '',
+                address: rec.Address || '',
+                askingPrice: formatCurrency(rec.Price),
+                capRate: formatPercent(rec.Cap_Rate),
+                leaseTerm: rec.Lease_Term || '',
+                description: rec.Notes || '',
+                tenants: tenants
+            };
+        }
+
+        function normalize(record) {
+            const id = String(record.id);
+            const propertyName = getField(record, 'Property_Name', 'propertyName') || 'Property';
+            const address = getField(record, 'Address', 'address') || '';
+            const city = getField(record, 'City', 'city') || extractCity(address) || '';
+            const state = getField(record, 'State', 'state') || '';
+            const zip = getField(record, 'Zip', 'zip') || '';
+            const priceVal = getField(record, 'Price', 'price');
+            const price = priceVal != null ? Number(priceVal) : null;
+            const capRateVal = getField(record, 'Cap_Rate', 'capRate');
+            const capRate = capRateVal != null ? Number(capRateVal) : null;
+            let noiVal = getField(record, 'NOI', 'noi');
+            let noi = noiVal != null ? Number(noiVal) : null;
+            if (noi == null && price != null && capRate != null) {
+                noi = price * capRate;
+            }
+            const rbaVal = getField(record, 'RBA', 'Building_Size', 'rba');
+            const rba = rbaVal != null ? Number(rbaVal) : null;
+            const landSize = getField(record, 'Land_Size', 'landSize');
+            const landUnit = getField(record, 'Land_Unit', 'landUnit') || (typeof landSize === 'string' && landSize.toUpperCase().includes('AC') ? 'AC' : (landSize ? 'SF' : ''));
+            const leaseTerm = getField(record, 'Lease_Term', 'Lease_Term_Remaining', 'leaseTermRemaining');
+            const leaseType = getField(record, 'Lease_Type', 'leaseType', 'Property_Type') || '';
+            const leaseExpiration = getField(record, 'Lease_Expiration', 'leaseExpiration') || '';
+            const leaseOptions = getField(record, 'Lease_Options', 'leaseOptions') || '';
+            const rentBumps = getField(record, 'Rent_Bumps', 'rentBumps') || '';
+            const tenantName = getField(record, 'Tenant_s_', 'Tenant(s)', 'Tenants', 'Tenant', 'Tenant_Name', 'tenantName') || '';
+            const dateListed = getField(record, 'Date_Listed', 'dateListed') || '';
+            const imageUrls = extractImageUrls(record);
+            const omUrl = getField(record, 'OM', 'omUrl');
+            const listingUrl = getField(record, 'Listing_URL', 'listingUrl');
+            const costar = getField(record, 'CoStar');
+            const crexi = getField(record, 'Crexi');
+            const tenancy = getField(record, 'Tenancy');
+            return { id, propertyName, address, city, state, zip, price, capRate, noi, rba, landSize, landUnit, leaseTerm, leaseType, leaseExpiration, leaseOptions, rentBumps, tenantName, imageUrls, omUrl, listingUrl, costar, crexi, tenancy, notes: getField(record, 'Notes', 'notes'), dateListed };
+        }
+
+        function showStatus(msg) {
+            const toast = document.getElementById('statusToast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        // ============================================
+        // TEMPLATES
+        // ============================================
+        function getFixedDefaultTemplate() {
+            return {
+                id: 'default_investment_summary',
+                name: 'Investment Summary (Rich)',
+                category: 'Listings',
+                icon: '🏢',
+                description: 'Modern property highlight with Tenants & Notes',
+                subject: 'Investment Opportunity: {{propertyName}}',
+                bodyHtml: `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; color: #374151;">
+                        <p>Hi [Name],</p>
+                        <p>I wanted to put this amazing opportunity in front of you that recently became available.</p>
+                        
+                        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0;">
+                          <tr>
+                            <td style="background-color: #eff6ff; border-left: 4px solid #2563eb; padding: 20px;">
+                              <div style="font-size: 18px; font-weight: 700; color: #111827; margin-bottom: 4px;">{{propertyName}}</div>
+                              <div style="font-size: 14px; color: #1d4ed8; font-weight: 500; margin-bottom: 8px;">{{address}}</div>
+                              <div style="font-size: 13px; font-style: italic; color: #6b7280;">Tenants: {{tenants}}</div>
+                            </td>
+                          </tr>
+                        </table>
+
+                        <p>I've attached the offering memorandum for your review, and here are the key terms of this deal:</p>
+                        
+                        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                            <tr><td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; width: 140px; font-weight: 700;">Asking Price:</td><td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb;">{{askingPrice}}</td></tr>
+                            <tr><td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; font-weight: 700;">Cap Rate:</td><td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb;">{{capRate}}</td></tr>
+                            <tr><td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; font-weight: 700;">Lease Term:</td><td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb;">{{leaseTerm}}</td></tr>
+                        </table>
+
+                        <div style="margin: 20px 0;">
+                            <div style="font-weight: 700; margin-bottom: 10px;">Recent Improvements:</div>
+                            <div>{{description_html}}</div>
+                        </div>
+
+                        <p>If you're interested in this property or would like to discuss current market conditions, feel free to give me a call anytime.</p>
+                        <p style="margin-top: 30px;">Best regards,<br><b>[Your Name]</b></p>
+                    </div>
+                `.trim()
+            };
+        }
+
+        function loadTemplates() {
+            try { state.templates = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch (e) { state.templates = []; }
+            
+            const fixedTpl = getFixedDefaultTemplate();
+            const existingIdx = state.templates.findIndex(t => t.id === fixedTpl.id);
+            if (existingIdx >= 0) {
+                state.templates[existingIdx] = fixedTpl;
+            } else {
+                state.templates.unshift(fixedTpl);
+            }
+            
+            if (!state.templates.length) state.templates.push(fixedTpl);
+            saveTemplates();
+            
+            state.activeTemplateId = state.templates[0].id;
+        }
+
+        function saveTemplates() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state.templates));
+        }
+
+        function renderTemplateList() {
+            const container = document.getElementById('templateCategories');
+            container.innerHTML = '';
+            
+            state.templates.forEach(t => {
+                const item = document.createElement('div');
+                item.className = `template-item ${t.id === state.activeTemplateId ? 'active' : ''}`;
+                item.innerHTML = `<span class="icon">${t.icon || '📄'}</span><div class="info"><span class="name">${t.name}</span></div>`;
+                item.onclick = () => switchTemplate(t.id);
+                item.oncontextmenu = (e) => showContextMenu(e, t.id);
+                container.appendChild(item);
+            });
+        }
+
+        function switchTemplate(id) {
+            state.activeTemplateId = id;
+            renderTemplateList();
+            regenerateFromTemplate();
+        }
+
+        function regenerateFromTemplate() {
+            const tpl = state.templates.find(t => t.id === state.activeTemplateId);
+            if (!tpl || !state.currentRecord) return;
+            document.getElementById('emailSubject').value = renderHtmlTemplate(tpl.subject, normalizeRecord(state.currentRecord));
+            document.getElementById('editor').innerHTML = renderHtmlTemplate(tpl.bodyHtml, normalizeRecord(state.currentRecord));
+            state.isDirty = false;
+        }
+
+        // ============================================
+        // BROWSE MODE FUNCTIONS
+        // ============================================
+        function createPropertyCard(record) {
+            const imageUrls = extractImageUrls(record);
+            const imageUrl = imageUrls[0] || `https://placehold.co/600x400/e2e8f0/64748b?text=${encodeURIComponent(record.Property_Name || 'No Image')}`;
+            const daysOnMarket = getDaysOnMarket(record.Date_Listed);
+            const isSelected = state.selectedIds.has(String(record.id));
+            const propertyName = record.Property_Name || 'Unnamed Property';
+
+            return `
+    <div class="property-card" data-id="${record.id}">
+      <div class="select-checkbox" onclick="event.stopPropagation(); toggleSelection('${record.id}')">
+        <input type="checkbox" ${isSelected ? 'checked' : ''} onclick="event.stopPropagation()">
+            </div>
+      <div class="card-inner">
+        <div class="card-front">
+          <div class="card-image-container">
+            <img src="${imageUrl}" alt="${escapeHtml(propertyName)}" class="card-image">
+            <div class="card-overlay-gradient"></div>
+            <div class="card-badges">
+              ${daysOnMarket !== null && daysOnMarket <= 7 ? '<span class="badge new">NEW</span>' : ''}
+              ${record.Property_Type ? `<span class="badge">${escapeHtml(record.Property_Type)}</span>` : ''}
+            </div>
+            <div class="card-content-overlay">
+                <h3 class="property-name">${escapeHtml(propertyName)}</h3>
+                <div class="property-address">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                    <span>${escapeHtml(record.Address || 'Address not available')}</span>
+                </div>
+                <div class="card-footer-overlay">
+                    <div class="price">${formatPrice(record.Price)}</div>
+                    <div class="cap-rate">Cap Rate: <span class="cap-rate-value">${formatCapRate(record.Cap_Rate)}</span></div>
+                </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-back">
+          <div class="back-header">
+            <h3>${escapeHtml(propertyName)}</h3>
+            <p>${escapeHtml(record.Address || 'Address not available')}</p>
+            </div>
+          <div class="back-content">
+            <div class="detail-grid">
+              <div class="detail-item">
+                <div class="detail-label">Price</div>
+                <div class="detail-value">${formatPrice(record.Price)}</div>
+            </div>
+              <div class="detail-item">
+                <div class="detail-label">Building Size</div>
+                <div class="detail-value">${formatSquareFeet(record.RBA)}</div>
+            </div>
+              <div class="detail-item">
+                <div class="detail-label">Cap Rate</div>
+                <div class="detail-value">${formatCapRate(record.Cap_Rate)}</div>
+            </div>
+              <div class="detail-item">
+                <div class="detail-label">Days on Market</div>
+                <div class="detail-value">${daysOnMarket !== null ? `${daysOnMarket} days` : 'N/A'}</div>
+            </div>
+            ${record.Notes ? `
+              <div class="description">
+                <h4>Description</h4>
+                <p>${escapeHtml(record.Notes)}</p>
+            </div>
+            ` : ''}
+            </div>
+          <div class="back-footer">
+          <div style="display: flex; gap: 0.5rem;">
+            ${record.CoStar ? `
+              <a href="${escapeHtml(record.CoStar)}" target="_blank" class="action-btn secondary">
+              <img src="${COSTAR_LOGO_URL}" alt="CoStar" class="logo-button">
+            </a>
+            ` : ''}
+            ${record.Crexi ? `
+              <a href="${escapeHtml(record.Crexi)}" target="_blank" class="action-btn secondary">
+                <img src="${CREXI_LOGO_URL}" alt="Crexi" class="logo-button">
+            </a>
+            ` : ''}
+            ${record.OM ? `
+              <a href="${escapeHtml(record.OM)}" target="_blank" rel="noopener noreferrer" class="action-btn secondary" onclick="event.stopPropagation()">
+                <img src="${OM_LOGO_URL}" alt="OM" class="logo-button">
+            </a>
+            ` : ''}
+            </div>
+            </div>
+            </div>
+            </div>
+            </div>
+  `;
+        }
+        
+        function toggleSelection(id) {
+            const strId = String(id);
+            if (state.selectedIds.has(strId)) {
+                state.selectedIds.delete(strId);
+            } else {
+                state.selectedIds.add(strId);
+            }
+            updateExportButton();
+        }
+
+        function updateExportButton() {
+            const btn = document.getElementById('export-btn');
+            if (!btn) return;
+            const labelEl = btn.querySelector('.export-label');
+            const count = state.selectedIds.size;
+            if (labelEl) labelEl.textContent = count > 0 ? `Export (${count})` : 'Export';
+            btn.disabled = !state.filteredRecords || state.filteredRecords.length === 0;
+            btn.classList.toggle('active', count > 0);
+        }
+
+        function populateFilters(records) {
+            // Property types
+            const types = [...new Set(records.map(r => r.Property_Type).filter(Boolean))].sort();
+            const typeFilter = document.getElementById('type-filter');
+            typeFilter.innerHTML = '<option value="all">All Types</option>';
+            types.forEach(type => {
+                const option = document.createElement('option');
+                option.value = type;
+                option.textContent = type;
+                typeFilter.appendChild(option);
+            });
+
+            // Tenancies
+            const tenancies = [...new Set(records.map(r => getField(r, 'Tenancy')).filter(Boolean).map(v => String(v).trim()).filter(Boolean))].sort();
+            const tenancyFilter = document.getElementById('tenancy-filter');
+            if (tenancyFilter) {
+                tenancyFilter.innerHTML = '<option value="all">All Tenancy</option>';
+                tenancies.forEach(tenancy => {
+                    const option = document.createElement('option');
+                    option.value = tenancy;
+                    option.textContent = tenancy;
+                    tenancyFilter.appendChild(option);
+                });
+            }
+
+            // Cities
+            const cities = [...new Set(records.map(r => extractCity(r.Address)).filter(Boolean))].sort();
+            const cityFilter = document.getElementById('city-filter');
+            cityFilter.innerHTML = '<option value="all">All Cities</option>';
+            cities.forEach(city => {
+                const option = document.createElement('option');
+                option.value = city;
+                option.textContent = city;
+                cityFilter.appendChild(option);
+            });
+        }
+
+        function applyFilters() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const typeFilter = document.getElementById('type-filter').value;
+            const tenancyFilter = document.getElementById('tenancy-filter').value;
+            const cityFilter = document.getElementById('city-filter').value;
+
+            state.filteredRecords = state.allRecords.filter(record => {
+                const matchesSearch = !searchTerm ||
+                      (record.Property_Name && record.Property_Name.toLowerCase().includes(searchTerm)) ||
+                      (record.Address && record.Address.toLowerCase().includes(searchTerm));
+
+                const matchesType = typeFilter === 'all' || record.Property_Type === typeFilter;
+                const matchesTenancy = tenancyFilter === 'all' || String(getField(record, 'Tenancy') || '') === tenancyFilter;
+                const matchesCity = cityFilter === 'all' || extractCity(record.Address) === cityFilter;
+
+                return matchesSearch && matchesType && matchesTenancy && matchesCity;
+            });
+
+            // Sort by most recently updated
+            state.filteredRecords.sort((a, b) => {
+                const dateA = new Date(a.Last_updated_at || a.Created_at || 0);
+                const dateB = new Date(b.Last_updated_at || b.Created_at || 0);
+                return dateB - dateA;
+            });
+
+            renderProperties(state.filteredRecords);
+        }
+
+        function renderProperties(records) {
+            const grid = document.getElementById('property-grid');
+            const statusMessage = document.getElementById('status-message');
+
+            if (!records || records.length === 0) {
+                grid.innerHTML = '';
+                statusMessage.style.display = 'block';
+                return;
+            }
+
+            statusMessage.style.display = 'none';
+            grid.innerHTML = records.map(record => createPropertyCard(record)).join('');
+            
+            // Add event listeners for property cards
+            const cards = grid.querySelectorAll('.property-card');
+            cards.forEach(card => {
+                const id = card.getAttribute('data-id');
+                const rec = records.find(r => String(r.id) === String(id));
+                card.addEventListener('click', () => openPropertyPanel(rec));
+            });
+        }
+
+        function closeExportModal() {
+            document.getElementById('export-modal').classList.remove('show');
+        }
+
+        function performExport() {
+            const recordsToExport = state.selectedIds.size > 0
+            ? state.allRecords.filter(r => state.selectedIds.has(String(r.id)))
+            : state.filteredRecords;
+
+            if (recordsToExport.length === 0) {
+                alert('No properties to export');
+                closeExportModal();
+                return;
+            }
+
+            const html = generateExportHTML(recordsToExport);
+            const blob = new Blob([html], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `properties-export-${new Date().toISOString().slice(0, 10)}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            closeExportModal();
+        }
+
+        function generateExportHTML(records) {
+            const propertyCards = records.map(record => {
+                const imageUrls = extractImageUrls(record);
+                const imageUrl = imageUrls[0] || `https://placehold.co/600x400/e2e8f0/64748b?text=${encodeURIComponent(record.Property_Name || 'No Image')}`;
+
+                return `
+                <div class="property-card">
+                <img src="${imageUrl}" alt="${escapeHtml(record.Property_Name || 'Property')}" style="width:100%;height:250px;object-fit:cover;">
+                <div style="padding:20px;">
+                  <h2 style="margin:0 0 10px 0;">${escapeHtml(record.Property_Name || 'Unnamed Property')}</h2>
+                  <p style="color:#059669;font-size:1.25rem;font-weight:bold;margin:0 0 10px 0;">${formatPrice(record.Price)}</p>
+                  <p style="margin:0;">${escapeHtml(record.Address || 'Address not available')}</p>
+                  <p style="margin:5px 0 0 0;">Cap Rate: ${formatCapRate(record.Cap_Rate)}</p>
+                  ${record.Notes ? `<p style="margin:10px 0 0 0;">${escapeHtml(record.Notes)}</p>` : ''}
+                </div>
+                </div>`;
+            }).join('');
+
+            return `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Property Listings Export</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f9fafb; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { text-align: center; margin-bottom: 30px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .property-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Property Listings Export</h1>
+        <div class="grid">${propertyCards}</div>
+    </div>
+</body>
+</html>`;
+        }
+
+        // ============================================
+        // DETAIL VIEW PANEL
+        // ============================================
+        function openPropertyPanel(record) {
+            if (!record) return;
+            state.currentRecord = record;
+            const d = normalize(record);
+            const overlay = document.getElementById('detail-overlay');
+            const imgEl = document.getElementById('detail-image');
+            const leaseBadge = document.getElementById('detail-leaseType');
+            const nameEl = document.getElementById('detail-name');
+            const addrEl = document.getElementById('detail-address');
+            const priceEl = document.getElementById('metric-price');
+            const capEl = document.getElementById('metric-cap');
+            const noiEl = document.getElementById('metric-noi');
+            const tTenant = document.getElementById('lease-tenant');
+            const tTerm = document.getElementById('lease-term');
+            const tExp = document.getElementById('lease-expiration');
+            const tBumps = document.getElementById('lease-bumps');
+            const tOpts = document.getElementById('lease-options');
+            const sRba = document.getElementById('site-rba');
+            const sLand = document.getElementById('site-land');
+            const sPriceSf = document.getElementById('site-price-sf');
+            const sDate = document.getElementById('site-dateListed');
+            const notesEl = document.getElementById('highlights');
+            const highlightsWrap = document.querySelector('.highlights');
+            const actions = document.getElementById('detail-actions');
+
+            const imageUrl = (d.imageUrls && d.imageUrls[0]) || `https://placehold.co/800x500/e2e8f0/64748b?text=${encodeURIComponent(d.propertyName)}`;
+            imgEl.setAttribute('src', imageUrl);
+            if (d.leaseType) {
+                leaseBadge.style.display = 'inline-block';
+                leaseBadge.textContent = d.leaseType + (d.leaseType.toUpperCase().includes('NNN') ? ' Lease' : '');
+            } else {
+                leaseBadge.style.display = 'none';
+            }
+
+            nameEl.textContent = d.propertyName || 'Property';
+            const addrParts = [d.address, [d.city, d.state].filter(Boolean).join(', '), d.zip].filter(Boolean);
+            addrEl.textContent = addrParts.join(' ');
+
+            priceEl.textContent = d.price != null ? formatPrice(d.price) : 'Contact for Price';
+            capEl.textContent = d.capRate != null ? formatCapRate(d.capRate) : 'N/A';
+            noiEl.textContent = d.noi != null ? formatPrice(d.noi) : 'N/A';
+
+            tTenant.textContent = d.tenantName || 'N/A';
+            tTerm.textContent = formatLeaseTerm(d.leaseTerm);
+            tExp.textContent = d.leaseExpiration ? new Date(d.leaseExpiration).toLocaleDateString() : 'N/A';
+            tBumps.textContent = d.rentBumps || 'N/A';
+            tOpts.textContent = d.leaseOptions || 'N/A';
+
+            sRba.textContent = d.rba != null ? `${Number(d.rba).toLocaleString()} SF` : 'N/A';
+            if (d.landSize != null) {
+                sLand.textContent = `${d.landSize} ${d.landUnit || ''}`.trim();
+            } else {
+                sLand.textContent = 'N/A';
+            }
+            sPriceSf.textContent = (d.price != null && d.rba) ? formatPrice(d.price / d.rba) : 'N/A';
+            sDate.textContent = formatDateShort(d.dateListed);
+
+            if (d.notes) {
+                if (highlightsWrap) highlightsWrap.style.display = 'block';
+                notesEl.textContent = d.notes;
+            } else {
+                if (highlightsWrap) highlightsWrap.style.display = 'none';
+                notesEl.textContent = '';
+            }
+
+            // Clear and rebuild action buttons
+            actions.innerHTML = '';
+            
+            // Add OM button if available
+            if (d.omUrl) {
+                const omLink = document.createElement('a');
+                omLink.className = 'om';
+                omLink.href = String(d.omUrl);
+                omLink.target = '_blank';
+                omLink.rel = 'noopener noreferrer';
+                omLink.textContent = 'View Offering Memorandum';
+                actions.appendChild(omLink);
+            }
+            
+            // Add listing button if available
+            const listingUrl = d.listingUrl || d.costar || d.crexi;
+            if (listingUrl) {
+                const listBtn = document.createElement('a');
+                listBtn.className = 'listing';
+                listBtn.href = listingUrl;
+                listBtn.target = '_blank';
+                listBtn.rel = 'noreferrer';
+                listBtn.innerHTML = 'Visit Listing Page';
+                actions.appendChild(listBtn);
+            }
+
+            overlay.classList.add('show');
+            state.isDetailOpen = true;
+        }
+
+        function closePropertyPanel() {
+            document.getElementById('detail-overlay').classList.remove('show');
+            state.currentRecord = null;
+            state.isDetailOpen = false;
+        }
+
+        // ============================================
+        // EMAIL MODE FUNCTIONS
+        // ============================================
+        function format(cmd, val = null) {
+            document.execCommand(cmd, false, val);
+            document.getElementById('editor').focus();
+        }
+
+        function populateFieldSelect() {
+            const select = document.getElementById('fieldInsertSelect');
+            select.innerHTML = '<option value="">-- Field --</option>';
+            placeholderFields.forEach(f => {
+                const opt = document.createElement('option');
+                opt.value = f.token;
+                opt.textContent = f.label;
+                select.appendChild(opt);
+            });
+        }
+
+        function downloadEml() {
+            const sub = document.getElementById('emailSubject').value || 'No Subject';
+            const html = document.getElementById('editor').innerHTML;
+            const text = document.getElementById('editor').innerText;
+            const emlContent = `MIME-Version: 1.0\nContent-Type: multipart/alternative; boundary="----=_BOUNDARY_"\nSubject: ${sub}\n\n------=_BOUNDARY_\nContent-Type: text/plain; charset="utf-8"\n\n${text}\n\n------=_BOUNDARY_\nContent-Type: text/html; charset="utf-8"\n\n${html}\n\n------=_BOUNDARY_--`;
+            
+            const blob = new Blob([emlContent], { type: 'message/rfc822' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${sub.replace(/[^a-z0-9]/gi, '_')}.eml`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function showContextMenu(e, id) {
+            e.preventDefault();
+            const menu = document.getElementById('templateContextMenu');
+            menu.style.top = `${e.clientY}px`;
+            menu.style.left = `${e.clientX}px`;
+            menu.classList.remove('hidden');
+            menu.dataset.targetId = id;
+        }
+
+        // ============================================
+        // AI PROMPT MODE FUNCTIONS
+        // ============================================
+        function renderAiPrompt() {
+            if (!state.currentRecord) {
+                document.getElementById('ai-output').value = "Select a property to generate materials.";
+                return;
+            }
+
+            const r = state.currentRecord;
+            const lines = [];
+
+            lines.push(`INSTRUCTION: Use the following property data to craft a professional investment email or analysis.`);
+            lines.push(``);
+
+            lines.push(`--- PROPERTY OVERVIEW ---`);
+            lines.push(`Name: ${r.Property_Name || ''}`);
+            lines.push(`Address: ${r.Address || ''}`);
+            lines.push(`Type: ${r.Property_Type || ''}`);
+            lines.push(``);
+
+            lines.push(`--- FINANCIALS ---`);
+            lines.push(`Price: ${formatCurrency(r.Price)}`);
+            lines.push(`Cap Rate: ${formatPercent(r.Cap_Rate)}`);
+            lines.push(`Building Size: ${formatNumber(r.RBA)} sq ft`);
+            const priceSf = r.Price_SF ? formatNumber(r.Price_SF) : (r.Price && r.RBA ? formatNumber(r.Price / r.RBA) : 'N/A');
+            lines.push(`Price / SF: $${priceSf}`);
+            lines.push(`Land Size: ${formatNumber(r.Land_Size)} Acres`);
+            lines.push(``);
+
+            lines.push(`--- LEASE DETAILS ---`);
+            lines.push(`Lease Type: ${r.Lease_Type || ''}`);
+            lines.push(`Term: ${r.Lease_Term || ''}`);
+            lines.push(`Commencement: ${formatDate(r.Lease_Commencement)}`);
+            lines.push(`Expiration: ${formatDate(r.Lease_Expiration)}`);
+            lines.push(`Options: ${r.Lease_Options || ''}`);
+            lines.push(`Rent Bumps: ${r.Rent_Bumps || ''}`);
+            lines.push(``);
+
+            const tenants = Array.isArray(r.Tenant_s_) ? r.Tenant_s_.join(', ') : (r.Tenant_s_ || '');
+            lines.push(`--- TENANCY ---`);
+            lines.push(`${tenants}`);
+            lines.push(``);
+
+            lines.push(`--- NOTES / DESCRIPTION ---`);
+            lines.push(r.Notes || '');
+            lines.push(``);
+
+            lines.push(`--- ASSETS & LINKS ---`);
+            
+            let photos = r.photo_url || '';
+            if (photos) {
+                photos = photos.trim().split(/\s+/).join('\n');
+            }
+            lines.push(`Photos:\n${photos}`);
+            lines.push(``);
+            lines.push(`CoStar: ${r.CoStar || ''}`);
+            lines.push(`Crexi: ${r.Crexi || ''}`);
+            lines.push(`OM: ${r.OM || ''}`);
+
+            document.getElementById('ai-output').value = lines.join('\n');
+        }
+
+        // ============================================
+        // TAB NAVIGATION
+        // ============================================
+        function switchTab(tabId) {
+            state.activeTab = tabId;
+            
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.tab === tabId);
+            });
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.toggle('active', content.id === `${tabId}-tab`);
+            });
+            
+            // Update content based on tab
+            if (tabId === 'email' && state.currentRecord && !state.isDirty) {
+                regenerateFromTemplate();
+            } else if (tabId === 'ai-prompt') {
+                renderAiPrompt();
+            }
+        }
+
+        // ============================================
+        // EVENT LISTENERS
+        // ============================================
+        function setupEventListeners() {
+            // Tab navigation
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+            });
+
+            // Browse mode
+            document.getElementById('search-input').addEventListener('input', applyFilters);
+            document.getElementById('type-filter').addEventListener('change', applyFilters);
+            const tenancyEl = document.getElementById('tenancy-filter');
+            if (tenancyEl) tenancyEl.addEventListener('change', applyFilters);
+            document.getElementById('city-filter').addEventListener('change', applyFilters);
+            document.getElementById('export-btn').addEventListener('click', () => {
+                document.getElementById('export-modal').classList.add('show');
+            });
+            document.getElementById('detail-close').addEventListener('click', closePropertyPanel);
+            document.getElementById('detail-overlay').addEventListener('click', (e) => {
+                if (e.target && e.target.id === 'detail-overlay') closePropertyPanel();
+            });
+
+            // Email mode
+            document.getElementById('toggleSidebarBtn').addEventListener('click', () => {
+                document.getElementById('sidebar').classList.toggle('hidden');
+            });
+            document.getElementById('closeSidebarBtn').addEventListener('click', () => {
+                document.getElementById('sidebar').classList.add('hidden');
+            });
+            document.querySelectorAll('.tool-btn[data-command]').forEach(btn => {
+                btn.addEventListener('click', () => format(btn.dataset.command));
+            });
+            document.getElementById('insertFieldBtn').addEventListener('click', () => {
+                const val = document.getElementById('fieldInsertSelect').value;
+                if (!val) return;
+                document.getElementById('editor').focus();
+                format('insertText', val);
+            });
+            document.getElementById('refreshFromTemplateBtn').addEventListener('click', () => {
+                if (confirm('Refresh from template? Unsaved changes will be lost.')) {
+                    regenerateFromTemplate();
+                }
+            });
+            document.getElementById('editTemplateBtn').addEventListener('click', () => {
+                state.emailMode = 'template';
+                document.getElementById('editTemplateBtn').classList.add('hidden');
+                document.getElementById('saveTemplateBtn').classList.remove('hidden');
+                document.getElementById('cancelTemplateEditBtn').classList.remove('hidden');
+                const tpl = state.templates.find(t => t.id === state.activeTemplateId);
+                if (tpl) {
+                    document.getElementById('emailSubject').value = tpl.subject;
+                    document.getElementById('editor').innerHTML = tpl.bodyHtml;
+                }
+                showStatus('Editing Template');
+            });
+            document.getElementById('saveTemplateBtn').addEventListener('click', () => {
+                const idx = state.templates.findIndex(t => t.id === state.activeTemplateId);
+                if (idx >= 0) {
+                    state.templates[idx].subject = document.getElementById('emailSubject').value;
+                    state.templates[idx].bodyHtml = document.getElementById('editor').innerHTML;
+                    saveTemplates();
+                    state.emailMode = 'email';
+                    document.getElementById('editTemplateBtn').classList.remove('hidden');
+                    document.getElementById('saveTemplateBtn').classList.add('hidden');
+                    document.getElementById('cancelTemplateEditBtn').classList.add('hidden');
+                    renderTemplateList();
+                    showStatus('Template Saved');
+                }
+            });
+            document.getElementById('cancelTemplateEditBtn').addEventListener('click', () => {
+                state.emailMode = 'email';
+                document.getElementById('editTemplateBtn').classList.remove('hidden');
+                document.getElementById('saveTemplateBtn').classList.add('hidden');
+                document.getElementById('cancelTemplateEditBtn').classList.add('hidden');
+                regenerateFromTemplate();
+            });
+            document.getElementById('copySubjectBtn').addEventListener('click', () => {
+                navigator.clipboard.writeText(document.getElementById('emailSubject').value);
+                showStatus('Subject copied');
+            });
+            document.getElementById('copyEmailBtn').addEventListener('click', () => {
+                navigator.clipboard.writeText(document.getElementById('editor').innerHTML);
+                showStatus('HTML copied');
+            });
+            document.getElementById('downloadEmlBtn').addEventListener('click', downloadEml);
+            document.getElementById('toggleDetailsBtn').addEventListener('click', () => {
+                const extra = document.getElementById('extraDetails');
+                const btn = document.getElementById('toggleDetailsBtn');
+                extra.classList.toggle('hidden');
+                btn.textContent = extra.classList.contains('hidden') ? 'Show Details' : 'Hide Details';
+            });
+
+            // Context menu
+            document.addEventListener('click', () => {
+                document.getElementById('templateContextMenu').classList.add('hidden');
+            });
+
+            // AI Prompt mode
+            document.getElementById('copyAiPromptBtn').addEventListener('click', function() {
+                const textArea = document.getElementById('ai-output');
+                textArea.select();
+                textArea.setSelectionRange(0, 99999);
+                
+                const btn = this;
+                const originalContent = btn.innerHTML;
+
+                navigator.clipboard.writeText(textArea.value).then(() => {
+                    btn.innerHTML = `
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        Copied!
+                    `;
+                    btn.classList.add('btn-success');
+                    
+                    setTimeout(() => {
+                        btn.innerHTML = originalContent;
+                        btn.classList.remove('btn-success');
+                    }, 1500);
+                });
+            });
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closePropertyPanel();
+                }
+            });
+        }
+
+        // ============================================
+        // GRIST INTEGRATION
+        // ============================================
+        function initializeGrist() {
+            grist.ready({
+                columns: [
+                    { name: "Property_Name", type: "Text", optional: true },
+                    { name: "Address", type: "Text", optional: true },
+                    { name: "Price", type: "Numeric", optional: true },
+                    { name: "Cap_Rate", type: "Numeric", optional: true },
+                    { name: "Lease_Term", type: "Text", optional: true },
+                    { name: "Notes", type: "Text", optional: true },
+                    { name: "Tenant_s_", type: "ChoiceList", optional: true },
+                    { name: "Property_Type", type: "Choice", optional: true },
+                    { name: "RBA", type: "Numeric", optional: true },
+                    { name: "Land_Size", type: "Numeric", optional: true },
+                    { name: "Lease_Type", type: "Choice", optional: true },
+                    { name: "Lease_Expiration", type: "Date", optional: true },
+                    { name: "Lease_Options", type: "Text", optional: true },
+                    { name: "Rent_Bumps", type: "Text", optional: true },
+                    { name: "Lease_Commencement", type: "Date", optional: true },
+                    { name: "Price_SF", type: "Numeric", optional: true },
+                    { name: "Date_Listed", type: "Date", optional: true },
+                    { name: "CoStar", type: "Text", optional: true },
+                    { name: "Crexi", type: "Text", optional: true },
+                    { name: "OM", type: "Text", optional: true },
+                    { name: "Tenancy", type: "Choice", optional: true },
+                    { name: "Created_at", type: "DateTime", optional: true },
+                    { name: "Last_updated_at", type: "DateTime", optional: true }
+                ],
+                requiredAccess: 'read table'
+            });
+
+            // Load all records for Browse mode
+            grist.onRecords((records, mappings) => {
+                state.allRecords = grist.mapColumnNames(records, mappings) || [];
+                document.getElementById('search-input').disabled = false;
+                populateFilters(state.allRecords);
+                applyFilters();
+                updateExportButton();
+            });
+
+            // Load current record for Email and AI Prompt modes
+            grist.onRecord((record) => {
+                if (!record) return;
+                state.currentRecord = record;
+                if (state.activeTab === 'email' && !state.isDirty) {
+                    regenerateFromTemplate();
+                } else if (state.activeTab === 'ai-prompt') {
+                    renderAiPrompt();
+                }
+            });
+        }
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        async function init() {
+            setupEventListeners();
+            loadTemplates();
+            renderTemplateList();
+            populateFieldSelect();
+
+            if (window.parent === window) {
+                // Demo Mode
+                state.currentRecord = {
+                    Property_Name: 'Demo Property',
+                    Address: '123 Demo St',
+                    Tenant_s_: ['Tenant A', 'Tenant B'],
+                    Price: 1000000,
+                    Cap_Rate: 0.075,
+                    Notes: '- New Roof\n- Updated Parking\n- New Signage'
+                };
+                state.allRecords = [state.currentRecord];
+                state.filteredRecords = [state.currentRecord];
+                document.getElementById('search-input').disabled = false;
+                populateFilters(state.allRecords);
+                applyFilters();
+                updateExportButton();
+                regenerateFromTemplate();
+            } else {
+                await initializeGrist();
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
