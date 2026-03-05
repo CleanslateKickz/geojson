@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investment Email Widget</title>
+    <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            --color-bg: #f9fafb;
+            --color-bg-pane: #ffffff;
+            --color-border: #e5e7eb;
+            --color-text-primary: #111827;
+            --color-text-secondary: #4b5563;
+            --color-text-muted: #9ca3af;
+            --color-primary: #2563eb;
+            --color-active-bg: #eff6ff;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --radius-sm: 4px;
+            --radius-md: 6px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: var(--font-sans);
+            font-size: 13px;
+            line-height: 1.5;
+            color: var(--color-text-primary);
+            background-color: var(--color-bg);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app-container { display: flex; height: 100%; position: relative; }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px; background-color: var(--color-bg-pane); border-right: 1px solid var(--color-border);
+            display: flex; flex-direction: column; height: 100%; transition: transform 0.3s ease; z-index: 100;
+        }
+        .sidebar.hidden { margin-left: -280px; position: absolute; left: 0; top: 0; }
+        .sidebar-header { padding: 16px 20px; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; }
+        .sidebar-content { flex-grow: 1; overflow-y: auto; padding: 12px; }
+        .sidebar-footer { padding: 12px; border-top: 1px solid var(--color-border); background-color: #f9fafb; }
+        .sidebar-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+
+        /* Main */
+        .main-content { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; background-color: #ffffff; }
+        .app-header { padding: 8px 16px; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; background-color: #ffffff; min-height: 48px; }
+        .header-left, .header-right { display: flex; gap: 8px; align-items: center; }
+
+        /* Metadata & Toolbar */
+        .email-metadata { padding: 8px 16px; border-bottom: 1px solid var(--color-border); background-color: #ffffff; }
+        .metadata-row { display: flex; align-items: center; margin-bottom: 4px; }
+        .metadata-row label { width: 60px; font-size: 12px; font-weight: 500; color: var(--color-text-secondary); }
+        .metadata-row input { flex-grow: 1; border: 1px solid transparent; padding: 4px 8px; font-size: 13px; border-radius: var(--radius-sm); }
+        .metadata-row input:focus { outline: none; background-color: #f3f4f6; }
+        #emailSubject { font-weight: 600; }
+        .details-toggle { font-size: 11px; color: var(--color-primary); cursor: pointer; margin-left: 60px; margin-top: 4px; display: inline-block; }
+
+        .editor-toolbar { padding: 6px 12px; background-color: #ffffff; border-bottom: 1px solid var(--color-border); display: flex; align-items: center; gap: 4px; overflow-x: auto; }
+        .toolbar-group { display: flex; align-items: center; gap: 2px; padding: 0 4px; border-right: 1px solid var(--color-border); }
+        .toolbar-group:last-child { border-right: none; }
+        .toolbar-spacer { flex-grow: 1; }
+        .tool-btn { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border: none; background: transparent; border-radius: var(--radius-sm); cursor: pointer; color: var(--color-text-secondary); }
+        .tool-btn:hover { background-color: #f3f4f6; }
+        .select-toolbar { padding: 2px 6px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background-color: #ffffff; font-size: 12px; }
+
+        /* Editor Container - Fixes for Text Overflow */
+        .editor-container { flex-grow: 1; overflow-y: auto; padding: 20px; background-color: #f3f4f6; display: flex; justify-content: center; }
+        
+        #editor {
+            width: 100%; max-width: 800px; min-height: 100%;
+            background-color: #ffffff; padding: 40px 60px;
+            box-shadow: var(--shadow-sm); border-radius: 2px; outline: none;
+            font-size: 14px; line-height: 1.6; color: var(--color-text-primary);
+            /* Fix: Prevent text overflow */
+            overflow-wrap: break-word; 
+            word-wrap: break-word; 
+            word-break: break-word;
+        }
+
+        /* Attachments */
+        .attachments-section { border-top: 1px solid var(--color-border); background-color: #ffffff; }
+        .attachments-header { padding: 8px 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background-color: #f9fafb; }
+        .attachments-content { padding: 12px 16px; }
+        .attachments-content.collapsed { display: none; }
+        .drop-zone { border: 1px dashed var(--color-border); border-radius: var(--radius-md); padding: 12px; text-align: center; cursor: pointer; color: var(--color-text-muted); }
+        .file-list { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px; }
+        .file-item { display: flex; align-items: center; gap: 6px; padding: 4px 8px; background-color: #f3f4f6; border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: 11px; }
+
+        /* Buttons & Utils */
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 6px 10px; font-size: 12px; font-weight: 500; border-radius: var(--radius-md); cursor: pointer; border: 1px solid transparent; white-space: nowrap; }
+        .btn-primary { background-color: var(--color-primary); color: #ffffff; }
+        .btn-primary:hover { background-color: #1d4ed8; }
+        .btn-secondary { background-color: #ffffff; border-color: var(--color-border); color: var(--color-text-primary); }
+        .btn-secondary:hover { background-color: #f9fafb; }
+        .btn-ghost { background-color: transparent; color: var(--color-text-secondary); }
+        .btn-ghost:hover { background-color: #f3f4f6; }
+        .btn-sm { padding: 4px 8px; font-size: 11px; }
+        .pill { padding: 2px 8px; border-radius: 999px; font-size: 10px; font-weight: 700; text-transform: uppercase; background-color: #f3f4f6; color: var(--color-text-secondary); }
+        
+        .template-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: var(--radius-md); cursor: pointer; }
+        .template-item:hover { background-color: #f3f4f6; }
+        .template-item.active { background-color: var(--color-active-bg); }
+        .template-item .info { display: flex; flex-direction: column; }
+        
+        svg { flex-shrink: 0; }
+        .hidden { display: none !important; }
+        
+        .status-message { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); padding: 8px 16px; background-color: #1f2937; color: #ffffff; border-radius: 6px; font-size: 12px; z-index: 2000; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+        .status-message.show { opacity: 1; }
+        
+        .context-menu { position: fixed; background: #ffffff; border: 1px solid var(--color-border); border-radius: var(--radius-md); box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); padding: 4px; z-index: 1000; }
+        .context-menu-item { display: block; width: 100%; padding: 6px 12px; text-align: left; background: transparent; border: none; font-size: 12px; cursor: pointer; border-radius: 4px; }
+        .context-menu-item:hover { background-color: #f3f4f6; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar hidden">
+            <header class="sidebar-header">
+                <h2>Message Templates</h2>
+                <button id="closeSidebarBtn" class="btn btn-ghost btn-sm" style="padding: 4px;">&times;</button>
+            </header>
+            <div class="sidebar-content"><div id="templateCategories"></div></div>
+            <footer class="sidebar-footer">
+                <div class="sidebar-actions">
+                    <button id="newTemplateBtn" class="btn btn-secondary btn-sm">New</button>
+                    <button id="duplicateTemplateBtn_s" class="btn btn-secondary btn-sm">Duplicate</button>
+                </div>
+            </footer>
+        </aside>
+
+        <!-- Main -->
+        <main class="main-content">
+            <header class="app-header">
+                <div class="header-left">
+                    <button id="toggleSidebarBtn" class="btn btn-secondary btn-sm">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+                        Templates
+                    </button>
+                    <select id="attachmentColumnSelect" class="select-toolbar" style="height: 28px;"><option value="">-- No Attachment --</option></select>
+                </div>
+                <div class="header-right">
+                    <span id="modeBadge" class="pill">Email</span>
+                    <button id="copySubjectBtn" class="btn btn-ghost btn-sm">Copy Subject</button>
+                    <button id="copyEmailBtn" class="btn btn-ghost btn-sm">Copy Body</button>
+                    <button id="downloadEmlBtn" class="btn btn-primary btn-sm">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                        Download .EML
+                    </button>
+                </div>
+            </header>
+
+            <div class="email-metadata">
+                <div id="extraDetails" class="hidden">
+                    <div class="metadata-row"><label>To</label><input type="text" id="emailTo" placeholder="Recipients..."></div>
+                    <div class="metadata-row"><label>Cc</label><input type="text" id="emailCc" placeholder="Cc..."></div>
+                </div>
+                <div class="metadata-row"><label>Subject</label><input type="text" id="emailSubject" placeholder="Subject..."></div>
+                <span id="toggleDetailsBtn" class="details-toggle">Show Details</span>
+            </div>
+
+            <div class="editor-toolbar">
+                <div class="toolbar-group">
+                    <select id="formatBlock" class="select-toolbar">
+                        <option value="p">Paragraph</option>
+                        <option value="h1">Heading 1</option>
+                        <option value="h2">Heading 2</option>
+                    </select>
+                </div>
+                <div class="toolbar-group">
+                    <button class="tool-btn" data-command="bold"><b>B</b></button>
+                    <button class="tool-btn" data-command="italic"><i>I</i></button>
+                    <button class="tool-btn" data-command="underline"><u>U</u></button>
+                </div>
+                <div class="toolbar-group">
+                    <button class="tool-btn" data-command="insertUnorderedList">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+                    </button>
+                </div>
+                <div class="toolbar-spacer"></div>
+                <div class="toolbar-group" style="border-right: none;">
+                    <select id="fieldInsertSelect" class="select-toolbar" style="max-width: 120px;"></select>
+                    <button id="insertFieldBtn" class="btn btn-secondary btn-sm" style="padding: 2px 6px;">Insert</button>
+                    <button id="refreshFromTemplateBtn" class="btn btn-ghost btn-sm" title="Refresh from Template">Refresh</button>
+                    <div style="width: 1px; height: 16px; background: var(--color-border); margin: 0 4px;"></div>
+                    <button id="editTemplateBtn" class="btn btn-secondary btn-sm">Edit Template</button>
+                    <button id="saveTemplateBtn" class="btn btn-primary btn-sm hidden">Save</button>
+                    <button id="cancelTemplateEditBtn" class="btn btn-secondary btn-sm hidden">Cancel</button>
+                </div>
+            </div>
+
+            <div class="editor-container">
+                <div id="editor" contenteditable="true"></div>
+            </div>
+
+            <div class="attachments-section">
+                <header id="attachmentsToggle" class="attachments-header">
+                    <h3 style="font-size:12px; font-weight:600; display:flex; align-items:center; gap:6px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                        Attachments (<span id="attachmentCount">0</span>)
+                    </h3>
+                </header>
+                <div id="attachmentsContent" class="attachments-content collapsed">
+                    <div id="dropZone" class="drop-zone">Drop files or click to add</div>
+                    <div id="fileList" class="file-list"></div>
+                    <input type="file" id="fileInput" multiple class="hidden">
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="templateContextMenu" class="context-menu hidden">
+        <button id="renameTemplateBtn" class="context-menu-item">Rename</button>
+        <button id="duplicateTemplateBtn" class="context-menu-item">Duplicate</button>
+        <button id="deleteTemplateBtn" class="context-menu-item" style="color: #ef4444;">Delete</button>
+    </div>
+    <div id="statusMessage" class="status-message"></div>
+
+    <script>
+        // --- Configuration & Placeholders ---
+        const placeholderFields = [
+            { key: 'propertyName', label: 'Property Name', token: '{{propertyName}}' },
+            { key: 'address', label: 'Address', token: '{{address}}' },
+            { key: 'tenants', label: 'Tenants', token: '{{tenants}}' }, // Added Tenants
+            { key: 'askingPrice', label: 'Asking Price', token: '{{askingPrice}}' },
+            { key: 'capRate', label: 'Cap Rate', token: '{{capRate}}' },
+            { key: 'leaseTerm', label: 'Lease Term', token: '{{leaseTerm}}' },
+            { key: 'description_html', label: 'Notes (HTML)', token: '{{description_html}}' },
+            { key: 'today', label: 'Today', token: '{{today}}' }
+        ];
+
+        // --- Utilities ---
+        function escapeHtml(value) {
+            return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        // Basic Markdown to HTML converter for Notes
+        function parseMarkdownToHtml(text) {
+            if (!text) return '';
+            const lines = text.split('\n');
+            let html = '';
+            let inList = false;
+
+            lines.forEach(line => {
+                const trimmed = line.trim();
+                const isList = trimmed.startsWith('- ') || trimmed.startsWith('* ');
+                
+                if (isList) {
+                    if (!inList) {
+                        html += '<ul style="margin: 0; padding-left: 20px; margin-bottom: 10px;">';
+                        inList = true;
+                    }
+                    html += `<li>${escapeHtml(trimmed.substring(2))}</li>`;
+                } else {
+                    if (inList) {
+                        html += '</ul>';
+                        inList = false;
+                    }
+                    if (trimmed) {
+                        html += `<p style="margin-bottom: 10px;">${escapeHtml(trimmed)}</p>`;
+                    }
+                }
+            });
+            if (inList) html += '</ul>';
+            return html;
+        }
+
+        function computeData(raw) {
+            const descriptionHtml = parseMarkdownToHtml(raw?.description || '');
+            const today = new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: '2-digit' }).format(new Date());
+            return { ...raw, description_html: descriptionHtml, today };
+        }
+
+        function renderHtmlTemplate(html, data) {
+            const ctx = computeData(data || {});
+            const rawKeys = new Set(['description_html']);
+            return String(html || '').replace(/\{\{\s*([\w.]+)\s*\}\}/g, (_m, key) => {
+                const val = ctx[key];
+                if (val === undefined || val === null) return '';
+                if (rawKeys.has(key)) return String(val);
+                return escapeHtml(val);
+            });
+        }
+
+        // --- Default Template (Fixed) ---
+        function getFixedDefaultTemplate() {
+            return {
+                id: 'default_investment_summary',
+                name: 'Investment Summary (Rich)',
+                category: 'Listings',
+                icon: '🏢',
+                description: 'Modern property highlight with Tenants & Notes',
+                subject: 'Investment Opportunity: {{propertyName}}',
+                bodyHtml: `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; color: #374151;">
+                        <p>Hi [Name],</p>
+                        <p>I wanted to put this amazing opportunity in front of you that recently became available.</p>
+                        
+                        <!-- Property Header -->
+                        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0;">
+                          <tr>
+                            <td style="background-color: #eff6ff; border-left: 4px solid #2563eb; padding: 20px;">
+                              <div style="font-size: 18px; font-weight: 700; color: #111827; margin-bottom: 4px;">{{propertyName}}</div>
+                              <div style="font-size: 14px; color: #1d4ed8; font-weight: 500; margin-bottom: 8px;">{{address}}</div>
+                              <!-- FIX: Displaying Tenants here instead of Type/Date -->
+                              <div style="font-size: 13px; font-style: italic; color: #6b7280;">Tenants: {{tenants}}</div>
+                            </td>
+                          </tr>
+                        </table>
+
+                        <p>I've attached the offering memorandum for your review, and here are the key terms of this deal:</p>
+                        
+                        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                            <tr><td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; width: 140px; font-weight: 700;">Asking Price:</td><td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb;">{{askingPrice}}</td></tr>
+                            <tr><td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; font-weight: 700;">Cap Rate:</td><td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb;">{{capRate}}</td></tr>
+                            <tr><td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; font-weight: 700;">Lease Term:</td><td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb;">{{leaseTerm}}</td></tr>
+                        </table>
+
+                        <div style="margin: 20px 0;">
+                            <div style="font-weight: 700; margin-bottom: 10px;">Recent Improvements:</div>
+                            <!-- FIX: Displaying processed Notes (markdown bullets) here -->
+                            <div>{{description_html}}</div>
+                        </div>
+
+                        <p>If you're interested in this property or would like to discuss current market conditions, feel free to give me a call anytime.</p>
+                        <p style="margin-top: 30px;">Best regards,<br><b>[Your Name]</b></p>
+                    </div>
+                `.trim()
+            };
+        }
+
+        // --- Grist Integration ---
+        function initializeGrist() {
+            return new Promise((resolve) => {
+                grist.ready({
+                    columns: [
+                        { name: "Property_Name", type: "Text", optional: true },
+                        { name: "Address", type: "Text", optional: true },
+                        { name: "Price", type: "Numeric", optional: true },
+                        { name: "Cap_Rate", type: "Numeric", optional: true },
+                        { name: "Lease_Term", type: "Text", optional: true },
+                        { name: "Notes", type: "Text", optional: true },
+                        { name: "Tenant_s_", type: "ChoiceList", optional: true } // Added
+                    ],
+                    requiredAccess: 'read table'
+                });
+                resolve();
+            });
+        }
+
+        function normalizeRecord(rec) {
+            const formatCurrency = (val) => (val === undefined || val === null) ? '' : new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
+            const formatPercent = (val) => {
+                if (val === undefined || val === null) return '';
+                const num = typeof val === 'number' ? val : Number(val);
+                if (!Number.isFinite(num)) return '';
+                const pct = num <= 1 ? num * 100 : num;
+                return pct.toFixed(2) + '%';
+            };
+            
+            // FIX: Handle ChoiceList for Tenants
+            let tenants = '';
+            if (rec.Tenant_s_ && Array.isArray(rec.Tenant_s_)) {
+                tenants = rec.Tenant_s_.join(', ');
+            }
+
+            return {
+                propertyName: rec.Property_Name || '',
+                address: rec.Address || '',
+                askingPrice: formatCurrency(rec.Price),
+                capRate: formatPercent(rec.Cap_Rate),
+                leaseTerm: rec.Lease_Term || '',
+                description: rec.Notes || '',
+                tenants: tenants // Added
+            };
+        }
+
+        // --- App Logic ---
+        const STORAGE_KEY = 'gristEmailTemplates.v3'; // Version bump to force refresh
+        let templates = [], activeTemplateId = null, mode = 'email', isDirty = false, currentGristData = null;
+        const ui = {};
+
+        async function init() {
+            // Map UI elements
+            ui.sidebar = document.getElementById('sidebar');
+            ui.toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
+            ui.closeSidebarBtn = document.getElementById('closeSidebarBtn');
+            ui.templateCategories = document.getElementById('templateCategories');
+            ui.editor = document.getElementById('editor');
+            ui.emailSubject = document.getElementById('emailSubject');
+            ui.statusMessage = document.getElementById('statusMessage');
+            ui.fieldInsertSelect = document.getElementById('fieldInsertSelect');
+            ui.insertFieldBtn = document.getElementById('insertFieldBtn');
+            ui.refreshFromTemplateBtn = document.getElementById('refreshFromTemplateBtn');
+            ui.editTemplateBtn = document.getElementById('editTemplateBtn');
+            ui.saveTemplateBtn = document.getElementById('saveTemplateBtn');
+            ui.cancelTemplateEditBtn = document.getElementById('cancelTemplateEditBtn');
+            ui.copySubjectBtn = document.getElementById('copySubjectBtn');
+            ui.copyEmailBtn = document.getElementById('copyEmailBtn');
+            ui.downloadEmlBtn = document.getElementById('downloadEmlBtn');
+            ui.contextMenu = document.getElementById('templateContextMenu');
+
+            setupEventListeners();
+            loadTemplates();
+            populateFieldSelect();
+            renderTemplateList();
+
+            if (window.parent === window) {
+                // Demo Mode
+                currentGristData = { propertyName: 'Demo Property', address: '123 Demo St', tenants: 'Tenant A, Tenant B', askingPrice: '$1,000,000', capRate: '7.5%', description: '- New Roof\n- Updated Parking\n- New Signage' };
+                regenerateFromTemplate();
+            } else {
+                await initializeGrist();
+                grist.onRecord((record) => {
+                    if (!record) return;
+                    currentGristData = normalizeRecord(record);
+                    if (mode === 'email' && !isDirty) regenerateFromTemplate();
+                });
+            }
+        }
+
+        function loadTemplates() {
+            try { templates = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch (e) { templates = []; }
+            
+            // Force update the default template to ensure fixes are applied
+            const fixedTpl = getFixedDefaultTemplate();
+            const existingIdx = templates.findIndex(t => t.id === fixedTpl.id);
+            if (existingIdx >= 0) {
+                templates[existingIdx] = fixedTpl; // Overwrite with fixed version
+            } else {
+                templates.unshift(fixedTpl); // Add if missing
+            }
+            
+            // Ensure we have at least one template
+            if (!templates.length) templates.push(fixedTpl);
+            saveTemplates();
+            
+            activeTemplateId = templates[0].id;
+        }
+
+        function saveTemplates() { localStorage.setItem(STORAGE_KEY, JSON.stringify(templates)); }
+
+        function renderTemplateList() {
+            ui.templateCategories.innerHTML = '';
+            const catDiv = document.createElement('div');
+            catDiv.className = 'template-category';
+            
+            templates.forEach(t => {
+                const item = document.createElement('div');
+                item.className = `template-item ${t.id === activeTemplateId ? 'active' : ''}`;
+                item.innerHTML = `<span class="icon">${t.icon || '📄'}</span><div class="info"><span class="name">${t.name}</span></div>`;
+                item.onclick = () => switchTemplate(t.id);
+                item.oncontextmenu = (e) => showContextMenu(e, t.id);
+                catDiv.appendChild(item);
+            });
+            ui.templateCategories.appendChild(catDiv);
+        }
+
+        function switchTemplate(id) {
+            activeTemplateId = id;
+            renderTemplateList();
+            regenerateFromTemplate();
+        }
+
+        function regenerateFromTemplate() {
+            const tpl = templates.find(t => t.id === activeTemplateId);
+            if (!tpl || !currentGristData) return;
+            ui.emailSubject.value = renderHtmlTemplate(tpl.subject, currentGristData); // Use renderHtml for subject too
+            ui.editor.innerHTML = renderHtmlTemplate(tpl.bodyHtml, currentGristData);
+            isDirty = false;
+        }
+
+        function populateFieldSelect() {
+            ui.fieldInsertSelect.innerHTML = '<option value="">-- Field --</option>';
+            placeholderFields.forEach(f => {
+                const opt = document.createElement('option'); opt.value = f.token; opt.textContent = f.label;
+                ui.fieldInsertSelect.appendChild(opt);
+            });
+        }
+
+        function format(cmd, val = null) { document.execCommand(cmd, false, val); ui.editor.focus(); }
+
+        function setupEventListeners() {
+            ui.toggleSidebarBtn.onclick = () => ui.sidebar.classList.toggle('hidden');
+            ui.closeSidebarBtn.onclick = () => ui.sidebar.classList.add('hidden');
+            document.querySelectorAll('.tool-btn[data-command]').forEach(btn => btn.onclick = () => format(btn.dataset.command));
+            
+            ui.insertFieldBtn.onclick = () => {
+                const val = ui.fieldInsertSelect.value; if (!val) return;
+                ui.editor.focus(); format('insertText', val);
+            };
+            
+            ui.refreshFromTemplateBtn.onclick = () => confirm('Refresh from template? Unsaved changes will be lost.') && regenerateFromTemplate();
+            
+            ui.editTemplateBtn.onclick = () => {
+                mode = 'template';
+                ui.editTemplateBtn.classList.add('hidden');
+                ui.saveTemplateBtn.classList.remove('hidden');
+                ui.cancelTemplateEditBtn.classList.remove('hidden');
+                const tpl = templates.find(t => t.id === activeTemplateId);
+                if (tpl) { ui.emailSubject.value = tpl.subject; ui.editor.innerHTML = tpl.bodyHtml; }
+                showStatus('Editing Template', 'info');
+            };
+            
+            ui.saveTemplateBtn.onclick = () => {
+                const idx = templates.findIndex(t => t.id === activeTemplateId);
+                if (idx >= 0) {
+                    templates[idx].subject = ui.emailSubject.value;
+                    templates[idx].bodyHtml = ui.editor.innerHTML;
+                    saveTemplates();
+                    mode = 'email';
+                    ui.editTemplateBtn.classList.remove('hidden');
+                    ui.saveTemplateBtn.classList.add('hidden');
+                    ui.cancelTemplateEditBtn.classList.add('hidden');
+                    renderTemplateList(); // Refresh name if needed
+                    showStatus('Template Saved', 'success');
+                }
+            };
+            
+            ui.cancelTemplateEditBtn.onclick = () => {
+                mode = 'email';
+                ui.editTemplateBtn.classList.remove('hidden');
+                ui.saveTemplateBtn.classList.add('hidden');
+                ui.cancelTemplateEditBtn.classList.add('hidden');
+                regenerateFromTemplate();
+            };
+            
+            ui.copySubjectBtn.onclick = () => { navigator.clipboard.writeText(ui.emailSubject.value); showStatus('Subject copied'); };
+            ui.copyEmailBtn.onclick = () => { navigator.clipboard.writeText(ui.editor.innerHTML); showStatus('HTML copied'); };
+            ui.downloadEmlBtn.onclick = downloadEml;
+            
+            // Simple context menu implementation
+            ui.templateCategories.oncontextmenu = (e) => {
+                // Delegate event logic handled in render loop for simplicity in this snippet
+            };
+            
+            document.addEventListener('click', () => ui.contextMenu.classList.add('hidden'));
+        }
+        
+        function showContextMenu(e, id) {
+            e.preventDefault();
+            ui.contextMenu.style.top = `${e.clientY}px`;
+            ui.contextMenu.style.left = `${e.clientX}px`;
+            ui.contextMenu.classList.remove('hidden');
+            ui.contextMenu.dataset.targetId = id;
+        }
+
+        function showStatus(msg) {
+            ui.statusMessage.textContent = msg; 
+            ui.statusMessage.className = 'status-message show';
+            setTimeout(() => ui.statusMessage.classList.remove('show'), 2000);
+        }
+
+        async function downloadEml() {
+            const sub = ui.emailSubject.value || 'No Subject';
+            const html = ui.editor.innerHTML;
+            const text = ui.editor.innerText;
+            const emlContent = `MIME-Version: 1.0\nContent-Type: multipart/alternative; boundary="----=_BOUNDARY_"\nSubject: ${sub}\n\n------=_BOUNDARY_\nContent-Type: text/plain; charset="utf-8"\n\n${text}\n\n------=_BOUNDARY_\nContent-Type: text/html; charset="utf-8"\n\n${html}\n\n------=_BOUNDARY_--`;
+            
+            const blob = new Blob([emlContent], { type: 'message/rfc822' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = `${sub.replace(/[^a-z0-9]/gi, '_')}.eml`; a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        init();
+    </script>
+</body>
+</html>
