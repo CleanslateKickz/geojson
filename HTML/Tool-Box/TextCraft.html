@@ -321,6 +321,10 @@
             box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
             position: relative;
             z-index: 1;
+            /* Fix: Prevent text overflow */
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            word-break: break-word;
         }
 
         .editor-title {
@@ -343,6 +347,10 @@
         .editor-content {
             min-height: 400px;
             outline: none;
+            /* Fix: Prevent text overflow */
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            word-break: break-word;
         }
 
         .editor-content:empty::before {
@@ -506,6 +514,30 @@
             transition: all 0.15s;
         }
         .btn-confirm:hover { background: var(--accent-hover); }
+
+        /* Utility Button Classes */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 14px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s;
+            border: 1px solid transparent;
+        }
+        .btn-sm { padding: 6px 10px; font-size: 0.75rem; }
+        .btn-ghost {
+            background: transparent;
+            color: var(--fg-secondary);
+        }
+        .btn-ghost:hover {
+            background: var(--bg-hover);
+            color: var(--fg-primary);
+        }
 
         /* Toast */
         .toast {
@@ -725,10 +757,18 @@
                 </div>
 
                 <div class="toolbar-right">
-                    <div class="mode-toggle">
-                        <button class="mode-btn active" id="btn-rich" onclick="setMode('rich')">Rich</button>
-                        <button class="mode-btn" id="btn-md" onclick="setMode('markdown')">Markdown</button>
-                    </div>
+                    <button class="btn btn-sm btn-ghost" onclick="copyContent('html')" title="Copy HTML">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                            <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                        </svg>
+                    </button>
+                    <button class="btn btn-sm btn-ghost" onclick="copyContent('text')" title="Copy Text">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/>
+                            <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                        </svg>
+                    </button>
 
                     <div class="export-dropdown">
                         <button class="tool-btn" title="Export">
@@ -744,6 +784,11 @@
                             <button class="dropdown-item" onclick="exportAs('md')">Export as Markdown</button>
                         </div>
                     </div>
+                </div>
+
+                <div class="mode-toggle" style="margin-left: 8px;">
+                    <button class="mode-btn active" id="btn-rich" onclick="setMode('rich')">Rich</button>
+                    <button class="mode-btn" id="btn-md" onclick="setMode('markdown')">Markdown</button>
                 </div>
             </div>
 
@@ -1030,17 +1075,30 @@
             if (url) document.execCommand('createLink', false, url);
         }
 
-        // Paste Handler
+        // Paste Handler - Improved to preserve formatting and styling like the CKEditor widget
         function setupPasteHandler() {
             editorContent.addEventListener('paste', (e) => {
                 e.preventDefault();
                 let html = '';
+                
+                // Try to get HTML first, fallback to plain text
                 if (e.clipboardData.types.includes('text/html')) {
                     html = e.clipboardData.getData('text/html');
                 } else if (e.clipboardData.types.includes('text/plain')) {
                     const text = e.clipboardData.getData('text/plain');
-                    html = text.replace(/\n/g, '<br>');
+                    // Preserve paragraphs by converting double newlines to <p> tags
+                    // and single newlines to <br> tags
+                    const paragraphs = text.split(/\n\s*\n/);
+                    if (paragraphs.length > 1) {
+                        html = paragraphs.map(p => {
+                            const content = p.replace(/\n/g, '<br>');
+                            return `<p>${content}</p>`;
+                        }).join('');
+                    } else {
+                        html = text.replace(/\n/g, '<br>');
+                    }
                 }
+                
                 const cleanHtml = cleanPastedHtml(html);
                 document.execCommand('insertHTML', false, cleanHtml);
             });
@@ -1049,26 +1107,90 @@
         function cleanPastedHtml(html) {
             const temp = document.createElement('div');
             temp.innerHTML = html;
-            const unwanted = temp.querySelectorAll('script, style, meta, link, noscript');
+            
+            // Remove dangerous/unnecessary elements
+            const unwanted = temp.querySelectorAll('script, style, meta, link, noscript, iframe, object, embed');
             unwanted.forEach(el => el.remove());
+            
+            // Process all elements
             const allElements = temp.querySelectorAll('*');
             allElements.forEach(el => {
-                if (el.tagName !== 'BR') {
+                // Keep semantic structure but clean up attributes
+                const tagName = el.tagName.toLowerCase();
+                
+                // Allow these tags fully
+                const allowedTags = ['p', 'br', 'strong', 'b', 'em', 'i', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 
+                                     'ul', 'ol', 'li', 'blockquote', 'pre', 'code', 'a', 'img', 'hr', 'div', 'span'];
+                
+                if (!allowedTags.includes(tagName)) {
+                    // Convert disallowed block elements to div
+                    const blockTags = ['article', 'section', 'aside', 'nav', 'header', 'footer', 'main'];
+                    if (blockTags.includes(tagName)) {
+                        el.outerHTML = `<div>${el.innerHTML}</div>`;
+                    }
+                }
+                
+                // Clean attributes but keep important ones
+                if (el.tagName !== 'BR' && el.tagName !== 'HR') {
+                    // Remove class attributes (they may conflict with our styles)
                     el.removeAttribute('class');
+                    
+                    // Clean but preserve inline styles
                     const style = el.getAttribute('style');
                     if (style) {
                         const keepStyles = [];
+                        
+                        // Extract and keep useful styles
                         const colorMatch = style.match(/color\s*:\s*[^;]+/i);
                         const bgMatch = style.match(/background(-color)?\s*:\s*[^;]+/i);
                         const weightMatch = style.match(/font-weight\s*:\s*[^;]+/i);
+                        const fontStyleMatch = style.match(/font-style\s*:\s*[^;]+/i);
+                        const textDecorationMatch = style.match(/text-decoration\s*:\s*[^;]+/i);
+                        const textAlignMatch = style.match(/text-align\s*:\s*[^;]+/i);
+                        const marginMatch = style.match(/margin[^:]*\s*:\s*[^;]+/i);
+                        const paddingMatch = style.match(/padding[^:]*\s*:\s*[^;]+/i);
+                        const lineHeightMatch = style.match(/line-height\s*:\s*[^;]+/i);
+                        const fontSizeMatch = style.match(/font-size\s*:\s*[^;]+/i);
+                        const fontFamilyMatch = style.match(/font-family\s*:\s*[^;]+/i);
+                        
                         if (colorMatch) keepStyles.push(colorMatch[0]);
                         if (bgMatch) keepStyles.push(bgMatch[0]);
                         if (weightMatch) keepStyles.push(weightMatch[0]);
-                        if (keepStyles.length > 0) el.setAttribute('style', keepStyles.join('; '));
-                        else el.removeAttribute('style');
+                        if (fontStyleMatch) keepStyles.push(fontStyleMatch[0]);
+                        if (textDecorationMatch) keepStyles.push(textDecorationMatch[0]);
+                        if (textAlignMatch) keepStyles.push(textAlignMatch[0]);
+                        if (marginMatch) keepStyles.push(marginMatch[0]);
+                        if (paddingMatch) keepStyles.push(paddingMatch[0]);
+                        if (lineHeightMatch) keepStyles.push(lineHeightMatch[0]);
+                        if (fontSizeMatch) keepStyles.push(fontSizeMatch[0]);
+                        if (fontFamilyMatch) keepStyles.push(fontFamilyMatch[0]);
+                        
+                        if (keepStyles.length > 0) {
+                            el.setAttribute('style', keepStyles.join('; '));
+                        } else {
+                            el.removeAttribute('style');
+                        }
+                    }
+                    
+                    // Handle links - remove target="_blank" for security unless it's an external link
+                    if (tagName === 'a') {
+                        const href = el.getAttribute('href');
+                        if (href && !href.startsWith('http://') && !href.startsWith('https://') && !href.startsWith('mailto:')) {
+                            // Keep relative links as-is
+                        } else {
+                            el.setAttribute('target', '_blank');
+                            el.setAttribute('rel', 'noopener noreferrer');
+                        }
+                    }
+                    
+                    // Handle images - ensure they're responsive
+                    if (tagName === 'img') {
+                        el.style.maxWidth = '100%';
+                        el.style.height = 'auto';
                     }
                 }
             });
+            
             return temp.innerHTML;
         }
 
@@ -1155,6 +1277,25 @@
             }
             downloadFile(content, filename, type);
             showToast(`Exported as ${format.toUpperCase()}`, 'success');
+        }
+
+        // Copy to Clipboard
+        function copyContent(type) {
+            if (!currentTemplate) return;
+            
+            let content;
+            if (type === 'html') {
+                content = currentTemplate.content;
+            } else {
+                content = stripHtml(currentTemplate.content);
+            }
+            
+            navigator.clipboard.writeText(content).then(() => {
+                showToast(`${type === 'html' ? 'HTML' : 'Text'} copied to clipboard`, 'success');
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                showToast('Failed to copy', 'error');
+            });
         }
 
         function downloadFile(content, filename, type) {
