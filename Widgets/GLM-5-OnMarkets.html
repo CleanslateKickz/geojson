@@ -1,0 +1,1672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Property Listings Widget</title>
+  <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f7f7f8;
+      --bg-subtle: #efefef;
+      --bg-card: #ffffff;
+      --fg: #1a1a1b;
+      --fg-muted: #6b6b6f;
+      --fg-subtle: #9d9da3;
+      --accent: #c9592b;
+      --accent-hover: #b34d23;
+      --accent-light: rgba(201, 89, 43, 0.1);
+      --success: #2d8a5f;
+      --border: #e3e3e5;
+      --border-strong: #d1d1d4;
+      --shadow-xs: 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-sm: 0 2px 4px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,0.12);
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --radius-xl: 20px;
+      --transition-fast: 120ms ease;
+      --transition-base: 180ms ease;
+      --transition-smooth: 280ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app {
+      min-height: 100vh;
+      padding: 1.25rem;
+      max-width: 1680px;
+      margin: 0 auto;
+    }
+
+    /* ========== CONTROLS ========== */
+    .controls-wrapper {
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      margin-bottom: 1.25rem;
+      box-shadow: var(--shadow-xs);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .controls {
+      padding: 1rem 1.25rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.875rem;
+      align-items: center;
+    }
+
+    .search-wrap {
+      flex: 1.5;
+      min-width: 220px;
+      position: relative;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      color: var(--fg-subtle);
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 0.75rem 1rem 0.75rem 2.75rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      font-size: 0.9rem;
+      font-family: inherit;
+      font-weight: 500;
+      background: var(--bg);
+      color: var(--fg);
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      background: var(--bg-card);
+      box-shadow: 0 0 0 4px var(--accent-light);
+    }
+
+    .search-input:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .filter-select {
+      padding: 0.7rem 2.25rem 0.7rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      font-size: 0.85rem;
+      font-family: inherit;
+      font-weight: 500;
+      background: var(--bg-card);
+      color: var(--fg);
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b6b6f' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      transition: border-color var(--transition-fast);
+      min-width: 130px;
+    }
+
+    .filter-select:focus { outline: none; border-color: var(--accent); }
+    .filter-select:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .view-toggle {
+      display: flex;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .view-btn {
+      padding: 0.6rem 0.8rem;
+      background: var(--bg-card);
+      border: none;
+      cursor: pointer;
+      transition: background var(--transition-fast);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .view-btn:not(:last-child) { border-right: 1px solid var(--border); }
+    .view-btn:hover { background: var(--bg-subtle); }
+    .view-btn.active { background: var(--fg); }
+    .view-btn.active svg { color: white; }
+    .view-btn svg { width: 18px; height: 18px; color: var(--fg-muted); transition: color var(--transition-fast); }
+
+    .btn {
+      padding: 0.7rem 1.25rem;
+      border-radius: var(--radius-md);
+      font-size: 0.85rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all var(--transition-fast);
+      border: none;
+      white-space: nowrap;
+    }
+
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary { background: var(--accent); color: white; }
+    .btn-primary:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-1px); }
+    .btn-secondary { background: var(--bg-card); color: var(--fg); border: 1px solid var(--border); }
+    .btn-secondary:hover:not(:disabled) { background: var(--bg); border-color: var(--border-strong); }
+    .btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+    /* Advanced Filters Toggle */
+    .advanced-toggle {
+      width: 100%;
+      padding: 0.6rem 1.25rem;
+      background: var(--bg);
+      border: none;
+      border-top: 1px solid var(--border);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--fg-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .advanced-toggle:hover { background: var(--bg-subtle); }
+    .advanced-toggle svg { width: 14px; height: 14px; transition: transform var(--transition-fast); }
+    .advanced-toggle.open svg { transform: rotate(180deg); }
+
+    .advanced-panel {
+      display: none;
+      padding: 1rem 1.25rem;
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+    }
+
+    .advanced-panel.open { display: block; }
+
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+      align-items: flex-end;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .filter-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--fg-subtle);
+    }
+
+    .range-inputs {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .range-inputs input {
+      width: 100px;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      font-size: 0.85rem;
+      font-family: inherit;
+      background: var(--bg-card);
+    }
+
+    .range-inputs span {
+      color: var(--fg-muted);
+      font-size: 0.8rem;
+    }
+
+    /* Results Info */
+    .results-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      padding: 0 0.25rem;
+    }
+
+    .results-info { font-size: 0.875rem; color: var(--fg-muted); }
+    .results-count { font-weight: 700; color: var(--fg); }
+    .selected-count {
+      background: var(--accent-light);
+      color: var(--accent);
+      padding: 0.3rem 0.75rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    /* ========== PROPERTY GRID ========== */
+    .property-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1.25rem;
+      contain: layout style;
+    }
+
+    /* Property card styles... (same as before) */
+    .property-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: transform var(--transition-smooth), box-shadow var(--transition-smooth), border-color var(--transition-fast);
+      contain: layout style paint;
+      position: relative;
+    }
+
+    .property-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .property-card:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px var(--accent-light);
+    }
+
+    .property-card.selected {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-light);
+    }
+
+    .property-card.selected::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--accent);
+      z-index: 5;
+    }
+
+    .card-image-wrap {
+      position: relative;
+      height: 190px;
+      background: linear-gradient(135deg, var(--bg-subtle) 0%, var(--border) 100%);
+      overflow: hidden;
+    }
+
+    .card-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 400ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      will-change: transform;
+    }
+
+    .property-card:hover .card-image { transform: scale(1.04); }
+
+    .img-placeholder {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, var(--bg-subtle) 25%, var(--bg-card) 50%, var(--bg-subtle) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.8s ease-in-out infinite;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .img-placeholder.hidden { display: none; }
+    .img-placeholder svg { width: 48px; height: 48px; color: var(--fg-subtle); opacity: 0.5; }
+
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    .card-badges {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      display: flex;
+      gap: 6px;
+      z-index: 2;
+    }
+
+    .badge {
+      padding: 5px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      backdrop-filter: blur(8px);
+    }
+
+    .badge-new { background: var(--accent); color: white; }
+    .badge-type { background: rgba(0,0,0,0.7); color: white; }
+
+    .card-checkbox {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 30px;
+      height: 30px;
+      background: rgba(255,255,255,0.95);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 3;
+      transition: all var(--transition-fast);
+      opacity: 0;
+      transform: scale(0.85);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .property-card:hover .card-checkbox,
+    .property-card.selected .card-checkbox {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .card-checkbox:hover { background: white; transform: scale(1.1); }
+    .card-checkbox input { width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent); }
+
+    .card-body { padding: 1.125rem; }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--fg);
+      line-height: 1.35;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .card-price {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--success);
+      white-space: nowrap;
+      letter-spacing: -0.02em;
+    }
+
+    .card-address {
+      font-size: 0.8rem;
+      color: var(--fg-muted);
+      margin-bottom: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      line-height: 1.4;
+    }
+
+    .card-address svg { width: 14px; height: 14px; flex-shrink: 0; color: var(--fg-subtle); }
+
+    .card-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      padding-top: 0.875rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .metric { text-align: center; }
+    .metric-label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--fg-subtle);
+      margin-bottom: 3px;
+    }
+    .metric-value { font-size: 0.9rem; font-weight: 700; color: var(--fg); }
+    .metric-value.highlight { color: var(--accent); }
+
+    /* ========== TABLE VIEW ========== */
+    .property-table { display: none; width: 100%; border-collapse: collapse; background: var(--bg-card); border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border); }
+    .property-table.show { display: table; }
+    
+    .property-table th {
+      text-align: left;
+      padding: 0.875rem 1rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--fg-muted);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .property-table td {
+      padding: 0.875rem 1rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.85rem;
+      color: var(--fg);
+      vertical-align: middle;
+    }
+
+    .property-table tr:last-child td { border-bottom: none; }
+    .property-table tr:hover td { background: var(--bg); cursor: pointer; }
+    .property-table tr.selected td { background: var(--accent-light); }
+
+    .table-img {
+      width: 80px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: var(--radius-sm);
+    }
+
+    .table-title { font-weight: 600; color: var(--fg); margin-bottom: 2px; }
+    .table-address { font-size: 0.75rem; color: var(--fg-muted); }
+
+    /* ========== LOADING & EMPTY STATES ========== */
+    .loading-state, .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 5rem 2rem;
+      text-align: center;
+    }
+
+    .spinner {
+      width: 44px;
+      height: 44px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin-bottom: 1.25rem;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { color: var(--fg-muted); font-size: 0.95rem; font-weight: 500; }
+
+    .empty-icon { width: 72px; height: 72px; color: var(--fg-subtle); opacity: 0.4; margin-bottom: 1.25rem; }
+    .empty-title { font-size: 1.15rem; font-weight: 700; color: var(--fg); margin-bottom: 0.35rem; }
+    .empty-text { color: var(--fg-muted); font-size: 0.9rem; }
+
+    /* ========== DETAIL PANEL ========== */
+    .detail-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      backdrop-filter: blur(6px);
+      z-index: 1000;
+      display: flex;
+      align-items: stretch;
+      justify-content: flex-end;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity var(--transition-base), visibility var(--transition-base);
+    }
+
+    .detail-overlay.show { opacity: 1; visibility: visible; }
+
+    .detail-panel {
+      width: 100%;
+      max-width: 480px;
+      background: var(--bg-card);
+      height: 100%;
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 320ms cubic-bezier(0.32, 0.72, 0, 1);
+    }
+
+    .detail-overlay.show .detail-panel { transform: translateX(0); }
+
+    .detail-header { position: relative; height: 240px; flex-shrink: 0; }
+    .detail-image { width: 100%; height: 100%; object-fit: cover; }
+    .detail-gradient { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 40%, transparent 70%); }
+
+    .detail-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 38px;
+      height: 38px;
+      background: rgba(255,255,255,0.18);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--transition-fast);
+      z-index: 10;
+    }
+
+    .detail-close:hover { background: rgba(255,255,255,0.3); }
+    .detail-close svg { width: 18px; height: 18px; }
+
+    .detail-title-area {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      padding: 1.25rem;
+      color: white;
+    }
+
+    .detail-type-badge {
+      display: inline-block;
+      padding: 5px 12px;
+      background: var(--accent);
+      border-radius: var(--radius-sm);
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 10px;
+    }
+
+    .detail-title { font-size: 1.35rem; font-weight: 800; margin-bottom: 5px; line-height: 1.25; }
+    .detail-address { font-size: 0.9rem; opacity: 0.85; display: flex; align-items: center; gap: 5px; }
+    .detail-address svg { width: 14px; height: 14px; }
+
+    .detail-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.25rem;
+      background: var(--bg);
+    }
+
+    .metrics-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 1.25rem;
+    }
+
+    .metric-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-md);
+      padding: 14px 10px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+
+    .metric-card-label {
+      font-size: 0.62rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: var(--fg-subtle);
+      margin-bottom: 5px;
+      letter-spacing: 0.04em;
+    }
+
+    .metric-card-value { font-size: 1.05rem; font-weight: 800; color: var(--fg); }
+    .metric-card-value.accent { color: var(--accent); }
+
+    .detail-sections {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .detail-section {
+      background: var(--bg-card);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .section-header {
+      padding: 10px 14px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--fg-muted);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+
+    .kv-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 7px 14px;
+      border-top: 1px solid var(--border);
+      font-size: 0.82rem;
+    }
+
+    .kv-row:first-child { border-top: none; }
+    .kv-key { color: var(--fg-muted); }
+    .kv-val { font-weight: 600; color: var(--fg); text-align: right; }
+    .kv-val.accent { color: var(--accent); }
+
+    /* Markdown Styles */
+    .highlights-section {
+      background: var(--bg-card);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      border: 1px solid var(--border);
+      margin-bottom: 12px;
+    }
+
+    .highlights-title {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--fg-muted);
+      margin-bottom: 10px;
+    }
+
+    .highlights-text {
+      font-size: 0.85rem;
+      color: var(--fg);
+      line-height: 1.65;
+    }
+
+    .highlights-text p { margin-bottom: 0.75rem; }
+    .highlights-text p:last-child { margin-bottom: 0; }
+    .highlights-text ul, .highlights-text ol { margin: 0.5rem 0; padding-left: 1.25rem; }
+    .highlights-text li { margin-bottom: 0.25rem; }
+    .highlights-text strong { color: var(--fg); font-weight: 700; }
+
+    .detail-actions {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .action-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px;
+      border-radius: var(--radius-md);
+      font-weight: 700;
+      font-size: 0.85rem;
+      text-decoration: none;
+      transition: all var(--transition-fast);
+    }
+
+    .action-link.om { background: var(--fg); color: white; }
+    .action-link.om:hover { background: #2d2d30; }
+    .action-link.listing { background: var(--accent); color: white; }
+    .action-link.listing:hover { background: var(--accent-hover); }
+
+    /* ========== MODAL ========== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(6px);
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity var(--transition-base), visibility var(--transition-base);
+    }
+
+    .modal-overlay.show { opacity: 1; visibility: visible; }
+
+    .modal {
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      max-width: 400px;
+      width: 90%;
+      box-shadow: var(--shadow-lg);
+      transform: translateY(16px) scale(0.96);
+      transition: transform 200ms ease;
+    }
+
+    .modal-overlay.show .modal { transform: translateY(0) scale(1); }
+
+    .modal-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); }
+    .modal-title { font-size: 1.1rem; font-weight: 700; }
+    .modal-body { padding: 1.5rem; }
+    .modal-body p { color: var(--fg-muted); font-size: 0.9rem; line-height: 1.6; }
+    .modal-body strong { color: var(--fg); }
+    .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border); display: flex; gap: 0.75rem; justify-content: flex-end; }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 900px) {
+      .property-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+      .detail-sections { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      .app { padding: 0.875rem; }
+      .controls { padding: 0.875rem 1rem; gap: 0.75rem; }
+      .search-wrap { min-width: 100%; order: 1; }
+      .filter-select { flex: 1; min-width: 0; }
+      .property-grid { grid-template-columns: 1fr; gap: 1rem; }
+      .detail-panel { max-width: 100%; }
+      .metrics-row { grid-template-columns: 1fr; }
+      .property-table th:nth-child(4), .property-table td:nth-child(4),
+      .property-table th:nth-child(6), .property-table td:nth-child(6) { display: none; }
+    }
+
+    @media (max-width: 480px) {
+      .card-metrics { grid-template-columns: 1fr; gap: 0.5rem; text-align: left; }
+      .metric { display: flex; justify-content: space-between; align-items: center; text-align: left; }
+      .metric-label { margin-bottom: 0; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="controls-wrapper">
+      <div class="controls">
+        <div class="search-wrap">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="m21 21-4.35-4.35"/>
+          </svg>
+          <input type="text" class="search-input" id="searchInput" placeholder="Search by name, address, or city..." disabled>
+        </div>
+
+        <select class="filter-select" id="typeFilter" disabled>
+          <option value="all">All Types</option>
+        </select>
+
+        <select class="filter-select" id="tenancyFilter" disabled>
+          <option value="all">All Tenancy</option>
+        </select>
+
+        <select class="filter-select" id="cityFilter" disabled>
+          <option value="all">All Cities</option>
+        </select>
+
+        <select class="filter-select" id="sortSelect" disabled>
+          <option value="date">Newest First</option>
+          <option value="price-high">Price: High to Low</option>
+          <option value="price-low">Price: Low to High</option>
+          <option value="cap-high">Cap Rate: High to Low</option>
+        </select>
+
+        <div class="view-toggle">
+          <button class="view-btn" id="tableViewBtn" title="Table View" aria-label="Table View">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <line x1="3" y1="9" x2="21" y2="9"/>
+              <line x1="3" y1="15" x2="21" y2="15"/>
+              <line x1="9" y1="3" x2="9" y2="21"/>
+            </svg>
+          </button>
+          <button class="view-btn active" id="gridViewBtn" title="Grid View" aria-label="Grid View">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7" rx="1"/>
+              <rect x="14" y="3" width="7" height="7" rx="1"/>
+              <rect x="3" y="14" width="7" height="7" rx="1"/>
+              <rect x="14" y="14" width="7" height="7" rx="1"/>
+            </svg>
+          </button>
+        </div>
+
+        <button class="btn btn-secondary" id="exportBtn" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          <span id="exportLabel">Export</span>
+        </button>
+      </div>
+
+      <button class="advanced-toggle" id="advancedToggle">
+        Advanced Filters
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="m6 9 6 6 6-6"/>
+        </svg>
+      </button>
+
+      <div class="advanced-panel" id="advancedPanel">
+        <div class="filter-row">
+          <div class="filter-group">
+            <label class="filter-label">Price Range</label>
+            <div class="range-inputs">
+              <input type="number" id="minPrice" placeholder="Min">
+              <span>to</span>
+              <input type="number" id="maxPrice" placeholder="Max">
+            </div>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Cap Rate Range (%)</label>
+            <div class="range-inputs">
+              <input type="number" step="0.1" id="minCap" placeholder="Min">
+              <span>to</span>
+              <input type="number" step="0.1" id="maxCap" placeholder="Max">
+            </div>
+          </div>
+          <button class="btn btn-secondary" id="clearFiltersBtn">Clear Filters</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="results-bar" id="resultsBar" style="display: none;">
+      <div class="results-info">
+        Showing <span class="results-count" id="resultsCount">0</span> properties
+      </div>
+      <div class="selected-count" id="selectedCount" style="display: none;"></div>
+    </div>
+
+    <div id="loadingState" class="loading-state">
+      <div class="spinner"></div>
+      <div class="loading-text">Loading properties...</div>
+    </div>
+
+    <div id="emptyState" class="empty-state" style="display: none;">
+      <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <div class="empty-title">No properties found</div>
+      <div class="empty-text">Try adjusting your search or filters</div>
+    </div>
+
+    <div id="propertyGrid" class="property-grid"></div>
+    <table id="propertyTable" class="property-table">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>Type</th>
+          <th>Price</th>
+          <th>Cap Rate</th>
+          <th>Tenancy</th>
+          <th>City</th>
+        </tr>
+      </thead>
+      <tbody id="propertyTableBody"></tbody>
+    </table>
+  </div>
+
+  <!-- Detail Panel -->
+  <div id="detailOverlay" class="detail-overlay">
+    <div class="detail-panel">
+      <div class="detail-header">
+        <img id="detailImage" class="detail-image" alt="Property">
+        <div class="detail-gradient"></div>
+        <button id="detailClose" class="detail-close" aria-label="Close panel">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </button>
+        <div class="detail-title-area">
+          <span id="detailTypeBadge" class="detail-type-badge"></span>
+          <h2 id="detailTitle" class="detail-title"></h2>
+          <p id="detailAddress" class="detail-address">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+            <span id="detailAddressText"></span>
+          </p>
+        </div>
+      </div>
+
+      <div class="detail-body">
+        <div class="metrics-row">
+          <div class="metric-card">
+            <div class="metric-card-label">List Price</div>
+            <div id="metricPrice" class="metric-card-value"></div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-card-label">Cap Rate</div>
+            <div id="metricCap" class="metric-card-value accent"></div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-card-label">NOI</div>
+            <div id="metricNoi" class="metric-card-value"></div>
+          </div>
+        </div>
+
+        <div class="detail-sections">
+          <div class="detail-section">
+            <div class="section-header">Lease Details</div>
+            <div class="kv-row"><span class="kv-key">Tenant</span><span id="kvTenant" class="kv-val"></span></div>
+            <div class="kv-row"><span class="kv-key">Term Remaining</span><span id="kvTerm" class="kv-val"></span></div>
+            <div class="kv-row"><span class="kv-key">Expiration</span><span id="kvExp" class="kv-val"></span></div>
+            <div class="kv-row"><span class="kv-key">Rent Bumps</span><span id="kvBumps" class="kv-val accent"></span></div>
+            <div class="kv-row"><span class="kv-key">Renewal Options</span><span id="kvOpts" class="kv-val"></span></div>
+          </div>
+
+          <div class="detail-section">
+            <div class="section-header">Site Details</div>
+            <div class="kv-row"><span class="kv-key">Building Size</span><span id="kvRba" class="kv-val"></span></div>
+            <div class="kv-row"><span class="kv-key">Land Size</span><span id="kvLand" class="kv-val"></span></div>
+            <div class="kv-row"><span class="kv-key">Price / SF</span><span id="kvPriceSf" class="kv-val"></span></div>
+            <div class="kv-row"><span class="kv-key">Date Listed</span><span id="kvDate" class="kv-val"></span></div>
+          </div>
+        </div>
+
+        <div id="highlightsSection" class="highlights-section" style="display: none;">
+          <div class="highlights-title">Investment Highlights</div>
+          <div id="highlightsText" class="highlights-text"></div>
+        </div>
+
+        <div id="detailActions" class="detail-actions"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Export Modal -->
+  <div id="exportModal" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Export Properties</h3>
+      </div>
+      <div class="modal-body">
+        <p>Export <strong id="exportCount">0</strong> properties to an HTML file.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="cancelExportBtn">Cancel</button>
+        <button class="btn btn-primary" id="confirmExportBtn">Export Now</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ========== INITIALIZATION ==========
+    grist.ready({ requiredAccess: 'read table' });
+
+    const normCache = new Map();
+    let allRecords = [];
+    let filteredRecords = [];
+    let selectedIds = new Set();
+    let currentRecord = null;
+    let currentView = 'grid';
+
+    const $ = (id) => document.getElementById(id);
+    const refs = {
+      searchInput: $('searchInput'),
+      typeFilter: $('typeFilter'),
+      tenancyFilter: $('tenancyFilter'),
+      cityFilter: $('cityFilter'),
+      sortSelect: $('sortSelect'),
+      advancedToggle: $('advancedToggle'),
+      advancedPanel: $('advancedPanel'),
+      minPrice: $('minPrice'),
+      maxPrice: $('maxPrice'),
+      minCap: $('minCap'),
+      maxCap: $('maxCap'),
+      clearFiltersBtn: $('clearFiltersBtn'),
+      tableViewBtn: $('tableViewBtn'),
+      gridViewBtn: $('gridViewBtn'),
+      exportBtn: $('exportBtn'),
+      exportLabel: $('exportLabel'),
+      loadingState: $('loadingState'),
+      emptyState: $('emptyState'),
+      resultsBar: $('resultsBar'),
+      resultsCount: $('resultsCount'),
+      selectedCount: $('selectedCount'),
+      propertyGrid: $('propertyGrid'),
+      propertyTable: $('propertyTable'),
+      propertyTableBody: $('propertyTableBody'),
+      detailOverlay: $('detailOverlay'),
+      detailClose: $('detailClose'),
+      exportModal: $('exportModal'),
+      exportCount: $('exportCount'),
+      cancelExportBtn: $('cancelExportBtn'),
+      confirmExportBtn: $('confirmExportBtn')
+    };
+
+    // ========== UTILITIES ==========
+    function debounce(fn, delay) {
+      let timeout;
+      return (...args) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => fn.apply(this, args), delay);
+      };
+    }
+
+    const formatPrice = (val) => {
+      if (val == null) return 'Contact for Price';
+      const n = Number(val);
+      if (!Number.isFinite(n)) return 'Contact for Price';
+      return '$' + n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+    };
+
+    const formatCap = (val) => {
+      if (val == null) return 'N/A';
+      const n = Number(val);
+      if (!Number.isFinite(n)) return 'N/A';
+      return (n > 1 ? n : n * 100).toFixed(2) + '%';
+    };
+
+    const formatSF = (val) => {
+      if (val == null) return 'N/A';
+      const n = Number(val);
+      if (!Number.isFinite(n)) return 'N/A';
+      return n.toLocaleString() + ' SF';
+    };
+
+    const formatTerm = (val) => {
+      if (val == null || val === '') return 'N/A';
+      const s = String(val).trim();
+      const n = Number(s);
+      return Number.isFinite(n) ? n + ' Years' : s;
+    };
+
+    // Fix for Grist Unix Timestamps (Seconds)
+    const formatDate = (val) => {
+      if (!val) return 'N/A';
+      // Grist returns timestamps in seconds. JS needs ms.
+      const d = new Date(val * 1000); 
+      if (isNaN(d.getTime())) return 'N/A';
+      const m = (d.getMonth() + 1).toString().padStart(2, '0');
+      const day = d.getDate().toString().padStart(2, '0');
+      const y = d.getFullYear();
+      return m + '/' + day + '/' + y;
+    };
+
+    const daysOnMarket = (val) => {
+      if (!val) return null;
+      const d = new Date(val * 1000); // Fix: Handle seconds
+      if (isNaN(d.getTime())) return null;
+      const diff = Math.floor((Date.now() - d.getTime()) / 86400000);
+      return Math.max(0, diff);
+    };
+
+    const esc = (s) => {
+      if (!s) return '';
+      const div = document.createElement('div');
+      div.textContent = s;
+      return div.innerHTML;
+    };
+
+    // ========== FIELD EXTRACTION ==========
+    // Fix for Grist List Format: ["L", "Item1", "Item2"]
+    const normVal = (v) => {
+      if (v == null) return undefined;
+      if (Array.isArray(v)) {
+        // Check for Grist List marker "L"
+        const list = (v.length > 0 && v[0] === 'L') ? v.slice(1) : v;
+        const parts = list.map(i => i == null ? '' : String(i).trim()).filter(Boolean);
+        return parts.length ? parts.join(', ') : undefined;
+      }
+      if (typeof v === 'object') return undefined;
+      if (typeof v === 'string') {
+        const s = v.trim();
+        return s || undefined;
+      }
+      return v;
+    };
+
+    const getField = (rec, ...names) => {
+      if (!rec) return undefined;
+      const keys = Object.keys(rec);
+      for (const n of names) {
+        if (Object.prototype.hasOwnProperty.call(rec, n)) {
+          const v = normVal(rec[n]);
+          if (v != null) return v;
+        }
+      }
+      return undefined;
+    };
+
+    const extractImages = (rec) => {
+      const raw = rec.photo_url;
+      if (!raw) return [];
+      if (Array.isArray(raw)) return raw;
+      if (typeof raw === 'string') return raw.split(/[\s,]+/).filter(Boolean);
+      return [];
+    };
+
+    function normalize(rec) {
+      const id = String(rec.id);
+      if (normCache.has(id)) return normCache.get(id);
+
+      const images = extractImages(rec);
+      const price = getField(rec, 'Price', 'price');
+      const cap = getField(rec, 'Cap_Rate', 'capRate');
+      const rba = getField(rec, 'RBA', 'Building_Size', 'rba');
+      const noiVal = getField(rec, 'NOI', 'noi');
+
+      const data = {
+        id,
+        name: getField(rec, 'Property_Name', 'propertyName') || 'Property',
+        address: getField(rec, 'Address', 'address') || '',
+        city: getField(rec, 'City', 'city') || '',
+        state: getField(rec, 'State', 'state') || '',
+        zip: getField(rec, 'Zip', 'zip') || '',
+        price: price != null ? Number(price) : null,
+        capRate: cap != null ? Number(cap) : null,
+        noi: noiVal != null ? Number(noiVal) : (price != null && cap != null ? Number(price) * Number(cap) : null),
+        rba: rba != null ? Number(rba) : null,
+        landSize: getField(rec, 'Land_Size', 'landSize'),
+        landUnit: getField(rec, 'Land_Unit', 'landUnit') || '',
+        leaseTerm: getField(rec, 'Lease_Term', 'Lease_Term_Remaining', 'leaseTermRemaining'),
+        leaseType: getField(rec, 'Lease_Type', 'leaseType') || '',
+        leaseExp: getField(rec, 'Lease_Expiration', 'leaseExpiration'), // Will be handled by formatDate
+        leaseOpts: getField(rec, 'Lease_Options', 'leaseOptions') || '',
+        rentBumps: getField(rec, 'Rent_Bumps', 'rentBumps') || '',
+        tenant: getField(rec, 'Tenant_s_', 'Tenant(s)', 'Tenants', 'Tenant', 'Tenant_Name', 'tenantName') || '',
+        images,
+        omUrl: getField(rec, 'OM', 'omUrl'),
+        listingUrl: getField(rec, 'Listing_URL', 'listingUrl'),
+        costarUrl: getField(rec, 'CoStar'),
+        crexiUrl: getField(rec, 'Crexi'),
+        tenancy: getField(rec, 'Tenancy'),
+        notes: getField(rec, 'Notes', 'notes'),
+        dateListed: getField(rec, 'Date_Listed', 'dateListed'), // Will be handled by formatDate
+        propertyType: getField(rec, 'Property_Type', 'propertyType'),
+        updatedAt: rec.Last_updated_at || rec.Created_at || null
+      };
+
+      normCache.set(id, data);
+      return data;
+    }
+
+    // ========== RENDERING ==========
+    function buildAddress(d) {
+      let addr = d.address || '';
+      const cityStateZip = [d.city, d.state, d.zip].filter(Boolean).join(' ');
+      const hasFull = d.zip && addr.includes(d.zip);
+      if (!hasFull && cityStateZip) {
+        addr = addr ? addr + ', ' + cityStateZip : cityStateZip;
+      }
+      return addr;
+    }
+
+    function createCard(rec) {
+      const d = normalize(rec);
+      const img = d.images[0] || '';
+      const placeholderImg = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250"><rect fill="#e3e3e5" width="400" height="250"/><text x="50%" y="50%" fill="#9d9da3" font-family="sans-serif" font-size="14" text-anchor="middle" dy=".3em">No Image</text></svg>');
+      const days = daysOnMarket(d.dateListed);
+      const isNew = days !== null && days <= 14;
+      const selected = selectedIds.has(d.id);
+      const addr = buildAddress(d);
+
+      return `
+        <div class="property-card ${selected ? 'selected' : ''}" data-id="${d.id}" tabindex="0" role="button" aria-label="View details for ${esc(d.name)}">
+          <div class="card-image-wrap">
+            <div class="img-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></div>
+            <img class="card-image" src="${img || placeholderImg}" alt="${esc(d.name)}" loading="lazy" onload="this.previousElementSibling.classList.add('hidden')" onerror="this.src='${placeholderImg}';this.previousElementSibling.classList.add('hidden')">
+            <div class="card-badges">
+              ${isNew ? '<span class="badge badge-new">New</span>' : ''}
+              ${d.propertyType ? '<span class="badge badge-type">' + esc(d.propertyType) + '</span>' : ''}
+            </div>
+            <div class="card-checkbox" onclick="event.stopPropagation()">
+              <input type="checkbox" ${selected ? 'checked' : ''} aria-label="Select ${esc(d.name)}">
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-header">
+              <h3 class="card-title">${esc(d.name)}</h3>
+              <div class="card-price">${formatPrice(d.price)}</div>
+            </div>
+            <div class="card-address">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <span>${esc(addr)}</span>
+            </div>
+            <div class="card-metrics">
+              <div class="metric"><div class="metric-label">Cap Rate</div><div class="metric-value highlight">${formatCap(d.capRate)}</div></div>
+              <div class="metric"><div class="metric-label">Building</div><div class="metric-value">${formatSF(d.rba)}</div></div>
+              <div class="metric"><div class="metric-label">Days Listed</div><div class="metric-value">${days != null ? days + ' days' : 'N/A'}</div></div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function createTableRow(rec) {
+      const d = normalize(rec);
+      const img = d.images[0] || '';
+      const selected = selectedIds.has(d.id);
+      const days = daysOnMarket(d.dateListed);
+      const placeholderImg = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 75"><rect fill="#e3e3e5" width="100" height="75"/><text x="50%" y="50%" fill="#9d9da3" font-size="10" text-anchor="middle">N/A</text></svg>');
+
+      return `
+        <tr class="${selected ? 'selected' : ''}" data-id="${d.id}">
+          <td>
+            <div style="display:flex; align-items:center; gap:12px;">
+              <img src="${img || placeholderImg}" class="table-img" loading="lazy">
+              <div>
+                <div class="table-title">${esc(d.name)}</div>
+                <div class="table-address">${esc(d.address)}</div>
+              </div>
+            </div>
+          </td>
+          <td>${esc(d.propertyType) || '-'}</td>
+          <td style="font-weight:700; color:var(--success);">${formatPrice(d.price)}</td>
+          <td style="font-weight:600; color:var(--accent);">${formatCap(d.capRate)}</td>
+          <td>${esc(d.tenancy) || '-'}</td>
+          <td>${esc(d.city)}</td>
+        </tr>
+      `;
+    }
+
+    function populateFilters(recs) {
+      const types = new Set();
+      const tenancies = new Set();
+      const cities = new Set();
+
+      recs.forEach(r => {
+        const d = normalize(r);
+        if (d.propertyType) types.add(d.propertyType);
+        if (d.tenancy) tenancies.add(d.tenancy);
+        if (d.city) cities.add(d.city);
+      });
+
+      refs.typeFilter.innerHTML = '<option value="all">All Types</option>';
+      [...types].sort().forEach(t => {
+        refs.typeFilter.innerHTML += '<option value="' + esc(t) + '">' + esc(t) + '</option>';
+      });
+
+      // Specific handling for Tenancy
+      refs.tenancyFilter.innerHTML = '<option value="all">All Tenancy</option>';
+      const sortedTenancies = [...tenancies].sort();
+      // Force specific order if those values exist
+      const priorityOrder = ['STNL', 'Multi', 'Center'];
+      priorityOrder.forEach(t => {
+        if (tenancies.has(t)) {
+          refs.tenancyFilter.innerHTML += '<option value="' + t + '">' + t + '</option>';
+        }
+      });
+      // Add any others
+      sortedTenancies.forEach(t => {
+        if (!priorityOrder.includes(t)) {
+           refs.tenancyFilter.innerHTML += '<option value="' + esc(t) + '">' + esc(t) + '</option>';
+        }
+      });
+
+      refs.cityFilter.innerHTML = '<option value="all">All Cities</option>';
+      [...cities].sort().forEach(c => {
+        refs.cityFilter.innerHTML += '<option value="' + esc(c) + '">' + esc(c) + '</option>';
+      });
+    }
+
+    function applyFilters() {
+      const search = refs.searchInput.value.toLowerCase().trim();
+      const type = refs.typeFilter.value;
+      const tenancy = refs.tenancyFilter.value;
+      const city = refs.cityFilter.value;
+      const sort = refs.sortSelect.value;
+
+      // Range filters
+      const minPrice = refs.minPrice.value ? Number(refs.minPrice.value) : null;
+      const maxPrice = refs.maxPrice.value ? Number(refs.maxPrice.value) : null;
+      const minCap = refs.minCap.value ? Number(refs.minCap.value) / 100 : null; // Convert % to decimal
+      const maxCap = refs.maxCap.value ? Number(refs.maxCap.value) / 100 : null;
+
+      filteredRecords = allRecords.filter(r => {
+        const d = normalize(r);
+
+        // Search
+        const matchSearch = !search ||
+          d.name.toLowerCase().includes(search) ||
+          d.address.toLowerCase().includes(search) ||
+          d.city.toLowerCase().includes(search) ||
+          (d.tenant && d.tenant.toLowerCase().includes(search));
+
+        // Dropdowns
+        const matchType = type === 'all' || d.propertyType === type;
+        const matchTenancy = tenancy === 'all' || d.tenancy === tenancy;
+        const matchCity = city === 'all' || d.city === city;
+
+        // Ranges
+        const matchPrice = (!minPrice || d.price >= minPrice) && (!maxPrice || d.price <= maxPrice);
+        const matchCap = (!minCap || d.capRate >= minCap) && (!maxCap || d.capRate <= maxCap);
+
+        return matchSearch && matchType && matchTenancy && matchCity && matchPrice && matchCap;
+      });
+
+      // Sort
+      filteredRecords.sort((a, b) => {
+        const da = normalize(a);
+        const db = normalize(b);
+        switch (sort) {
+          case 'price-high': return (db.price || 0) - (da.price || 0);
+          case 'price-low': return (da.price || 0) - (db.price || 0);
+          case 'cap-high': return (db.capRate || 0) - (da.capRate || 0);
+          default: return new Date(db.updatedAt * 1000) - new Date(da.updatedAt * 1000); // Fix timestamp sort
+        }
+      });
+
+      render();
+    }
+
+    function render() {
+      refs.loadingState.style.display = 'none';
+
+      if (filteredRecords.length === 0) {
+        refs.emptyState.style.display = 'flex';
+        refs.propertyGrid.style.display = 'none';
+        refs.propertyTable.style.display = 'none';
+        refs.resultsBar.style.display = 'none';
+        return;
+      }
+
+      refs.emptyState.style.display = 'none';
+      refs.resultsBar.style.display = 'flex';
+      refs.resultsCount.textContent = filteredRecords.length;
+
+      updateSelectedCount();
+
+      if (currentView === 'grid') {
+        refs.propertyGrid.style.display = 'grid';
+        refs.propertyTable.style.display = 'none';
+        
+        const fragment = document.createRange().createContextualFragment(
+          filteredRecords.map(createCard).join('')
+        );
+        refs.propertyGrid.innerHTML = '';
+        refs.propertyGrid.appendChild(fragment);
+      } else {
+        refs.propertyGrid.style.display = 'none';
+        refs.propertyTable.classList.add('show');
+        refs.propertyTable.style.display = 'table';
+        
+        refs.propertyTableBody.innerHTML = filteredRecords.map(createTableRow).join('');
+      }
+
+      updateExportBtn();
+    }
+
+    function updateExportBtn() {
+      const count = selectedIds.size;
+      refs.exportLabel.textContent = count > 0 ? 'Export (' + count + ')' : 'Export';
+      refs.exportBtn.disabled = filteredRecords.length === 0;
+    }
+
+    function updateSelectedCount() {
+      const count = selectedIds.size;
+      if (count > 0) {
+        refs.selectedCount.style.display = 'block';
+        refs.selectedCount.textContent = count + ' selected';
+      } else {
+        refs.selectedCount.style.display = 'none';
+      }
+    }
+
+    // ========== DETAIL PANEL ==========
+    function openDetail(rec) {
+      if (!rec) return;
+      currentRecord = rec;
+      const d = normalize(rec);
+
+      const img = d.images[0] || 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500"><rect fill="#e3e3e5" width="800" height="500"/><text x="50%" y="50%" fill="#9d9da3" font-family="sans-serif" font-size="18" text-anchor="middle" dy=".3em">No Image Available</text></svg>');
+      $('detailImage').src = img;
+      $('detailTypeBadge').textContent = d.leaseType || d.propertyType || 'Property';
+      $('detailTitle').textContent = d.name;
+      $('detailAddressText').textContent = buildAddress(d);
+
+      $('metricPrice').textContent = formatPrice(d.price);
+      $('metricCap').textContent = formatCap(d.capRate);
+      $('metricNoi').textContent = formatPrice(d.noi);
+
+      $('kvTenant').textContent = d.tenant || 'N/A';
+      $('kvTerm').textContent = formatTerm(d.leaseTerm);
+      $('kvExp').textContent = formatDate(d.leaseExp); // Fixed date handling
+      $('kvBumps').textContent = d.rentBumps || 'N/A';
+      $('kvOpts').textContent = d.leaseOpts || 'N/A';
+
+      $('kvRba').textContent = formatSF(d.rba);
+      $('kvLand').textContent = d.landSize ? (d.landSize + ' ' + d.landUnit).trim() : 'N/A';
+      $('kvPriceSf').textContent = (d.price && d.rba) ? formatPrice(d.price / d.rba) : 'N/A';
+      $('kvDate').textContent = formatDate(d.dateListed); // Fixed date handling
+
+      const highlightsSection = $('highlightsSection');
+      const highlightsText = $('highlightsText');
+      if (d.notes) {
+        highlightsSection.style.display = 'block';
+        // Render Markdown
+        highlightsText.innerHTML = marked.parse(d.notes);
+      } else {
+        highlightsSection.style.display = 'none';
+      }
+
+      const actions = $('detailActions');
+      actions.innerHTML = '';
+
+      if (d.omUrl) {
+        const a = document.createElement('a');
+        a.className = 'action-link om';
+        a.href = d.omUrl;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.textContent = 'View Offering Memorandum';
+        actions.appendChild(a);
+      }
+
+      const listing = d.listingUrl || d.costarUrl || d.crexiUrl;
+      if (listing) {
+        const a = document.createElement('a');
+        a.className = 'action-link listing';
+        a.href = listing;
+        a.target = '_blank';
+        a.rel = 'noreferrer';
+        a.textContent = 'Visit Listing';
+        actions.appendChild(a);
+      }
+
+      refs.detailOverlay.classList.add('show');
+    }
+
+    function closeDetail() {
+      refs.detailOverlay.classList.remove('show');
+      currentRecord = null;
+    }
+
+    // ========== EXPORT ==========
+    function openExportModal() {
+      const count = selectedIds.size || filteredRecords.length;
+      refs.exportCount.textContent = count;
+      refs.exportModal.classList.add('show');
+    }
+
+    function closeExportModal() {
+      refs.exportModal.classList.remove('show');
+    }
+
+    function performExport() {
+      const recs = selectedIds.size > 0
+        ? allRecords.filter(r => selectedIds.has(String(r.id)))
+        : filteredRecords;
+
+      if (!recs.length) {
+        alert('No properties to export');
+        closeExportModal();
+        return;
+      }
+
+      const cards = recs.map(r => {
+        const d = normalize(r);
+        const img = d.images[0] || '';
+        const addr = buildAddress(d);
+        // Basic HTML for export
+        return `
+          <div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1);break-inside:avoid;margin-bottom:16px;">
+            ${img ? '<img src="' + esc(img) + '" style="width:100%;height:200px;object-fit:cover;">' : ''}
+            <div style="padding:16px;">
+              <h3 style="margin:0 0 8px;font-size:16px;font-weight:700;">${esc(d.name)}</h3>
+              <p style="color:#2d8a5f;font-size:18px;font-weight:700;margin:0 0 8px;">${formatPrice(d.price)}</p>
+              <p style="color:#6b6b6f;font-size:13px;margin:0 0 8px;">${esc(addr)}</p>
+              <p style="color:#6b6b6f;font-size:13px;margin:0;">Cap Rate: ${formatCap(d.capRate)} | ${formatSF(d.rba)}</p>
+              ${d.notes ? '<div style="color:#6b6b6f;font-size:13px;margin:12px 0 0;padding-top:12px;border-top:1px solid #e3e3e5;">' + marked.parse(d.notes) + '</div>' : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const html = '<!DOCTYPE html>\n<html>\n<head>\n<meta charset="UTF-8">\n<title>Property Listings Export</title>\n<style>\nbody{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f7f7f8;padding:20px;}\n.container{max-width:1200px;margin:0 auto;}\nh1{text-align:center;margin-bottom:24px;color:#1a1a1b;}\n.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;}\n</style>\n</head>\n<body>\n<div class="container">\n<h1>Commercial Property Listings</h1>\n<div class="grid">' + cards + '</div>\n</div>\n</body>\n</html>';
+
+      const blob = new Blob([html], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'properties-export-' + new Date().toISOString().slice(0, 10) + '.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      closeExportModal();
+    }
+
+    // ========== EVENT HANDLERS ==========
+    const debouncedFilter = debounce(applyFilters, 200);
+
+    refs.searchInput.addEventListener('input', debouncedFilter);
+    refs.typeFilter.addEventListener('change', applyFilters);
+    refs.tenancyFilter.addEventListener('change', applyFilters);
+    refs.cityFilter.addEventListener('change', applyFilters);
+    refs.sortSelect.addEventListener('change', applyFilters);
+
+    // Advanced Filters
+    refs.minPrice.addEventListener('input', debouncedFilter);
+    refs.maxPrice.addEventListener('input', debouncedFilter);
+    refs.minCap.addEventListener('input', debouncedFilter);
+    refs.maxCap.addEventListener('input', debouncedFilter);
+
+    refs.clearFiltersBtn.addEventListener('click', () => {
+      refs.minPrice.value = '';
+      refs.maxPrice.value = '';
+      refs.minCap.value = '';
+      refs.maxCap.value = '';
+      applyFilters();
+    });
+
+    refs.advancedToggle.addEventListener('click', () => {
+      const isOpen = refs.advancedPanel.classList.toggle('open');
+      refs.advancedToggle.classList.toggle('open', isOpen);
+    });
+
+    // Views
+    refs.tableViewBtn.addEventListener('click', () => {
+      currentView = 'table';
+      refs.tableViewBtn.classList.add('active');
+      refs.gridViewBtn.classList.remove('active');
+      render();
+    });
+
+    refs.gridViewBtn.addEventListener('click', () => {
+      currentView = 'grid';
+      refs.gridViewBtn.classList.add('active');
+      refs.tableViewBtn.classList.remove('active');
+      render();
+    });
+
+    refs.exportBtn.addEventListener('click', openExportModal);
+    refs.cancelExportBtn.addEventListener('click', closeExportModal);
+    refs.confirmExportBtn.addEventListener('click', performExport);
+
+    refs.detailClose.addEventListener('click', closeDetail);
+    refs.detailOverlay.addEventListener('click', (e) => {
+      if (e.target === refs.detailOverlay) closeDetail();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (refs.detailOverlay.classList.contains('show')) closeDetail();
+        if (refs.exportModal.classList.contains('show')) closeExportModal();
+      }
+    });
+
+    // Grid Click Delegation
+    refs.propertyGrid.addEventListener('click', (e) => {
+      const card = e.target.closest('.property-card');
+      if (!card) return;
+      const id = card.dataset.id;
+
+      if (e.target.closest('.card-checkbox')) {
+        if (selectedIds.has(id)) {
+          selectedIds.delete(id);
+          card.classList.remove('selected');
+        } else {
+          selectedIds.add(id);
+          card.classList.add('selected');
+        }
+        const cb = card.querySelector('input');
+        if (cb) cb.checked = selectedIds.has(id);
+        updateExportBtn();
+        updateSelectedCount();
+        return;
+      }
+
+      const rec = filteredRecords.find(r => String(r.id) === id);
+      if (rec) openDetail(rec);
+    });
+
+    // Table Click Delegation
+    refs.propertyTableBody.addEventListener('click', (e) => {
+      const row = e.target.closest('tr');
+      if (!row) return;
+      const id = row.dataset.id;
+      const rec = filteredRecords.find(r => String(r.id) === id);
+      if (rec) openDetail(rec);
+    });
+
+    // ========== GRIST DATA ==========
+    grist.onRecords((records, mappings) => {
+      allRecords = grist.mapColumnNames(records, mappings) || [];
+      normCache.clear();
+
+      // Enable controls
+      refs.searchInput.disabled = false;
+      refs.typeFilter.disabled = false;
+      refs.tenancyFilter.disabled = false;
+      refs.cityFilter.disabled = false;
+      refs.sortSelect.disabled = false;
+      refs.exportBtn.disabled = false;
+
+      populateFilters(allRecords);
+      applyFilters();
+    });
+  </script>
+</body>
+</html>
