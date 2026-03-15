@@ -1,0 +1,2119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Property Listings Widget</title>
+<script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --primary: #4f46e5;
+  --primary-dark: #4338ca;
+  --success: #059669;
+  --warning: #f59e0b;
+  --danger: #dc2626;
+  --slate-50: #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-300: #cbd5e1;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-800: #1e293b;
+  --slate-900: #0f172a;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--slate-50);
+  color: var(--slate-900);
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+/* Header */
+.header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.header h1 {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: var(--slate-900);
+  letter-spacing: -0.03em;
+}
+
+.header p {
+  font-size: 0.95rem;
+  color: var(--slate-500);
+}
+
+/* Stats Bar */
+.stats-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.stat-card {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--slate-200);
+}
+
+.stat-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--slate-500);
+  margin-bottom: 0.25rem;
+}
+
+.stat-value {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--slate-900);
+}
+
+.stat-value.accent { color: var(--success); }
+.stat-value.primary { color: var(--primary); }
+
+/* Controls Bar */
+.controls-bar {
+  background: white;
+  border-radius: var(--radius-xl);
+  padding: 1rem;
+  margin-bottom: 1.25rem;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  border: 1px solid var(--slate-200);
+}
+
+.search-box {
+  flex: 1;
+  min-width: 250px;
+  position: relative;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 0.65rem 0.85rem 0.65rem 2.75rem;
+  border: 1.5px solid var(--slate-200);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  background: var(--slate-50);
+}
+
+.search-box input:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: white;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+}
+
+.search-box svg {
+  position: absolute;
+  left: 0.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  stroke: var(--slate-400);
+}
+
+.filter-group {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.filter-select {
+  padding: 0.65rem 0.9rem;
+  border: 1.5px solid var(--slate-200);
+  border-radius: var(--radius-md);
+  background: white;
+  color: var(--slate-600);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  min-width: 130px;
+}
+
+.filter-select:hover {
+  border-color: var(--slate-300);
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+}
+
+/* Price Range Inputs */
+.price-range, .cap-range {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--slate-50);
+  padding: 0.4rem 0.6rem;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--slate-200);
+}
+
+.price-range input, .cap-range input {
+  width: 85px;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--slate-200);
+  border-radius: 4px;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.price-range input:focus, .cap-range input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.price-range span, .cap-range span {
+  color: var(--slate-400);
+  font-weight: 600;
+}
+
+/* Sort Button */
+.sort-container {
+  position: relative;
+}
+
+.sort-btn {
+  padding: 0.65rem 0.9rem;
+  border: 1.5px solid var(--slate-200);
+  border-radius: var(--radius-md);
+  background: white;
+  color: var(--slate-600);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: inherit;
+}
+
+.sort-btn:hover {
+  border-color: var(--slate-300);
+  background: var(--slate-50);
+}
+
+.sort-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--slate-200);
+  min-width: 180px;
+  z-index: 1000;
+  display: none;
+  overflow: hidden;
+}
+
+.sort-dropdown.show {
+  display: block;
+}
+
+.sort-dropdown button {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font-size: 0.88rem;
+  color: var(--slate-700);
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: inherit;
+}
+
+.sort-dropdown button:hover {
+  background: var(--slate-50);
+}
+
+.sort-dropdown button.active {
+  background: var(--slate-100);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* View Toggle */
+.view-toggle {
+  display: flex;
+  background: var(--slate-100);
+  border-radius: var(--radius-md);
+  padding: 3px;
+  border: 1.5px solid var(--slate-200);
+}
+
+.view-toggle button {
+  padding: 0.5rem 0.7rem;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--slate-500);
+}
+
+.view-toggle button.active {
+  background: white;
+  color: var(--primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.view-toggle button svg {
+  width: 17px;
+  height: 17px;
+}
+
+/* Export Button */
+.export-btn {
+  padding: 0.65rem 1rem;
+  border: 1.5px solid var(--slate-200);
+  border-radius: var(--radius-md);
+  background: white;
+  color: var(--slate-600);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: inherit;
+}
+
+.export-btn:hover {
+  border-color: var(--slate-300);
+  background: var(--slate-50);
+}
+
+.export-btn.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.export-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Property Grid */
+.property-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 1.25rem;
+}
+
+.property-grid.list-view {
+  grid-template-columns: 1fr;
+}
+
+/* Property Card */
+.property-card {
+  background: white;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--slate-200);
+  transition: all 0.25s;
+  cursor: pointer;
+}
+
+.property-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary);
+}
+
+.property-card.list-view {
+  display: flex;
+  flex-direction: row;
+}
+
+.property-card.list-view .card-image-container {
+  width: 320px;
+  height: auto;
+  min-height: 200px;
+  flex-shrink: 0;
+}
+
+.property-card.list-view .card-content {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  gap: 1.5rem;
+}
+
+.property-card.list-view .card-main-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.property-card.list-view .card-metrics {
+  display: flex;
+  gap: 1.5rem;
+  flex-shrink: 0;
+}
+
+.card-image-container {
+  position: relative;
+  height: 220px;
+  overflow: hidden;
+  background: var(--slate-100);
+}
+
+.card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s;
+}
+
+.property-card:hover .card-image {
+  transform: scale(1.06);
+}
+
+.card-skeleton {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, var(--slate-100) 25%, var(--slate-200) 50%, var(--slate-100) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 40%, transparent 100%);
+  pointer-events: none;
+}
+
+.card-badges {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  z-index: 5;
+}
+
+.badge {
+  padding: 0.35rem 0.65rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  border-radius: 6px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--slate-800);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.badge.new {
+  background: var(--success);
+  color: white;
+}
+
+.badge.tenancy {
+  background: var(--primary);
+  color: white;
+}
+
+.select-checkbox {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 30px;
+  height: 30px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  z-index: 10;
+  border: 2px solid var(--slate-200);
+}
+
+.select-checkbox:hover {
+  background: white;
+  transform: scale(1.1);
+  border-color: var(--primary);
+}
+
+.select-checkbox input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--primary);
+}
+
+.card-content {
+  padding: 1.1rem;
+}
+
+.property-type {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--slate-500);
+  margin-bottom: 0.3rem;
+}
+
+.property-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--slate-900);
+  margin-bottom: 0.35rem;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.property-address {
+  font-size: 0.83rem;
+  color: var(--slate-500);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+
+.property-address svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--slate-200);
+}
+
+.price {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--success);
+}
+
+.cap-rate {
+  font-size: 0.83rem;
+  color: var(--slate-600);
+}
+
+.cap-rate-value {
+  font-weight: 700;
+  color: var(--primary);
+}
+
+/* List View Metrics */
+.list-metric {
+  text-align: center;
+}
+
+.list-metric-label {
+  font-size: 0.65rem;
+  color: var(--slate-400);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.list-metric-value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--slate-900);
+}
+
+/* Status */
+.status-message {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--slate-500);
+}
+
+.loading-spinner {
+  width: 44px;
+  height: 44px;
+  margin: 0 auto 1.25rem;
+  border: 3px solid var(--slate-200);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Detail Panel */
+.detail-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(6px);
+  z-index: 1200;
+  align-items: stretch;
+  justify-content: flex-end;
+}
+
+.detail-overlay.show {
+  display: flex;
+}
+
+.detail-panel {
+  width: 100%;
+  max-width: 580px;
+  background: white;
+  height: 100vh;
+  box-shadow: -8px 0 32px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.detail-header {
+  position: relative;
+  height: 200px;
+  flex-shrink: 0;
+}
+
+.detail-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.detail-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.85), transparent 60%);
+}
+
+.detail-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 38px;
+  height: 38px;
+  background: rgba(255,255,255,0.2);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  backdrop-filter: blur(8px);
+}
+
+.detail-close:hover {
+  background: rgba(255,255,255,0.35);
+  transform: scale(1.1);
+}
+
+.detail-title {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  padding: 1.25rem;
+  color: white;
+  width: 100%;
+}
+
+.detail-badges {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.lease-badge {
+  background: var(--primary);
+  padding: 0.3rem 0.7rem;
+  border-radius: 6px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.detail-title h2 {
+  font-size: 1.4rem;
+  font-weight: 800;
+  margin-bottom: 0.3rem;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+}
+
+.detail-title p {
+  color: rgba(255,255,255,0.9);
+  font-size: 0.88rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.detail-body {
+  padding: 1.25rem;
+  background: var(--slate-50);
+  overflow-y: auto;
+  flex: 1;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.65rem;
+  margin-bottom: 1.25rem;
+}
+
+.metric {
+  background: white;
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-lg);
+  padding: 0.9rem;
+  text-align: center;
+}
+
+.metric-label {
+  font-size: 0.68rem;
+  color: var(--slate-500);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.35rem;
+}
+
+.metric-value {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--slate-900);
+}
+
+.metric-value.accent { color: var(--success); }
+.metric-value.primary { color: var(--primary); }
+
+.sections {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem;
+  margin-bottom: 1.25rem;
+}
+
+.section {
+  background: white;
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.section-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--slate-900);
+  padding: 0.75rem 1rem 0.5rem;
+  border-bottom: 1px solid var(--slate-200);
+  background: var(--slate-50);
+}
+
+.section .kv {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.65rem 1rem;
+  border-top: 1px solid var(--slate-200);
+}
+
+.section .kv:first-child {
+  border-top: none;
+}
+
+.section .kv span:first-child {
+  color: var(--slate-500);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.section .kv span:last-child {
+  color: var(--slate-900);
+  font-weight: 600;
+  font-size: 0.83rem;
+  text-align: right;
+}
+
+.highlights {
+  margin-bottom: 1.25rem;
+}
+
+.highlights-body {
+  background: white;
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-lg);
+  padding: 1.1rem;
+  color: var(--slate-700);
+  line-height: 1.7;
+  font-size: 0.88rem;
+}
+
+.highlights-body p {
+  margin-bottom: 0.75rem;
+}
+
+.highlights-body p:last-child {
+  margin-bottom: 0;
+}
+
+.highlights-body ul, .highlights-body ol {
+  margin: 0.5rem 0 0.5rem 1.25rem;
+}
+
+.highlights-body li {
+  margin-bottom: 0.35rem;
+}
+
+.detail-actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.65rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--slate-200);
+}
+
+.detail-actions a,
+.detail-actions button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.8rem 1rem;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: white;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.detail-actions a.om,
+.detail-actions button.om {
+  background: var(--slate-800);
+}
+
+.detail-actions a.om:hover,
+.detail-actions button.om:hover {
+  background: var(--slate-700);
+}
+
+.detail-actions a.listing,
+.detail-actions button.listing {
+  background: var(--primary);
+}
+
+.detail-actions a.listing:hover,
+.detail-actions button.listing:hover {
+  background: var(--primary-dark);
+}
+
+/* Export Modal */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(6px);
+  z-index: 1000;
+}
+
+.modal-overlay.show {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal {
+  background: white;
+  border-radius: var(--radius-xl);
+  max-width: 480px;
+  width: 90%;
+  animation: slideUp 0.3s;
+}
+
+.modal-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--slate-200);
+}
+
+.modal-header h2 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--slate-900);
+}
+
+.modal-body {
+  padding: 1.25rem 1.5rem;
+  color: var(--slate-600);
+}
+
+.modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--slate-200);
+  display: flex;
+  gap: 0.65rem;
+  justify-content: flex-end;
+  background: var(--slate-50);
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+}
+
+.action-btn {
+  padding: 0.65rem 1.1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: inherit;
+}
+
+.action-btn.secondary {
+  background: white;
+  color: var(--slate-600);
+  border: 1.5px solid var(--slate-200);
+}
+
+.action-btn.secondary:hover {
+  background: var(--slate-50);
+  border-color: var(--slate-300);
+}
+
+.action-btn.primary {
+  background: var(--primary);
+  color: white;
+  border: none;
+}
+
+.action-btn.primary:hover {
+  background: var(--primary-dark);
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .property-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+  .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .container { padding: 1rem; }
+  .controls-bar { padding: 0.85rem; }
+  .search-box { min-width: 100%; }
+  .filter-group { width: 100%; }
+  .filter-select { flex: 1; min-width: 100px; }
+  .property-grid { grid-template-columns: 1fr; }
+  .property-card.list-view { flex-direction: column; }
+  .property-card.list-view .card-image-container { width: 100%; height: 200px; }
+  .property-card.list-view .card-content { flex-direction: column; align-items: flex-start; }
+  .property-card.list-view .card-metrics { width: 100%; justify-content: space-between; }
+  .metrics-grid { grid-template-columns: 1fr; }
+  .sections { grid-template-columns: 1fr; }
+  .detail-panel { max-width: 100%; }
+  .stats-bar { grid-template-columns: repeat(2, 1fr); }
+  .price-range, .cap-range { width: 100%; }
+}
+
+@media (max-width: 480px) {
+  .header h1 { font-size: 1.5rem; }
+  .filter-select { font-size: 0.83rem; padding: 0.55rem 0.7rem; }
+  .view-toggle { display: none; }
+  .detail-actions { grid-template-columns: 1fr; }
+  .stats-bar { grid-template-columns: 1fr; }
+}
+
+/* Markdown Styles */
+.highlights-body h1, .highlights-body h2, .highlights-body h3 {
+  font-size: 1.1em;
+  font-weight: 700;
+  color: var(--slate-800);
+  margin: 1rem 0 0.5rem;
+}
+
+.highlights-body strong {
+  font-weight: 700;
+  color: var(--slate-800);
+}
+
+.highlights-body em {
+  font-style: italic;
+}
+
+.highlights-body code {
+  background: var(--slate-100);
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+.highlights-body blockquote {
+  border-left: 3px solid var(--primary);
+  padding-left: 1rem;
+  margin: 0.75rem 0;
+  color: var(--slate-600);
+}
+
+/* Focus States */
+button:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 7px; }
+::-webkit-scrollbar-track { background: var(--slate-100); }
+::-webkit-scrollbar-thumb { background: var(--slate-300); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--slate-400); }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>Commercial Property Listings</h1>
+    <p>Investment opportunities with detailed analytics</p>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-card">
+      <div class="stat-label">Total Properties</div>
+      <div class="stat-value" id="stat-total">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Avg Price</div>
+      <div class="stat-value accent" id="stat-avg-price">$0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Avg Cap Rate</div>
+      <div class="stat-value primary" id="stat-avg-cap">0%</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Selected</div>
+      <div class="stat-value" id="stat-selected">0</div>
+    </div>
+  </div>
+
+  <div class="controls-bar">
+    <div class="search-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"></circle>
+        <path d="m21 21-4.35-4.35"></path>
+      </svg>
+      <input type="text" id="search-input" placeholder="Search by name, address, or city..." disabled>
+    </div>
+    
+    <div class="filter-group">
+      <select id="type-filter" class="filter-select" disabled>
+        <option value="all">All Types</option>
+      </select>
+      
+      <select id="tenancy-filter" class="filter-select" disabled>
+        <option value="all">All Tenancy</option>
+        <option value="STNL">STNL</option>
+        <option value="Multi">Multi</option>
+        <option value="Center">Center</option>
+      </select>
+      
+      <div class="price-range">
+        <input type="number" id="price-min" placeholder="Min $" disabled>
+        <span>–</span>
+        <input type="number" id="price-max" placeholder="Max $" disabled>
+      </div>
+      
+      <div class="cap-range">
+        <input type="number" id="cap-min" placeholder="Min %" step="0.1" disabled>
+        <span>–</span>
+        <input type="number" id="cap-max" placeholder="Max %" step="0.1" disabled>
+      </div>
+      
+      <div class="sort-container">
+        <button class="sort-btn" id="sort-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <path d="M3 6h18M6 12h12M9 18h6"/>
+          </svg>
+          <span>Sort</span>
+        </button>
+        <div class="sort-dropdown" id="sort-dropdown">
+          <button data-sort="newest" class="active">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+              <path d="M12 5v14M5 12l7 7 7-7"/>
+            </svg>
+            Newest First
+          </button>
+          <button data-sort="price-asc">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+              <path d="M12 19V5M5 12l7-7 7 7"/>
+            </svg>
+            Price: Low to High
+          </button>
+          <button data-sort="price-desc">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+              <path d="M12 5v14M5 12l7 7 7-7"/>
+            </svg>
+            Price: High to Low
+          </button>
+          <button data-sort="cap-asc">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+              <path d="M12 19V5M5 12l7-7 7 7"/>
+            </svg>
+            Cap Rate: Low to High
+          </button>
+          <button data-sort="cap-desc">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+              <path d="M12 5v14M5 12l7 7 7-7"/>
+            </svg>
+            Cap Rate: High to Low
+          </button>
+        </div>
+      </div>
+
+      <div class="view-toggle">
+        <button class="active" id="view-grid" title="Grid View">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+        </button>
+        <button id="view-list" title="List View">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="8" y1="6" x2="21" y2="6"></line>
+            <line x1="8" y1="12" x2="21" y2="12"></line>
+            <line x1="8" y1="18" x2="21" y2="18"></line>
+            <line x1="3" y1="6" x2="3.01" y2="6"></line>
+            <line x1="3" y1="12" x2="3.01" y2="12"></line>
+            <line x1="3" y1="18" x2="3.01" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <button id="export-btn" class="export-btn" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        <span class="export-label">Export</span>
+      </button>
+    </div>
+  </div>
+
+  <div id="status-message" class="status-message">
+    <div class="loading-spinner"></div>
+    <div>Loading properties...</div>
+  </div>
+
+  <div id="property-grid" class="property-grid"></div>
+</div>
+
+<!-- Export Modal -->
+<div id="export-modal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Export Properties</h2>
+    </div>
+    <div class="modal-body">
+      <p>Export selected properties to HTML format. If no properties are selected, all filtered results will be exported.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="action-btn secondary" onclick="closeExportModal()">Cancel</button>
+      <button class="action-btn primary" onclick="performExport()">Export Now</button>
+    </div>
+  </div>
+</div>
+
+<!-- Detail Panel -->
+<div id="detail-overlay" class="detail-overlay">
+  <div class="detail-panel">
+    <div class="detail-header">
+      <img id="detail-image" class="detail-image" alt="Property">
+      <div class="detail-gradient"></div>
+      <button id="detail-close" class="detail-close" aria-label="Close">✕</button>
+      <div class="detail-title">
+        <div class="detail-badges">
+          <span id="detail-leaseType" class="lease-badge" style="display:none"></span>
+          <span id="detail-newBadge" class="lease-badge" style="display:none;background:#059669;">NEW</span>
+          <span id="detail-tenancy" class="lease-badge" style="display:none;background:#4f46e5;"></span>
+        </div>
+        <h2 id="detail-name"></h2>
+        <p id="detail-address">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+            <circle cx="12" cy="10" r="3"></circle>
+          </svg>
+          <span></span>
+        </p>
+      </div>
+    </div>
+    <div class="detail-body">
+      <div class="metrics-grid">
+        <div class="metric">
+          <div class="metric-label">List Price</div>
+          <div id="metric-price" class="metric-value"></div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Cap Rate</div>
+          <div id="metric-cap" class="metric-value accent"></div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">NOI</div>
+          <div id="metric-noi" class="metric-value primary"></div>
+        </div>
+      </div>
+      <div class="sections">
+        <div class="section">
+          <h3 class="section-title">Lease Details</h3>
+          <div class="kv"><span>Tenant</span><span id="lease-tenant"></span></div>
+          <div class="kv"><span>Term Remaining</span><span id="lease-term"></span></div>
+          <div class="kv"><span>Expiration</span><span id="lease-expiration"></span></div>
+          <div class="kv"><span>Rent Bumps</span><span id="lease-bumps"></span></div>
+          <div class="kv"><span>Renewal Options</span><span id="lease-options"></span></div>
+        </div>
+        <div class="section">
+          <h3 class="section-title">Site Details</h3>
+          <div class="kv"><span>Building Size</span><span id="site-rba"></span></div>
+          <div class="kv"><span>Land Size</span><span id="site-land"></span></div>
+          <div class="kv"><span>Price / SF</span><span id="site-price-sf"></span></div>
+          <div class="kv"><span>Date Listed</span><span id="site-dateListed"></span></div>
+        </div>
+      </div>
+      <div class="highlights" style="display:none;">
+        <h3 class="section-title">Investment Highlights</h3>
+        <div id="highlights" class="highlights-body"></div>
+      </div>
+      <div id="detail-actions" class="detail-actions"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============= CONFIGURATION =============
+const CONFIG = {
+  DEBOUNCE_DELAY: 250,
+  MAX_CACHED_NORMALIZED: 1000
+};
+
+// ============= DOM CACHE =============
+const dom = {
+  grid: document.getElementById('property-grid'),
+  statusMessage: document.getElementById('status-message'),
+  searchInput: document.getElementById('search-input'),
+  typeFilter: document.getElementById('type-filter'),
+  tenancyFilter: document.getElementById('tenancy-filter'),
+  cityFilter: document.getElementById('city-filter'),
+  priceMin: document.getElementById('price-min'),
+  priceMax: document.getElementById('price-max'),
+  capMin: document.getElementById('cap-min'),
+  capMax: document.getElementById('cap-max'),
+  exportBtn: document.getElementById('export-btn'),
+  exportModal: document.getElementById('export-modal'),
+  detailOverlay: document.getElementById('detail-overlay'),
+  detailClose: document.getElementById('detail-close'),
+  sortBtn: document.getElementById('sort-btn'),
+  sortDropdown: document.getElementById('sort-dropdown'),
+  viewGrid: document.getElementById('view-grid'),
+  viewList: document.getElementById('view-list')
+};
+
+// ============= STATE =============
+let state = {
+  allRecords: [],
+  filteredRecords: [],
+  normalizedCache: new Map(),
+  selectedIds: new Set(),
+  currentRecord: null,
+  currentSort: 'newest',
+  currentView: 'grid',
+  filters: {
+    search: '',
+    type: 'all',
+    tenancy: 'all',
+    city: 'all',
+    priceMin: null,
+    priceMax: null,
+    capMin: null,
+    capMax: null
+  }
+};
+
+// ============= UTILITY FUNCTIONS =============
+
+function debounce(func, wait) {
+  let timeout;
+  return function(...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(this, args), wait);
+  };
+}
+
+// Normalize timestamp from Grist (can be seconds or milliseconds)
+function normalizeTimestamp(val) {
+  if (!val) return null;
+  const num = Number(val);
+  if (!num) return null;
+  // Grist returns seconds since epoch, convert to milliseconds
+  return num > 10000000000 ? num : num * 1000;
+}
+
+// Format timestamp to date string
+function formatDate(val) {
+  const ts = normalizeTimestamp(val);
+  if (!ts) return 'N/A';
+  const d = new Date(ts);
+  if (isNaN(d.getTime())) return 'N/A';
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+// Get days on market
+function getDaysOnMarket(val) {
+  const ts = normalizeTimestamp(val);
+  if (!ts) return null;
+  const diff = Math.floor((Date.now() - ts) / 86400000);
+  return diff < 0 ? 0 : diff;
+}
+
+// Format price
+function formatPrice(price) {
+  if (price == null || !Number.isFinite(price)) return 'Contact for Price';
+  return '$' + new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(price);
+}
+
+// Format cap rate (Grist stores as decimal like 0.0791)
+function formatCapRate(rate) {
+  if (rate == null || !Number.isFinite(rate)) return 'N/A';
+  const val = Number(rate);
+  // If value is less than 1, it's a decimal (0.0791 = 7.91%)
+  return (val > 1 ? val : val * 100).toFixed(2) + '%';
+}
+
+// Format square feet
+function formatSquareFeet(sf) {
+  if (!sf) return 'N/A';
+  return Number(sf).toLocaleString() + ' SF';
+}
+
+// Extract city from address
+function extractCity(address) {
+  if (!address) return '';
+  const parts = address.split(',').map(p => p.trim());
+  return parts[parts.length - 2] || '';
+}
+
+// Escape HTML
+function escapeHtml(text) {
+  if (!text) return '';
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// Parse markdown using marked library
+function parseMarkdown(text) {
+  if (!text) return '';
+  try {
+    return marked.parse(text, { breaks: true });
+  } catch (e) {
+    return escapeHtml(text);
+  }
+}
+
+// Extract tenant name from array or string
+function extractTenant(val) {
+  if (!val) return '';
+  if (Array.isArray(val)) {
+    // Grist returns ["L", "Tenant Name"]
+    return val.filter(v => v && v !== 'L').join(', ') || '';
+  }
+  return String(val);
+}
+
+// Extract image URLs
+function extractImageUrls(record) {
+  const photoUrl = record.fields?.photo_url || record.photo_url || '';
+  if (!photoUrl) return [];
+  // Split by whitespace and filter valid URLs
+  return photoUrl.split(/\s+/).filter(url => url && url.startsWith('http')).slice(0, 5);
+}
+
+// ============= NORMALIZE RECORD =============
+function normalize(record) {
+  const id = String(record.id);
+  
+  // Check cache
+  if (state.normalizedCache.has(id)) {
+    return state.normalizedCache.get(id);
+  }
+
+  const fields = record.fields || record;
+
+  const data = {
+    id,
+    propertyName: fields.Property_Name || fields.propertyName || 'Property',
+    address: fields.Address || fields.address || '',
+    city: fields.City || fields.city || extractCity(fields.Address) || '',
+    state: fields.State || fields.state || '',
+    zip: fields.Zip || fields.zip || '',
+    price: fields.Price != null ? Number(fields.Price) : null,
+    capRate: fields.Cap_Rate != null ? Number(fields.Cap_Rate) : null,
+    rba: fields.RBA != null ? Number(fields.RBA) : null,
+    landSize: fields.Land_Size != null ? Number(fields.Land_Size) : null,
+    leaseTerm: fields.Lease_Term || '',
+    leaseType: fields.Lease_Type || fields.Property_Type || '',
+    leaseExpiration: fields.Lease_Expiration || null,
+    leaseOptions: fields.Lease_Options || '',
+    rentBumps: fields.Rent_Bumps || '',
+    tenantName: extractTenant(fields.Tenant_s_) || fields.Tenant_Name || '',
+    dateListed: fields.Date_Listed || null,
+    imageUrls: extractImageUrls(record),
+    omUrl: fields.OM || '',
+    listingUrl: fields.Listing_URL || '',
+    costarUrl: fields.CoStar || '',
+    crexiUrl: fields.Crexi || '',
+    tenancy: fields.Tenancy || '',
+    notes: fields.Notes || fields.notes || '',
+    propertyType: fields.Property_Type || '',
+    priceSf: fields.Price_SF != null ? Number(fields.Price_SF) : null,
+    lastUpdated: fields.Last_updated_at || fields.Created_at || null
+  };
+
+  // Calculate NOI if not provided
+  if (data.noi == null && data.price != null && data.capRate != null) {
+    data.noi = data.price * data.capRate;
+  }
+
+  // Cache with limit
+  if (state.normalizedCache.size >= CONFIG.MAX_CACHED_NORMALIZED) {
+    const firstKey = state.normalizedCache.keys().next().value;
+    state.normalizedCache.delete(firstKey);
+  }
+  state.normalizedCache.set(id, data);
+
+  return data;
+}
+
+// ============= RENDERING =============
+
+function createPropertyCard(record) {
+  const d = normalize(record);
+  const imageUrl = d.imageUrls[0] || `https://placehold.co/600x400/e2e8f0/64748b?text=${encodeURIComponent(d.propertyName)}`;
+  const daysOnMarket = getDaysOnMarket(d.dateListed);
+  const isSelected = state.selectedIds.has(d.id);
+
+  // Build address
+  let displayAddress = d.address || '';
+  const cityStateZip = [d.city, d.state, d.zip].filter(Boolean).join(' ');
+  if (d.zip && !displayAddress.includes(d.zip) && cityStateZip) {
+    displayAddress = displayAddress ? `${displayAddress}, ${cityStateZip}` : cityStateZip;
+  }
+
+  const isListView = state.currentView === 'list';
+
+  if (isListView) {
+    return `
+      <div class="property-card list-view" data-id="${d.id}">
+        <div class="card-image-container">
+          <div class="card-skeleton"></div>
+          <img src="${imageUrl}" alt="${escapeHtml(d.propertyName)}" class="card-image loading">
+          <div class="card-overlay"></div>
+          <div class="card-badges">
+            ${daysOnMarket !== null && daysOnMarket <= 7 ? '<span class="badge new">NEW</span>' : ''}
+            ${d.tenancy ? `<span class="badge tenancy">${escapeHtml(d.tenancy)}</span>` : ''}
+          </div>
+          <div class="select-checkbox">
+            <input type="checkbox" ${isSelected ? 'checked' : ''}>
+          </div>
+        </div>
+        <div class="card-content">
+          <div class="card-main-info">
+            <div class="property-type">${escapeHtml(d.propertyType || 'Commercial')}</div>
+            <h3 class="property-name">${escapeHtml(d.propertyName)}</h3>
+            <div class="property-address">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+              <span>${escapeHtml(displayAddress)}</span>
+            </div>
+          </div>
+          <div class="card-metrics">
+            <div class="list-metric">
+              <div class="list-metric-label">Price</div>
+              <div class="list-metric-value" style="color:var(--success)">${formatPrice(d.price)}</div>
+            </div>
+            <div class="list-metric">
+              <div class="list-metric-label">Cap Rate</div>
+              <div class="list-metric-value" style="color:var(--primary)">${formatCapRate(d.capRate)}</div>
+            </div>
+            <div class="list-metric">
+              <div class="list-metric-label">Size</div>
+              <div class="list-metric-value">${formatSquareFeet(d.rba)}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="property-card" data-id="${d.id}">
+      <div class="card-image-container">
+        <div class="card-skeleton"></div>
+        <img src="${imageUrl}" alt="${escapeHtml(d.propertyName)}" class="card-image loading">
+        <div class="card-overlay"></div>
+        <div class="card-badges">
+          ${daysOnMarket !== null && daysOnMarket <= 7 ? '<span class="badge new">NEW</span>' : ''}
+          ${d.tenancy ? `<span class="badge tenancy">${escapeHtml(d.tenancy)}</span>` : ''}
+          ${d.propertyType ? `<span class="badge">${escapeHtml(d.propertyType)}</span>` : ''}
+        </div>
+        <div class="select-checkbox">
+          <input type="checkbox" ${isSelected ? 'checked' : ''}>
+        </div>
+      </div>
+      <div class="card-content">
+        <div class="property-type">${escapeHtml(d.propertyType || 'Commercial')}</div>
+        <h3 class="property-name">${escapeHtml(d.propertyName)}</h3>
+        <div class="property-address">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+            <circle cx="12" cy="10" r="3"></circle>
+          </svg>
+          <span>${escapeHtml(displayAddress)}</span>
+        </div>
+        <div class="card-footer">
+          <div class="price">${formatPrice(d.price)}</div>
+          <div class="cap-rate">Cap: <span class="cap-rate-value">${formatCapRate(d.capRate)}</span></div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderProperties(records) {
+  if (!records || records.length === 0) {
+    dom.grid.innerHTML = '';
+    dom.statusMessage.style.display = 'block';
+    dom.statusMessage.innerHTML = '<div style="font-size:3rem;margin-bottom:1rem;">📭</div><div>No properties found</div><div style="margin-top:0.5rem;font-size:0.9rem;">Try adjusting your filters</div>';
+    return;
+  }
+
+  dom.statusMessage.style.display = 'none';
+  
+  const html = records.map(record => createPropertyCard(record)).join('');
+  dom.grid.innerHTML = html;
+
+  // Initialize image loaders
+  dom.grid.querySelectorAll('.card-image').forEach(img => {
+    const skeleton = img.parentElement.querySelector('.card-skeleton');
+    img.onload = () => {
+      img.classList.remove('loading');
+      if (skeleton) skeleton.style.display = 'none';
+    };
+    img.onerror = () => {
+      img.src = 'https://placehold.co/600x400/e2e8f0/64748b?text=No+Image';
+      img.classList.remove('loading');
+      if (skeleton) skeleton.style.display = 'none';
+    };
+  });
+
+  updateExportButton();
+  updateStats();
+}
+
+// ============= FILTERING & SORTING =============
+
+function applyFilters() {
+  const { search, type, tenancy, priceMin, priceMax, capMin, capMax } = state.filters;
+  
+  state.filteredRecords = state.allRecords.filter(record => {
+    const d = normalize(record);
+    
+    // Search
+    const matchesSearch = !search ||
+      d.propertyName.toLowerCase().includes(search) ||
+      d.address.toLowerCase().includes(search) ||
+      d.city.toLowerCase().includes(search);
+    
+    // Type
+    const matchesType = type === 'all' || d.propertyType === type;
+    
+    // Tenancy
+    const matchesTenancy = tenancy === 'all' || d.tenancy === tenancy;
+    
+    // Price range
+    const matchesPriceMin = priceMin == null || d.price == null || d.price >= priceMin;
+    const matchesPriceMax = priceMax == null || d.price == null || d.price <= priceMax;
+    const matchesPrice = matchesPriceMin && matchesPriceMax;
+    
+    // Cap rate range (convert percentage input to decimal for comparison)
+    const capRatePercent = d.capRate != null ? (d.capRate > 1 ? d.capRate : d.capRate * 100) : null;
+    const matchesCapMin = capMin == null || capRatePercent == null || capRatePercent >= capMin;
+    const matchesCapMax = capMax == null || capRatePercent == null || capRatePercent <= capMax;
+    const matchesCap = matchesCapMin && matchesCapMax;
+    
+    return matchesSearch && matchesType && matchesTenancy && matchesPrice && matchesCap;
+  });
+
+  sortRecords();
+  renderProperties(state.filteredRecords);
+}
+
+function sortRecords() {
+  const sort = state.currentSort;
+  
+  state.filteredRecords.sort((a, b) => {
+    const da = normalize(a);
+    const db = normalize(b);
+    
+    switch (sort) {
+      case 'price-asc':
+        return (da.price || 0) - (db.price || 0);
+      case 'price-desc':
+        return (db.price || 0) - (da.price || 0);
+      case 'cap-asc':
+        return (da.capRate || 0) - (db.capRate || 0);
+      case 'cap-desc':
+        return (db.capRate || 0) - (da.capRate || 0);
+      case 'newest':
+      default:
+        const dateA = normalizeTimestamp(da.lastUpdated);
+        const dateB = normalizeTimestamp(db.lastUpdated);
+        return (dateB || 0) - (dateA || 0);
+    }
+  });
+}
+
+// ============= POPULATE FILTERS =============
+
+function populateFilters(records) {
+  // Property Types
+  const types = [...new Set(records.map(r => normalize(r).propertyType).filter(Boolean))].sort();
+  dom.typeFilter.innerHTML = '<option value="all">All Types</option>';
+  types.forEach(type => {
+    const option = document.createElement('option');
+    option.value = type;
+    option.textContent = type;
+    dom.typeFilter.appendChild(option);
+  });
+
+  // Cities
+  const cities = [...new Set(records.map(r => normalize(r).city).filter(Boolean))].sort();
+  // Create city filter if it doesn't exist
+  if (!document.getElementById('city-filter')) {
+    const citySelect = document.createElement('select');
+    citySelect.id = 'city-filter';
+    citySelect.className = 'filter-select';
+    citySelect.disabled = true;
+    citySelect.innerHTML = '<option value="all">All Cities</option>';
+    cities.forEach(city => {
+      const option = document.createElement('option');
+      option.value = city;
+      option.textContent = city;
+      citySelect.appendChild(option);
+    });
+    dom.priceMin.parentElement.insertBefore(citySelect, dom.priceMin);
+    dom.cityFilter = citySelect;
+  } else {
+    dom.cityFilter.innerHTML = '<option value="all">All Cities</option>';
+    cities.forEach(city => {
+      const option = document.createElement('option');
+      option.value = city;
+      option.textContent = city;
+      dom.cityFilter.appendChild(option);
+    });
+  }
+}
+
+// ============= STATS =============
+
+function updateStats() {
+  document.getElementById('stat-total').textContent = state.allRecords.length;
+  document.getElementById('stat-selected').textContent = state.selectedIds.size;
+  
+  // Calculate average price from filtered records
+  const prices = state.filteredRecords
+    .map(r => normalize(r).price)
+    .filter(p => p != null && Number.isFinite(p));
+  
+  if (prices.length > 0) {
+    const avgPrice = prices.reduce((a, b) => a + b, 0) / prices.length;
+    document.getElementById('stat-avg-price').textContent = formatPrice(avgPrice);
+  } else {
+    document.getElementById('stat-avg-price').textContent = '$0';
+  }
+  
+  // Calculate average cap rate from filtered records
+  const caps = state.filteredRecords
+    .map(r => normalize(r).capRate)
+    .filter(c => c != null && Number.isFinite(c));
+  
+  if (caps.length > 0) {
+    const avgCap = caps.reduce((a, b) => a + b, 0) / caps.length;
+    document.getElementById('stat-avg-cap').textContent = formatCapRate(avgCap);
+  } else {
+    document.getElementById('stat-avg-cap').textContent = 'N/A';
+  }
+}
+
+// ============= SELECTION =============
+
+function toggleSelection(id) {
+  const strId = String(id);
+  if (state.selectedIds.has(strId)) {
+    state.selectedIds.delete(strId);
+  } else {
+    state.selectedIds.add(strId);
+  }
+  
+  const card = dom.grid.querySelector(`[data-id="${strId}"]`);
+  if (card) {
+    const checkbox = card.querySelector('.select-checkbox input');
+    if (checkbox) checkbox.checked = state.selectedIds.has(strId);
+  }
+  
+  updateExportButton();
+  updateStats();
+}
+
+function updateExportButton() {
+  const labelEl = dom.exportBtn.querySelector('.export-label');
+  const count = state.selectedIds.size;
+  if (labelEl) labelEl.textContent = count > 0 ? `Export (${count})` : 'Export';
+  dom.exportBtn.disabled = !state.filteredRecords || state.filteredRecords.length === 0;
+  dom.exportBtn.classList.toggle('active', count > 0);
+}
+
+// ============= DETAIL PANEL =============
+
+function openPropertyPanel(record) {
+  if (!record) return;
+  state.currentRecord = record;
+  const d = normalize(record);
+  
+  const imageUrl = d.imageUrls[0] || `https://placehold.co/800x500/e2e8f0/64748b?text=${encodeURIComponent(d.propertyName)}`;
+  document.getElementById('detail-image').src = imageUrl;
+  
+  // Badges
+  const leaseBadge = document.getElementById('detail-leaseType');
+  const newBadge = document.getElementById('detail-newBadge');
+  const tenancyBadge = document.getElementById('detail-tenancy');
+  const daysOnMarket = getDaysOnMarket(d.dateListed);
+  
+  if (d.leaseType) {
+    leaseBadge.style.display = 'inline-block';
+    leaseBadge.textContent = d.leaseType + (d.leaseType.toUpperCase().includes('NNN') ? ' Lease' : '');
+  } else {
+    leaseBadge.style.display = 'none';
+  }
+  
+  newBadge.style.display = (daysOnMarket !== null && daysOnMarket <= 7) ? 'inline-block' : 'none';
+  
+  if (d.tenancy) {
+    tenancyBadge.style.display = 'inline-block';
+    tenancyBadge.textContent = d.tenancy;
+  } else {
+    tenancyBadge.style.display = 'none';
+  }
+  
+  document.getElementById('detail-name').textContent = d.propertyName || 'Property';
+  
+  // Address
+  let displayAddress = d.address || '';
+  const cityStateZip = [d.city, d.state, d.zip].filter(Boolean).join(' ');
+  if (d.zip && !displayAddress.includes(d.zip) && cityStateZip) {
+    displayAddress = displayAddress ? `${displayAddress}, ${cityStateZip}` : cityStateZip;
+  }
+  document.getElementById('detail-address').querySelector('span').textContent = displayAddress;
+  
+  // Metrics
+  document.getElementById('metric-price').textContent = d.price != null ? formatPrice(d.price) : 'Contact for Price';
+  document.getElementById('metric-cap').textContent = d.capRate != null ? formatCapRate(d.capRate) : 'N/A';
+  document.getElementById('metric-noi').textContent = d.noi != null ? formatPrice(d.noi) : 'N/A';
+  
+  // Lease details
+  document.getElementById('lease-tenant').textContent = d.tenantName || 'N/A';
+  document.getElementById('lease-term').textContent = d.leaseTerm ? `${d.leaseTerm} Years` : 'N/A';
+  document.getElementById('lease-expiration').textContent = formatDate(d.leaseExpiration);
+  document.getElementById('lease-bumps').textContent = d.rentBumps || 'N/A';
+  document.getElementById('lease-options').textContent = d.leaseOptions || 'N/A';
+  
+  // Site details
+  document.getElementById('site-rba').textContent = d.rba != null ? formatSquareFeet(d.rba) : 'N/A';
+  document.getElementById('site-land').textContent = d.landSize != null ? `${d.landSize} AC` : 'N/A';
+  document.getElementById('site-price-sf').textContent = d.priceSf != null ? formatPrice(d.priceSf) : (d.price && d.rba ? formatPrice(d.price / d.rba) : 'N/A');
+  document.getElementById('site-dateListed').textContent = formatDate(d.dateListed);
+  
+  // Investment Highlights (Markdown)
+  const highlightsWrap = document.querySelector('.highlights');
+  const notesEl = document.getElementById('highlights');
+  if (d.notes) {
+    highlightsWrap.style.display = 'block';
+    notesEl.innerHTML = parseMarkdown(d.notes);
+  } else {
+    highlightsWrap.style.display = 'none';
+    notesEl.innerHTML = '';
+  }
+  
+  // Actions
+  const actions = document.getElementById('detail-actions');
+  actions.innerHTML = '';
+  
+  if (d.omUrl) {
+    const omLink = document.createElement('a');
+    omLink.className = 'om';
+    omLink.href = String(d.omUrl);
+    omLink.target = '_blank';
+    omLink.rel = 'noopener noreferrer';
+    omLink.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg> Offering Memo';
+    actions.appendChild(omLink);
+  }
+  
+  const listingUrl = d.listingUrl || d.costarUrl || d.crexiUrl;
+  if (listingUrl) {
+    const listBtn = document.createElement('a');
+    listBtn.className = 'listing';
+    listBtn.href = listingUrl.trim();
+    listBtn.target = '_blank';
+    listBtn.rel = 'noreferrer';
+    listBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg> Listing Page';
+    actions.appendChild(listBtn);
+  }
+  
+  dom.detailOverlay.classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePropertyPanel() {
+  dom.detailOverlay.classList.remove('show');
+  state.currentRecord = null;
+  document.body.style.overflow = '';
+}
+
+// ============= EXPORT =============
+
+function closeExportModal() {
+  dom.exportModal.classList.remove('show');
+}
+
+function performExport() {
+  const recordsToExport = state.selectedIds.size > 0
+    ? state.allRecords.filter(r => state.selectedIds.has(String(r.id)))
+    : state.filteredRecords;
+    
+  if (recordsToExport.length === 0) {
+    alert('No properties to export');
+    closeExportModal();
+    return;
+  }
+  
+  const html = generateExportHTML(recordsToExport);
+  const blob = new Blob([html], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `properties-export-${new Date().toISOString().slice(0, 10)}.html`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  closeExportModal();
+}
+
+function generateExportHTML(records) {
+  const propertyCards = records.map(record => {
+    const d = normalize(record);
+    const imageUrl = d.imageUrls[0] || `https://placehold.co/600x400/e2e8f0/64748b?text=${encodeURIComponent(d.propertyName)}`;
+    
+    let displayAddress = d.address || '';
+    const cityStateZip = [d.city, d.state, d.zip].filter(Boolean).join(' ');
+    if (d.zip && !displayAddress.includes(d.zip) && cityStateZip) {
+      displayAddress = displayAddress ? `${displayAddress}, ${cityStateZip}` : cityStateZip;
+    }
+    
+    return `
+      <div class="property-card">
+        <img src="${imageUrl}" alt="${escapeHtml(d.propertyName)}" class="property-image">
+        <div class="property-details">
+          <h2>${escapeHtml(d.propertyName)}</h2>
+          <p class="price">${formatPrice(d.price)}</p>
+          <p>${escapeHtml(displayAddress)}</p>
+          <p>Cap Rate: ${formatCapRate(d.capRate)} | Size: ${formatSquareFeet(d.rba)}</p>
+          ${d.notes ? `<div class="notes">${parseMarkdown(d.notes)}</div>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+  
+  return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Property Listings Export</title>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"><\/script>
+<style>
+body{font-family:Arial,sans-serif;margin:20px;background:#f8fafc}
+.container{max-width:1200px;margin:0 auto}
+h1{text-align:center;margin-bottom:30px;color:#0f172a}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
+.property-card{background:white;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+.property-image{width:100%;height:250px;object-fit:cover}
+.property-details{padding:20px}
+.price{color:#059669;font-size:1.25rem;font-weight:bold}
+.notes{margin-top:15px;padding-top:15px;border-top:1px solid #e2e8f0;font-size:0.9rem;color:#64748b}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Property Listings Export - ${new Date().toLocaleDateString()}</h1>
+<div class="grid">${propertyCards}</div>
+</div>
+</body>
+</html>`;
+}
+
+// ============= EVENT LISTENERS =============
+
+// Grid clicks
+dom.grid.addEventListener('click', (e) => {
+  const card = e.target.closest('.property-card');
+  if (!card) return;
+  const id = card.dataset.id;
+  
+  if (e.target.closest('a')) {
+    e.stopPropagation();
+    return;
+  }
+  
+  const checkbox = e.target.closest('.select-checkbox');
+  if (checkbox) {
+    e.stopPropagation();
+    toggleSelection(id);
+    return;
+  }
+  
+  const record = state.filteredRecords.find(r => String(r.id) === id);
+  if (record) openPropertyPanel(record);
+});
+
+// Search
+const debouncedFilter = debounce(() => {
+  state.filters.search = dom.searchInput.value.toLowerCase();
+  applyFilters();
+}, CONFIG.DEBOUNCE_DELAY);
+
+dom.searchInput.addEventListener('input', debouncedFilter);
+
+// Filters
+dom.typeFilter.addEventListener('change', () => {
+  state.filters.type = dom.typeFilter.value;
+  applyFilters();
+});
+
+dom.tenancyFilter.addEventListener('change', () => {
+  state.filters.tenancy = dom.tenancyFilter.value;
+  applyFilters();
+});
+
+// City filter (dynamically created)
+document.addEventListener('change', (e) => {
+  if (e.target.id === 'city-filter') {
+    state.filters.city = e.target.value;
+    applyFilters();
+  }
+});
+
+// Price range
+const debouncedPriceFilter = debounce(() => {
+  state.filters.priceMin = dom.priceMin.value ? Number(dom.priceMin.value) : null;
+  state.filters.priceMax = dom.priceMax.value ? Number(dom.priceMax.value) : null;
+  applyFilters();
+}, CONFIG.DEBOUNCE_DELAY);
+
+dom.priceMin.addEventListener('input', debouncedPriceFilter);
+dom.priceMax.addEventListener('input', debouncedPriceFilter);
+
+// Cap rate range
+const debouncedCapFilter = debounce(() => {
+  state.filters.capMin = dom.capMin.value ? Number(dom.capMin.value) : null;
+  state.filters.capMax = dom.capMax.value ? Number(dom.capMax.value) : null;
+  applyFilters();
+}, CONFIG.DEBOUNCE_DELAY);
+
+dom.capMin.addEventListener('input', debouncedCapFilter);
+dom.capMax.addEventListener('input', debouncedCapFilter);
+
+// Sort
+dom.sortBtn.addEventListener('click', () => {
+  dom.sortDropdown.classList.toggle('show');
+});
+
+dom.sortDropdown.addEventListener('click', (e) => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  
+  state.currentSort = btn.dataset.sort;
+  dom.sortDropdown.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  dom.sortDropdown.classList.remove('show');
+  sortRecords();
+  renderProperties(state.filteredRecords);
+});
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.sort-container')) {
+    dom.sortDropdown.classList.remove('show');
+  }
+});
+
+// View toggle
+dom.viewGrid.addEventListener('click', () => {
+  state.currentView = 'grid';
+  dom.viewGrid.classList.add('active');
+  dom.viewList.classList.remove('active');
+  dom.grid.classList.remove('list-view');
+  applyFilters();
+});
+
+dom.viewList.addEventListener('click', () => {
+  state.currentView = 'list';
+  dom.viewList.classList.add('active');
+  dom.viewGrid.classList.remove('active');
+  dom.grid.classList.add('list-view');
+  applyFilters();
+});
+
+// Export
+dom.exportBtn.addEventListener('click', () => dom.exportModal.classList.add('show'));
+
+// Detail panel
+dom.detailClose.addEventListener('click', closePropertyPanel);
+dom.detailOverlay.addEventListener('click', (e) => {
+  if (e.target === dom.detailOverlay) closePropertyPanel();
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closePropertyPanel();
+    closeExportModal();
+    dom.sortDropdown.classList.remove('show');
+  }
+});
+
+// ============= GRIST INTEGRATION =============
+
+grist.ready({ requiredAccess: 'read table' });
+
+grist.onRecords((records, mappings) => {
+  state.allRecords = grist.mapColumnNames(records, mappings) || [];
+  state.normalizedCache.clear();
+  
+  dom.searchInput.disabled = false;
+  dom.typeFilter.disabled = false;
+  dom.tenancyFilter.disabled = false;
+  dom.priceMin.disabled = false;
+  dom.priceMax.disabled = false;
+  dom.capMin.disabled = false;
+  dom.capMax.disabled = false;
+  dom.exportBtn.disabled = false;
+  
+  if (dom.cityFilter) dom.cityFilter.disabled = false;
+  
+  populateFilters(state.allRecords);
+  applyFilters();
+});
+
+grist.onRecord((record, mappings) => {
+  if (record && record.id) {
+    const normalizedId = String(record.id);
+    const card = dom.grid.querySelector(`[data-id="${normalizedId}"]`);
+    if (card) {
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      card.style.boxShadow = '0 0 0 3px var(--primary)';
+      setTimeout(() => {
+        card.style.boxShadow = '';
+      }, 2000);
+    }
+  }
+});
+</script>
+</body>
+</html>
