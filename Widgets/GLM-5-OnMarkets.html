@@ -178,7 +178,7 @@
     .btn-secondary:hover:not(:disabled) { background: var(--bg); border-color: var(--border-strong); }
     .btn svg { width: 16px; height: 16px; flex-shrink: 0; }
 
-    /* Advanced Filters Toggle */
+    /* Advanced Filters */
     .advanced-toggle {
       width: 100%;
       padding: 0.6rem 1.25rem;
@@ -245,10 +245,7 @@
       background: var(--bg-card);
     }
 
-    .range-inputs span {
-      color: var(--fg-muted);
-      font-size: 0.8rem;
-    }
+    .range-inputs span { color: var(--fg-muted); font-size: 0.8rem; }
 
     /* Results Info */
     .results-bar {
@@ -278,7 +275,12 @@
       contain: layout style;
     }
 
-    /* Property card styles... (same as before) */
+    /* Compact Grid View - Redesigned */
+    .property-grid.compact-view {
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 0.5rem;
+    }
+
     .property-card {
       background: var(--bg-card);
       border-radius: var(--radius-lg);
@@ -291,7 +293,7 @@
     }
 
     .property-card:hover {
-      transform: translateY(-3px);
+      transform: translateY(-2px);
       box-shadow: var(--shadow-md);
     }
 
@@ -303,17 +305,6 @@
     .property-card.selected {
       border-color: var(--accent);
       box-shadow: 0 0 0 2px var(--accent-light);
-    }
-
-    .property-card.selected::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: var(--accent);
-      z-index: 5;
     }
 
     .card-image-wrap {
@@ -462,6 +453,89 @@
     .metric-value { font-size: 0.9rem; font-weight: 700; color: var(--fg); }
     .metric-value.highlight { color: var(--accent); }
 
+    /* ========== COMPACT VIEW SPECIFIC (Redesigned) ========== */
+    .compact-view .property-card {
+      display: flex;
+      flex-direction: row;
+      height: 80px; /* Fixed slim height */
+      border-radius: var(--radius-md); /* Slightly smaller radius */
+    }
+    
+    .compact-view .card-image-wrap {
+      width: 100px;
+      height: 100%;
+      flex-shrink: 0;
+    }
+    
+    .compact-view .card-body {
+      padding: 0.75rem 1rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      flex: 1;
+      min-width: 0; /* Prevent flex overflow */
+    }
+    
+    .compact-view .card-header {
+      margin-bottom: 0.15rem;
+      align-items: center;
+    }
+    
+    .compact-view .card-title {
+      font-size: 0.9rem;
+      line-height: 1.2;
+      -webkit-line-clamp: 1;
+      margin: 0;
+    }
+    
+    .compact-view .card-price {
+      font-size: 0.95rem;
+    }
+
+    /* Custom meta line for compact view */
+    .compact-meta {
+      display: none; /* Hidden by default */
+      font-size: 0.75rem;
+      color: var(--fg-muted);
+      margin-top: auto;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .compact-view .compact-meta {
+      display: flex;
+    }
+    
+    .compact-view .card-address {
+      display: none;
+    }
+    
+    .compact-view .card-metrics {
+      display: none;
+    }
+    
+    .compact-view .card-badges {
+      top: 6px;
+      left: 6px;
+    }
+    
+    .compact-view .badge {
+      padding: 2px 5px;
+      font-size: 0.55rem;
+    }
+    
+    .compact-view .card-checkbox {
+      top: 50%;
+      right: 10px;
+      transform: translateY(-50%) scale(0.85);
+      opacity: 0.5;
+    }
+    
+    .compact-view .property-card:hover .card-checkbox {
+      opacity: 1;
+      transform: translateY(-50%) scale(1);
+    }
+
     /* ========== TABLE VIEW ========== */
     .property-table { display: none; width: 100%; border-collapse: collapse; background: var(--bg-card); border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border); }
     .property-table.show { display: table; }
@@ -557,6 +631,8 @@
       flex-direction: column;
       transform: translateX(100%);
       transition: transform 320ms cubic-bezier(0.32, 0.72, 0, 1);
+      overflow-y: auto; /* Allow vertical scroll */
+      overflow-x: hidden; /* Prevent horizontal scroll */
     }
 
     .detail-overlay.show .detail-panel { transform: translateX(0); }
@@ -611,11 +687,39 @@
     .detail-address { font-size: 0.9rem; opacity: 0.85; display: flex; align-items: center; gap: 5px; }
     .detail-address svg { width: 14px; height: 14px; }
 
+    /* Top Actions */
+    .detail-top-actions {
+      padding: 0.75rem 1.25rem;
+      display: flex;
+      gap: 10px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+
     .detail-body {
       flex: 1;
       overflow-y: auto;
+      overflow-x: hidden; /* Fix for scrollbar */
       padding: 1.25rem;
       background: var(--bg);
+    }
+
+    /* Tenant Badges - Minimal Style */
+    .tenant-badges-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .tenant-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      background: var(--bg-subtle);
+      color: var(--fg-muted);
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      line-height: 1.4;
     }
 
     .metrics-row {
@@ -677,11 +781,12 @@
       padding: 7px 14px;
       border-top: 1px solid var(--border);
       font-size: 0.82rem;
+      min-width: 0; /* Fix for flex content overflow */
     }
 
     .kv-row:first-child { border-top: none; }
-    .kv-key { color: var(--fg-muted); }
-    .kv-val { font-weight: 600; color: var(--fg); text-align: right; }
+    .kv-key { color: var(--fg-muted); margin-right: 10px; white-space: nowrap; }
+    .kv-val { font-weight: 600; color: var(--fg); text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: normal; }
     .kv-val.accent { color: var(--accent); }
 
     /* Markdown Styles */
@@ -706,6 +811,7 @@
       font-size: 0.85rem;
       color: var(--fg);
       line-height: 1.65;
+      word-break: break-word; /* Fix for long words causing scroll */
     }
 
     .highlights-text p { margin-bottom: 0.75rem; }
@@ -714,24 +820,18 @@
     .highlights-text li { margin-bottom: 0.25rem; }
     .highlights-text strong { color: var(--fg); font-weight: 700; }
 
-    .detail-actions {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      margin-top: 4px;
-    }
-
     .action-link {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      padding: 14px;
+      padding: 12px;
       border-radius: var(--radius-md);
       font-weight: 700;
       font-size: 0.85rem;
       text-decoration: none;
       transition: all var(--transition-fast);
+      flex: 1;
     }
 
     .action-link.om { background: var(--fg); color: white; }
@@ -791,6 +891,9 @@
       .metrics-row { grid-template-columns: 1fr; }
       .property-table th:nth-child(4), .property-table td:nth-child(4),
       .property-table th:nth-child(6), .property-table td:nth-child(6) { display: none; }
+      
+      .compact-view .property-card { height: auto; flex-direction: column; }
+      .compact-view .card-image-wrap { width: 100%; height: 140px; }
     }
 
     @media (max-width: 480px) {
@@ -817,7 +920,7 @@
             <circle cx="11" cy="11" r="8"/>
             <path d="m21 21-4.35-4.35"/>
           </svg>
-          <input type="text" class="search-input" id="searchInput" placeholder="Search by name, address, or city..." disabled>
+          <input type="text" class="search-input" id="searchInput" placeholder="Search by name, address, city, or tenant..." disabled>
         </div>
 
         <select class="filter-select" id="typeFilter" disabled>
@@ -826,6 +929,9 @@
 
         <select class="filter-select" id="tenancyFilter" disabled>
           <option value="all">All Tenancy</option>
+          <option value="STNL">STNL</option>
+          <option value="Multi">Multi</option>
+          <option value="Center">Center</option>
         </select>
 
         <select class="filter-select" id="cityFilter" disabled>
@@ -846,6 +952,14 @@
               <line x1="3" y1="9" x2="21" y2="9"/>
               <line x1="3" y1="15" x2="21" y2="15"/>
               <line x1="9" y1="3" x2="9" y2="21"/>
+            </svg>
+          </button>
+          <button class="view-btn" id="compactViewBtn" title="Compact View" aria-label="Compact View">
+             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7" rx="1"/>
+              <rect x="14" y="3" width="7" height="7" rx="1"/>
+              <rect x="3" y="14" width="7" height="7" rx="1"/>
+              <rect x="14" y="14" width="7" height="7" rx="1"/>
             </svg>
           </button>
           <button class="view-btn active" id="gridViewBtn" title="Grid View" aria-label="Grid View">
@@ -959,6 +1073,11 @@
         </div>
       </div>
 
+      <!-- Moved Action Buttons Here -->
+      <div id="detailTopActions" class="detail-top-actions">
+        <!-- Buttons injected via JS -->
+      </div>
+
       <div class="detail-body">
         <div class="metrics-row">
           <div class="metric-card">
@@ -998,8 +1117,6 @@
           <div class="highlights-title">Investment Highlights</div>
           <div id="highlightsText" class="highlights-text"></div>
         </div>
-
-        <div id="detailActions" class="detail-actions"></div>
       </div>
     </div>
   </div>
@@ -1046,6 +1163,7 @@
       maxCap: $('maxCap'),
       clearFiltersBtn: $('clearFiltersBtn'),
       tableViewBtn: $('tableViewBtn'),
+      compactViewBtn: $('compactViewBtn'),
       gridViewBtn: $('gridViewBtn'),
       exportBtn: $('exportBtn'),
       exportLabel: $('exportLabel'),
@@ -1059,6 +1177,7 @@
       propertyTableBody: $('propertyTableBody'),
       detailOverlay: $('detailOverlay'),
       detailClose: $('detailClose'),
+      detailTopActions: $('detailTopActions'),
       exportModal: $('exportModal'),
       exportCount: $('exportCount'),
       cancelExportBtn: $('cancelExportBtn'),
@@ -1075,9 +1194,9 @@
     }
 
     const formatPrice = (val) => {
-      if (val == null) return 'Contact for Price';
+      if (val == null) return 'N/A';
       const n = Number(val);
-      if (!Number.isFinite(n)) return 'Contact for Price';
+      if (!Number.isFinite(n)) return 'N/A';
       return '$' + n.toLocaleString('en-US', { maximumFractionDigits: 0 });
     };
 
@@ -1102,12 +1221,16 @@
       return Number.isFinite(n) ? n + ' Years' : s;
     };
 
-    // Fix for Grist Unix Timestamps (Seconds)
+    // Smart Date Formatter
     const formatDate = (val) => {
       if (!val) return 'N/A';
-      // Grist returns timestamps in seconds. JS needs ms.
-      const d = new Date(val * 1000); 
+      const n = Number(val);
+      if (!Number.isFinite(n)) return 'N/A';
+      
+      const dateVal = n > 10000000000 ? n : n * 1000;
+      const d = new Date(dateVal);
       if (isNaN(d.getTime())) return 'N/A';
+      
       const m = (d.getMonth() + 1).toString().padStart(2, '0');
       const day = d.getDate().toString().padStart(2, '0');
       const y = d.getFullYear();
@@ -1116,7 +1239,11 @@
 
     const daysOnMarket = (val) => {
       if (!val) return null;
-      const d = new Date(val * 1000); // Fix: Handle seconds
+      const n = Number(val);
+      if(!Number.isFinite(n)) return null;
+      
+      const dateVal = n > 10000000000 ? n : n * 1000;
+      const d = new Date(dateVal);
       if (isNaN(d.getTime())) return null;
       const diff = Math.floor((Date.now() - d.getTime()) / 86400000);
       return Math.max(0, diff);
@@ -1129,83 +1256,91 @@
       return div.innerHTML;
     };
 
-    // ========== FIELD EXTRACTION ==========
-    // Fix for Grist List Format: ["L", "Item1", "Item2"]
-    const normVal = (v) => {
+    // ========== ROBUST DATA ACCESS ==========
+    const getSource = (rec) => rec.fields || rec;
+
+    const getRawVal = (src, colName) => {
+      if (!src) return undefined;
+      if (src.hasOwnProperty(colName)) return src[colName];
+      const cleanKey = Object.keys(src).find(k => k.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() === colName.replace(/[^a-zA-Z0-9]/g, '').toLowerCase());
+      return cleanKey ? src[cleanKey] : undefined;
+    };
+
+    const processList = (v) => {
+      if (v == null) return [];
+      if (Array.isArray(v)) {
+        if (v.length > 0 && v[0] === 'L') return v.slice(1).map(i => String(i).trim()).filter(Boolean);
+        return v.map(i => String(i).trim()).filter(Boolean);
+      }
+      if (typeof v === 'string') {
+        return v.split(',').map(i => i.trim()).filter(Boolean);
+      }
+      return [];
+    };
+
+    const processVal = (v) => {
       if (v == null) return undefined;
       if (Array.isArray(v)) {
-        // Check for Grist List marker "L"
-        const list = (v.length > 0 && v[0] === 'L') ? v.slice(1) : v;
-        const parts = list.map(i => i == null ? '' : String(i).trim()).filter(Boolean);
-        return parts.length ? parts.join(', ') : undefined;
+        if (v.length > 0 && v[0] === 'L') {
+          return v.slice(1).map(i => String(i).trim()).filter(Boolean).join(', ');
+        }
+        return v.map(i => String(i).trim()).filter(Boolean).join(', ');
       }
       if (typeof v === 'object') return undefined;
-      if (typeof v === 'string') {
-        const s = v.trim();
-        return s || undefined;
-      }
+      if (typeof v === 'string') return v.trim() || undefined;
       return v;
-    };
-
-    const getField = (rec, ...names) => {
-      if (!rec) return undefined;
-      const keys = Object.keys(rec);
-      for (const n of names) {
-        if (Object.prototype.hasOwnProperty.call(rec, n)) {
-          const v = normVal(rec[n]);
-          if (v != null) return v;
-        }
-      }
-      return undefined;
-    };
-
-    const extractImages = (rec) => {
-      const raw = rec.photo_url;
-      if (!raw) return [];
-      if (Array.isArray(raw)) return raw;
-      if (typeof raw === 'string') return raw.split(/[\s,]+/).filter(Boolean);
-      return [];
     };
 
     function normalize(rec) {
       const id = String(rec.id);
       if (normCache.has(id)) return normCache.get(id);
 
-      const images = extractImages(rec);
-      const price = getField(rec, 'Price', 'price');
-      const cap = getField(rec, 'Cap_Rate', 'capRate');
-      const rba = getField(rec, 'RBA', 'Building_Size', 'rba');
-      const noiVal = getField(rec, 'NOI', 'noi');
+      const src = getSource(rec);
+      
+      const rawImages = getRawVal(src, 'photo_url');
+      const images = (typeof rawImages === 'string') ? rawImages.split(/[\s,]+/).filter(Boolean) : 
+                     (Array.isArray(rawImages) ? rawImages : []);
+
+      const price = processVal(getRawVal(src, 'Price'));
+      const cap = processVal(getRawVal(src, 'Cap_Rate'));
+      const rba = processVal(getRawVal(src, 'RBA'));
+      const noiVal = processVal(getRawVal(src, 'NOI'));
+      
+      const timestamp = getRawVal(src, 'Date_Listed');
+      const updated = getRawVal(src, 'Last_updated_at') || getRawVal(src, 'Created_at');
+
+      const tenantsList = processList(getRawVal(src, 'Tenant_s_'));
 
       const data = {
         id,
-        name: getField(rec, 'Property_Name', 'propertyName') || 'Property',
-        address: getField(rec, 'Address', 'address') || '',
-        city: getField(rec, 'City', 'city') || '',
-        state: getField(rec, 'State', 'state') || '',
-        zip: getField(rec, 'Zip', 'zip') || '',
+        name: processVal(getRawVal(src, 'Property_Name')) || 'Property',
+        address: processVal(getRawVal(src, 'Address')) || '',
+        city: processVal(getRawVal(src, 'City')) || '',
+        state: processVal(getRawVal(src, 'State')) || '',
+        zip: processVal(getRawVal(src, 'Zip')) || '',
         price: price != null ? Number(price) : null,
         capRate: cap != null ? Number(cap) : null,
         noi: noiVal != null ? Number(noiVal) : (price != null && cap != null ? Number(price) * Number(cap) : null),
         rba: rba != null ? Number(rba) : null,
-        landSize: getField(rec, 'Land_Size', 'landSize'),
-        landUnit: getField(rec, 'Land_Unit', 'landUnit') || '',
-        leaseTerm: getField(rec, 'Lease_Term', 'Lease_Term_Remaining', 'leaseTermRemaining'),
-        leaseType: getField(rec, 'Lease_Type', 'leaseType') || '',
-        leaseExp: getField(rec, 'Lease_Expiration', 'leaseExpiration'), // Will be handled by formatDate
-        leaseOpts: getField(rec, 'Lease_Options', 'leaseOptions') || '',
-        rentBumps: getField(rec, 'Rent_Bumps', 'rentBumps') || '',
-        tenant: getField(rec, 'Tenant_s_', 'Tenant(s)', 'Tenants', 'Tenant', 'Tenant_Name', 'tenantName') || '',
+        landSize: processVal(getRawVal(src, 'Land_Size')),
+        landUnit: processVal(getRawVal(src, 'Land_Unit')) || '',
+        leaseTerm: processVal(getRawVal(src, 'Lease_Term')),
+        leaseType: processVal(getRawVal(src, 'Lease_Type')) || '',
+        leaseExp: getRawVal(src, 'Lease_Expiration'),
+        leaseOpts: processVal(getRawVal(src, 'Lease_Options')) || '',
+        rentBumps: processVal(getRawVal(src, 'Rent_Bumps')) || '',
+        tenantsList,
+        tenant: tenantsList.join(', '),
         images,
-        omUrl: getField(rec, 'OM', 'omUrl'),
-        listingUrl: getField(rec, 'Listing_URL', 'listingUrl'),
-        costarUrl: getField(rec, 'CoStar'),
-        crexiUrl: getField(rec, 'Crexi'),
-        tenancy: getField(rec, 'Tenancy'),
-        notes: getField(rec, 'Notes', 'notes'),
-        dateListed: getField(rec, 'Date_Listed', 'dateListed'), // Will be handled by formatDate
-        propertyType: getField(rec, 'Property_Type', 'propertyType'),
-        updatedAt: rec.Last_updated_at || rec.Created_at || null
+        omUrl: processVal(getRawVal(src, 'OM')),
+        listingUrl: processVal(getRawVal(src, 'Listing_URL')),
+        costarUrl: processVal(getRawVal(src, 'CoStar')),
+        crexiUrl: processVal(getRawVal(src, 'Crexi')),
+        tenancy: processVal(getRawVal(src, 'Tenancy')),
+        notes: processVal(getRawVal(src, 'Notes')),
+        dateListed: timestamp,
+        propertyType: processVal(getRawVal(src, 'Property_Type')),
+        updatedAt: updated
       };
 
       normCache.set(id, data);
@@ -1230,7 +1365,10 @@
       const days = daysOnMarket(d.dateListed);
       const isNew = days !== null && days <= 14;
       const selected = selectedIds.has(d.id);
-      const addr = buildAddress(d);
+      
+      // Logic for Compact vs Grid
+      const isCompact = currentView === 'compact';
+      const addrText = isCompact ? `${d.city}, ${d.state}` : buildAddress(d);
 
       return `
         <div class="property-card ${selected ? 'selected' : ''}" data-id="${d.id}" tabindex="0" role="button" aria-label="View details for ${esc(d.name)}">
@@ -1252,7 +1390,11 @@
             </div>
             <div class="card-address">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              <span>${esc(addr)}</span>
+              <span>${esc(addrText)}</span>
+            </div>
+            <div class="compact-meta">
+              <span>${formatCap(d.capRate)} Cap</span>
+              <span>${d.tenancy || '-'}</span>
             </div>
             <div class="card-metrics">
               <div class="metric"><div class="metric-label">Cap Rate</div><div class="metric-value highlight">${formatCap(d.capRate)}</div></div>
@@ -1268,7 +1410,6 @@
       const d = normalize(rec);
       const img = d.images[0] || '';
       const selected = selectedIds.has(d.id);
-      const days = daysOnMarket(d.dateListed);
       const placeholderImg = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 75"><rect fill="#e3e3e5" width="100" height="75"/><text x="50%" y="50%" fill="#9d9da3" font-size="10" text-anchor="middle">N/A</text></svg>');
 
       return `
@@ -1293,38 +1434,21 @@
 
     function populateFilters(recs) {
       const types = new Set();
-      const tenancies = new Set();
       const cities = new Set();
 
       recs.forEach(r => {
         const d = normalize(r);
         if (d.propertyType) types.add(d.propertyType);
-        if (d.tenancy) tenancies.add(d.tenancy);
         if (d.city) cities.add(d.city);
       });
 
+      // Types
       refs.typeFilter.innerHTML = '<option value="all">All Types</option>';
       [...types].sort().forEach(t => {
         refs.typeFilter.innerHTML += '<option value="' + esc(t) + '">' + esc(t) + '</option>';
       });
 
-      // Specific handling for Tenancy
-      refs.tenancyFilter.innerHTML = '<option value="all">All Tenancy</option>';
-      const sortedTenancies = [...tenancies].sort();
-      // Force specific order if those values exist
-      const priorityOrder = ['STNL', 'Multi', 'Center'];
-      priorityOrder.forEach(t => {
-        if (tenancies.has(t)) {
-          refs.tenancyFilter.innerHTML += '<option value="' + t + '">' + t + '</option>';
-        }
-      });
-      // Add any others
-      sortedTenancies.forEach(t => {
-        if (!priorityOrder.includes(t)) {
-           refs.tenancyFilter.innerHTML += '<option value="' + esc(t) + '">' + esc(t) + '</option>';
-        }
-      });
-
+      // Cities
       refs.cityFilter.innerHTML = '<option value="all">All Cities</option>';
       [...cities].sort().forEach(c => {
         refs.cityFilter.innerHTML += '<option value="' + esc(c) + '">' + esc(c) + '</option>';
@@ -1341,25 +1465,22 @@
       // Range filters
       const minPrice = refs.minPrice.value ? Number(refs.minPrice.value) : null;
       const maxPrice = refs.maxPrice.value ? Number(refs.maxPrice.value) : null;
-      const minCap = refs.minCap.value ? Number(refs.minCap.value) / 100 : null; // Convert % to decimal
+      const minCap = refs.minCap.value ? Number(refs.minCap.value) / 100 : null; 
       const maxCap = refs.maxCap.value ? Number(refs.maxCap.value) / 100 : null;
 
       filteredRecords = allRecords.filter(r => {
         const d = normalize(r);
 
-        // Search
         const matchSearch = !search ||
           d.name.toLowerCase().includes(search) ||
           d.address.toLowerCase().includes(search) ||
           d.city.toLowerCase().includes(search) ||
           (d.tenant && d.tenant.toLowerCase().includes(search));
 
-        // Dropdowns
         const matchType = type === 'all' || d.propertyType === type;
         const matchTenancy = tenancy === 'all' || d.tenancy === tenancy;
         const matchCity = city === 'all' || d.city === city;
 
-        // Ranges
         const matchPrice = (!minPrice || d.price >= minPrice) && (!maxPrice || d.price <= maxPrice);
         const matchCap = (!minCap || d.capRate >= minCap) && (!maxCap || d.capRate <= maxCap);
 
@@ -1374,7 +1495,10 @@
           case 'price-high': return (db.price || 0) - (da.price || 0);
           case 'price-low': return (da.price || 0) - (db.price || 0);
           case 'cap-high': return (db.capRate || 0) - (da.capRate || 0);
-          default: return new Date(db.updatedAt * 1000) - new Date(da.updatedAt * 1000); // Fix timestamp sort
+          default: 
+            const tA = da.updatedAt ? Number(da.updatedAt) : 0;
+            const tB = db.updatedAt ? Number(db.updatedAt) : 0;
+            return tB - tA; 
         }
       });
 
@@ -1398,21 +1522,22 @@
 
       updateSelectedCount();
 
-      if (currentView === 'grid') {
-        refs.propertyGrid.style.display = 'grid';
+      if (currentView === 'table') {
+        refs.propertyGrid.style.display = 'none';
+        refs.propertyTable.classList.add('show');
+        refs.propertyTable.style.display = 'table';
+        
+        refs.propertyTableBody.innerHTML = filteredRecords.map(createTableRow).join('');
+      } else {
         refs.propertyTable.style.display = 'none';
+        refs.propertyGrid.style.display = 'grid';
+        refs.propertyGrid.classList.toggle('compact-view', currentView === 'compact');
         
         const fragment = document.createRange().createContextualFragment(
           filteredRecords.map(createCard).join('')
         );
         refs.propertyGrid.innerHTML = '';
         refs.propertyGrid.appendChild(fragment);
-      } else {
-        refs.propertyGrid.style.display = 'none';
-        refs.propertyTable.classList.add('show');
-        refs.propertyTable.style.display = 'table';
-        
-        refs.propertyTableBody.innerHTML = filteredRecords.map(createTableRow).join('');
       }
 
       updateExportBtn();
@@ -1450,29 +1575,45 @@
       $('metricCap').textContent = formatCap(d.capRate);
       $('metricNoi').textContent = formatPrice(d.noi);
 
-      $('kvTenant').textContent = d.tenant || 'N/A';
+      // Tenant Badges
+      const tenantContainer = $('kvTenant');
+      tenantContainer.innerHTML = '';
+      if (d.tenantsList.length > 0) {
+        const badgesDiv = document.createElement('div');
+        badgesDiv.className = 'tenant-badges-container';
+        d.tenantsList.forEach(t => {
+          const badge = document.createElement('span');
+          badge.className = 'tenant-badge';
+          badge.textContent = t;
+          badgesDiv.appendChild(badge);
+        });
+        tenantContainer.appendChild(badgesDiv);
+      } else {
+        tenantContainer.textContent = 'N/A';
+      }
+
       $('kvTerm').textContent = formatTerm(d.leaseTerm);
-      $('kvExp').textContent = formatDate(d.leaseExp); // Fixed date handling
+      $('kvExp').textContent = formatDate(d.leaseExp);
       $('kvBumps').textContent = d.rentBumps || 'N/A';
       $('kvOpts').textContent = d.leaseOpts || 'N/A';
 
       $('kvRba').textContent = formatSF(d.rba);
       $('kvLand').textContent = d.landSize ? (d.landSize + ' ' + d.landUnit).trim() : 'N/A';
       $('kvPriceSf').textContent = (d.price && d.rba) ? formatPrice(d.price / d.rba) : 'N/A';
-      $('kvDate').textContent = formatDate(d.dateListed); // Fixed date handling
+      $('kvDate').textContent = formatDate(d.dateListed);
 
       const highlightsSection = $('highlightsSection');
       const highlightsText = $('highlightsText');
       if (d.notes) {
         highlightsSection.style.display = 'block';
-        // Render Markdown
         highlightsText.innerHTML = marked.parse(d.notes);
       } else {
         highlightsSection.style.display = 'none';
       }
 
-      const actions = $('detailActions');
-      actions.innerHTML = '';
+      // Actions (Moved to Top)
+      const actionsContainer = $('detailTopActions');
+      actionsContainer.innerHTML = '';
 
       if (d.omUrl) {
         const a = document.createElement('a');
@@ -1481,7 +1622,7 @@
         a.target = '_blank';
         a.rel = 'noopener noreferrer';
         a.textContent = 'View Offering Memorandum';
-        actions.appendChild(a);
+        actionsContainer.appendChild(a);
       }
 
       const listing = d.listingUrl || d.costarUrl || d.crexiUrl;
@@ -1492,7 +1633,7 @@
         a.target = '_blank';
         a.rel = 'noreferrer';
         a.textContent = 'Visit Listing';
-        actions.appendChild(a);
+        actionsContainer.appendChild(a);
       }
 
       refs.detailOverlay.classList.add('show');
@@ -1529,7 +1670,6 @@
         const d = normalize(r);
         const img = d.images[0] || '';
         const addr = buildAddress(d);
-        // Basic HTML for export
         return `
           <div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1);break-inside:avoid;margin-bottom:16px;">
             ${img ? '<img src="' + esc(img) + '" style="width:100%;height:200px;object-fit:cover;">' : ''}
@@ -1567,7 +1707,6 @@
     refs.cityFilter.addEventListener('change', applyFilters);
     refs.sortSelect.addEventListener('change', applyFilters);
 
-    // Advanced Filters
     refs.minPrice.addEventListener('input', debouncedFilter);
     refs.maxPrice.addEventListener('input', debouncedFilter);
     refs.minCap.addEventListener('input', debouncedFilter);
@@ -1586,20 +1725,22 @@
       refs.advancedToggle.classList.toggle('open', isOpen);
     });
 
-    // Views
-    refs.tableViewBtn.addEventListener('click', () => {
-      currentView = 'table';
-      refs.tableViewBtn.classList.add('active');
-      refs.gridViewBtn.classList.remove('active');
-      render();
-    });
-
-    refs.gridViewBtn.addEventListener('click', () => {
-      currentView = 'grid';
-      refs.gridViewBtn.classList.add('active');
+    function setView(view) {
+      currentView = view;
       refs.tableViewBtn.classList.remove('active');
+      refs.compactViewBtn.classList.remove('active');
+      refs.gridViewBtn.classList.remove('active');
+      
+      if(view === 'table') refs.tableViewBtn.classList.add('active');
+      else if(view === 'compact') refs.compactViewBtn.classList.add('active');
+      else refs.gridViewBtn.classList.add('active');
+      
       render();
-    });
+    }
+
+    refs.tableViewBtn.addEventListener('click', () => setView('table'));
+    refs.compactViewBtn.addEventListener('click', () => setView('compact'));
+    refs.gridViewBtn.addEventListener('click', () => setView('grid'));
 
     refs.exportBtn.addEventListener('click', openExportModal);
     refs.cancelExportBtn.addEventListener('click', closeExportModal);
@@ -1617,7 +1758,6 @@
       }
     });
 
-    // Grid Click Delegation
     refs.propertyGrid.addEventListener('click', (e) => {
       const card = e.target.closest('.property-card');
       if (!card) return;
@@ -1642,7 +1782,6 @@
       if (rec) openDetail(rec);
     });
 
-    // Table Click Delegation
     refs.propertyTableBody.addEventListener('click', (e) => {
       const row = e.target.closest('tr');
       if (!row) return;
@@ -1652,11 +1791,10 @@
     });
 
     // ========== GRIST DATA ==========
-    grist.onRecords((records, mappings) => {
-      allRecords = grist.mapColumnNames(records, mappings) || [];
+    grist.onRecords((records) => {
+      allRecords = records || [];
       normCache.clear();
 
-      // Enable controls
       refs.searchInput.disabled = false;
       refs.typeFilter.disabled = false;
       refs.tenancyFilter.disabled = false;
