@@ -14,7 +14,7 @@
             --bg-elevated: #111216;
             --bg-card: #16181d;
             --border: #2a2d35;
-            --border-active: #3d4150;
+            --border-hover: #3d4150;
             --fg: #e8eaed;
             --fg-muted: #7a8194;
             --accent: #22d3ee;
@@ -24,648 +24,602 @@
             --danger: #f87171;
         }
 
-        * { box-sizing: border-box; }
+        [data-theme="light"] {
+            --bg: #f8fafc;
+            --bg-elevated: #ffffff;
+            --bg-card: #ffffff;
+            --border: #e2e8f0;
+            --border-hover: #cbd5e1;
+            --fg: #0f172a;
+            --fg-muted: #64748b;
+            --accent: #0891b2;
+            --accent-dim: rgba(8, 145, 178, 0.1);
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #dc2626;
+        }
 
+        * { box-sizing: border-box; }
         body {
             font-family: 'Space Grotesk', sans-serif;
             background: var(--bg);
             color: var(--fg);
-            min-height: 100vh;
+            transition: background 0.3s, color 0.3s;
         }
-
         .font-mono { font-family: 'JetBrains Mono', monospace; }
-
+        
         ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: var(--bg-elevated); }
+        ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--border-active); }
-
+        ::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }
+        
         .input-field {
             background: var(--bg);
             border: 1px solid var(--border);
             color: var(--fg);
-            transition: all 0.2s ease;
+            transition: all 0.2s;
         }
-        .input-field:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px var(--accent-dim);
-        }
+        .input-field:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
         .input-field::placeholder { color: var(--fg-muted); }
-
-        .btn-primary {
-            background: var(--accent);
-            color: var(--bg);
-            font-weight: 600;
-            transition: all 0.2s ease;
-        }
+        
+        .btn-primary { background: var(--accent); color: white; font-weight: 600; transition: all 0.2s; }
         .btn-primary:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); }
-        .btn-primary:active:not(:disabled) { transform: translateY(0); }
         .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .btn-secondary { background: var(--bg-elevated); border: 1px solid var(--border); color: var(--fg); transition: all 0.2s; }
+        .btn-secondary:hover { background: var(--bg-card); border-color: var(--border-hover); }
+        
+        /* Segmented Control for Patterns */
+        .pattern-segment {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--fg-muted);
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .pattern-segment:hover {
+            border-color: var(--border-hover);
+            color: var(--fg);
+        }
+        .pattern-segment.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+            font-weight: 600;
+        }
 
-        .btn-secondary {
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th { background: var(--bg-elevated); position: sticky; top: 0; text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--border); z-index: 10; }
+        .data-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        .data-table tr:hover td { background: var(--bg-elevated); }
+        
+        @keyframes fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fade-in 0.4s ease-out; }
+        
+        .toast { position: fixed; bottom: 24px; right: 24px; padding: 12px 24px; border-radius: 6px; font-weight: 500; z-index: 9999; animation: fade-in 0.3s; color: white; }
+        .toast-success { background: var(--success); }
+        .toast-error { background: var(--danger); }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 100; opacity: 0; pointer-events: none;
+            transition: opacity 0.2s;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-content {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            color: var(--fg);
-            transition: all 0.2s ease;
+            border-radius: 12px;
+            padding: 24px;
+            width: 90%;
+            max-width: 400px;
+            transform: scale(0.95);
+            transition: transform 0.2s;
         }
-        .btn-secondary:hover { background: var(--bg-elevated); border-color: var(--border-active); }
-
-        .data-table { border-collapse: separate; border-spacing: 0; }
-        .data-table th { background: var(--bg-elevated); position: sticky; top: 0; z-index: 10; }
-        .data-table tr { transition: background 0.15s ease; }
-        .data-table tbody tr:hover { background: var(--bg-elevated); }
-        .data-table td, .data-table th { border-bottom: 1px solid var(--border); }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-
-        .animate-fade-in { animation: fadeIn 0.4s ease forwards; }
-        .animate-slide-in { animation: slideIn 0.3s ease forwards; }
-        .animate-pulse { animation: pulse 1.5s ease infinite; }
-
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
-        }
-
-        .bg-grid {
-            background-image: linear-gradient(rgba(34, 211, 238, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(34, 211, 238, 0.03) 1px, transparent 1px);
-            background-size: 40px 40px;
-        }
-        .glow-accent { box-shadow: 0 0 40px rgba(34, 211, 238, 0.1); }
-        
-        .url-location { color: var(--accent); }
-        .url-filtered { color: var(--fg-muted); text-decoration: line-through; opacity: 0.5; }
-
-        .toast {
-            position: fixed; bottom: 24px; right: 24px; padding: 12px 20px; border-radius: 8px;
-            font-weight: 500; z-index: 1000; animation: slideIn 0.3s ease;
-        }
-        .toast-success { background: var(--success); color: var(--bg); }
-        .toast-error { background: var(--danger); color: var(--bg); }
-        .toast-warning { background: var(--warning); color: var(--bg); }
-        
-        .alert-box {
-            background: rgba(251, 191, 36, 0.1);
-            border: 1px solid var(--warning);
-            color: var(--warning);
-        }
+        .modal-overlay.active .modal-content { transform: scale(1); }
     </style>
 </head>
-<body class="bg-grid">
-    <div class="min-h-screen flex flex-col">
+<body class="min-h-screen">
+
+    <!-- Fallback Tools Modal -->
+    <div id="fallbackModal" class="modal-overlay" onclick="if(event.target === this) toggleModal(false)">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold">External XML Converters</h3>
+                <button onclick="toggleModal(false)" class="text-[var(--fg-muted)] hover:text-[var(--fg)]">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <p class="text-sm text-[var(--fg-muted)] mb-4">If the automatic fetch fails, use these trusted tools to convert XML to CSV, then paste the URLs:</p>
+            <div class="space-y-3">
+                <a href="https://tableconvert.com/xml-to-csv" target="_blank" class="flex items-center gap-3 p-3 rounded-lg bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--accent)] transition-colors">
+                    <svg class="w-5 h-5 text-[var(--accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
+                    <span class="font-medium">TableConvert</span>
+                    <svg class="w-4 h-4 ml-auto text-[var(--fg-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                </a>
+                <a href="https://www.convertcsv.com/xml-to-csv.htm" target="_blank" class="flex items-center gap-3 p-3 rounded-lg bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--accent)] transition-colors">
+                    <svg class="w-5 h-5 text-[var(--accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
+                    <span class="font-medium">ConvertCSV</span>
+                    <svg class="w-4 h-4 ml-auto text-[var(--fg-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                </a>
+                <a href="https://data.page/xml/csv" target="_blank" class="flex items-center gap-3 p-3 rounded-lg bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--accent)] transition-colors">
+                    <svg class="w-5 h-5 text-[var(--accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
+                    <span class="font-medium">Data.page</span>
+                    <svg class="w-4 h-4 ml-auto text-[var(--fg-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-6xl mx-auto p-4 sm:p-6 space-y-6">
+        
         <!-- Header -->
-        <header class="border-b border-[var(--border)] bg-[var(--bg-elevated)]">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-lg bg-[var(--accent-dim)] flex items-center justify-center">
-                        <svg class="w-5 h-5 text-[var(--accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <h1 class="text-lg font-bold">Sitemap Location Extractor</h1>
-                        <p class="text-xs text-[var(--fg-muted)]">Extract and clean location URLs from sitemap.xml</p>
-                    </div>
+        <header class="flex items-center justify-between mb-8">
+            <div class="flex items-center gap-4">
+                <div class="p-3 rounded-lg bg-[var(--accent-dim)]">
+                    <svg class="w-6 h-6 text-[var(--accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold">Sitemap Location Extractor</h1>
+                    <p class="text-[var(--fg-muted)] text-sm">Isolate specific location URLs from large sitemaps</p>
                 </div>
             </div>
+
+            <!-- Theme Toggle -->
+            <button onclick="toggleTheme()" id="themeToggleBtn" class="btn-secondary p-2 rounded-full" aria-label="Toggle theme">
+                <svg id="moonIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+                <svg id="sunIcon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+            </button>
         </header>
 
-        <!-- Main Content -->
-        <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-6">
+        <!-- Step 1: Load Data -->
+        <section class="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-6 animate-fade-in shadow-sm">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="w-7 h-7 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-sm font-bold">1</span>
+                <h2 class="text-lg font-semibold">Load Sitemap</h2>
+            </div>
             
-            <!-- Local File Warning -->
-            <div id="localWarning" class="hidden mb-6 animate-fade-in">
-                <div class="alert-box rounded-lg p-4 flex items-start gap-3">
-                    <svg class="w-5 h-5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                    </svg>
-                    <div>
-                        <h3 class="font-bold">Browser Security Restriction Detected</h3>
-                        <p class="text-sm mt-1 opacity-90">
-                            You are running this tool locally (<code class="bg-black/20 px-1 rounded">file://</code>). 
-                            Browsers block external URL fetching from local files for security.
-                            <strong class="block mt-2">Please use the "Paste XML" option below.</strong>
-                        </p>
+            <div class="space-y-4">
+                <!-- Fetch URL -->
+                <div>
+                    <label class="block text-sm font-medium text-[var(--fg-muted)] mb-1">Fetch from URL</label>
+                    <div class="flex gap-2">
+                        <input type="url" id="urlInput" class="input-field flex-1 px-4 py-2 rounded-lg text-sm font-mono" placeholder="https://example.com/sitemap.xml" value="https://www.dairyqueen.com/en-us/sitemap.xml">
+                        <button id="fetchBtn" onclick="handleFetch()" class="btn-primary px-6 py-2 rounded-lg text-sm whitespace-nowrap">Fetch</button>
+                        <button onclick="toggleModal(true)" class="btn-secondary px-3 py-2 rounded-lg" title="Manual Fallback Tools">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </button>
                     </div>
+                    <p class="text-xs text-[var(--fg-muted)] mt-1">If fetch fails, click the <strong>?</strong> button for manual tools.</p>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <div class="flex-1 h-px bg-[var(--border)]"></div>
+                    <span class="text-xs text-[var(--fg-muted)]">OR</span>
+                    <div class="flex-1 h-px bg-[var(--border)]"></div>
+                </div>
+
+                <!-- Paste XML -->
+                <div>
+                    <label class="block text-sm font-medium text-[var(--fg-muted)] mb-1">Paste XML Content</label>
+                    <textarea id="pasteInput" class="input-field w-full px-4 py-2 rounded-lg text-xs font-mono h-32" placeholder="Paste raw XML content here..."></textarea>
+                    <button onclick="handlePaste()" class="btn-secondary px-6 py-2 rounded-lg text-sm mt-2">Parse XML</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Step 2: Filter Logic -->
+        <section id="filterSection" class="hidden bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-6 animate-fade-in shadow-sm">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="w-7 h-7 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-sm font-bold">2</span>
+                <h2 class="text-lg font-semibold">Filter Locations</h2>
+            </div>
+
+            <!-- Pattern Selection (Cleaned Up) -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-[var(--fg-muted)] mb-3">1. Select Location Directory</label>
+                <div id="patternContainer" class="inline-flex flex-wrap rounded-lg overflow-hidden border border-[var(--border)] bg-[var(--bg)]">
+                    <!-- JS will inject buttons here -->
                 </div>
             </div>
 
-            <!-- Step 1: Fetch Sitemap -->
-            <section id="step1" class="animate-fade-in">
-                <div class="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-6 glow-accent">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="w-8 h-8 rounded-full bg-[var(--accent)] text-[var(--bg)] flex items-center justify-center text-sm font-bold">1</div>
-                        <h2 class="text-xl font-bold">Input Source</h2>
-                    </div>
-                    
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-[var(--fg-muted)] mb-2">Option A: Fetch from URL</label>
-                            <div class="flex gap-3">
-                                <input 
-                                    type="url" 
-                                    id="sitemapUrl" 
-                                    class="input-field flex-1 px-4 py-3 rounded-lg font-mono text-sm"
-                                    placeholder="https://example.com/sitemap.xml"
-                                >
-                                <button 
-                                    id="fetchBtn" 
-                                    class="btn-primary px-6 py-3 rounded-lg flex items-center gap-2"
-                                    onclick="fetchSitemap()"
-                                >
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                                    </svg>
-                                    Fetch
-                                </button>
-                            </div>
-                            <p class="text-xs text-[var(--fg-muted)] mt-2">Note: Fetching may fail due to CORS restrictions. If it fails, use Option B.</p>
-                        </div>
-
-                        <div class="border-t border-[var(--border)] pt-4">
-                            <label class="block text-sm font-medium text-[var(--fg-muted)] mb-2">Option B: Paste XML Directly (Reliable)</label>
-                            <textarea 
-                                id="xmlInput" 
-                                class="input-field w-full px-4 py-3 rounded-lg font-mono text-xs h-40"
-                                placeholder="Open the sitemap URL in your browser, press Ctrl+A to select all, Ctrl+C to copy, then paste here..."
-                            ></textarea>
-                            <button 
-                                class="btn-primary px-4 py-2 rounded-lg mt-3 text-sm"
-                                onclick="parseXmlInput()"
-                            >
-                                Parse XML from Text
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Loading state -->
-                    <div id="loadingState" class="hidden mt-6 flex items-center gap-3 text-[var(--fg-muted)]">
-                        <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        <span>Fetching sitemap...</span>
-                    </div>
+            <!-- Depth Control -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-[var(--fg-muted)] mb-2">2. Minimum URL Depth (Segments after directory)</label>
+                <div class="flex items-center gap-4">
+                    <input type="range" id="depthSlider" min="1" max="6" value="1" class="w-full cursor-pointer" oninput="updateDepthLabel(); processUrls();">
+                    <span id="depthLabel" class="font-mono text-sm bg-[var(--bg)] px-3 py-1 rounded border border-[var(--border)] w-16 text-center">1</span>
                 </div>
-            </section>
+                <p class="text-xs text-[var(--fg-muted)] mt-1">Filter out partial paths (like State or City index pages). State=1, City=2, Store=3+</p>
+            </div>
 
-            <!-- Step 2: Configure Filter -->
-            <section id="step2" class="hidden mt-6 animate-fade-in">
-                <div class="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-6">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="w-8 h-8 rounded-full bg-[var(--accent)] text-[var(--bg)] flex items-center justify-center text-sm font-bold">2</div>
-                        <h2 class="text-xl font-bold">Configure Location Filter</h2>
-                    </div>
-
-                    <div class="grid sm:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-medium text-[var(--fg-muted)] mb-2">Location Path Pattern</label>
-                            <input 
-                                type="text" 
-                                id="locationPattern" 
-                                class="input-field w-full px-4 py-3 rounded-lg font-mono text-sm"
-                                placeholder="/locations/"
-                                oninput="updatePreview()"
-                            >
-                            <p class="text-xs text-[var(--fg-muted)] mt-1">URLs containing this path will be identified as locations</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-[var(--fg-muted)] mb-2">Minimum URL Depth (after pattern)</label>
-                            <input 
-                                type="number" 
-                                id="minDepth" 
-                                class="input-field w-full px-4 py-3 rounded-lg font-mono text-sm"
-                                value="2"
-                                min="0"
-                                oninput="updatePreview()"
-                            >
-                            <p class="text-xs text-[var(--fg-muted)] mt-1">Filter out incomplete paths (e.g., just state or city)</p>
-                        </div>
-                    </div>
-
-                    <!-- Quick patterns -->
-                    <div class="mt-4">
-                        <span class="text-sm text-[var(--fg-muted)]">Quick patterns detected:</span>
-                        <div id="quickPatterns" class="flex flex-wrap gap-2 mt-2"></div>
-                    </div>
-
-                    <!-- Stats -->
-                    <div id="filterStats" class="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
-                        <div class="bg-[var(--bg)] rounded-lg p-4">
-                            <div class="text-2xl font-bold font-mono" id="totalUrls">0</div>
-                            <div class="text-xs text-[var(--fg-muted)]">Total URLs</div>
-                        </div>
-                        <div class="bg-[var(--bg)] rounded-lg p-4">
-                            <div class="text-2xl font-bold font-mono text-[var(--accent)]" id="locationCount">0</div>
-                            <div class="text-xs text-[var(--fg-muted)]">Locations Found</div>
-                        </div>
-                        <div class="bg-[var(--bg)] rounded-lg p-4">
-                            <div class="text-2xl font-bold font-mono text-[var(--fg-muted)]" id="filteredCount">0</div>
-                            <div class="text-xs text-[var(--fg-muted)]">Filtered Out</div>
-                        </div>
-                        <div class="bg-[var(--bg)] rounded-lg p-4">
-                            <div class="text-2xl font-bold font-mono text-[var(--success)]" id="uniqueStates">0</div>
-                            <div class="text-xs text-[var(--fg-muted)]">Unique States</div>
-                        </div>
-                    </div>
+            <!-- Stats -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-lg border border-[var(--border)] bg-[var(--bg)]">
+                <div>
+                    <div class="text-2xl font-bold font-mono" id="statTotal">0</div>
+                    <div class="text-xs text-[var(--fg-muted)]">Total URLs</div>
                 </div>
-            </section>
-
-            <!-- Step 3: Preview & Export -->
-            <section id="step3" class="hidden mt-6 animate-fade-in">
-                <div class="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-6">
-                    <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full bg-[var(--accent)] text-[var(--bg)] flex items-center justify-center text-sm font-bold">3</div>
-                            <h2 class="text-xl font-bold">Preview & Export</h2>
-                        </div>
-                        <div class="flex gap-2">
-                            <button id="toggleViewBtn" class="btn-secondary px-4 py-2 rounded-lg text-sm flex items-center gap-2" onclick="toggleView()">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                </svg>
-                                <span id="viewLabel">Show All URLs</span>
-                            </button>
-                            <button class="btn-primary px-4 py-2 rounded-lg text-sm flex items-center gap-2" onclick="exportCSV()">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                </svg>
-                                Export CSV
-                            </button>
-                            <button class="btn-secondary px-4 py-2 rounded-lg text-sm flex items-center gap-2" onclick="copyToClipboard()">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-                                </svg>
-                                Copy URLs
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Search -->
-                    <div class="mb-4">
-                        <input type="text" id="searchInput" class="input-field w-full px-4 py-2 rounded-lg text-sm" placeholder="Search URLs..." oninput="filterTable()">
-                    </div>
-
-                    <!-- Table -->
-                    <div class="overflow-auto max-h-96 rounded-lg border border-[var(--border)]">
-                        <table class="data-table w-full text-sm">
-                            <thead>
-                                <tr>
-                                    <th class="text-left px-4 py-3 font-medium">#</th>
-                                    <th class="text-left px-4 py-3 font-medium">URL</th>
-                                    <th class="text-left px-4 py-3 font-medium">State</th>
-                                    <th class="text-left px-4 py-3 font-medium">City</th>
-                                    <th class="text-center px-4 py-3 font-medium">Type</th>
-                                </tr>
-                            </thead>
-                            <tbody id="urlTableBody"></tbody>
-                        </table>
-                    </div>
-
-                    <!-- Pagination -->
-                    <div id="pagination" class="mt-4 flex items-center justify-between">
-                        <span class="text-sm text-[var(--fg-muted)]">Showing <span id="showingCount">0</span> of <span id="totalCount">0</span></span>
-                        <div class="flex gap-2">
-                            <button class="btn-secondary px-3 py-1.5 rounded text-sm" onclick="prevPage()">Previous</button>
-                            <button class="btn-secondary px-3 py-1.5 rounded text-sm" onclick="nextPage()">Next</button>
-                        </div>
-                    </div>
+                <div>
+                    <div class="text-2xl font-bold font-mono text-[var(--accent)]" id="statFound">0</div>
+                    <div class="text-xs text-[var(--fg-muted)]">Locations Found</div>
                 </div>
-            </section>
-        </main>
+                <div>
+                    <div class="text-2xl font-bold font-mono" id="statFiltered">0</div>
+                    <div class="text-xs text-[var(--fg-muted)]">Filtered Out</div>
+                </div>
+                <div>
+                    <div class="text-2xl font-bold font-mono text-[var(--success)]" id="statStates">0</div>
+                    <div class="text-xs text-[var(--fg-muted)]">Unique States</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Step 3: Results -->
+        <section id="resultsSection" class="hidden bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-6 animate-fade-in shadow-sm">
+            <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+                <div class="flex items-center gap-2">
+                    <span class="w-7 h-7 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-sm font-bold">3</span>
+                    <h2 class="text-lg font-semibold">Results</h2>
+                </div>
+                <div class="flex gap-2">
+                    <button id="viewToggle" onclick="toggleView()" class="btn-secondary px-4 py-2 rounded-lg text-sm">Show All URLs</button>
+                    <button onclick="handleExport()" class="btn-primary px-4 py-2 rounded-lg text-sm">Export CSV</button>
+                    <button onclick="handleCopy()" class="btn-secondary px-4 py-2 rounded-lg text-sm">Copy CSV Data</button>
+                </div>
+            </div>
+
+            <!-- Search -->
+            <input type="text" id="searchInput" class="input-field w-full px-4 py-2 rounded-lg text-sm mb-4" placeholder="Search..." oninput="renderTable()">
+
+            <!-- Table -->
+            <div class="overflow-auto max-h-[500px] rounded-lg border border-[var(--border)]">
+                <table class="data-table text-sm">
+                    <thead>
+                        <tr>
+                            <th class="w-12">#</th>
+                            <th>URL</th>
+                            <th class="w-20">State</th>
+                            <th class="w-32">City</th>
+                            <th class="w-20 text-center">Depth</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="flex justify-between items-center mt-4">
+                <span id="pageInfo" class="text-sm text-[var(--fg-muted)]">Showing 0-0 of 0</span>
+                <div class="flex gap-2">
+                    <button onclick="changePage(-1)" class="btn-secondary px-3 py-1 rounded text-sm">Prev</button>
+                    <button onclick="changePage(1)" class="btn-secondary px-3 py-1 rounded text-sm">Next</button>
+                </div>
+            </div>
+        </section>
+
     </div>
 
     <script>
-        // State management
-        let allUrls = [];
-        let filteredUrls = [];
-        let currentPage = 0;
-        const pageSize = 50;
-        let showAllUrls = false;
+        // --- State ---
+        let rawUrls = [];
+        let processedUrls = [];
+        let currentPattern = '';
+        let page = 0;
+        const perPage = 100;
+        let showAll = false;
 
-        // Check for local file protocol on load
-        document.addEventListener('DOMContentLoaded', () => {
-            if (window.location.protocol === 'file:') {
-                document.getElementById('localWarning').classList.remove('hidden');
-            }
-        });
-
-        // Fetch sitemap
-        async function fetchSitemap() {
-            const url = document.getElementById('sitemapUrl').value.trim();
-            if (!url) {
-                showToast('Please enter a sitemap URL', 'error');
-                return;
-            }
-
-            const fetchBtn = document.getElementById('fetchBtn');
-            const loadingState = document.getElementById('loadingState');
-            
-            fetchBtn.disabled = true;
-            loadingState.classList.remove('hidden');
-
-            // Try multiple CORS proxies
-            const corsProxies = [
-                `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-                `https://corsproxy.io/?${encodeURIComponent(url)}`,
-                `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
-            ];
-
-            let success = false;
-            
-            for (let i = 0; i < corsProxies.length; i++) {
-                try {
-                    const response = await fetch(corsProxies[i]);
-                    if (!response.ok) continue;
-                    
-                    const text = await response.text();
-                    if (text && text.trim().length > 0) {
-                        parseSitemapXml(text);
-                        success = true;
-                        break;
-                    }
-                } catch (err) {
-                    console.log(`Proxy ${i+1} failed, trying next...`);
-                }
-            }
-
-            if (!success) {
-                showToast('Network error: Could not fetch URL. Please use "Paste XML" option.', 'error');
-            }
-
-            fetchBtn.disabled = false;
-            loadingState.classList.add('hidden');
-        }
-
-        function parseXmlInput() {
-            const xml = document.getElementById('xmlInput').value.trim();
-            if (!xml) {
-                showToast('Please paste XML content', 'error');
-                return;
-            }
-            parseSitemapXml(xml);
-        }
-
-        function parseSitemapXml(xmlText) {
-            // Basic validation to check if input is actually XML
-            const trimmedText = xmlText.trim();
-            if (!trimmedText.startsWith('<')) {
-                showToast('Invalid input: Data does not look like XML. Please check the source.', 'error');
-                console.error("Input received:", trimmedText.substring(0, 100));
-                return;
-            }
-
-            const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
-            
-            // Check for parsing errors
-            const parserError = xmlDoc.querySelector('parsererror');
-            if (parserError) {
-                showToast('Invalid XML format. Please check the content.', 'error');
-                return;
-            }
-
-            // Try standard namespace
-            let urlNodes = xmlDoc.querySelectorAll('url loc');
-            
-            // Fallback for namespaces or simplified structures
-            if (urlNodes.length === 0) {
-                // Try getting all 'loc' tags regardless of namespace
-                const allLocs = xmlDoc.getElementsByTagNameNS('*', 'loc');
-                if (allLocs.length > 0) {
-                    urlNodes = allLocs;
-                }
-            }
-            
-            // Fallback for plain text lists of URLs
-            if (urlNodes.length === 0 && trimmedText.includes('http')) {
-                const urlRegex = /https?:\/\/[^\s<]+/g;
-                const matches = trimmedText.match(urlRegex);
-                if (matches && matches.length > 0) {
-                    allUrls = matches.map(url => ({ url: url, lastmod: null }));
-                }
+        // --- Init Theme ---
+        const initTheme = () => {
+            if (localStorage.theme === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+                document.getElementById('sunIcon').classList.remove('hidden');
+                document.getElementById('moonIcon').classList.add('hidden');
             } else {
-                allUrls = Array.from(urlNodes).map(locNode => {
-                    const urlNode = locNode.parentElement;
-                    const lastmod = urlNode ? urlNode.querySelector('lastmod') : null;
-                    return {
-                        url: locNode.textContent.trim(),
-                        lastmod: lastmod ? lastmod.textContent.trim() : null
-                    };
-                });
+                document.documentElement.setAttribute('data-theme', 'dark');
+                document.getElementById('sunIcon').classList.add('hidden');
+                document.getElementById('moonIcon').classList.remove('hidden');
             }
+        }
+        initTheme();
 
-            if (allUrls.length === 0) {
-                showToast('No URLs found in the data provided.', 'error');
-                return;
+        function toggleTheme() {
+            if (document.documentElement.getAttribute('data-theme') === 'light') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.theme = 'dark';
+                document.getElementById('sunIcon').classList.add('hidden');
+                document.getElementById('moonIcon').classList.remove('hidden');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.theme = 'light';
+                document.getElementById('sunIcon').classList.remove('hidden');
+                document.getElementById('moonIcon').classList.add('hidden');
             }
-
-            showToast(`Successfully loaded ${allUrls.length} URLs`, 'success');
-            
-            autoDetectPattern();
-            
-            document.getElementById('step2').classList.remove('hidden');
-            document.getElementById('step3').classList.remove('hidden');
-            
-            updatePreview();
         }
 
-        function autoDetectPattern() {
-            const commonPatterns = ['/location', '/locations', '/store', '/stores', '/restaurant', '/restaurants', '/shop', '/shops', '/office', '/branch'];
-            const quickPatternsDiv = document.getElementById('quickPatterns');
-            quickPatternsDiv.innerHTML = '';
-            const foundPatterns = [];
+        function toggleModal(show) {
+            const modal = document.getElementById('fallbackModal');
+            if(show) modal.classList.add('active');
+            else modal.classList.remove('active');
+        }
+        
+        // --- Handlers ---
+        
+        async function handleFetch() {
+            const url = document.getElementById('urlInput').value.trim();
+            if(!url) return toast('Enter a URL', 'error');
+            
+            document.getElementById('fetchBtn').disabled = true;
+            document.getElementById('fetchBtn').textContent = 'Loading...';
 
-            commonPatterns.forEach(pattern => {
-                const count = allUrls.filter(item => item.url.toLowerCase().includes(pattern)).length;
-                if (count > 0) {
-                    foundPatterns.push({ pattern, count });
-                    const btn = document.createElement('button');
-                    btn.className = 'btn-secondary px-3 py-1.5 rounded text-xs font-mono';
-                    btn.textContent = `${pattern} (${count})`;
-                    btn.onclick = () => {
-                        document.getElementById('locationPattern').value = pattern;
-                        updatePreview();
-                    };
-                    quickPatternsDiv.appendChild(btn);
+            try {
+                const proxies = [
+                    `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+                    `https://corsproxy.io/?${encodeURIComponent(url)}`
+                ];
+
+                let text = null;
+                for(let proxy of proxies) {
+                    try {
+                        const resp = await fetch(proxy);
+                        if(resp.ok) {
+                            text = await resp.text();
+                            if(text && !text.toLowerCase().includes('<!doctype')) break;
+                        }
+                    } catch(e) { /* Try next proxy */ }
                 }
+
+                if(text) {
+                    parseXml(text);
+                } else {
+                    toast('Could not fetch URL. Use Paste or Manual Tools.', 'error');
+                }
+            } catch(e) {
+                console.error(e);
+                toast('Error fetching URL', 'error');
+            } finally {
+                document.getElementById('fetchBtn').disabled = false;
+                document.getElementById('fetchBtn').textContent = 'Fetch';
+            }
+        }
+
+        function handlePaste() {
+            const text = document.getElementById('pasteInput').value.trim();
+            if(!text) return toast('Paste XML content first', 'error');
+            parseXml(text);
+        }
+
+        function parseXml(xmlText) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(xmlText, 'text/xml');
+            const locs = doc.getElementsByTagName('loc');
+            
+            if(locs.length === 0) {
+                const matches = xmlText.match(/<loc>\s*(https?:\/\/[^<]+)\s*<\/loc>/gi) || [];
+                rawUrls = matches.map(m => m.replace(/<\/?loc>/gi, '').trim());
+            } else {
+                rawUrls = Array.from(locs).map(l => l.textContent.trim());
+            }
+
+            if(rawUrls.length === 0) return toast('No URLs found in XML', 'error');
+            toast(`Loaded ${rawUrls.length} URLs`, 'success');
+            detectPatterns();
+        }
+
+        function detectPatterns() {
+            const counts = {};
+            const pathSegments = {};
+
+            rawUrls.forEach(url => {
+                try {
+                    const p = new URL(url).pathname;
+                    const parts = p.split('/').filter(s => s.length > 0);
+                    
+                    parts.forEach((seg, i) => {
+                        if(/location|store|shop|branch|restaurant/i.test(seg)) {
+                            const key = seg.toLowerCase();
+                            counts[key] = (counts[key] || 0) + 1;
+                            const depth = parts.length - (i + 1);
+                            if(!pathSegments[key]) pathSegments[key] = {};
+                            pathSegments[key][depth] = (pathSegments[key][depth] || 0) + 1;
+                        }
+                    });
+                } catch(e) {}
             });
 
-            if (foundPatterns.length > 0) {
-                foundPatterns.sort((a, b) => b.count - a.count);
-                document.getElementById('locationPattern').value = foundPatterns[0].pattern;
-            }
-        }
-
-        function updatePreview() {
-            const pattern = document.getElementById('locationPattern').value.trim().toLowerCase();
-            const minDepth = parseInt(document.getElementById('minDepth').value) || 0;
-
-            filteredUrls = allUrls.map(item => {
-                const urlLower = item.url.toLowerCase();
-                const patternIndex = urlLower.indexOf(pattern);
-                
-                if (!pattern || patternIndex === -1) {
-                    return { ...item, isLocation: false, state: null, city: null, depth: 0 };
-                }
-
-                const afterPattern = item.url.substring(patternIndex + pattern.length);
-                // Clean up query strings and anchors for parsing
-                const cleanPath = afterPattern.split('?')[0].split('#')[0];
-                const segments = cleanPath.split('/').filter(s => s.length > 0);
-                
-                const depth = segments.length;
-                const state = segments[0] || null;
-                const city = segments[1] || null;
-                const isLocation = depth >= minDepth;
-
-                return {
-                    ...item,
-                    isLocation,
-                    state: state ? state.toUpperCase() : null,
-                    city: city ? capitalizeWords(city.replace(/-/g, ' ')) : null,
-                    depth
+            const container = document.getElementById('patternContainer');
+            container.innerHTML = '';
+            
+            const sorted = Object.keys(counts).sort((a,b) => counts[b] - counts[a]);
+            
+            sorted.forEach(key => {
+                const btn = document.createElement('button');
+                // Clean UI styles
+                btn.className = 'pattern-segment px-4 py-2 text-sm font-mono border-r border-[var(--border)] last:border-r-0';
+                btn.textContent = `${key} (${counts[key]})`;
+                btn.onclick = () => {
+                    // Update active state
+                    Array.from(container.children).forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    selectPattern(key, pathSegments[key]);
                 };
+                container.appendChild(btn);
             });
 
-            const locations = filteredUrls.filter(u => u.isLocation);
-            const states = [...new Set(locations.map(u => u.state).filter(Boolean))];
+            if(sorted.length > 0) {
+                // Auto click first
+                container.firstChild.click();
+                document.getElementById('filterSection').classList.remove('hidden');
+                document.getElementById('resultsSection').classList.remove('hidden');
+            } else {
+                toast('Could not detect location patterns', 'error');
+            }
+        }
 
-            document.getElementById('totalUrls').textContent = allUrls.length.toLocaleString();
-            document.getElementById('locationCount').textContent = locations.length.toLocaleString();
-            document.getElementById('filteredCount').textContent = (allUrls.length - locations.length).toLocaleString();
-            document.getElementById('uniqueStates').textContent = states.length.toLocaleString();
+        function selectPattern(pattern, depthMap) {
+            currentPattern = pattern;
+            
+            let bestDepth = 1;
+            let maxCount = 0;
+            
+            // Auto-depth logic
+            for(const [depth, count] of Object.entries(depthMap)) {
+                if(count >= maxCount * 0.8) {
+                    maxCount = count;
+                    bestDepth = parseInt(depth);
+                }
+            }
 
-            currentPage = 0;
+            const slider = document.getElementById('depthSlider');
+            slider.value = bestDepth;
+            updateDepthLabel();
+            processUrls();
+        }
+
+        function updateDepthLabel() {
+            document.getElementById('depthLabel').textContent = document.getElementById('depthSlider').value;
+        }
+
+        function processUrls() {
+            const minDepth = parseInt(document.getElementById('depthSlider').value);
+            
+            processedUrls = rawUrls.map(url => {
+                try {
+                    const urlObj = new URL(url);
+                    const parts = urlObj.pathname.split('/').filter(s => s.length > 0);
+                    const idx = parts.findIndex(p => p.toLowerCase() === currentPattern);
+
+                    if(idx === -1) return { url, state: null, city: null, depth: 0, keep: false };
+
+                    const segments = parts.slice(idx + 1);
+                    const depth = segments.length;
+
+                    return {
+                        url,
+                        state: segments[0] ? segments[0].toUpperCase() : null,
+                        city: segments[1] ? toTitleCase(segments[1].replace(/-/g, ' ')) : null,
+                        depth,
+                        keep: depth >= minDepth
+                    };
+                } catch(e) {
+                    return { url, state: null, city: null, depth: 0, keep: false };
+                }
+            });
+
+            updateStats();
             renderTable();
         }
 
-        function capitalizeWords(str) {
-            return str.replace(/\b\w/g, l => l.toUpperCase());
-        }
-
-        function toggleView() {
-            showAllUrls = !showAllUrls;
-            document.getElementById('viewLabel').textContent = showAllUrls ? 'Show Locations Only' : 'Show All URLs';
-            currentPage = 0;
-            renderTable();
-        }
-
-        function filterTable() {
-            currentPage = 0;
-            renderTable();
+        function updateStats() {
+            const found = processedUrls.filter(u => u.keep);
+            const states = new Set(found.map(u => u.state).filter(Boolean));
+            
+            document.getElementById('statTotal').textContent = rawUrls.length.toLocaleString();
+            document.getElementById('statFound').textContent = found.length.toLocaleString();
+            document.getElementById('statFiltered').textContent = (rawUrls.length - found.length).toLocaleString();
+            document.getElementById('statStates').textContent = states.size.toLocaleString();
         }
 
         function renderTable() {
             const search = document.getElementById('searchInput').value.toLowerCase();
-            const tbody = document.getElementById('urlTableBody');
+            let list = processedUrls.filter(u => showAll || u.keep);
             
-            let displayUrls = showAllUrls ? filteredUrls : filteredUrls.filter(u => u.isLocation);
-            
-            if (search) {
-                displayUrls = displayUrls.filter(u => 
-                    u.url.toLowerCase().includes(search) ||
+            if(search) {
+                list = list.filter(u => 
+                    u.url.toLowerCase().includes(search) || 
                     (u.state && u.state.toLowerCase().includes(search)) ||
                     (u.city && u.city.toLowerCase().includes(search))
                 );
             }
 
-            const start = currentPage * pageSize;
-            const end = Math.min(start + pageSize, displayUrls.length);
-            const pageUrls = displayUrls.slice(start, end);
+            const total = list.length;
+            const start = page * perPage;
+            const end = Math.min(start + perPage, total);
+            const slice = list.slice(start, end);
 
-            tbody.innerHTML = pageUrls.map((item, index) => `
-                <tr class="${item.isLocation ? '' : 'opacity-40'}">
-                    <td class="px-4 py-2 font-mono text-[var(--fg-muted)]">${start + index + 1}</td>
-                    <td class="px-4 py-2 font-mono text-xs ${item.isLocation ? 'url-location' : 'url-filtered'} break-all max-w-md">${escapeHtml(item.url)}</td>
-                    <td class="px-4 py-2 font-mono text-xs">${item.state || '-'}</td>
-                    <td class="px-4 py-2 text-xs">${item.city || '-'}</td>
-                    <td class="px-4 py-2 text-center">
-                        <span class="inline-block px-2 py-1 rounded text-xs ${item.isLocation ? 'bg-[var(--accent-dim)] text-[var(--accent)]' : 'bg-[var(--bg)] text-[var(--fg-muted)]'}">
-                            ${item.isLocation ? 'Location' : 'Filtered'}
-                        </span>
-                    </td>
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = slice.map((u, i) => `
+                <tr class="${u.keep ? '' : 'opacity-40'}">
+                    <td class="font-mono text-[var(--fg-muted)] text-xs">${start+i+1}</td>
+                    <td class="font-mono text-xs ${u.keep ? 'text-[var(--accent)]' : 'line-through'} break-all max-w-md">${u.url}</td>
+                    <td class="font-mono text-xs">${u.state || '-'}</td>
+                    <td class="text-xs">${u.city || '-'}</td>
+                    <td class="text-center text-xs font-mono">${u.depth}</td>
                 </tr>
             `).join('');
 
-            document.getElementById('showingCount').textContent = pageUrls.length;
-            document.getElementById('totalCount').textContent = displayUrls.length.toLocaleString();
+            document.getElementById('pageInfo').textContent = `Showing ${start+1}-${end} of ${total}`;
         }
 
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
+        // --- Actions ---
+
+        function toggleView() {
+            showAll = !showAll;
+            document.getElementById('viewToggle').textContent = showAll ? 'Show Locations Only' : 'Show All URLs';
+            page = 0;
+            renderTable();
         }
 
-        function prevPage() {
-            if (currentPage > 0) {
-                currentPage--;
-                renderTable();
-            }
+        function changePage(dir) {
+            page += dir;
+            renderTable();
         }
 
-        function nextPage() {
-            const search = document.getElementById('searchInput').value.toLowerCase();
-            let displayUrls = showAllUrls ? filteredUrls : filteredUrls.filter(u => u.isLocation);
-            if (search) {
-                displayUrls = displayUrls.filter(u => 
-                    u.url.toLowerCase().includes(search) ||
-                    (u.state && u.state.toLowerCase().includes(search)) ||
-                    (u.city && u.city.toLowerCase().includes(search))
-                );
-            }
-            if ((currentPage + 1) * pageSize < displayUrls.length) {
-                currentPage++;
-                renderTable();
-            }
+        // Generates CSV string
+        function generateCSV() {
+            const data = processedUrls.filter(u => u.keep);
+            if(data.length === 0) return null;
+
+            let csv = 'URL,State,City\n';
+            data.forEach(u => {
+                const safeUrl = u.url.includes(',') ? `"${u.url}"` : u.url;
+                const safeState = u.state || '';
+                const safeCity = u.city ? (u.city.includes(',') ? `"${u.city}"` : u.city) : '';
+                csv += `${safeUrl},${safeState},${safeCity}\n`;
+            });
+            return csv;
         }
 
-        function exportCSV() {
-            const locations = filteredUrls.filter(u => u.isLocation);
-            if (locations.length === 0) {
-                showToast('No locations to export', 'error');
-                return;
-            }
+        function handleExport() {
+            const csv = generateCSV();
+            if(!csv) return toast('No locations to export', 'error');
 
-            const headers = ['URL', 'State', 'City'];
-            const rows = locations.map(u => [`"${u.url}"`, u.state || '', u.city || '']);
-            const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'locations.csv';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
 
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'locations.csv';
-            a.click();
-            URL.revokeObjectURL(url);
-            showToast(`Exported ${locations.length} locations`, 'success');
+            toast(`Exported ${processedUrls.filter(u=>u.keep).length} locations`, 'success');
         }
 
-        function copyToClipboard() {
-            const locations = filteredUrls.filter(u => u.isLocation);
-            if (locations.length === 0) {
-                showToast('No locations to copy', 'error');
-                return;
-            }
-            const text = locations.map(u => u.url).join('\n');
-            navigator.clipboard.writeText(text).then(() => {
-                showToast(`Copied ${locations.length} URLs to clipboard`, 'success');
-            }).catch(() => {
-                showToast('Failed to copy', 'error');
+        function handleCopy() {
+            const csv = generateCSV();
+            if(!csv) return toast('No locations to copy', 'error');
+            
+            navigator.clipboard.writeText(csv).then(() => {
+                toast('CSV data copied to clipboard!', 'success');
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                toast('Failed to copy', 'error');
             });
         }
 
-        function showToast(message, type) {
-            document.querySelectorAll('.toast').forEach(t => t.remove());
-            const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 4000);
+        // --- Utils ---
+
+        function toTitleCase(str) {
+            return str.replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+        }
+
+        function toast(msg, type) {
+            const el = document.createElement('div');
+            el.className = `toast toast-${type}`;
+            el.textContent = msg;
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 3000);
         }
     </script>
 </body>
