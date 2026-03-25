@@ -193,7 +193,7 @@ ready(function() {
   $('btn-html').onclick = downloadHTML;
 
   // Init Grist
-  grist.ready({ requiredAccess: 'read' });
+  grist.ready({ requiredAccess: 'full' });
   grist.onRecords(() => refreshView());
   
   // Initial Load
