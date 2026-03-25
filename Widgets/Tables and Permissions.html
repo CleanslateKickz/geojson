@@ -116,7 +116,6 @@
       line-height: 1.5;
       border: 2px solid var(--primary-color);
     }
-    .ai-header { color: #ebcb8b; font-weight: bold; }
 
     /* Notifications */
     #notification {
@@ -141,11 +140,12 @@
   <p class="description">
     Generate reports on Table Schemas and Access Control Lists (ACLs). 
     Use <b>AI Mode</b> to format output for ChatGPT or Claude.
+    <br><span style="color:#b45309; font-weight:bold;">Requires Full Access.</span>
   </p>
 
   <!-- Navigation -->
   <div class="controls">
-    <button id="btn-tables" class="active">Tables</button>
+    <button id="btn-tables">Tables</button>
     <button id="btn-acl">ACLs</button>
     <span class="separator"></span>
     <button id="btn-code-view">Code View</button>
@@ -161,16 +161,20 @@
 
   <!-- Output Container -->
   <div id="loading" style="display:none; font-style:italic; color:#888;">Loading data...</div>
-  <div id="output-container"></div>
+  <div id="output-container">
+    <div style="padding: 20px; text-align:center; color:#888;">
+      Click <b>Tables</b> or <b>ACLs</b> to generate a report.
+    </div>
+  </div>
   
   <!-- Notification Element -->
   <div id="notification">Copied!</div>
 
 <script>
-let currentMode = 'tables'; // 'tables' or 'acl'
+let currentMode = null; // Start as null so we don't auto-load
 let codeViewEnabled = false;
 let aiModeEnabled = false;
-let currentData = null; // Store fetched data for export
+let currentData = null; 
 
 // Utility: DOM Shortcuts
 const $ = id => document.getElementById(id);
@@ -193,37 +197,41 @@ ready(function() {
   $('btn-html').onclick = downloadHTML;
 
   // Init Grist
+  // IMPORTANT: 'full' access is required to read _grist_Tables
   grist.ready({ requiredAccess: 'full' });
-  grist.onRecords(() => refreshView());
   
-  // Initial Load
-  refreshView();
+  // We do NOT call refreshView() here. 
+  // We wait for the user to click a button.
 });
 
 function switchMode(mode) {
   currentMode = mode;
+  
+  // Update button active states
   $('btn-tables').classList.toggle('active', mode === 'tables');
   $('btn-acl').classList.toggle('active', mode === 'acl');
+  
+  // Trigger the data fetch
   refreshView();
 }
 
 function toggleCodeView() {
   codeViewEnabled = !codeViewEnabled;
   $('btn-code-view').classList.toggle('active', codeViewEnabled);
-  // If turning on Code View, turn off AI Mode to avoid conflict
-  if (codeViewEnabled && aiModeEnabled) toggleAIMode();
-  refreshView();
+  if (codeViewEnabled && aiModeEnabled) toggleAIMode(); // Turn off AI mode if Code View is on
+  if (currentMode) refreshView(); // Only refresh if data is already loaded
 }
 
 function toggleAIMode() {
   aiModeEnabled = !aiModeEnabled;
   $('btn-ai-mode').classList.toggle('active', aiModeEnabled);
-  // If turning on AI Mode, turn off standard Code View
-  if (aiModeEnabled && codeViewEnabled) toggleCodeView();
-  refreshView();
+  if (aiModeEnabled && codeViewEnabled) toggleCodeView(); // Turn off Code View if AI mode is on
+  if (currentMode) refreshView(); // Only refresh if data is already loaded
 }
 
 async function refreshView() {
+  if (!currentMode) return; // Safety check
+
   $('output-container').innerHTML = '';
   $('loading').style.display = 'block';
   
@@ -234,7 +242,13 @@ async function refreshView() {
       await showACL();
     }
   } catch (e) {
-    $('output-container').innerHTML = `<div style="color:red">Error: ${e.message}. <br>Ensure you have 'Full Access' enabled in the widget settings.</div>`;
+    let errorMsg = e.message;
+    if (e.message && e.message.includes("No view")) {
+        errorMsg = "Waiting for access... Please click 'Grant Full Access' in the banner above or in widget settings.";
+    } else if (e.message.includes("permission")) {
+        errorMsg = "Permission denied. This widget requires 'Full Access' to read the schema.";
+    }
+    $('output-container').innerHTML = `<div style="color:red; padding: 10px; border: 1px solid red; background: #fff0f0;">Error: ${errorMsg}</div>`;
     console.error(e);
   }
   
@@ -245,17 +259,14 @@ async function refreshView() {
    1. TABLES / SCHEMA LOGIC
 --------------------------------------------------------------------- */
 async function showSchemaTables() {
-  // Fetch internal Grist tables
   const tablesData = await grist.docApi.fetchTable("_grist_Tables");
   const colsData = await grist.docApi.fetchTable("_grist_Tables_column");
 
   let result = [];
 
-  // Map IDs to names for lookup
   const tableIdMap = {};
   tablesData.id.forEach((id, i) => tableIdMap[id] = tablesData.tableId[i]);
 
-  // Process Columns
   for (let i = 0; i < colsData.id.length; i++) {
     const tableNum = colsData.parentId[i];
     const tableName = tableIdMap[tableNum];
@@ -277,7 +288,6 @@ async function showSchemaTables() {
     });
   }
 
-  // Sort and Group
   result.sort((a, b) => (a.tableName + a.fieldName).localeCompare(b.tableName + b.fieldName));
   
   const grouped = {};
@@ -354,12 +364,8 @@ function renderCodeView(grouped) {
    2. AI MODE RENDERING
 --------------------------------------------------------------------- */
 function renderAIMode(grouped) {
-  // Generate the prompt text
   let markdown = generateAIMarkdown(grouped);
-  
-  // Render visually with syntax highlighting classes
   let visualHtml = `<div class="ai-container">${escapeHtml(markdown)}</div>`;
-  
   $('output-container').innerHTML = visualHtml;
 }
 
@@ -367,14 +373,13 @@ function generateAIMarkdown(grouped) {
   let text = `Here is the schema for the Grist data tables, followed by the code view of each table.\n\n`;
   
   for (const [tableName, rows] of Object.entries(grouped)) {
-    // 1. Schema Section
     text += `## Table: ${tableName}\n`;
     text += `| Field | Type | Formula |\n`;
     text += `|---|---|---|\n`;
     
     rows.forEach(r => {
       const type = r.isFormula ? "Formula" : r.type;
-      const formula = r.formula.replace(/\n/g, " ").replace(/"/g, "'"); // Clean up for table
+      const formula = r.formula.replace(/\n/g, " ").replace(/"/g, "'");
       text += `| ${r.fieldName} | ${type} | ${r.isFormula ? formula : ""} |\n`;
     });
 
@@ -500,7 +505,7 @@ function renderACL_AI(results) {
         text += `\n`;
     });
 
-    currentData.aiText = text; // Store for copy
+    currentData.aiText = text; 
     $('output-container').innerHTML = `<div class="ai-container">${escapeHtml(text)}</div>`;
 }
 
@@ -509,23 +514,20 @@ function renderACL_AI(results) {
 --------------------------------------------------------------------- */
 
 function copyToClipboard() {
-  if (!currentData) return;
+  if (!currentData) {
+    notify("No data loaded yet.");
+    return;
+  }
   
   let textToCopy = "";
 
-  // Priority 1: AI Mode Text
   if (aiModeEnabled) {
-    // If we generated AI text (either Schema or ACL), use that
     if (currentData.type === 'schema') {
-        // Re-generate to ensure we have latest, or fetch from global scope
         textToCopy = generateAIMarkdown(currentData.data); 
     } else {
-        // ACL AI text is generated in renderACL_AI
         textToCopy = currentData.aiText || "";
     }
-  } 
-  // Priority 2: Standard Tab-Separated for Excel
-  else {
+  } else {
     if (currentData.type === 'schema') {
       textToCopy = "Table\tField\tType\tFormula\n";
       for (const [tbl, rows] of Object.entries(currentData.data)) {
@@ -572,13 +574,14 @@ function downloadCSV() {
 }
 
 function downloadHTML() {
-  // If in AI mode, download the markdown as text file instead
   if (aiModeEnabled) {
     let text = (currentData.type === 'schema') ? generateAIMarkdown(currentData.data) : currentData.aiText;
     downloadFile(text, "ai_prompt.txt", "text/plain");
     notify("Downloaded AI Prompt");
     return;
   }
+  
+  if (!currentData) return;
 
   const content = $('output-container').innerHTML;
   const styles = document.querySelector('style').outerHTML;
