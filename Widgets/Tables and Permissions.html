@@ -1,390 +1,655 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <style>
-/* Your CSS here */
-    </style>
-</head>
-<body>
-<html>
-
-<head>
+  <meta charset="utf-8">
+  <title>Grist Schema & ACL Reporter</title>
   <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
-  <script src="api.js"></script>
-  <style id="stylejta">
+  <style>
+    :root {
+      --primary-color: #16b378;
+      --text-color: #333;
+      --border-color: #ddd;
+      --bg-color: #f9f9f9;
+      --ai-bg: #2b303b;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      padding: 15px;
+      color: var(--text-color);
+      background-color: white;
+    }
+    h1 { font-size: 1.4rem; margin-top: 0; }
+    .description { font-size: 0.9rem; color: #666; margin-bottom: 15px; }
+    
+    /* Controls */
+    .controls {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    button {
+      background-color: white;
+      border: 1px solid var(--border-color);
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    button:hover { background-color: var(--bg-color); }
+    button.active {
+      background-color: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+    button.action-btn {
+      background-color: transparent;
+      color: var(--primary-color);
+      border: 1px solid var(--primary-color);
+      font-weight: bold;
+    }
+    button.action-btn:hover { background-color: #eef9f4; }
+    
+    .separator {
+      width: 1px;
+      height: 20px;
+      background-color: var(--border-color);
+      margin: 0 5px;
+    }
+
+    /* Tables */
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-bottom: 20px;
+      margin-bottom: 25px;
+      font-size: 13px;
     }
-
-    table,
-    th,
-    td {
-      border: 1px solid black;
-    }
-
-    th, .sep {
-      background-color: #f2f2f2;
-    }
-
-    th,
-    td {
-      padding: 4px;
+    th, td {
+      border: 1px solid var(--border-color);
+      padding: 8px;
       text-align: left;
       vertical-align: top;
-      font-size: 14px;
-      font-family: Arial, Helvetica, sans-serif;
     }
-
+    th {
+      background-color: var(--bg-color);
+      font-weight: 600;
+    }
     pre {
       background-color: #f4f4f4;
-      padding: 8px;
-      margin: 0px;
+      padding: 6px;
+      margin: 0;
       white-space: pre-wrap;
       word-wrap: break-word;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+      font-size: 12px;
+      border-radius: 3px;
     }
+    
+    /* Code View Styles */
+    .code-view-container {
+      background-color: #282c34;
+      color: #abb2bf;
+      padding: 15px;
+      border-radius: 5px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+      font-size: 13px;
+      white-space: pre;
+      overflow-x: auto;
+    }
+    .code-keyword { color: #c678dd; }
+    .code-func { color: #61afef; }
+    .code-string { color: #98c379; }
+    .code-comment { color: #5c6370; font-style: italic; }
 
-    .title {
-      font-weight: bold;
+    /* AI Mode Styles */
+    .ai-container {
+      background-color: var(--ai-bg);
+      color: #c0c5ce;
+      padding: 20px;
+      border-radius: 5px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+      font-size: 13px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      line-height: 1.5;
+      border: 2px solid var(--primary-color);
     }
+    .ai-header { color: #ebcb8b; font-weight: bold; }
+
+    /* Notifications */
+    #notification {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #333;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 4px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      z-index: 1000;
+    }
+    #notification.show { opacity: 1; }
   </style>
 </head>
-
 <body>
-  <div style="font-family: sans-serif; padding-left: 1em; padding-right: 1em;">
-    <h2>Tables and Permissions</h2>
-    <p>This plugin generates a complete report on the tables and advanced permissions of the document.<br>
-      The report can be downloaded in HTML format (click the "Save" button at the bottom of the table).</p>
-    <i><b>Note:</b> Full access to the document is required</i>
-    <br><br>
-    <button id="tables">Tables</button>&nbsp;
-    <button id="acl">ACLs</button>
-    <br><hr><br>
-    <div id="container"></div>
-    <div id="button"></div>
-  </div>
-</body>
 
-</html>
-    <script>
-const div = "container";
-const button = "button";
+  <h1>Grist Document Reporter</h1>
+  <p class="description">
+    Generate reports on Table Schemas and Access Control Lists (ACLs). 
+    Use <b>AI Mode</b> to format output for ChatGPT or Claude.
+  </p>
+
+  <!-- Navigation -->
+  <div class="controls">
+    <button id="btn-tables" class="active">Tables</button>
+    <button id="btn-acl">ACLs</button>
+    <span class="separator"></span>
+    <button id="btn-code-view">Code View</button>
+    <button id="btn-ai-mode">AI Mode</button>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="controls" style="margin-bottom: 20px;">
+    <button id="btn-copy" class="action-btn">📋 Copy to Clipboard</button>
+    <button id="btn-csv" class="action-btn">📊 Download CSV</button>
+    <button id="btn-html" class="action-btn">💾 Download HTML</button>
+  </div>
+
+  <!-- Output Container -->
+  <div id="loading" style="display:none; font-style:italic; color:#888;">Loading data...</div>
+  <div id="output-container"></div>
+  
+  <!-- Notification Element -->
+  <div id="notification">Copied!</div>
+
+<script>
+let currentMode = 'tables'; // 'tables' or 'acl'
+let codeViewEnabled = false;
+let aiModeEnabled = false;
+let currentData = null; // Store fetched data for export
+
+// Utility: DOM Shortcuts
+const $ = id => document.getElementById(id);
 
 function ready(fn) {
-  if (document.readyState !== 'loading') {
-    fn();
-  } else {
-    document.addEventListener('DOMContentLoaded', fn);
-  }
+  if (document.readyState !== 'loading') fn();
+  else document.addEventListener('DOMContentLoaded', fn);
 }
 
-ready(function () {
-  document.getElementById("acl").addEventListener("click", function () {
-    document.getElementById(div).innerHTML = "... loading ...";
-    document.getElementById(button).innerHTML = "";
-    showACL();
-  });
-  document.getElementById("tables").addEventListener("click", function () {
-    document.getElementById(div).innerHTML = "... loading ...";
-    document.getElementById(button).innerHTML = "";
-    showSchemaTables();
-  });
+ready(function() {
+  // Button Listeners
+  $('btn-tables').onclick = () => switchMode('tables');
+  $('btn-acl').onclick = () => switchMode('acl');
+  $('btn-code-view').onclick = toggleCodeView;
+  $('btn-ai-mode').onclick = toggleAIMode;
+  
+  // Export Listeners
+  $('btn-copy').onclick = copyToClipboard;
+  $('btn-csv').onclick = downloadCSV;
+  $('btn-html').onclick = downloadHTML;
 
-  grist.ready({ requiredAccess: 'none' });
-  grist.onRecords(table => {
-    // document.getElementById('dump').innerHTML = JSON.stringify(table, null, 2);
-  });
-  grist.onRecord(record => {
-
-  });
+  // Init Grist
+  grist.ready({ requiredAccess: 'read' });
+  grist.onRecords(() => refreshView());
+  
+  // Initial Load
+  refreshView();
 });
 
-//--------------------------------
-function showSchemaTables() {
-  grist.docApi.fetchTable("_grist_Tables").then(function (tables) {
-    grist.docApi.fetchTable("_grist_Tables_column").then(function (data) {
-
-      let result = [];
-
-      function getInitTrigger(deps, ids, labels) {
-        if (deps == "") return "";
-        let result = [];
-        deps.forEach(trigger => {
-          let x = ids.indexOf(trigger);
-          if (x > 0) {
-            result.push(labels[x]);
-          }
-        });
-        return result.join(",");
-      }
-
-      for (let i = 0; i < data.id.length; i++) {
-        const tableNumber = data.parentId[i];
-        const fieldName = data.label[i];
-        const fieldType = data.type[i];
-        const formula = data.isFormula[i] ? data.formula[i] : "";
-        const initFormula = !data.isFormula[i] ? data.formula[i] : "";
-        const initTrigger = data.recalcDeps[i] ? data.recalcDeps[i] : "";
-        const choices = data.widgetOptions[i] && JSON.parse(data.widgetOptions[i]).choices || [];
-        const dropcond = data.widgetOptions[i] && JSON.parse(data.widgetOptions[i]).dropdownCondition || "";
-
-        if (fieldType !== "ManualSortPos" && !fieldName.startsWith("gristHelper")) {
-          result.push({
-            tableNumber: tableNumber,
-            tableName: tables.tableId[tables.id.indexOf(data.parentId[i])],
-            fieldName: fieldName,
-            fieldType: formula !== "" ? "Formula" : fieldType,
-            formula: formula,
-            initFormula: initFormula,
-            initTrigger: getInitTrigger(initTrigger, data.id, data.label),
-            choices: choices,
-            dropcond: dropcond ? dropcond.text : ""
-          });
-        }
-      }
-
-      result.sort((a, b) => a.tableNumber - b.tableNumber);
-
-      const tablesGrouped = result.reduce((acc, curr) => {
-        if (!acc[curr.tableName]) {
-          acc[curr.tableName] = [];
-        }
-        acc[curr.tableName].push(curr);
-        return acc;
-      }, {});
-
-      const container = document.getElementById(div);
-      container.innerHTML = "Date: " + getTodayDate();
-      for (const [tableName, rows] of Object.entries(tablesGrouped)) {
-        const tableHtml = `
-          <h2>${tableName}</h2>
-          <table>
-              <thead>
-                  <tr>
-                      <th>Field</th>
-                      <th>Type</th>
-                      <th>Formula</th>
-                      <th>Choices</th>
-                  </tr>
-              </thead>
-              <tbody>
-                  ${rows.map(row => {
-          const formulaContent = row.formula ? `<pre>${row.formula}</pre>` : '';
-          const initFormulaContent = row.initFormula ? `<span class="title">Field Initialization: </span><pre>${row.initFormula}</pre>` : '';
-          const initTriggerContent = row.initTrigger ? `<span class="title">Triggered by changes to columns: </span><pre>${row.initTrigger}</pre>` : '';
-          const dropcondContent = row.dropcond ? `<span class="title">Dropdown condition: </span><pre>${row.dropcond}</pre>` : '';
-          const formulaText = initFormulaContent || formulaContent;
-          const choicesText = row.choices.length > 0 ? row.choices.join('<br>') : '';
-
-          return `
-              <tr>
-                  <td><b>${row.fieldName}</b></td>
-                  <td>${row.fieldType}</td>
-                  <td>${formulaText}${initTriggerContent}${dropcondContent}</td>
-                  <td>${choicesText}</td>
-              </tr>
-          `;
-        }).join('')}
-              </tbody>
-          </table>
-        `;
-        container.innerHTML += tableHtml;
-      }
-
-      document.getElementById(button).innerHTML = getButton("downloadBtn", "Save");
-      document.getElementById("downloadBtn").addEventListener("click", function () {
-        downloadHTML(div, "stylejta", "Tables");
-      });
-    });
-  });
+function switchMode(mode) {
+  currentMode = mode;
+  $('btn-tables').classList.toggle('active', mode === 'tables');
+  $('btn-acl').classList.toggle('active', mode === 'acl');
+  refreshView();
 }
 
-/* ---------------------------------------------------------------------------------
- To retrieve the table description: query _grist_Views_section
-
- _grist_Views_section : { "id": 23, "tableRef": 3, "title": "team", "description": "jta description" }
- _grist_Tables        : { "id": 3, "tableId": "Team", "summarySourceTable": 0, "rawViewSectionRef": 23 }
-
- description = _grist_Views_section.description[_grist_Views_section.id.indexOf(_grist_Tables.rawViewSectionRef)]
-------------------------------------------------------------------------------------*/
-
-//--------------------------------
-function showACL() {
-  grist.docApi.fetchTable("_grist_ACLResources").then(function (tables) {
-    grist.docApi.fetchTable("_grist_ACLRules").then(function (rules) {
-      let records = inverseFetch(rules);
-      let results = [];
-      const TABLEUSER = "_xxx";
-      const BR = "<br>";
-      for (let i = 0; i < records.length; i++) {
-        let r = tables.id.indexOf(records[i].resource);
-        let obj = {
-          "sortKey": "",
-          "table": tables.tableId[r],
-          "columns": tables.colIds[r].replace(/,/g, BR),
-          "condition": records[i].aclFormula || "All others",
-          "ACL": records[i].permissionsText,
-          "memo": records[i].memo,
-          "attributeName": "",
-          "affectedTable": "",
-          "affectedField": "",
-          "userAttribute": ""
-        }
-        let userAttributes = records[i].userAttributes;
-        if (userAttributes) {
-          userAttributes = JSON.parse(userAttributes);
-          obj.attributeName = userAttributes.name;
-          obj.affectedTable = userAttributes.tableId;
-          obj.affectedField = userAttributes.lookupColId;
-          obj.userAttribute = userAttributes.charId;
-          obj.table = TABLEUSER;
-        }
-        obj.sortKey = obj.table + obj.columns + records[i].rulePos;
-        results.push(obj);
-      }
-
-      results.sort((a, b) => a.sortKey.localeCompare(b.sortKey));
-
-      function colorizeString(str) {
-        let result = str.replace(/([+-])([A-Za-z]+)/g, (match, sign, letters) => {
-          if (sign === '+') {
-            return `${sign}<span style="color: green;">${letters}</span>`;
-          } else if (sign === '-') {
-            return `${sign}<span style="color: red;">${letters}</span>`;
-          }
-        });
-        return result;
-      }
-
-      function generateUsersTable() {
-        let html = `
-          <h2>Users</h2>
-          <table>
-              <thead>
-                  <tr>
-                      <th>Attribute Name</th>
-                      <th>Affected Table</th>
-                      <th>Affected Field</th>
-                      <th>User Attribute</th>
-                  </tr>
-            </thead>
-            <tbody>`;
-
-        results.forEach(entry => {
-          if (entry.table.startsWith('_xxx')) {
-            html += `
-            <tr>
-                <td>${entry.attributeName}</td>
-                <td>${entry.affectedTable}</td>
-                <td>${entry.affectedField}</td>
-                <td>${entry.userAttribute}</td>
-            </tr>`;
-          }
-        });
-
-        html += `</tbody></table>`;
-        return html;
-      }
-
-      function generateTables() {
-        let currentTable = "";
-        let html = `
-          <h2>Tables</h2>
-          <table>
-              <thead>
-                  <tr>
-                      <th>Table</th>
-                      <th>Columns</th>
-                      <th>Condition</th>
-                      <th>ACL</th>
-                      <th>Memo</th>
-                  </tr>
-              </thead>
-              <tbody>`;
-
-        results.forEach(entry => {
-          if (!entry.table.startsWith('_xxx')) {
-            const isNewTable = currentTable !== entry.table && currentTable !== "";
-            if (isNewTable) {
-              html += `
-              <tr>
-                  <td class="sep"> </td>
-                  <td class="sep"> </td>
-                  <td class="sep"> </td>
-                  <td class="sep"> </td>
-                  <td class="sep"> </td>
-              </tr>`;
-            }
-            html += `
-            <tr>
-                <td>${isNewTable ? entry.table : ""}</td>
-                <td>${entry.columns}</td>
-                <td>${entry.condition}</td>
-                <td>${colorizeString(entry.ACL)}</td>
-                <td>${entry.memo}</td>
-            </tr>`;
-          }
-          currentTable = entry.table;
-        });
-
-        html += `</tbody></table>`;
-        return html;
-      }
-
-      document.getElementById(div).innerHTML = "Date: " + getTodayDate() + generateUsersTable() + generateTables();
-
-      document.getElementById(button).innerHTML = getButton("downloadBtn", "Save");
-      document.getElementById("downloadBtn").addEventListener("click", function () {
-        downloadHTML(div, "stylejta", "ACL");
-      });
-
-    });
-  });
+function toggleCodeView() {
+  codeViewEnabled = !codeViewEnabled;
+  $('btn-code-view').classList.toggle('active', codeViewEnabled);
+  // If turning on Code View, turn off AI Mode to avoid conflict
+  if (codeViewEnabled && aiModeEnabled) toggleAIMode();
+  refreshView();
 }
 
-//--------------------------------
-function inverseFetch(records) {
-  const keys = Object.keys(records);
-  const result = [];
-  const length = records[keys[0]].length;
-  for (let i = 0; i < length; i++) {
-    let obj = {};
-    keys.forEach(key => {
-      obj[key] = records[key][i];
-    });
-    result.push(obj);
+function toggleAIMode() {
+  aiModeEnabled = !aiModeEnabled;
+  $('btn-ai-mode').classList.toggle('active', aiModeEnabled);
+  // If turning on AI Mode, turn off standard Code View
+  if (aiModeEnabled && codeViewEnabled) toggleCodeView();
+  refreshView();
+}
+
+async function refreshView() {
+  $('output-container').innerHTML = '';
+  $('loading').style.display = 'block';
+  
+  try {
+    if (currentMode === 'tables') {
+      await showSchemaTables();
+    } else {
+      await showACL();
+    }
+  } catch (e) {
+    $('output-container').innerHTML = `<div style="color:red">Error: ${e.message}. <br>Ensure you have 'Full Access' enabled in the widget settings.</div>`;
+    console.error(e);
   }
-  return result;
+  
+  $('loading').style.display = 'none';
 }
 
-//--------------------------------
-function getButton(id, text) {
-  return `<button id='${id}'>${text}</button>`;
+/* ---------------------------------------------------------------------
+   1. TABLES / SCHEMA LOGIC
+--------------------------------------------------------------------- */
+async function showSchemaTables() {
+  // Fetch internal Grist tables
+  const tablesData = await grist.docApi.fetchTable("_grist_Tables");
+  const colsData = await grist.docApi.fetchTable("_grist_Tables_column");
+
+  let result = [];
+
+  // Map IDs to names for lookup
+  const tableIdMap = {};
+  tablesData.id.forEach((id, i) => tableIdMap[id] = tablesData.tableId[i]);
+
+  // Process Columns
+  for (let i = 0; i < colsData.id.length; i++) {
+    const tableNum = colsData.parentId[i];
+    const tableName = tableIdMap[tableNum];
+    const fieldName = colsData.label[i];
+    const fieldType = colsData.type[i];
+    const isFormula = colsData.isFormula[i];
+    const formula = colsData.formula[i] || "";
+    const widgetOpts = colsData.widgetOptions[i] ? JSON.parse(colsData.widgetOptions[i]) : {};
+
+    if (fieldType === "ManualSortPos" || fieldName.startsWith("gristHelper")) continue;
+
+    result.push({
+      tableName: tableName,
+      fieldName: fieldName,
+      type: fieldType,
+      isFormula: isFormula,
+      formula: formula,
+      choices: widgetOpts.choices || [],
+    });
+  }
+
+  // Sort and Group
+  result.sort((a, b) => (a.tableName + a.fieldName).localeCompare(b.tableName + b.fieldName));
+  
+  const grouped = {};
+  result.forEach(row => {
+    if (!grouped[row.tableName]) grouped[row.tableName] = [];
+    grouped[row.tableName].push(row);
+  });
+
+  currentData = { type: 'schema', data: grouped };
+
+  if (aiModeEnabled) {
+    renderAIMode(grouped);
+  } else if (codeViewEnabled) {
+    renderCodeView(grouped);
+  } else {
+    renderTableHTML(grouped);
+  }
 }
 
-//--------------------------------
-function getTodayDate(fmt) {
-  fmt = fmt ? fmt : "m/d/y";
-  const today = new Date();
-  const day = String(today.getDate()).padStart(2, '0');
-  const month = String(today.getMonth() + 1).padStart(2, '0');
-  const year = today.getFullYear();
-  fmt = fmt.replace("d", day).replace("m", month).replace("y", year);
-  return fmt;
+function renderTableHTML(grouped) {
+  let html = `Date: ${getTodayDate()}`;
+  
+  for (const [tableName, rows] of Object.entries(grouped)) {
+    html += `<h2>${tableName}</h2>`;
+    html += `<table>
+      <thead><tr>
+        <th>Field</th><th>Type</th><th>Formula / Trigger</th><th>Config</th>
+      </tr></thead><tbody>`;
+    
+    rows.forEach(row => {
+      const typeLabel = row.isFormula ? "Formula" : row.type;
+      let formulaCell = "";
+      if (row.formula) formulaCell = `<pre>${escapeHtml(row.formula)}</pre>`;
+      let configCell = "";
+      if (row.choices.length) configCell += `<b>Choices:</b> ${row.choices.join(", ")}`;
+
+      html += `<tr>
+        <td><b>${row.fieldName}</b></td>
+        <td>${typeLabel}</td>
+        <td>${formulaCell}</td>
+        <td>${configCell}</td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
+  }
+  $('output-container').innerHTML = html;
 }
 
-//--------------------------------
-function downloadHTML(divHtml, divStyle, fileName) {
-  var htmlContent = document.getElementById(divHtml).innerHTML;
-  var styleContent = document.getElementById(divStyle).innerHTML;
-  var combinedContent = "<html>\n<head>\n<style>\n" + styleContent + "\n</style>\n</head>\n<body>\n\n" + htmlContent + "\n</body>\n</html>";
-  var blob = new Blob([combinedContent], { type: 'text/html' });
-  var link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = fileName + ".html";
-  link.click();
+function renderCodeView(grouped) {
+  let code = `# Grist Schema Export\n# Date: ${getTodayDate()}\n\n`;
+  
+  for (const [tableName, rows] of Object.entries(grouped)) {
+    code += `<span class="code-keyword">class</span> <span class="code-func">${tableName}</span>:\n`;
+    
+    rows.forEach(row => {
+      if (row.isFormula) {
+        const cleanFormula = escapeHtml(row.formula.replace(/\n/g, "\n    # "));
+        code += `  <span class="code-comment"># Formula</span>\n`;
+        code += `  <span class="code-keyword">def</span> <span class="code-func">${row.fieldName}</span>(self):\n`;
+        code += `    <span class="code-keyword">return</span> <span class="code-string">${cleanFormula}</span>\n\n`;
+      } else {
+        let typeDef = row.type;
+        if (row.choices.length) typeDef += ` [${row.choices.map(c=>`'${c}'`).join(', ')}]`;
+        
+        code += `  <span class="code-func">${row.fieldName}</span>: <span class="code-keyword">${typeDef}</span>\n`;
+      }
+    });
+    code += `\n`;
+  }
+  $('output-container').innerHTML = `<div class="code-view-container">${code}</div>`;
 }
-    </script>
+
+/* ---------------------------------------------------------------------
+   2. AI MODE RENDERING
+--------------------------------------------------------------------- */
+function renderAIMode(grouped) {
+  // Generate the prompt text
+  let markdown = generateAIMarkdown(grouped);
+  
+  // Render visually with syntax highlighting classes
+  let visualHtml = `<div class="ai-container">${escapeHtml(markdown)}</div>`;
+  
+  $('output-container').innerHTML = visualHtml;
+}
+
+function generateAIMarkdown(grouped) {
+  let text = `Here is the schema for the Grist data tables, followed by the code view of each table.\n\n`;
+  
+  for (const [tableName, rows] of Object.entries(grouped)) {
+    // 1. Schema Section
+    text += `## Table: ${tableName}\n`;
+    text += `| Field | Type | Formula |\n`;
+    text += `|---|---|---|\n`;
+    
+    rows.forEach(r => {
+      const type = r.isFormula ? "Formula" : r.type;
+      const formula = r.formula.replace(/\n/g, " ").replace(/"/g, "'"); // Clean up for table
+      text += `| ${r.fieldName} | ${type} | ${r.isFormula ? formula : ""} |\n`;
+    });
+
+    text += `\n### Code View\n`;
+    text += "```python\n";
+    text += `class ${tableName}:\n`;
+    
+    rows.forEach(r => {
+      if (r.isFormula) {
+        text += `    def ${r.fieldName}(self):\n`;
+        text += `        return ${r.formula}\n`;
+      } else {
+        text += `    ${r.fieldName} = ${r.type}\n`;
+      }
+    });
+    text += "```\n\n---\n\n";
+  }
+  return text;
+}
+
+/* ---------------------------------------------------------------------
+   3. ACL LOGIC
+--------------------------------------------------------------------- */
+async function showACL() {
+  const resources = await grist.docApi.fetchTable("_grist_ACLResources");
+  const rules = await grist.docApi.fetchTable("_grist_ACLRules");
+  
+  const rulesList = mapToObjects(rules);
+  const resourcesList = mapToObjects(resources);
+
+  let results = [];
+
+  rulesList.forEach(rule => {
+    const res = resourcesList.find(r => r.id === rule.resource) || {};
+    
+    const entry = {
+      table: res.tableId || 'Document',
+      columns: (res.colIds || []).join(", "),
+      condition: rule.aclFormula || "All others",
+      permissions: rule.permissionsText || "",
+      memo: rule.memo || "",
+      isUserAttr: false,
+      attrName: "",
+      attrTable: "",
+      attrCol: ""
+    };
+
+    if (rule.userAttributes) {
+      try {
+        const ua = JSON.parse(rule.userAttributes);
+        entry.isUserAttr = true;
+        entry.table = "User Attributes";
+        entry.attrName = ua.name || "";
+        entry.attrTable = ua.tableId || "";
+        entry.attrCol = ua.lookupColId || "";
+      } catch(e) {}
+    }
+
+    results.push(entry);
+  });
+
+  results.sort((a, b) => (a.table + a.columns).localeCompare(b.table + b.columns));
+
+  currentData = { type: 'acl', data: results };
+  
+  if (aiModeEnabled) {
+      renderACL_AI(results);
+  } else {
+      renderACL_HTML(results);
+  }
+}
+
+function renderACL_HTML(results) {
+  let html = `Date: ${getTodayDate()}`;
+  
+  html += `<h2>User Attributes</h2><table>
+    <thead><tr><th>Name</th><th>Lookup Table</th><th>Lookup Column</th></tr></thead><tbody>`;
+  
+  results.filter(r => r.isUserAttr).forEach(r => {
+    html += `<tr><td>${r.attrName}</td><td>${r.attrTable}</td><td>${r.attrCol}</td></tr>`;
+  });
+  html += `</tbody></table>`;
+
+  html += `<h2>Permissions Rules</h2><table>
+    <thead><tr><th>Table</th><th>Columns</th><th>Condition</th><th>Permissions</th><th>Memo</th></tr></thead><tbody>`;
+  
+  let lastTable = "";
+  results.filter(r => !r.isUserAttr).forEach(r => {
+    if (r.table !== lastTable && lastTable !== "") {
+      html += `<tr style="background-color:#f2f2f2; height:5px;"><td colspan="5"></td></tr>`;
+    }
+    lastTable = r.table;
+    
+    const perms = colorizePerms(r.permissions);
+    html += `<tr>
+      <td><b>${r.table}</b></td>
+      <td>${r.columns}</td>
+      <td><pre>${escapeHtml(r.condition)}</pre></td>
+      <td>${perms}</td>
+      <td>${r.memo}</td>
+    </tr>`;
+  });
+  html += `</tbody></table>`;
+  $('output-container').innerHTML = html;
+}
+
+function renderACL_AI(results) {
+    let text = `Here are the Access Control Rules for the Grist document.\n\n`;
+    
+    text += `## User Attributes\n`;
+    results.filter(r => r.isUserAttr).forEach(r => {
+        text += `- Attribute: **${r.attrName}** looks up **${r.attrCol}** in table **${r.attrTable}**\n`;
+    });
+    text += `\n`;
+
+    text += `## Permissions Rules\n`;
+    results.filter(r => !r.isUserAttr).forEach(r => {
+        text += `### Table: ${r.table}\n`;
+        text += `- **Columns**: ${r.columns || 'All'}\n`;
+        text += `- **Condition**: ${r.condition}\n`;
+        text += `- **Permissions**: ${r.permissions}\n`;
+        if(r.memo) text += `- **Memo**: ${r.memo}\n`;
+        text += `\n`;
+    });
+
+    currentData.aiText = text; // Store for copy
+    $('output-container').innerHTML = `<div class="ai-container">${escapeHtml(text)}</div>`;
+}
+
+/* ---------------------------------------------------------------------
+   4. EXPORT UTILITIES
+--------------------------------------------------------------------- */
+
+function copyToClipboard() {
+  if (!currentData) return;
+  
+  let textToCopy = "";
+
+  // Priority 1: AI Mode Text
+  if (aiModeEnabled) {
+    // If we generated AI text (either Schema or ACL), use that
+    if (currentData.type === 'schema') {
+        // Re-generate to ensure we have latest, or fetch from global scope
+        textToCopy = generateAIMarkdown(currentData.data); 
+    } else {
+        // ACL AI text is generated in renderACL_AI
+        textToCopy = currentData.aiText || "";
+    }
+  } 
+  // Priority 2: Standard Tab-Separated for Excel
+  else {
+    if (currentData.type === 'schema') {
+      textToCopy = "Table\tField\tType\tFormula\n";
+      for (const [tbl, rows] of Object.entries(currentData.data)) {
+        rows.forEach(r => {
+          textToCopy += `${tbl}\t${r.fieldName}\t${r.type}\t${r.formula}\n`;
+        });
+      }
+    } else if (currentData.type === 'acl') {
+      textToCopy = "Table\tColumns\tCondition\tPermissions\tMemo\n";
+      currentData.data.forEach(r => {
+        if(!r.isUserAttr) textToCopy += `${r.table}\t${r.columns}\t${r.condition}\t${r.permissions}\t${r.memo}\n`;
+      });
+    }
+  }
+
+  navigator.clipboard.writeText(textToCopy).then(() => notify("Copied to Clipboard!"));
+}
+
+function downloadCSV() {
+  if (!currentData || aiModeEnabled) {
+    notify("Download as CSV not available in this view.");
+    return;
+  }
+  let csv = "";
+  const sep = ",";
+
+  if (currentData.type === 'schema') {
+    csv = "Table,Field,Type,Formula\n";
+    for (const [tbl, rows] of Object.entries(currentData.data)) {
+      rows.forEach(r => {
+        csv += `${quoteCsv(tbl)}${sep}${quoteCsv(r.fieldName)}${sep}${quoteCsv(r.type)}${sep}${quoteCsv(r.formula)}\n`;
+      });
+    }
+    downloadFile(csv, "schema_export.csv", "text/csv");
+  } else {
+    csv = "Table,Columns,Condition,Permissions,Memo\n";
+    currentData.data.forEach(r => {
+      if(!r.isUserAttr) {
+        csv += `${quoteCsv(r.table)}${sep}${quoteCsv(r.columns)}${sep}${quoteCsv(r.condition)}${sep}${quoteCsv(r.permissions)}${sep}${quoteCsv(r.memo)}\n`;
+      }
+    });
+    downloadFile(csv, "acl_export.csv", "text/csv");
+  }
+}
+
+function downloadHTML() {
+  // If in AI mode, download the markdown as text file instead
+  if (aiModeEnabled) {
+    let text = (currentData.type === 'schema') ? generateAIMarkdown(currentData.data) : currentData.aiText;
+    downloadFile(text, "ai_prompt.txt", "text/plain");
+    notify("Downloaded AI Prompt");
+    return;
+  }
+
+  const content = $('output-container').innerHTML;
+  const styles = document.querySelector('style').outerHTML;
+  const fullHtml = `<html><head>${styles}</head><body>${content}</body></html>`;
+  downloadFile(fullHtml, "report.html", "text/html");
+}
+
+/* ---------------------------------------------------------------------
+   5. HELPER FUNCTIONS
+--------------------------------------------------------------------- */
+
+function mapToObjects(gristData) {
+  if (!gristData || !gristData.id) return [];
+  return gristData.id.map((_, i) => {
+    const obj = {};
+    Object.keys(gristData).forEach(key => {
+      obj[key] = gristData[key][i];
+    });
+    return obj;
+  });
+}
+
+function escapeHtml(text) {
+  if (!text) return "";
+  return String(text)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function quoteCsv(text) {
+  if (!text) return "";
+  text = String(text);
+  if (text.includes(",") || text.includes("\"") || text.includes("\n")) {
+    return `"${text.replace(/"/g, '""')}"`;
+  }
+  return text;
+}
+
+function colorizePerms(pStr) {
+  if (!pStr) return "";
+  return pStr.replace(/([+-])([a-zA-Z]+)/g, (match, sign, letters) => {
+    const color = sign === '+' ? 'green' : 'red';
+    return `<span style="color:${color}; font-weight:bold;">${sign}${letters}</span>`;
+  });
+}
+
+function getTodayDate() {
+  const d = new Date();
+  return d.toLocaleDateString();
+}
+
+function downloadFile(content, filename, type) {
+  const blob = new Blob([content], { type: type });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function notify(msg) {
+  const n = $('notification');
+  n.textContent = msg;
+  n.classList.add('show');
+  setTimeout(() => n.classList.remove('show'), 2000);
+}
+
+</script>
 </body>
 </html>
