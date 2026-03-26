@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -69,7 +70,33 @@
         .btn-secondary { background: var(--bg-elevated); border: 1px solid var(--border); color: var(--fg); transition: all 0.2s; }
         .btn-secondary:hover { background: var(--bg-card); border-color: var(--border-hover); }
         
-        /* Segmented Control for Patterns */
+        .checkbox-custom {
+            appearance: none;
+            width: 1.25rem;
+            height: 1.25rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--bg);
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s;
+        }
+        .checkbox-custom:checked {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+        .checkbox-custom:checked::after {
+            content: '';
+            position: absolute;
+            left: 5px;
+            top: 2px;
+            width: 5px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
         .pattern-segment {
             background: transparent;
             border: 1px solid var(--border);
@@ -100,7 +127,6 @@
         .toast-success { background: var(--success); }
         .toast-error { background: var(--danger); }
 
-        /* Modal Styles */
         .modal-overlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.6);
             display: flex; align-items: center; justify-content: center;
@@ -144,11 +170,6 @@
                     <span class="font-medium">ConvertCSV</span>
                     <svg class="w-4 h-4 ml-auto text-[var(--fg-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                 </a>
-                <a href="https://data.page/xml/csv" target="_blank" class="flex items-center gap-3 p-3 rounded-lg bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--accent)] transition-colors">
-                    <svg class="w-5 h-5 text-[var(--accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
-                    <span class="font-medium">Data.page</span>
-                    <svg class="w-4 h-4 ml-auto text-[var(--fg-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                </a>
             </div>
         </div>
     </div>
@@ -186,7 +207,7 @@
                 <div>
                     <label class="block text-sm font-medium text-[var(--fg-muted)] mb-1">Fetch from URL</label>
                     <div class="flex gap-2">
-                        <input type="url" id="urlInput" class="input-field flex-1 px-4 py-2 rounded-lg text-sm font-mono" placeholder="https://example.com/sitemap.xml" value="https://www.dairyqueen.com/en-us/sitemap.xml">
+                        <input type="url" id="urlInput" class="input-field flex-1 px-4 py-2 rounded-lg text-sm font-mono" placeholder="https://example.com/sitemap.xml">
                         <button id="fetchBtn" onclick="handleFetch()" class="btn-primary px-6 py-2 rounded-lg text-sm whitespace-nowrap">Fetch</button>
                         <button onclick="toggleModal(true)" class="btn-secondary px-3 py-2 rounded-lg" title="Manual Fallback Tools">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -203,9 +224,9 @@
 
                 <!-- Paste XML -->
                 <div>
-                    <label class="block text-sm font-medium text-[var(--fg-muted)] mb-1">Paste XML Content</label>
-                    <textarea id="pasteInput" class="input-field w-full px-4 py-2 rounded-lg text-xs font-mono h-32" placeholder="Paste raw XML content here..."></textarea>
-                    <button onclick="handlePaste()" class="btn-secondary px-6 py-2 rounded-lg text-sm mt-2">Parse XML</button>
+                    <label class="block text-sm font-medium text-[var(--fg-muted)] mb-1">Paste XML or Raw URL List</label>
+                    <textarea id="pasteInput" class="input-field w-full px-4 py-2 rounded-lg text-xs font-mono h-32" placeholder="Paste raw XML, or just a list of URLs (works with mixed text too)..."></textarea>
+                    <button onclick="handlePaste()" class="btn-secondary px-6 py-2 rounded-lg text-sm mt-2">Parse Content</button>
                 </div>
             </div>
         </section>
@@ -217,7 +238,7 @@
                 <h2 class="text-lg font-semibold">Filter Locations</h2>
             </div>
 
-            <!-- Pattern Selection (Cleaned Up) -->
+            <!-- Pattern Selection -->
             <div class="mb-6">
                 <label class="block text-sm font-medium text-[var(--fg-muted)] mb-3">1. Select Location Directory</label>
                 <div id="patternContainer" class="inline-flex flex-wrap rounded-lg overflow-hidden border border-[var(--border)] bg-[var(--bg)]">
@@ -225,14 +246,39 @@
                 </div>
             </div>
 
-            <!-- Depth Control -->
-            <div class="mb-6">
-                <label class="block text-sm font-medium text-[var(--fg-muted)] mb-2">2. Minimum URL Depth (Segments after directory)</label>
-                <div class="flex items-center gap-4">
-                    <input type="range" id="depthSlider" min="1" max="6" value="1" class="w-full cursor-pointer" oninput="updateDepthLabel(); processUrls();">
-                    <span id="depthLabel" class="font-mono text-sm bg-[var(--bg)] px-3 py-1 rounded border border-[var(--border)] w-16 text-center">1</span>
+            <!-- Depth Controls -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label class="block text-sm font-medium text-[var(--fg-muted)] mb-2">2. Min URL Depth</label>
+                    <div class="flex items-center gap-4">
+                        <input type="range" id="depthSliderMin" min="1" max="10" value="1" class="w-full cursor-pointer" oninput="updateDepthLabels(); processUrls();">
+                        <span id="depthLabelMin" class="font-mono text-sm bg-[var(--bg)] px-3 py-1 rounded border border-[var(--border)] w-16 text-center">1</span>
+                    </div>
+                    <p class="text-xs text-[var(--fg-muted)] mt-1">Filter out top-level pages (e.g. State indexes)</p>
                 </div>
-                <p class="text-xs text-[var(--fg-muted)] mt-1">Filter out partial paths (like State or City index pages). State=1, City=2, Store=3+</p>
+                <div>
+                    <label class="block text-sm font-medium text-[var(--fg-muted)] mb-2">3. Max URL Depth</label>
+                    <div class="flex items-center gap-4">
+                        <input type="range" id="depthSliderMax" min="1" max="10" value="10" class="w-full cursor-pointer" oninput="updateDepthLabels(); processUrls();">
+                        <span id="depthLabelMax" class="font-mono text-sm bg-[var(--bg)] px-3 py-1 rounded border border-[var(--border)] w-16 text-center">10</span>
+                    </div>
+                    <p class="text-xs text-[var(--fg-muted)] mt-1">Filter out deep pages (e.g. /reviews, /menu)</p>
+                </div>
+            </div>
+
+            <!-- Exclusion Filters -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-[var(--fg-muted)] mb-2">4. Exclude Keywords (in path)</label>
+                <input type="text" id="excludeInput" class="input-field w-full px-4 py-2 rounded-lg text-sm" placeholder="reviews, menu, photos" value="reviews, menu, photos" oninput="processUrls()">
+                <p class="text-xs text-[var(--fg-muted)] mt-1">Comma-separated list. URLs containing these path segments will be hidden.</p>
+            </div>
+
+            <!-- Options -->
+            <div class="mb-6 flex items-center gap-6">
+                 <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" id="abbreviateCheck" class="checkbox-custom" onchange="processUrls()">
+                    <span class="text-sm font-medium">Convert States to Abbreviations</span>
+                </label>
             </div>
 
             <!-- Stats -->
@@ -302,7 +348,22 @@
     </div>
 
     <script>
-        // --- State ---
+        // --- State Dictionary ---
+        const stateMap = {
+            'alabama': 'AL', 'alaska': 'AK', 'arizona': 'AZ', 'arkansas': 'AR', 'california': 'CA',
+            'colorado': 'CO', 'connecticut': 'CT', 'delaware': 'DE', 'florida': 'FL', 'georgia': 'GA',
+            'hawaii': 'HI', 'idaho': 'ID', 'illinois': 'IL', 'indiana': 'IN', 'iowa': 'IA',
+            'kansas': 'KS', 'kentucky': 'KY', 'louisiana': 'LA', 'maine': 'ME', 'maryland': 'MD',
+            'massachusetts': 'MA', 'michigan': 'MI', 'minnesota': 'MN', 'mississippi': 'MS', 'missouri': 'MO',
+            'montana': 'MT', 'nebraska': 'NE', 'nevada': 'NV', 'new hampshire': 'NH', 'new jersey': 'NJ',
+            'new mexico': 'NM', 'new york': 'NY', 'north carolina': 'NC', 'north dakota': 'ND', 'ohio': 'OH',
+            'oklahoma': 'OK', 'oregon': 'OR', 'pennsylvania': 'PA', 'rhode island': 'RI', 'south carolina': 'SC',
+            'south dakota': 'SD', 'tennessee': 'TN', 'texas': 'TX', 'utah': 'UT', 'vermont': 'VT',
+            'virginia': 'VA', 'washington': 'WA', 'west virginia': 'WV', 'wisconsin': 'WI', 'wyoming': 'WY',
+            'district of columbia': 'DC'
+        };
+
+        // --- App State ---
         let rawUrls = [];
         let processedUrls = [];
         let currentPattern = '';
@@ -356,7 +417,8 @@
             try {
                 const proxies = [
                     `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-                    `https://corsproxy.io/?${encodeURIComponent(url)}`
+                    `https://corsproxy.io/?${encodeURIComponent(url)}`,
+                    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
                 ];
 
                 let text = null;
@@ -365,13 +427,13 @@
                         const resp = await fetch(proxy);
                         if(resp.ok) {
                             text = await resp.text();
-                            if(text && !text.toLowerCase().includes('<!doctype')) break;
+                            if(text && text.length > 10) break;
                         }
                     } catch(e) { /* Try next proxy */ }
                 }
 
                 if(text) {
-                    parseXml(text);
+                    parseInput(text);
                 } else {
                     toast('Could not fetch URL. Use Paste or Manual Tools.', 'error');
                 }
@@ -386,43 +448,66 @@
 
         function handlePaste() {
             const text = document.getElementById('pasteInput').value.trim();
-            if(!text) return toast('Paste XML content first', 'error');
-            parseXml(text);
+            if(!text) return toast('Paste content first', 'error');
+            parseInput(text);
         }
 
-        function parseXml(xmlText) {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(xmlText, 'text/xml');
-            const locs = doc.getElementsByTagName('loc');
+        // --- Robust Parsing Logic ---
+        function parseInput(text) {
+            rawUrls = [];
             
-            if(locs.length === 0) {
-                const matches = xmlText.match(/<loc>\s*(https?:\/\/[^<]+)\s*<\/loc>/gi) || [];
+            // 1. Try strict XML parsing
+            try {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(text, 'text/xml');
+                const errorNode = doc.querySelector('parsererror');
+                
+                if (!errorNode) {
+                    const locs = doc.getElementsByTagName('loc');
+                    if(locs.length > 0) {
+                        rawUrls = Array.from(locs).map(l => l.textContent.trim());
+                    }
+                }
+            } catch(e) {}
+
+            // 2. Fallback: Regex for <loc> tags (handles broken XML)
+            if(rawUrls.length === 0) {
+                const matches = text.match(/<loc>\s*(https?:\/\/[^<]+)\s*<\/loc>/gi) || [];
                 rawUrls = matches.map(m => m.replace(/<\/?loc>/gi, '').trim());
-            } else {
-                rawUrls = Array.from(locs).map(l => l.textContent.trim());
             }
 
-            if(rawUrls.length === 0) return toast('No URLs found in XML', 'error');
+            // 3. Fallback: Generic URL extraction (handles plain text lists)
+            if(rawUrls.length === 0) {
+                const matches = text.match(/https?:\/\/[^\s<>"]+/g);
+                if(matches) {
+                    rawUrls = matches.map(u => u.trim());
+                }
+            }
+
+            if(rawUrls.length === 0) return toast('No URLs found in input', 'error');
+            
             toast(`Loaded ${rawUrls.length} URLs`, 'success');
             detectPatterns();
         }
 
         function detectPatterns() {
-            const counts = {};
-            const pathSegments = {};
+            const pathCounts = {};
+            const hostCounts = {};
 
             rawUrls.forEach(url => {
                 try {
-                    const p = new URL(url).pathname;
-                    const parts = p.split('/').filter(s => s.length > 0);
+                    const urlObj = new URL(url);
+                    const host = urlObj.hostname;
+                    const pathParts = urlObj.pathname.split('/').filter(s => s.length > 0);
                     
-                    parts.forEach((seg, i) => {
-                        if(/location|store|shop|branch|restaurant/i.test(seg)) {
+                    if(/location|store|shop|branch|restaurant|place/i.test(host)) {
+                        hostCounts['_host_root_'] = (hostCounts['_host_root_'] || 0) + 1;
+                    }
+
+                    pathParts.forEach((seg, i) => {
+                        if(/location|store|shop|branch|restaurant|place/i.test(seg)) {
                             const key = seg.toLowerCase();
-                            counts[key] = (counts[key] || 0) + 1;
-                            const depth = parts.length - (i + 1);
-                            if(!pathSegments[key]) pathSegments[key] = {};
-                            pathSegments[key][depth] = (pathSegments[key][depth] || 0) + 1;
+                            pathCounts[key] = (pathCounts[key] || 0) + 1;
                         }
                     });
                 } catch(e) {}
@@ -431,80 +516,115 @@
             const container = document.getElementById('patternContainer');
             container.innerHTML = '';
             
-            const sorted = Object.keys(counts).sort((a,b) => counts[b] - counts[a]);
+            const sortedPathKeys = Object.keys(pathCounts).sort((a,b) => pathCounts[b] - pathCounts[a]);
             
-            sorted.forEach(key => {
-                const btn = document.createElement('button');
-                // Clean UI styles
-                btn.className = 'pattern-segment px-4 py-2 text-sm font-mono border-r border-[var(--border)] last:border-r-0';
-                btn.textContent = `${key} (${counts[key]})`;
-                btn.onclick = () => {
-                    // Update active state
-                    Array.from(container.children).forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    selectPattern(key, pathSegments[key]);
-                };
-                container.appendChild(btn);
+            if(hostCounts['_host_root_']) {
+                createPatternButton(container, 'Root (Host Match)', '_host_root_', hostCounts['_host_root_']);
+            }
+
+            sortedPathKeys.forEach(key => {
+                createPatternButton(container, `/${key}`, key, pathCounts[key]);
             });
 
-            if(sorted.length > 0) {
-                // Auto click first
-                container.firstChild.click();
-                document.getElementById('filterSection').classList.remove('hidden');
-                document.getElementById('resultsSection').classList.remove('hidden');
-            } else {
-                toast('Could not detect location patterns', 'error');
+            if(container.children.length === 0) {
+                 createPatternButton(container, 'Root Domain', '_root_', rawUrls.length);
             }
+
+            if(container.children.length > 0) {
+                container.firstChild.click();
+            }
+            
+            document.getElementById('filterSection').classList.remove('hidden');
+            document.getElementById('resultsSection').classList.remove('hidden');
         }
 
-        function selectPattern(pattern, depthMap) {
+        function createPatternButton(container, label, key, count) {
+            const btn = document.createElement('button');
+            btn.className = 'pattern-segment px-4 py-2 text-sm font-mono border-r border-[var(--border)] last:border-r-0';
+            btn.textContent = `${label} (${count})`;
+            btn.onclick = () => {
+                Array.from(container.children).forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectPattern(key);
+            };
+            container.appendChild(btn);
+        }
+
+        function selectPattern(pattern) {
             currentPattern = pattern;
             
-            let bestDepth = 1;
-            let maxCount = 0;
-            
-            // Auto-depth logic
-            for(const [depth, count] of Object.entries(depthMap)) {
-                if(count >= maxCount * 0.8) {
-                    maxCount = count;
-                    bestDepth = parseInt(depth);
-                }
-            }
-
-            const slider = document.getElementById('depthSlider');
-            slider.value = bestDepth;
-            updateDepthLabel();
+            // Try to auto-detect best depth settings based on pattern counts
+            // Reset to safe defaults
+            document.getElementById('depthSliderMin').value = 1;
+            document.getElementById('depthSliderMax').value = 10;
+            updateDepthLabels();
             processUrls();
         }
 
-        function updateDepthLabel() {
-            document.getElementById('depthLabel').textContent = document.getElementById('depthSlider').value;
+        function updateDepthLabels() {
+            document.getElementById('depthLabelMin').textContent = document.getElementById('depthSliderMin').value;
+            document.getElementById('depthLabelMax').textContent = document.getElementById('depthSliderMax').value;
         }
 
         function processUrls() {
-            const minDepth = parseInt(document.getElementById('depthSlider').value);
+            const minDepth = parseInt(document.getElementById('depthSliderMin').value);
+            const maxDepth = parseInt(document.getElementById('depthSliderMax').value);
+            const excludeText = document.getElementById('excludeInput').value;
+            const shouldAbbreviate = document.getElementById('abbreviateCheck').checked;
             
+            // Parse exclude keywords
+            const excludeKeywords = excludeText.split(',').map(k => k.trim().toLowerCase()).filter(k => k);
+
             processedUrls = rawUrls.map(url => {
                 try {
                     const urlObj = new URL(url);
                     const parts = urlObj.pathname.split('/').filter(s => s.length > 0);
-                    const idx = parts.findIndex(p => p.toLowerCase() === currentPattern);
+                    
+                    let idx = -1;
+                    
+                    if (currentPattern === '_host_root_' || currentPattern === '_root_') {
+                        idx = -1;
+                    } else {
+                        idx = parts.findIndex(p => p.toLowerCase() === currentPattern);
+                    }
 
-                    if(idx === -1) return { url, state: null, city: null, depth: 0, keep: false };
+                    if(idx === -1 && currentPattern !== '_host_root_' && currentPattern !== '_root_') {
+                         return { url, state: null, city: null, depth: 0, keep: false };
+                    }
 
                     const segments = parts.slice(idx + 1);
                     const depth = segments.length;
 
+                    // Determine State
+                    let rawState = segments[0] ? segments[0].toLowerCase() : '';
+                    let stateDisplay = segments[0] ? segments[0].toUpperCase() : null;
+                    
+                    if (shouldAbbreviate && rawState && stateMap[rawState]) {
+                        stateDisplay = stateMap[rawState];
+                    }
+
                     return {
                         url,
-                        state: segments[0] ? segments[0].toUpperCase() : null,
+                        state: stateDisplay,
                         city: segments[1] ? toTitleCase(segments[1].replace(/-/g, ' ')) : null,
                         depth,
-                        keep: depth >= minDepth
+                        keep: depth >= minDepth && depth <= maxDepth
                     };
                 } catch(e) {
                     return { url, state: null, city: null, depth: 0, keep: false };
                 }
+            })
+            .filter(item => {
+                if (!item.keep) return true; // Keep for stats but mark as filtered
+                
+                // Check exclusions
+                const path = new URL(item.url).pathname.toLowerCase();
+                const hasExcludedKeyword = excludeKeywords.some(k => path.includes(`/${k}`) || path.includes(`/${k}/`));
+                
+                if (hasExcludedKeyword) {
+                    item.keep = false;
+                }
+                return true;
             });
 
             updateStats();
@@ -514,7 +634,7 @@
         function updateStats() {
             const found = processedUrls.filter(u => u.keep);
             const states = new Set(found.map(u => u.state).filter(Boolean));
-            
+
             document.getElementById('statTotal').textContent = rawUrls.length.toLocaleString();
             document.getElementById('statFound').textContent = found.length.toLocaleString();
             document.getElementById('statFiltered').textContent = (rawUrls.length - found.length).toLocaleString();
@@ -524,13 +644,13 @@
         function renderTable() {
             const search = document.getElementById('searchInput').value.toLowerCase();
             let list = processedUrls.filter(u => showAll || u.keep);
-            
+
             if(search) {
-                list = list.filter(u => 
-                    u.url.toLowerCase().includes(search) || 
-                    (u.state && u.state.toLowerCase().includes(search)) ||
-                    (u.city && u.city.toLowerCase().includes(search))
-                );
+                list = list.filter(u =>
+                                   u.url.toLowerCase().includes(search) ||
+                                   (u.state && u.state.toLowerCase().includes(search)) ||
+                                   (u.city && u.city.toLowerCase().includes(search))
+                                  );
             }
 
             const total = list.length;
@@ -566,7 +686,6 @@
             renderTable();
         }
 
-        // Generates CSV string
         function generateCSV() {
             const data = processedUrls.filter(u => u.keep);
             if(data.length === 0) return null;
@@ -599,7 +718,7 @@
         function handleCopy() {
             const csv = generateCSV();
             if(!csv) return toast('No locations to copy', 'error');
-            
+
             navigator.clipboard.writeText(csv).then(() => {
                 toast('CSV data copied to clipboard!', 'success');
             }).catch(err => {
@@ -622,5 +741,5 @@
             setTimeout(() => el.remove(), 3000);
         }
     </script>
-</body>
+    </body>
 </html>
