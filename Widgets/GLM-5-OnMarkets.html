@@ -265,7 +265,10 @@
       border-radius: var(--radius-sm);
       font-size: 0.8rem;
       font-weight: 600;
+      cursor: pointer;
+      transition: background var(--transition-fast);
     }
+    .selected-count:hover { background: rgba(201, 89, 43, 0.2); }
 
     /* ========== PROPERTY GRID ========== */
     .property-grid {
@@ -576,6 +579,17 @@
 
     .table-title { font-weight: 600; color: var(--fg); margin-bottom: 2px; }
     .table-address { font-size: 0.75rem; color: var(--fg-muted); }
+    
+    .table-checkbox { 
+      width: 40px; 
+      text-align: center; 
+    }
+    .table-checkbox input { 
+      width: 18px; 
+      height: 18px; 
+      cursor: pointer; 
+      accent-color: var(--accent); 
+    }
 
     /* ========== LOADING & EMPTY STATES ========== */
     .loading-state, .empty-state {
@@ -1016,7 +1030,7 @@
       <div class="results-info">
         Showing <span class="results-count" id="resultsCount">0</span> properties
       </div>
-      <div class="selected-count" id="selectedCount" style="display: none;"></div>
+      <div class="selected-count" id="selectedCount" style="display: none;" title="Clear Selection"></div>
     </div>
 
     <div id="loadingState" class="loading-state">
@@ -1037,6 +1051,7 @@
     <table id="propertyTable" class="property-table">
       <thead>
         <tr>
+          <th class="table-checkbox"></th> <!-- Added Checkbox Column -->
           <th>Property</th>
           <th>Type</th>
           <th>Price</th>
@@ -1125,14 +1140,14 @@
   <div id="exportModal" class="modal-overlay">
     <div class="modal">
       <div class="modal-header">
-        <h3 class="modal-title">Export Properties</h3>
+        <h3 class="modal-title">Export Data</h3>
       </div>
       <div class="modal-body">
-        <p>Export <strong id="exportCount">0</strong> properties to an HTML file.</p>
+        <p>Export <strong id="exportCount">0</strong> properties to a CSV file containing all available data columns.</p>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" id="cancelExportBtn">Cancel</button>
-        <button class="btn btn-primary" id="confirmExportBtn">Export Now</button>
+        <button class="btn btn-primary" id="confirmExportBtn">Export CSV</button>
       </div>
     </div>
   </div>
@@ -1370,6 +1385,7 @@
       const isCompact = currentView === 'compact';
       const addrText = isCompact ? `${d.city}, ${d.state}` : buildAddress(d);
 
+      // REMOVED onclick="event.stopPropagation()" from checkbox wrapper
       return `
         <div class="property-card ${selected ? 'selected' : ''}" data-id="${d.id}" tabindex="0" role="button" aria-label="View details for ${esc(d.name)}">
           <div class="card-image-wrap">
@@ -1379,7 +1395,7 @@
               ${isNew ? '<span class="badge badge-new">New</span>' : ''}
               ${d.propertyType ? '<span class="badge badge-type">' + esc(d.propertyType) + '</span>' : ''}
             </div>
-            <div class="card-checkbox" onclick="event.stopPropagation()">
+            <div class="card-checkbox">
               <input type="checkbox" ${selected ? 'checked' : ''} aria-label="Select ${esc(d.name)}">
             </div>
           </div>
@@ -1412,8 +1428,12 @@
       const selected = selectedIds.has(d.id);
       const placeholderImg = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 75"><rect fill="#e3e3e5" width="100" height="75"/><text x="50%" y="50%" fill="#9d9da3" font-size="10" text-anchor="middle">N/A</text></svg>');
 
+      // Added Checkbox Column
       return `
         <tr class="${selected ? 'selected' : ''}" data-id="${d.id}">
+          <td class="table-checkbox">
+             <input type="checkbox" class="table-cb" ${selected ? 'checked' : ''} aria-label="Select ${esc(d.name)}">
+          </td>
           <td>
             <div style="display:flex; align-items:center; gap:12px;">
               <img src="${img || placeholderImg}" class="table-img" loading="lazy">
@@ -1666,34 +1686,66 @@
         return;
       }
 
-      const cards = recs.map(r => {
-        const d = normalize(r);
-        const img = d.images[0] || '';
-        const addr = buildAddress(d);
-        return `
-          <div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1);break-inside:avoid;margin-bottom:16px;">
-            ${img ? '<img src="' + esc(img) + '" style="width:100%;height:200px;object-fit:cover;">' : ''}
-            <div style="padding:16px;">
-              <h3 style="margin:0 0 8px;font-size:16px;font-weight:700;">${esc(d.name)}</h3>
-              <p style="color:#2d8a5f;font-size:18px;font-weight:700;margin:0 0 8px;">${formatPrice(d.price)}</p>
-              <p style="color:#6b6b6f;font-size:13px;margin:0 0 8px;">${esc(addr)}</p>
-              <p style="color:#6b6b6f;font-size:13px;margin:0;">Cap Rate: ${formatCap(d.capRate)} | ${formatSF(d.rba)}</p>
-              ${d.notes ? '<div style="color:#6b6b6f;font-size:13px;margin:12px 0 0;padding-top:12px;border-top:1px solid #e3e3e5;">' + marked.parse(d.notes) + '</div>' : ''}
-            </div>
-          </div>
-        `;
-      }).join('');
+      // Identify all unique column headers from the raw data
+      const allKeys = new Set();
+      allKeys.add('Grist_ID'); // Add Grist Record ID explicitly
+      
+      const dataRows = recs.map(rec => {
+        const src = getSource(rec);
+        // Add keys to set
+        Object.keys(src).forEach(k => allKeys.add(k));
+        return { id: rec.id, src };
+      });
 
-      const html = '<!DOCTYPE html>\n<html>\n<head>\n<meta charset="UTF-8">\n<title>Property Listings Export</title>\n<style>\nbody{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f7f7f8;padding:20px;}\n.container{max-width:1200px;margin:0 auto;}\nh1{text-align:center;margin-bottom:24px;color:#1a1a1b;}\n.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;}\n</style>\n</head>\n<body>\n<div class="container">\n<h1>Commercial Property Listings</h1>\n<div class="grid">' + cards + '</div>\n</div>\n</body>\n</html>';
+      // Sort columns (ID first, then alphabetical)
+      const columns = Array.from(allKeys).sort((a, b) => {
+        if (a === 'Grist_ID') return -1;
+        if (b === 'Grist_ID') return 1;
+        return a.localeCompare(b);
+      });
 
-      const blob = new Blob([html], { type: 'text/html' });
+      // Helper to format value for CSV (handle commas, quotes, newlines, and Grist lists)
+      const formatCsvVal = (val) => {
+        if (val == null) return '';
+        // Handle Grist Lists (['L', ...])
+        if (Array.isArray(val)) {
+          const list = (val.length > 0 && val[0] === 'L') ? val.slice(1) : val;
+          val = list.join('; ');
+        }
+        // Convert to string
+        const s = String(val);
+        // If contains special chars, wrap in quotes and escape existing quotes
+        if (s.includes(',') || s.includes('"') || s.includes('\n') || s.includes('\r')) {
+          return '"' + s.replace(/"/g, '""') + '"';
+        }
+        return s;
+      };
+
+      // Build CSV Content
+      const header = columns.map(c => {
+        // Headers might also need escaping if they contain commas
+        if (c.includes(',') || c.includes('"')) return '"' + c.replace(/"/g, '""') + '"';
+        return c;
+      }).join(',');
+
+      const rows = dataRows.map(item => {
+        return columns.map(col => {
+          if (col === 'Grist_ID') return item.id;
+          return formatCsvVal(item.src[col]);
+        }).join(',');
+      });
+
+      const csvContent = header + '\r\n' + rows.join('\r\n');
+
+      // Download
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'properties-export-' + new Date().toISOString().slice(0, 10) + '.html';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'properties-export-' + new Date().toISOString().slice(0, 10) + '.csv';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
       URL.revokeObjectURL(url);
       closeExportModal();
     }
@@ -1750,6 +1802,13 @@
     refs.detailOverlay.addEventListener('click', (e) => {
       if (e.target === refs.detailOverlay) closeDetail();
     });
+    
+    // Clear Selection Helper
+    refs.selectedCount.addEventListener('click', () => {
+       selectedIds.clear();
+       render();
+       updateExportBtn();
+    });
 
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
@@ -1758,11 +1817,15 @@
       }
     });
 
+    // ========== MAIN EVENT LISTENERS FOR SELECTION ==========
+
+    // Grid/Compact View Listener
     refs.propertyGrid.addEventListener('click', (e) => {
       const card = e.target.closest('.property-card');
       if (!card) return;
       const id = card.dataset.id;
 
+      // Handle Checkbox Click
       if (e.target.closest('.card-checkbox')) {
         if (selectedIds.has(id)) {
           selectedIds.delete(id);
@@ -1771,21 +1834,47 @@
           selectedIds.add(id);
           card.classList.add('selected');
         }
+        
+        // Force sync checkbox state
         const cb = card.querySelector('input');
         if (cb) cb.checked = selectedIds.has(id);
+        
+        updateExportBtn();
+        updateSelectedCount();
+        return; // Stop propagation to opening detail
+      }
+
+      // Handle Card Click (Detail)
+      const rec = filteredRecords.find(r => String(r.id) === id);
+      if (rec) openDetail(rec);
+    });
+
+    // Table View Listener
+    refs.propertyTableBody.addEventListener('click', (e) => {
+      const row = e.target.closest('tr');
+      if (!row) return;
+      const id = row.dataset.id;
+
+      // Handle Checkbox Click
+      if (e.target.closest('.table-cb')) {
+         if (selectedIds.has(id)) {
+          selectedIds.delete(id);
+          row.classList.remove('selected');
+        } else {
+          selectedIds.add(id);
+          row.classList.add('selected');
+        }
+        
+        // Force sync checkbox state
+        const cb = row.querySelector('.table-cb');
+        if (cb) cb.checked = selectedIds.has(id);
+        
         updateExportBtn();
         updateSelectedCount();
         return;
       }
 
-      const rec = filteredRecords.find(r => String(r.id) === id);
-      if (rec) openDetail(rec);
-    });
-
-    refs.propertyTableBody.addEventListener('click', (e) => {
-      const row = e.target.closest('tr');
-      if (!row) return;
-      const id = row.dataset.id;
+      // Handle Row Click (Detail)
       const rec = filteredRecords.find(r => String(r.id) === id);
       if (rec) openDetail(rec);
     });
