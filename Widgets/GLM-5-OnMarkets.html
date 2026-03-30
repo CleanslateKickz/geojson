@@ -6,6 +6,18 @@
   <title>Property Listings Widget</title>
   <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  
+  <!-- Leaflet CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <!-- Leaflet Geoman (Drawing Tools) -->
+  <link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
+  <script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
+
+  <!-- Turf.js for Spatial Analysis -->
+  <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -121,7 +133,7 @@
       color: var(--fg);
       cursor: pointer;
       appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b6b6f' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+      background-image: url("image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b6b6f' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 10px center;
       transition: border-color var(--transition-fast);
@@ -591,6 +603,109 @@
       accent-color: var(--accent); 
     }
 
+    /* ========== MAP VIEW ========== */
+    #mapContainer {
+      display: none;
+      height: 650px;
+      width: 100%;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      z-index: 1;
+      background: #e5e5e5;
+    }
+    #mapContainer.show { display: block; }
+    
+    .map-filter-notice {
+      display: none;
+      background: var(--accent-light);
+      color: var(--accent);
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-md);
+      margin-bottom: 1rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid rgba(201, 89, 43, 0.2);
+    }
+    .map-filter-notice.show { display: flex; }
+    .map-clear-btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    .map-clear-btn:hover { background: var(--accent-hover); }
+
+    /* Map Popup Styles */
+    .leaflet-popup-content-wrapper {
+      border-radius: var(--radius-md);
+      padding: 0;
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+    }
+    .leaflet-popup-content {
+      margin: 0;
+      width: 280px !important;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .map-popup-img {
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+      background: #eee;
+    }
+    .map-popup-body {
+      padding: 12px;
+    }
+    .map-popup-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin-bottom: 4px;
+      color: var(--fg);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .map-popup-price {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--success);
+      margin-bottom: 8px;
+    }
+    .map-popup-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--fg-muted);
+      margin-bottom: 10px;
+      border-top: 1px solid var(--border);
+      padding-top: 8px;
+    }
+    .map-popup-btn {
+      display: block;
+      width: 100%;
+      text-align: center;
+      background: var(--fg);
+      color: white;
+      padding: 8px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: background 0.2s;
+    }
+    .map-popup-btn:hover {
+      background: var(--accent);
+      color: white;
+    }
+
     /* ========== LOADING & EMPTY STATES ========== */
     .loading-state, .empty-state {
       display: flex;
@@ -976,6 +1091,12 @@
               <rect x="14" y="14" width="7" height="7" rx="1"/>
             </svg>
           </button>
+          <button class="view-btn" id="mapViewBtn" title="Map View" aria-label="Map View">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+          </button>
           <button class="view-btn active" id="gridViewBtn" title="Grid View" aria-label="Grid View">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="3" y="3" width="7" height="7" rx="1"/>
@@ -1033,6 +1154,11 @@
       <div class="selected-count" id="selectedCount" style="display: none;" title="Clear Selection"></div>
     </div>
 
+    <div id="mapFilterNotice" class="map-filter-notice">
+      <span>Filtering by drawn area</span>
+      <button class="map-clear-btn" id="clearMapFilterBtn">Clear Map Filter</button>
+    </div>
+
     <div id="loadingState" class="loading-state">
       <div class="spinner"></div>
       <div class="loading-text">Loading properties...</div>
@@ -1062,6 +1188,8 @@
       </thead>
       <tbody id="propertyTableBody"></tbody>
     </table>
+    
+    <div id="mapContainer"></div>
   </div>
 
   <!-- Detail Panel -->
@@ -1162,6 +1290,10 @@
     let selectedIds = new Set();
     let currentRecord = null;
     let currentView = 'grid';
+    let map = null;
+    let mapMarkers = [];
+    let drawnPolygon = null;
+    let mapFilterActive = false;
 
     const $ = (id) => document.getElementById(id);
     const refs = {
@@ -1179,6 +1311,7 @@
       clearFiltersBtn: $('clearFiltersBtn'),
       tableViewBtn: $('tableViewBtn'),
       compactViewBtn: $('compactViewBtn'),
+      mapViewBtn: $('mapViewBtn'),
       gridViewBtn: $('gridViewBtn'),
       exportBtn: $('exportBtn'),
       exportLabel: $('exportLabel'),
@@ -1190,6 +1323,9 @@
       propertyGrid: $('propertyGrid'),
       propertyTable: $('propertyTable'),
       propertyTableBody: $('propertyTableBody'),
+      mapContainer: $('mapContainer'),
+      mapFilterNotice: $('mapFilterNotice'),
+      clearMapFilterBtn: $('clearMapFilterBtn'),
       detailOverlay: $('detailOverlay'),
       detailClose: $('detailClose'),
       detailTopActions: $('detailTopActions'),
@@ -1355,7 +1491,9 @@
         notes: processVal(getRawVal(src, 'Notes')),
         dateListed: timestamp,
         propertyType: processVal(getRawVal(src, 'Property_Type')),
-        updatedAt: updated
+        updatedAt: updated,
+        lat: Number(getRawVal(src, 'Latitude')),
+        lng: Number(getRawVal(src, 'Longitude'))
       };
 
       normCache.set(id, data);
@@ -1376,7 +1514,7 @@
     function createCard(rec) {
       const d = normalize(rec);
       const img = d.images[0] || '';
-      const placeholderImg = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250"><rect fill="#e3e3e5" width="400" height="250"/><text x="50%" y="50%" fill="#9d9da3" font-family="sans-serif" font-size="14" text-anchor="middle" dy=".3em">No Image</text></svg>');
+      const placeholderImg = 'image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250"><rect fill="#e3e3e5" width="400" height="250"/><text x="50%" y="50%" fill="#9d9da3" font-family="sans-serif" font-size="14" text-anchor="middle" dy=".3em">No Image</text></svg>');
       const days = daysOnMarket(d.dateListed);
       const isNew = days !== null && days <= 14;
       const selected = selectedIds.has(d.id);
@@ -1385,7 +1523,6 @@
       const isCompact = currentView === 'compact';
       const addrText = isCompact ? `${d.city}, ${d.state}` : buildAddress(d);
 
-      // REMOVED onclick="event.stopPropagation()" from checkbox wrapper
       return `
         <div class="property-card ${selected ? 'selected' : ''}" data-id="${d.id}" tabindex="0" role="button" aria-label="View details for ${esc(d.name)}">
           <div class="card-image-wrap">
@@ -1428,7 +1565,6 @@
       const selected = selectedIds.has(d.id);
       const placeholderImg = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 75"><rect fill="#e3e3e5" width="100" height="75"/><text x="50%" y="50%" fill="#9d9da3" font-size="10" text-anchor="middle">N/A</text></svg>');
 
-      // Added Checkbox Column
       return `
         <tr class="${selected ? 'selected' : ''}" data-id="${d.id}">
           <td class="table-checkbox">
@@ -1498,13 +1634,29 @@
           (d.tenant && d.tenant.toLowerCase().includes(search));
 
         const matchType = type === 'all' || d.propertyType === type;
-        const matchTenancy = tenancy === 'all' || d.tenancy === tenancy;
+        
+        // FIX: Normalize tenancy for comparison (trim and lowercase)
+        const tenancyMatch = tenancy === 'all' || (d.tenancy && d.tenancy.trim().toLowerCase() === tenancy.toLowerCase());
+
         const matchCity = city === 'all' || d.city === city;
 
         const matchPrice = (!minPrice || d.price >= minPrice) && (!maxPrice || d.price <= maxPrice);
         const matchCap = (!minCap || d.capRate >= minCap) && (!maxCap || d.capRate <= maxCap);
 
-        return matchSearch && matchType && matchTenancy && matchCity && matchPrice && matchCap;
+        // MAP FILTER LOGIC
+        let matchMap = true;
+        if (mapFilterActive && drawnPolygon && d.lat && d.lng) {
+            try {
+                const point = turf.point([d.lng, d.lat]);
+                const polygon = drawnPolygon.toGeoJSON();
+                matchMap = turf.booleanPointInPolygon(point, polygon);
+            } catch (e) {
+                console.error("Map filter error", e);
+                matchMap = true; // Fail open
+            }
+        }
+
+        return matchSearch && matchType && tenancyMatch && matchCity && matchPrice && matchCap && matchMap;
       });
 
       // Sort
@@ -1528,10 +1680,22 @@
     function render() {
       refs.loadingState.style.display = 'none';
 
+      // Handle View Visibility
+      const isMap = currentView === 'map';
+      const isTable = currentView === 'table';
+      const isGrid = currentView === 'grid' || currentView === 'compact';
+
+      refs.propertyGrid.style.display = isGrid ? 'grid' : 'none';
+      refs.propertyTable.style.display = isTable ? 'table' : 'none';
+      refs.mapContainer.style.display = isMap ? 'block' : 'none';
+
+      if (isMap) {
+        initMap();
+        return;
+      }
+
       if (filteredRecords.length === 0) {
         refs.emptyState.style.display = 'flex';
-        refs.propertyGrid.style.display = 'none';
-        refs.propertyTable.style.display = 'none';
         refs.resultsBar.style.display = 'none';
         return;
       }
@@ -1542,15 +1706,11 @@
 
       updateSelectedCount();
 
-      if (currentView === 'table') {
-        refs.propertyGrid.style.display = 'none';
+      if (isTable) {
         refs.propertyTable.classList.add('show');
-        refs.propertyTable.style.display = 'table';
-        
         refs.propertyTableBody.innerHTML = filteredRecords.map(createTableRow).join('');
       } else {
-        refs.propertyTable.style.display = 'none';
-        refs.propertyGrid.style.display = 'grid';
+        refs.propertyTable.classList.remove('show');
         refs.propertyGrid.classList.toggle('compact-view', currentView === 'compact');
         
         const fragment = document.createRange().createContextualFragment(
@@ -1585,7 +1745,7 @@
       currentRecord = rec;
       const d = normalize(rec);
 
-      const img = d.images[0] || 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500"><rect fill="#e3e3e5" width="800" height="500"/><text x="50%" y="50%" fill="#9d9da3" font-family="sans-serif" font-size="18" text-anchor="middle" dy=".3em">No Image Available</text></svg>');
+      const img = d.images[0] || 'image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500"><rect fill="#e3e3e5" width="800" height="500"/><text x="50%" y="50%" fill="#9d9da3" font-family="sans-serif" font-size="18" text-anchor="middle" dy=".3em">No Image Available</text></svg>');
       $('detailImage').src = img;
       $('detailTypeBadge').textContent = d.leaseType || d.propertyType || 'Property';
       $('detailTitle').textContent = d.name;
@@ -1750,6 +1910,102 @@
       closeExportModal();
     }
 
+    // ========== MAP VIEW LOGIC ==========
+    function initMap() {
+      if (!map) {
+        // Initialize Map with Voyager Tiles (Cleaner look)
+        map = L.map('mapContainer').setView([47.6062, -122.3321], 10); // Default to Seattle area
+        
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+          subdomains: 'abcd',
+          maxZoom: 20
+        }).addTo(map);
+
+        // Enable Geoman (Drawing Tools)
+        map.pm.addControls({
+          position: 'topleft',
+          drawCircleMarker: false,
+          drawCircle: false,
+          drawMarker: false,
+          drawPolyline: false,
+          drawRectangle: false,
+          drawText: false,
+          editMode: false,
+          dragMode: false,
+          cutPolygon: false,
+          removalMode: false
+        });
+
+        // Listen for Polygon Creation
+        map.on('pm:create', (e) => {
+          // Remove existing polygon if any
+          if (drawnPolygon) map.removeLayer(drawnPolygon);
+          drawnPolygon = e.layer;
+          mapFilterActive = true;
+          refs.mapFilterNotice.classList.add('show');
+          applyFilters(); // Re-filter based on polygon
+        });
+      } else {
+        map.invalidateSize();
+      }
+
+      // Add Markers
+      mapMarkers.forEach(m => map.removeLayer(m));
+      mapMarkers = [];
+
+      filteredRecords.forEach(rec => {
+        const d = normalize(rec);
+        if (d.lat && d.lng) {
+          // Create custom popup content
+          const popupContent = `
+            <div class="map-popup-wrapper">
+              <img src="${d.images[0] || 'https://via.placeholder.com/300x150?text=No+Image'}" class="map-popup-img" onerror="this.src='https://via.placeholder.com/300x150?text=Error'">
+              <div class="map-popup-body">
+                <div class="map-popup-title">${esc(d.name)}</div>
+                <div class="map-popup-price">${formatPrice(d.price)}</div>
+                <div class="map-popup-meta">
+                  <span>${formatCap(d.capRate)} Cap</span>
+                  <span>${formatSF(d.rba)}</span>
+                </div>
+                <a href="#" class="map-popup-btn" onclick="openDetailFromMap('${d.id}'); return false;">View Details</a>
+              </div>
+            </div>
+          `;
+
+          const marker = L.marker([d.lat, d.lng]).addTo(map);
+          marker.bindPopup(popupContent);
+          
+          // Store record ID on marker for easy retrieval
+          marker.recordId = d.id;
+          
+          mapMarkers.push(marker);
+        }
+      });
+
+      // Fit bounds to show all markers if no polygon exists
+      if (!mapFilterActive && mapMarkers.length > 0) {
+        const group = new L.featureGroup(mapMarkers);
+        map.fitBounds(group.getBounds().pad(0.1));
+      }
+    }
+
+    // Global function to be called from popup
+    window.openDetailFromMap = function(id) {
+      const rec = allRecords.find(r => String(r.id) === id);
+      if (rec) openDetail(rec);
+    };
+
+    function clearMapFilter() {
+      if (drawnPolygon) {
+        map.removeLayer(drawnPolygon);
+        drawnPolygon = null;
+      }
+      mapFilterActive = false;
+      refs.mapFilterNotice.classList.remove('show');
+      applyFilters();
+    }
+
     // ========== EVENT HANDLERS ==========
     const debouncedFilter = debounce(applyFilters, 200);
 
@@ -1781,10 +2037,12 @@
       currentView = view;
       refs.tableViewBtn.classList.remove('active');
       refs.compactViewBtn.classList.remove('active');
+      refs.mapViewBtn.classList.remove('active');
       refs.gridViewBtn.classList.remove('active');
       
       if(view === 'table') refs.tableViewBtn.classList.add('active');
       else if(view === 'compact') refs.compactViewBtn.classList.add('active');
+      else if(view === 'map') refs.mapViewBtn.classList.add('active');
       else refs.gridViewBtn.classList.add('active');
       
       render();
@@ -1792,6 +2050,7 @@
 
     refs.tableViewBtn.addEventListener('click', () => setView('table'));
     refs.compactViewBtn.addEventListener('click', () => setView('compact'));
+    refs.mapViewBtn.addEventListener('click', () => setView('map'));
     refs.gridViewBtn.addEventListener('click', () => setView('grid'));
 
     refs.exportBtn.addEventListener('click', openExportModal);
@@ -1809,6 +2068,8 @@
        render();
        updateExportBtn();
     });
+
+    refs.clearMapFilterBtn.addEventListener('click', clearMapFilter);
 
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
