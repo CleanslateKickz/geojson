@@ -11,210 +11,229 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   
-  <!-- Leaflet Geoman (Drawing Tools) -->
-  <link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
-  <script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
-
-  <!-- Turf.js for Spatial Analysis -->
-  <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
+  <!-- Leaflet Draw -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
+  <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+  
+  <!-- Marker Clustering -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
   <style>
     :root {
-      --bg: #f7f7f8;
-      --bg-subtle: #efefef;
-      --bg-card: #ffffff;
-      --fg: #1a1a1b;
-      --fg-muted: #6b6b6f;
-      --fg-subtle: #9d9da3;
+      --bg: #fafafa;
+      --bg-elevated: #ffffff;
+      --bg-pressed: #f5f5f5;
+      --bg-subtle: #f0f0f0;
+      --fg: #0f0f0f;
+      --fg-secondary: #444444;
+      --fg-tertiary: #6b6b6b;
       --accent: #c9592b;
-      --accent-hover: #b34d23;
-      --accent-light: rgba(201, 89, 43, 0.1);
-      --success: #2d8a5f;
-      --border: #e3e3e5;
-      --border-strong: #d1d1d4;
-      --shadow-xs: 0 1px 2px rgba(0,0,0,0.04);
-      --shadow-sm: 0 2px 4px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
-      --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
-      --shadow-lg: 0 12px 40px rgba(0,0,0,0.12);
+      --accent-hover: #a8471f;
+      --accent-light: rgba(201, 89, 43, 0.08);
+      --accent-medium: rgba(201, 89, 43, 0.15);
+      --success: #0d7c3d;
+      --warning: #b45309;
+      --border: #e5e5e5;
+      --border-strong: #d4d4d4;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
       --radius-sm: 6px;
-      --radius-md: 10px;
-      --radius-lg: 14px;
-      --radius-xl: 20px;
-      --transition-fast: 120ms ease;
-      --transition-base: 180ms ease;
-      --transition-smooth: 280ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+      --transition: 150ms cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    body {
-      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    html, body {
+      height: 100vh;
+      overflow: hidden;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       background: var(--bg);
       color: var(--fg);
-      line-height: 1.5;
+      line-height: 1.4;
       -webkit-font-smoothing: antialiased;
     }
 
     .app {
-      min-height: 100vh;
-      padding: 1.25rem;
-      max-width: 1680px;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 0.75rem 1rem 1rem;
+      max-width: 1920px;
       margin: 0 auto;
     }
 
     /* ========== CONTROLS ========== */
     .controls-wrapper {
-      background: var(--bg-card);
-      border-radius: var(--radius-xl);
-      margin-bottom: 1.25rem;
-      box-shadow: var(--shadow-xs);
+      background: var(--bg-elevated);
+      border-radius: var(--radius-lg);
+      margin-bottom: 0.75rem;
+      box-shadow: var(--shadow-sm);
       border: 1px solid var(--border);
-      overflow: hidden;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 10;
     }
 
     .controls {
-      padding: 1rem 1.25rem;
+      padding: 0.625rem 0.75rem;
       display: flex;
       flex-wrap: wrap;
-      gap: 0.875rem;
+      gap: 0.5rem;
       align-items: center;
     }
 
     .search-wrap {
-      flex: 1.5;
-      min-width: 220px;
+      flex: 2;
+      min-width: 240px;
       position: relative;
     }
 
     .search-icon {
       position: absolute;
-      left: 14px;
+      left: 10px;
       top: 50%;
       transform: translateY(-50%);
-      width: 18px;
-      height: 18px;
-      color: var(--fg-subtle);
+      width: 14px;
+      height: 14px;
+      color: var(--fg-tertiary);
       pointer-events: none;
     }
 
     .search-input {
       width: 100%;
-      padding: 0.75rem 1rem 0.75rem 2.75rem;
+      padding: 0.5rem 0.75rem 0.5rem 2rem;
       border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      font-size: 0.9rem;
+      border-radius: var(--radius-md);
+      font-size: 0.8125rem;
       font-family: inherit;
       font-weight: 500;
       background: var(--bg);
       color: var(--fg);
-      transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+      transition: all var(--transition);
+      height: 34px;
     }
 
     .search-input:focus {
       outline: none;
       border-color: var(--accent);
-      background: var(--bg-card);
-      box-shadow: 0 0 0 4px var(--accent-light);
+      background: var(--bg-elevated);
+      box-shadow: 0 0 0 3px var(--accent-light);
     }
 
-    .search-input:disabled { opacity: 0.6; cursor: not-allowed; }
+    .search-input:disabled { opacity: 0.5; cursor: not-allowed; }
 
     .filter-select {
-      padding: 0.7rem 2.25rem 0.7rem 1rem;
+      padding: 0.5rem 1.75rem 0.5rem 0.625rem;
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
-      font-size: 0.85rem;
+      font-size: 0.8125rem;
       font-family: inherit;
       font-weight: 500;
-      background: var(--bg-card);
+      background: var(--bg-elevated);
       color: var(--fg);
       cursor: pointer;
       appearance: none;
-      background-image: url("image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b6b6f' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236b6b6b' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
-      background-position: right 10px center;
-      transition: border-color var(--transition-fast);
-      min-width: 130px;
+      background-position: right 6px center;
+      transition: all var(--transition);
+      min-width: 110px;
+      height: 34px;
     }
 
-    .filter-select:focus { outline: none; border-color: var(--accent); }
+    .filter-select:hover { border-color: var(--border-strong); }
+    .filter-select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
     .filter-select:disabled { opacity: 0.5; cursor: not-allowed; }
 
     .view-toggle {
       display: flex;
-      border: 1px solid var(--border);
+      background: var(--bg);
       border-radius: var(--radius-md);
-      overflow: hidden;
-      flex-shrink: 0;
+      padding: 3px;
+      gap: 3px;
+      border: 1px solid var(--border);
     }
 
     .view-btn {
-      padding: 0.6rem 0.8rem;
-      background: var(--bg-card);
+      padding: 0.375rem;
+      background: transparent;
       border: none;
       cursor: pointer;
-      transition: background var(--transition-fast);
+      transition: all var(--transition);
       display: flex;
       align-items: center;
       justify-content: center;
+      border-radius: var(--radius-sm);
+      color: var(--fg-tertiary);
+      height: 28px;
+      width: 28px;
     }
 
-    .view-btn:not(:last-child) { border-right: 1px solid var(--border); }
-    .view-btn:hover { background: var(--bg-subtle); }
-    .view-btn.active { background: var(--fg); }
-    .view-btn.active svg { color: white; }
-    .view-btn svg { width: 18px; height: 18px; color: var(--fg-muted); transition: color var(--transition-fast); }
+    .view-btn:hover { background: var(--bg-pressed); color: var(--fg-secondary); }
+    .view-btn.active { background: var(--bg-elevated); color: var(--fg); box-shadow: var(--shadow-sm); }
+    .view-btn svg { width: 16px; height: 16px; }
 
     .btn {
-      padding: 0.7rem 1.25rem;
+      padding: 0.5rem 0.875rem;
       border-radius: var(--radius-md);
-      font-size: 0.85rem;
+      font-size: 0.8125rem;
       font-weight: 600;
       font-family: inherit;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
-      transition: all var(--transition-fast);
+      gap: 0.375rem;
+      transition: all var(--transition);
       border: none;
       white-space: nowrap;
+      height: 34px;
     }
 
     .btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-primary { background: var(--accent); color: white; }
-    .btn-primary:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-1px); }
-    .btn-secondary { background: var(--bg-card); color: var(--fg); border: 1px solid var(--border); }
-    .btn-secondary:hover:not(:disabled) { background: var(--bg); border-color: var(--border-strong); }
-    .btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .btn-primary:hover:not(:disabled) { background: var(--accent-hover); }
+    .btn-secondary { background: var(--bg-elevated); color: var(--fg); border: 1px solid var(--border); }
+    .btn-secondary:hover:not(:disabled) { background: var(--bg-pressed); border-color: var(--border-strong); }
+    .btn svg { width: 14px; height: 14px; flex-shrink: 0; }
 
     /* Advanced Filters */
     .advanced-toggle {
       width: 100%;
-      padding: 0.6rem 1.25rem;
-      background: var(--bg);
+      padding: 0.5rem 0.75rem;
+      background: transparent;
       border: none;
       border-top: 1px solid var(--border);
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       font-weight: 600;
-      color: var(--fg-muted);
+      color: var(--fg-tertiary);
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 0.5rem;
+      gap: 0.375rem;
+      transition: all var(--transition);
+      height: 32px;
     }
 
-    .advanced-toggle:hover { background: var(--bg-subtle); }
-    .advanced-toggle svg { width: 14px; height: 14px; transition: transform var(--transition-fast); }
+    .advanced-toggle:hover { background: var(--bg-subtle); color: var(--fg-secondary); }
+    .advanced-toggle svg { width: 14px; height: 14px; transition: transform var(--transition); }
     .advanced-toggle.open svg { transform: rotate(180deg); }
 
     .advanced-panel {
       display: none;
-      padding: 1rem 1.25rem;
-      background: var(--bg);
+      padding: 0.75rem;
+      background: var(--bg-subtle);
       border-top: 1px solid var(--border);
     }
 
@@ -223,98 +242,148 @@
     .filter-row {
       display: flex;
       flex-wrap: wrap;
-      gap: 1.25rem;
+      gap: 1rem;
       align-items: flex-end;
     }
 
     .filter-group {
       display: flex;
       flex-direction: column;
-      gap: 0.4rem;
+      gap: 0.25rem;
     }
 
     .filter-label {
-      font-size: 0.7rem;
-      font-weight: 700;
+      font-size: 0.6875rem;
+      font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--fg-subtle);
+      letter-spacing: 0.025em;
+      color: var(--fg-tertiary);
     }
 
     .range-inputs {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.375rem;
     }
 
     .range-inputs input {
-      width: 100px;
-      padding: 0.5rem 0.75rem;
+      width: 90px;
+      padding: 0.375rem 0.5rem;
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
-      font-size: 0.85rem;
+      font-size: 0.8125rem;
       font-family: inherit;
-      background: var(--bg-card);
+      background: var(--bg-elevated);
+      transition: all var(--transition);
+      height: 32px;
     }
 
-    .range-inputs span { color: var(--fg-muted); font-size: 0.8rem; }
+    .range-inputs input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+    .range-inputs span { color: var(--fg-tertiary); font-size: 0.75rem; }
+
+    /* Boundary Status */
+    .boundary-status {
+      display: none;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.375rem 0.75rem;
+      background: var(--accent-light);
+      color: var(--accent);
+      border-radius: var(--radius-md);
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin: 0 0.75rem 0.5rem;
+      width: fit-content;
+    }
+    
+    .boundary-status.active { display: inline-flex; }
+    
+    .boundary-status button {
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 0.125rem 0.5rem;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    
+    .boundary-status button:hover { background: var(--accent-hover); }
 
     /* Results Info */
     .results-bar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 1rem;
-      padding: 0 0.25rem;
+      margin-bottom: 0.625rem;
+      flex-shrink: 0;
+      padding: 0 0.125rem;
     }
 
-    .results-info { font-size: 0.875rem; color: var(--fg-muted); }
+    .results-info { font-size: 0.8125rem; color: var(--fg-tertiary); font-weight: 500; }
     .results-count { font-weight: 700; color: var(--fg); }
     .selected-count {
       background: var(--accent-light);
       color: var(--accent);
-      padding: 0.3rem 0.75rem;
-      border-radius: var(--radius-sm);
-      font-size: 0.8rem;
+      padding: 0.25rem 0.625rem;
+      border-radius: var(--radius-md);
+      font-size: 0.75rem;
       font-weight: 600;
       cursor: pointer;
-      transition: background var(--transition-fast);
+      transition: all var(--transition);
+      border: 1px solid transparent;
     }
-    .selected-count:hover { background: rgba(201, 89, 43, 0.2); }
+    .selected-count:hover { background: var(--accent-medium); border-color: var(--accent); }
 
-    /* ========== PROPERTY GRID ========== */
-    .property-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-      gap: 1.25rem;
-      contain: layout style;
+    /* ========== CONTENT AREA ========== */
+    .content-area {
+      flex: 1;
+      min-height: 0;
+      position: relative;
+      overflow: hidden;
     }
 
-    /* Compact Grid View - Redesigned */
-    .property-grid.compact-view {
+    /* ========== PROPERTY GRID - FIXED ========== */
+    #propertyGrid {
+      display: none;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      grid-auto-rows: min-content;
+      gap: 0.75rem;
+      height: 100%;
+      overflow-y: auto;
+      padding-right: 0.25rem;
+      align-items: start;
+    }
+
+    /* FIX: Added !important to ensure grid displays */
+    #propertyGrid.active {
+      display: grid !important;
+    }
+
+    #propertyGrid.compact-view {
       grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
       gap: 0.5rem;
     }
 
     .property-card {
-      background: var(--bg-card);
-      border-radius: var(--radius-lg);
+      background: var(--bg-elevated);
+      border-radius: var(--radius-md);
       overflow: hidden;
       border: 1px solid var(--border);
       cursor: pointer;
-      transition: transform var(--transition-smooth), box-shadow var(--transition-smooth), border-color var(--transition-fast);
-      contain: layout style paint;
+      transition: all var(--transition);
       position: relative;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
     }
 
     .property-card:hover {
-      transform: translateY(-2px);
+      transform: translateY(-1px);
       box-shadow: var(--shadow-md);
-    }
-
-    .property-card:focus-visible {
-      outline: none;
-      box-shadow: 0 0 0 3px var(--accent-light);
+      border-color: var(--border-strong);
     }
 
     .property-card.selected {
@@ -324,33 +393,37 @@
 
     .card-image-wrap {
       position: relative;
-      height: 190px;
-      background: linear-gradient(135deg, var(--bg-subtle) 0%, var(--border) 100%);
+      height: 160px;
+      background: var(--bg-subtle);
       overflow: hidden;
+      flex-shrink: 0;
     }
 
     .card-image {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transition: transform 400ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
-      will-change: transform;
+      transition: transform 400ms ease;
+      display: block;
+      position: relative;
+      z-index: 2;
     }
 
-    .property-card:hover .card-image { transform: scale(1.04); }
+    .property-card:hover .card-image { transform: scale(1.03); }
 
     .img-placeholder {
       position: absolute;
       inset: 0;
-      background: linear-gradient(90deg, var(--bg-subtle) 25%, var(--bg-card) 50%, var(--bg-subtle) 75%);
+      background: linear-gradient(90deg, var(--bg-subtle) 25%, var(--bg-pressed) 50%, var(--bg-subtle) 75%);
       background-size: 200% 100%;
-      animation: shimmer 1.8s ease-in-out infinite;
+      animation: shimmer 1.5s ease-in-out infinite;
       display: flex;
       align-items: center;
       justify-content: center;
+      z-index: 1;
     }
     .img-placeholder.hidden { display: none; }
-    .img-placeholder svg { width: 48px; height: 48px; color: var(--fg-subtle); opacity: 0.5; }
+    .img-placeholder svg { width: 32px; height: 32px; color: var(--fg-tertiary); opacity: 0.4; }
 
     @keyframes shimmer {
       0% { background-position: 200% 0; }
@@ -359,43 +432,44 @@
 
     .card-badges {
       position: absolute;
-      top: 12px;
-      left: 12px;
+      top: 8px;
+      left: 8px;
       display: flex;
-      gap: 6px;
-      z-index: 2;
+      gap: 4px;
+      z-index: 3;
     }
 
     .badge {
-      padding: 5px 10px;
-      border-radius: var(--radius-sm);
-      font-size: 0.68rem;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 0.625rem;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.02em;
       backdrop-filter: blur(8px);
     }
 
     .badge-new { background: var(--accent); color: white; }
-    .badge-type { background: rgba(0,0,0,0.7); color: white; }
+    .badge-type { background: rgba(0,0,0,0.75); color: white; }
 
     .card-checkbox {
       position: absolute;
-      top: 12px;
-      right: 12px;
-      width: 30px;
-      height: 30px;
+      top: 8px;
+      right: 8px;
+      width: 24px;
+      height: 24px;
       background: rgba(255,255,255,0.95);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      z-index: 3;
-      transition: all var(--transition-fast);
+      z-index: 4;
+      transition: all var(--transition);
       opacity: 0;
       transform: scale(0.85);
-      box-shadow: var(--shadow-sm);
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border);
     }
 
     .property-card:hover .card-checkbox,
@@ -404,24 +478,29 @@
       transform: scale(1);
     }
 
-    .card-checkbox:hover { background: white; transform: scale(1.1); }
-    .card-checkbox input { width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent); }
+    .card-checkbox input { width: 14px; height: 14px; cursor: pointer; accent-color: var(--accent); }
 
-    .card-body { padding: 1.125rem; }
+    .card-body { 
+      padding: 0.875rem; 
+      background: var(--bg-elevated);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
 
     .card-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      gap: 0.75rem;
-      margin-bottom: 0.5rem;
+      gap: 0.5rem;
+      margin-bottom: 0.25rem;
     }
 
     .card-title {
-      font-size: 1.05rem;
+      font-size: 0.9375rem;
       font-weight: 700;
       color: var(--fg);
-      line-height: 1.35;
+      line-height: 1.3;
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
@@ -429,367 +508,656 @@
     }
 
     .card-price {
-      font-size: 1.1rem;
+      font-size: 0.9375rem;
       font-weight: 800;
       color: var(--success);
       white-space: nowrap;
-      letter-spacing: -0.02em;
+      letter-spacing: -0.01em;
     }
 
     .card-address {
-      font-size: 0.8rem;
-      color: var(--fg-muted);
-      margin-bottom: 0.875rem;
+      font-size: 0.75rem;
+      color: var(--fg-tertiary);
+      margin-bottom: 0.625rem;
       display: flex;
       align-items: center;
-      gap: 5px;
-      line-height: 1.4;
+      gap: 4px;
+      line-height: 1.3;
+      font-weight: 500;
     }
 
-    .card-address svg { width: 14px; height: 14px; flex-shrink: 0; color: var(--fg-subtle); }
+    .card-address svg { width: 12px; height: 12px; flex-shrink: 0; color: var(--fg-tertiary); opacity: 0.7; }
 
     .card-metrics {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 0.75rem;
-      padding-top: 0.875rem;
+      gap: 0.5rem;
+      padding-top: 0.625rem;
       border-top: 1px solid var(--border);
+      margin-top: auto;
     }
 
     .metric { text-align: center; }
     .metric-label {
-      font-size: 0.65rem;
+      font-size: 0.625rem;
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--fg-subtle);
-      margin-bottom: 3px;
+      letter-spacing: 0.02em;
+      color: var(--fg-tertiary);
+      margin-bottom: 2px;
     }
-    .metric-value { font-size: 0.9rem; font-weight: 700; color: var(--fg); }
+    .metric-value { font-size: 0.8125rem; font-weight: 700; color: var(--fg); }
     .metric-value.highlight { color: var(--accent); }
 
-    /* ========== COMPACT VIEW SPECIFIC (Redesigned) ========== */
-    .compact-view .property-card {
-      display: flex;
-      flex-direction: row;
-      height: 80px; /* Fixed slim height */
-      border-radius: var(--radius-md); /* Slightly smaller radius */
-    }
-    
-    .compact-view .card-image-wrap {
-      width: 100px;
-      height: 100%;
-      flex-shrink: 0;
-    }
-    
-    .compact-view .card-body {
-      padding: 0.75rem 1rem;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      flex: 1;
-      min-width: 0; /* Prevent flex overflow */
-    }
-    
-    .compact-view .card-header {
-      margin-bottom: 0.15rem;
-      align-items: center;
-    }
-    
-    .compact-view .card-title {
-      font-size: 0.9rem;
-      line-height: 1.2;
-      -webkit-line-clamp: 1;
-      margin: 0;
-    }
-    
-    .compact-view .card-price {
-      font-size: 0.95rem;
-    }
-
-    /* Custom meta line for compact view */
     .compact-meta {
-      display: none; /* Hidden by default */
-      font-size: 0.75rem;
-      color: var(--fg-muted);
-      margin-top: auto;
+      display: none;
+      font-size: 0.6875rem;
+      color: var(--fg-secondary);
+      margin-top: 0.25rem;
       align-items: center;
       justify-content: space-between;
+      font-weight: 500;
+    }
+
+    /* Compact View Overrides */
+    #propertyGrid.compact-view .property-card {
+      flex-direction: row;
+      height: 80px;
     }
     
-    .compact-view .compact-meta {
+    #propertyGrid.compact-view .card-image-wrap {
+      width: 100px;
+      height: 100%;
+    }
+    
+    #propertyGrid.compact-view .card-body {
+      padding: 0.625rem 0.75rem;
+      justify-content: center;
+    }
+    
+    #propertyGrid.compact-view .card-header {
+      margin-bottom: 0.125rem;
+      align-items: center;
+    }
+    
+    #propertyGrid.compact-view .card-title {
+      font-size: 0.8125rem;
+      line-height: 1.2;
+      -webkit-line-clamp: 1;
+    }
+    
+    #propertyGrid.compact-view .card-price {
+      font-size: 0.8125rem;
+    }
+
+    #propertyGrid.compact-view .compact-meta {
       display: flex;
     }
     
-    .compact-view .card-address {
+    #propertyGrid.compact-view .card-address {
       display: none;
     }
     
-    .compact-view .card-metrics {
+    #propertyGrid.compact-view .card-metrics {
       display: none;
     }
     
-    .compact-view .card-badges {
+    #propertyGrid.compact-view .card-badges {
       top: 6px;
       left: 6px;
     }
     
-    .compact-view .badge {
+    #propertyGrid.compact-view .badge {
       padding: 2px 5px;
       font-size: 0.55rem;
     }
     
-    .compact-view .card-checkbox {
+    #propertyGrid.compact-view .card-checkbox {
       top: 50%;
-      right: 10px;
+      right: 8px;
       transform: translateY(-50%) scale(0.85);
       opacity: 0.5;
     }
     
-    .compact-view .property-card:hover .card-checkbox {
+    #propertyGrid.compact-view .property-card:hover .card-checkbox {
       opacity: 1;
       transform: translateY(-50%) scale(1);
     }
 
     /* ========== TABLE VIEW ========== */
-    .property-table { display: none; width: 100%; border-collapse: collapse; background: var(--bg-card); border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border); }
-    .property-table.show { display: table; }
+    #propertyTable { 
+      display: none; 
+      width: 100%; 
+      border-collapse: separate; 
+      border-spacing: 0; 
+      background: var(--bg-elevated); 
+      border-radius: var(--radius-md); 
+      overflow: hidden; 
+      border: 1px solid var(--border); 
+      box-shadow: var(--shadow-sm);
+      height: 100%;
+    }
+    #propertyTable.active { 
+      display: table;
+    }
     
-    .property-table th {
+    #propertyTable th {
       text-align: left;
-      padding: 0.875rem 1rem;
-      background: var(--bg);
+      padding: 0.625rem 0.75rem;
+      background: var(--bg-subtle);
       border-bottom: 1px solid var(--border);
-      font-size: 0.7rem;
+      font-size: 0.6875rem;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--fg-muted);
+      letter-spacing: 0.025em;
+      color: var(--fg-tertiary);
       position: sticky;
       top: 0;
       z-index: 10;
     }
 
-    .property-table td {
-      padding: 0.875rem 1rem;
+    #propertyTable td {
+      padding: 0.625rem 0.75rem;
       border-bottom: 1px solid var(--border);
-      font-size: 0.85rem;
+      font-size: 0.8125rem;
       color: var(--fg);
       vertical-align: middle;
+      font-weight: 500;
     }
 
-    .property-table tr:last-child td { border-bottom: none; }
-    .property-table tr:hover td { background: var(--bg); cursor: pointer; }
-    .property-table tr.selected td { background: var(--accent-light); }
+    #propertyTable tr:last-child td { border-bottom: none; }
+    #propertyTable tbody tr { transition: background var(--transition); }
+    #propertyTable tbody tr:hover { background: var(--bg-subtle); cursor: pointer; }
+    #propertyTable tr.selected td { background: var(--accent-light); }
 
     .table-img {
-      width: 80px;
-      height: 60px;
+      width: 48px;
+      height: 36px;
       object-fit: cover;
       border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-sm);
     }
 
-    .table-title { font-weight: 600; color: var(--fg); margin-bottom: 2px; }
-    .table-address { font-size: 0.75rem; color: var(--fg-muted); }
+    .table-title { font-weight: 700; color: var(--fg); margin-bottom: 1px; font-size: 0.875rem; }
+    .table-address { font-size: 0.75rem; color: var(--fg-tertiary); font-weight: 500; }
     
     .table-checkbox { 
       width: 40px; 
       text-align: center; 
     }
     .table-checkbox input { 
-      width: 18px; 
-      height: 18px; 
+      width: 14px; 
+      height: 14px; 
       cursor: pointer; 
       accent-color: var(--accent); 
     }
 
     /* ========== MAP VIEW ========== */
-    #mapContainer {
+    #mapView {
       display: none;
-      height: 650px;
-      width: 100%;
-      border-radius: var(--radius-lg);
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow-sm);
-      z-index: 1;
-      background: #e5e5e5;
-    }
-    #mapContainer.show { display: block; }
-    
-    .map-filter-notice {
-      display: none;
-      background: var(--accent-light);
-      color: var(--accent);
-      padding: 0.75rem 1rem;
+      height: 100%;
+      background: var(--bg-elevated);
       border-radius: var(--radius-md);
-      margin-bottom: 1rem;
-      font-weight: 600;
-      font-size: 0.9rem;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      position: relative;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    #mapView.active {
+      display: flex;
+    }
+    
+    #propertyMap {
+      flex: 1;
+      height: 100%;
+      z-index: 1;
+    }
+    
+    .map-sidebar {
+      width: 320px;
+      background: var(--bg-elevated);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      z-index: 5;
+      position: relative;
+      flex-shrink: 0;
+    }
+    
+    .map-sidebar-header {
+      padding: 0.875rem 1rem;
+      background: var(--fg);
+      color: white;
+      font-weight: 700;
+      font-size: 0.875rem;
+      display: flex;
       align-items: center;
       justify-content: space-between;
-      border: 1px solid rgba(201, 89, 43, 0.2);
+      flex-shrink: 0;
     }
-    .map-filter-notice.show { display: flex; }
-    .map-clear-btn {
-      background: var(--accent);
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 0.75rem;
-      cursor: pointer;
-      font-weight: 600;
-      transition: background 0.2s;
+    
+    .map-sidebar-content {
+      overflow-y: auto;
+      flex: 1;
+      padding: 0.5rem;
     }
-    .map-clear-btn:hover { background: var(--accent-hover); }
-
-    /* Map Popup Styles */
-    .leaflet-popup-content-wrapper {
+    
+    .map-property-item {
+      padding: 0.75rem;
       border-radius: var(--radius-md);
-      padding: 0;
-      box-shadow: var(--shadow-lg);
-      overflow: hidden;
+      cursor: pointer;
+      transition: all var(--transition);
+      margin-bottom: 0.375rem;
+      border: 1px solid transparent;
     }
-    .leaflet-popup-content {
-      margin: 0;
-      width: 280px !important;
-      font-family: 'Plus Jakarta Sans', sans-serif;
+    
+    .map-property-item:hover {
+      background: var(--bg-subtle);
     }
-    .map-popup-img {
-      width: 100%;
-      height: 140px;
-      object-fit: cover;
-      background: #eee;
+    
+    .map-property-item.active {
+      background: var(--accent-light);
+      border-color: var(--accent);
     }
-    .map-popup-body {
-      padding: 12px;
-    }
-    .map-popup-title {
+    
+    .map-prop-title {
       font-weight: 700;
-      font-size: 0.95rem;
-      margin-bottom: 4px;
-      color: var(--fg);
+      font-size: 0.8125rem;
+      margin-bottom: 0.25rem;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      color: var(--fg);
     }
-    .map-popup-price {
-      font-size: 1.1rem;
-      font-weight: 800;
+    
+    .map-prop-price {
       color: var(--success);
-      margin-bottom: 8px;
+      font-weight: 700;
+      font-size: 0.75rem;
+      margin-bottom: 0.125rem;
     }
-    .map-popup-meta {
+    
+    .map-prop-meta {
+      color: var(--fg-tertiary);
+      font-size: 0.6875rem;
+      font-weight: 500;
+      line-height: 1.3;
+    }
+
+    /* FIX: Moved instructions to left side to avoid overlapping layer control */
+    .map-instructions {
+      position: absolute;
+      top: 12px;
+      left: 12px; /* Changed from right: 60px */
+      background: rgba(255, 255, 255, 0.98);
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      z-index: 500;
+      font-size: 0.8125rem;
+      max-width: 240px;
+      border: 1px solid var(--border);
+      backdrop-filter: blur(8px);
+    }
+    
+    .map-instructions h4 {
+      margin-bottom: 0.375rem;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.025em;
+      color: var(--fg);
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+    }
+    
+    .map-instructions p {
+      color: var(--fg-secondary);
+      line-height: 1.4;
+      font-size: 0.75rem;
+    }
+
+    /* Map Popup Styles */
+    .leaflet-popup {
+      z-index: 1000 !important;
+    }
+    
+    .leaflet-popup-content-wrapper {
+      border-radius: var(--radius-md);
+      padding: 0;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      background: white;
+    }
+    
+    .leaflet-popup-content {
+      margin: 0;
+      width: 260px !important;
+      position: relative;
+      background: white;
+      padding: 0;
+    }
+    
+    .map-popup-img-container {
+      width: 100%;
+      height: 140px;
+      background: var(--bg-subtle);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .map-popup-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    
+    .map-popup-fallback {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      color: var(--fg-tertiary);
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: var(--bg-subtle);
+    }
+    
+    .map-popup-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 2rem 0.75rem 0.75rem;
+      background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 60%, transparent 100%);
+      color: white;
+      z-index: 2;
+    }
+    
+    .map-popup-title {
+      font-weight: 700;
+      font-size: 0.9375rem;
+      margin-bottom: 0.25rem;
+      line-height: 1.2;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    }
+    
+    .map-popup-address {
+      font-size: 0.75rem;
+      opacity: 0.9;
+      line-height: 1.3;
+      font-weight: 500;
+    }
+    
+    .map-popup-details {
       display: flex;
       justify-content: space-between;
-      font-size: 0.8rem;
-      color: var(--fg-muted);
-      margin-bottom: 10px;
+      align-items: center;
+      padding: 0.75rem;
+      background: var(--bg-elevated);
       border-top: 1px solid var(--border);
-      padding-top: 8px;
+      gap: 0.5rem;
     }
+    
+    .map-popup-price {
+      font-weight: 800;
+      color: var(--success);
+      font-size: 0.875rem;
+    }
+    
+    .map-popup-cap {
+      font-weight: 700;
+      color: var(--accent);
+      font-size: 0.875rem;
+    }
+    
     .map-popup-btn {
-      display: block;
-      width: 100%;
-      text-align: center;
-      background: var(--fg);
-      color: white;
-      padding: 8px;
-      border-radius: 6px;
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 0.85rem;
-      transition: background 0.2s;
-    }
-    .map-popup-btn:hover {
+      padding: 0.375rem 0.75rem;
       background: var(--accent);
       color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all var(--transition);
+      white-space: nowrap;
+    }
+    
+    .map-popup-btn:hover { background: var(--accent-hover); }
+
+    /* Layer Control */
+    .layer-control {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 600; /* Higher than instructions */
+    }
+    
+    .layer-btn {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 0.5rem 0.75rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: var(--shadow-md);
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+      transition: all var(--transition);
+    }
+    
+    .layer-btn:hover {
+      background: var(--bg-subtle);
+    }
+    
+    .layer-menu {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 0.5rem;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      padding: 0.375rem;
+      min-width: 140px;
+      display: none;
+      z-index: 700;
+    }
+    
+    .layer-menu.show {
+      display: block;
+    }
+    
+    .layer-option {
+      padding: 0.5rem 0.75rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      transition: all var(--transition);
+    }
+    
+    .layer-option:hover {
+      background: var(--bg-subtle);
+    }
+    
+    .layer-option.active {
+      background: var(--accent-light);
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    /* Draw Toolbar */
+    .leaflet-draw-toolbar {
+      margin-top: 8px !important;
+      margin-left: 8px !important;
+    }
+    
+    .leaflet-draw-toolbar a {
+      background-color: white !important;
+      border-color: var(--border) !important;
+      color: var(--fg) !important;
+      width: 32px !important;
+      height: 32px !important;
+      line-height: 32px !important;
+      border-radius: var(--radius-md) !important;
+      box-shadow: var(--shadow-md) !important;
+      margin-bottom: 6px !important;
+      transition: all var(--transition) !important;
+    }
+    
+    .leaflet-draw-toolbar a:hover {
+      background-color: var(--bg-subtle) !important;
+      border-color: var(--border-strong) !important;
+    }
+
+    /* Custom Markers by Tenancy */
+    .custom-marker-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform var(--transition);
+      width: 48px;
+      height: 48px;
+      background: none;
+      border: none;
+      box-shadow: none;
+    }
+    
+    .custom-marker-icon:hover {
+      transform: scale(1.15);
+      z-index: 1000 !important;
+    }
+    
+    .custom-marker-icon img {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    }
+    
+    .marker-stnl { background: none; }
+    .marker-multi { background: none; }
+    .marker-center { background: none; }
+    .marker-default { background: none; }
+
+    /* Marker Cluster */
+    .marker-cluster-small, .marker-cluster-medium, .marker-cluster-large {
+      background-color: rgba(201, 89, 43, 0.2);
+    }
+    .marker-cluster-small div, .marker-cluster-medium div, .marker-cluster-large div {
+      background-color: var(--accent);
+      color: white;
+      font-weight: 700;
+      font-size: 13px;
     }
 
     /* ========== LOADING & EMPTY STATES ========== */
-    .loading-state, .empty-state {
-      display: flex;
+    #loadingState, #emptyState {
+      display: none;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 5rem 2rem;
+      padding: 3rem;
       text-align: center;
+      background: var(--bg-elevated);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      height: 100%;
+      width: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 5;
+    }
+
+    #loadingState.active, #emptyState.active {
+      display: flex;
     }
 
     .spinner {
-      width: 44px;
-      height: 44px;
-      border: 3px solid var(--border);
+      width: 32px;
+      height: 32px;
+      border: 2px solid var(--border);
       border-top-color: var(--accent);
       border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      margin-bottom: 1.25rem;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 1rem;
     }
 
     @keyframes spin { to { transform: rotate(360deg); } }
-    .loading-text { color: var(--fg-muted); font-size: 0.95rem; font-weight: 500; }
+    .loading-text { color: var(--fg-tertiary); font-size: 0.875rem; font-weight: 500; }
 
-    .empty-icon { width: 72px; height: 72px; color: var(--fg-subtle); opacity: 0.4; margin-bottom: 1.25rem; }
-    .empty-title { font-size: 1.15rem; font-weight: 700; color: var(--fg); margin-bottom: 0.35rem; }
-    .empty-text { color: var(--fg-muted); font-size: 0.9rem; }
+    .empty-icon { width: 48px; height: 48px; color: var(--border-strong); margin-bottom: 0.75rem; }
+    .empty-title { font-size: 1rem; font-weight: 700; color: var(--fg); margin-bottom: 0.25rem; }
+    .empty-text { color: var(--fg-tertiary); font-size: 0.875rem; font-weight: 500; }
 
     /* ========== DETAIL PANEL ========== */
-    .detail-overlay {
+    #detailOverlay {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.35);
-      backdrop-filter: blur(6px);
-      z-index: 1000;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(4px);
+      z-index: 3000;
       display: flex;
       align-items: stretch;
       justify-content: flex-end;
       opacity: 0;
       visibility: hidden;
-      transition: opacity var(--transition-base), visibility var(--transition-base);
+      transition: all var(--transition);
     }
 
-    .detail-overlay.show { opacity: 1; visibility: visible; }
+    #detailOverlay.show { opacity: 1; visibility: visible; }
 
     .detail-panel {
       width: 100%;
-      max-width: 480px;
-      background: var(--bg-card);
+      max-width: 420px;
+      background: var(--bg-elevated);
       height: 100%;
-      box-shadow: var(--shadow-lg);
+      box-shadow: var(--shadow-xl);
       display: flex;
       flex-direction: column;
       transform: translateX(100%);
-      transition: transform 320ms cubic-bezier(0.32, 0.72, 0, 1);
-      overflow-y: auto; /* Allow vertical scroll */
-      overflow-x: hidden; /* Prevent horizontal scroll */
+      transition: transform 300ms cubic-bezier(0.32, 0.72, 0, 1);
+      overflow: hidden;
     }
 
-    .detail-overlay.show .detail-panel { transform: translateX(0); }
+    #detailOverlay.show .detail-panel { transform: translateX(0); }
 
-    .detail-header { position: relative; height: 240px; flex-shrink: 0; }
+    .detail-header { position: relative; height: 220px; flex-shrink: 0; }
     .detail-image { width: 100%; height: 100%; object-fit: cover; }
-    .detail-gradient { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 40%, transparent 70%); }
+    .detail-gradient { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) 50%, transparent 80%); }
 
     .detail-close {
       position: absolute;
-      top: 14px;
-      right: 14px;
-      width: 38px;
-      height: 38px;
-      background: rgba(255,255,255,0.18);
-      color: white;
+      top: 12px;
+      right: 12px;
+      width: 32px;
+      height: 32px;
+      background: rgba(255,255,255,0.9);
+      color: var(--fg);
       border: none;
       border-radius: 50%;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: background var(--transition-fast);
+      transition: all var(--transition);
       z-index: 10;
+      box-shadow: var(--shadow-md);
     }
 
-    .detail-close:hover { background: rgba(255,255,255,0.3); }
-    .detail-close svg { width: 18px; height: 18px; }
+    .detail-close:hover { background: white; transform: scale(1.1); }
+    .detail-close svg { width: 16px; height: 16px; }
 
     .detail-title-area {
       position: absolute;
@@ -802,38 +1170,35 @@
 
     .detail-type-badge {
       display: inline-block;
-      padding: 5px 12px;
+      padding: 4px 10px;
       background: var(--accent);
-      border-radius: var(--radius-sm);
-      font-size: 0.68rem;
+      border-radius: 12px;
+      font-size: 0.625rem;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
-      margin-bottom: 10px;
+      letter-spacing: 0.02em;
+      margin-bottom: 8px;
     }
 
-    .detail-title { font-size: 1.35rem; font-weight: 800; margin-bottom: 5px; line-height: 1.25; }
-    .detail-address { font-size: 0.9rem; opacity: 0.85; display: flex; align-items: center; gap: 5px; }
-    .detail-address svg { width: 14px; height: 14px; }
+    .detail-title { font-size: 1.25rem; font-weight: 800; margin-bottom: 6px; line-height: 1.2; }
+    .detail-address { font-size: 0.875rem; opacity: 0.9; display: flex; align-items: center; gap: 4px; font-weight: 500; }
+    .detail-address svg { width: 14px; height: 14px; opacity: 0.8; }
 
-    /* Top Actions */
     .detail-top-actions {
-      padding: 0.75rem 1.25rem;
+      padding: 0.875rem 1rem;
       display: flex;
-      gap: 10px;
-      background: var(--bg);
+      gap: 0.75rem;
+      background: var(--bg-subtle);
       border-bottom: 1px solid var(--border);
     }
 
     .detail-body {
       flex: 1;
       overflow-y: auto;
-      overflow-x: hidden; /* Fix for scrollbar */
-      padding: 1.25rem;
+      padding: 1rem;
       background: var(--bg);
     }
 
-    /* Tenant Badges - Minimal Style */
     .tenant-badges-container {
       display: flex;
       flex-wrap: wrap;
@@ -842,105 +1207,104 @@
 
     .tenant-badge {
       display: inline-block;
-      padding: 2px 8px;
+      padding: 3px 8px;
       background: var(--bg-subtle);
-      color: var(--fg-muted);
-      border-radius: 4px;
-      font-size: 0.7rem;
+      color: var(--fg-secondary);
+      border-radius: 12px;
+      font-size: 0.6875rem;
       font-weight: 600;
-      line-height: 1.4;
+      border: 1px solid var(--border);
     }
 
     .metrics-row {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-bottom: 1.25rem;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
     }
 
     .metric-card {
-      background: var(--bg-card);
+      background: var(--bg-elevated);
       border-radius: var(--radius-md);
-      padding: 14px 10px;
+      padding: 1rem 0.5rem;
       text-align: center;
       border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
     }
 
     .metric-card-label {
-      font-size: 0.62rem;
-      font-weight: 600;
+      font-size: 0.625rem;
+      font-weight: 700;
       text-transform: uppercase;
-      color: var(--fg-subtle);
-      margin-bottom: 5px;
-      letter-spacing: 0.04em;
+      color: var(--fg-tertiary);
+      margin-bottom: 4px;
+      letter-spacing: 0.025em;
     }
 
-    .metric-card-value { font-size: 1.05rem; font-weight: 800; color: var(--fg); }
+    .metric-card-value { font-size: 1rem; font-weight: 800; color: var(--fg); }
     .metric-card-value.accent { color: var(--accent); }
 
     .detail-sections {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 12px;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
     }
 
     .detail-section {
-      background: var(--bg-card);
+      background: var(--bg-elevated);
       border-radius: var(--radius-md);
       border: 1px solid var(--border);
       overflow: hidden;
+      box-shadow: var(--shadow-sm);
     }
 
     .section-header {
-      padding: 10px 14px;
-      font-size: 0.68rem;
-      font-weight: 700;
+      padding: 0.625rem 0.875rem;
+      font-size: 0.625rem;
+      font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--fg-muted);
+      letter-spacing: 0.025em;
+      color: var(--fg-tertiary);
       border-bottom: 1px solid var(--border);
-      background: var(--bg);
+      background: var(--bg-subtle);
     }
 
     .kv-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 7px 14px;
+      padding: 0.5rem 0.875rem;
       border-top: 1px solid var(--border);
-      font-size: 0.82rem;
-      min-width: 0; /* Fix for flex content overflow */
+      font-size: 0.8125rem;
     }
 
     .kv-row:first-child { border-top: none; }
-    .kv-key { color: var(--fg-muted); margin-right: 10px; white-space: nowrap; }
-    .kv-val { font-weight: 600; color: var(--fg); text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: normal; }
+    .kv-key { color: var(--fg-tertiary); margin-right: 8px; white-space: nowrap; font-weight: 500; font-size: 0.75rem; }
+    .kv-val { font-weight: 700; color: var(--fg); text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: normal; font-size: 0.8125rem; }
     .kv-val.accent { color: var(--accent); }
 
-    /* Markdown Styles */
     .highlights-section {
-      background: var(--bg-card);
+      background: var(--bg-elevated);
       border-radius: var(--radius-md);
-      padding: 14px;
+      padding: 1rem;
       border: 1px solid var(--border);
-      margin-bottom: 12px;
+      box-shadow: var(--shadow-sm);
     }
 
     .highlights-title {
-      font-size: 0.68rem;
-      font-weight: 700;
+      font-size: 0.625rem;
+      font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--fg-muted);
-      margin-bottom: 10px;
+      letter-spacing: 0.025em;
+      color: var(--fg-tertiary);
+      margin-bottom: 0.75rem;
     }
 
     .highlights-text {
-      font-size: 0.85rem;
-      color: var(--fg);
-      line-height: 1.65;
-      word-break: break-word; /* Fix for long words causing scroll */
+      font-size: 0.875rem;
+      color: var(--fg-secondary);
+      line-height: 1.6;
     }
 
     .highlights-text p { margin-bottom: 0.75rem; }
@@ -953,82 +1317,101 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      padding: 12px;
+      gap: 6px;
+      padding: 0.625rem;
       border-radius: var(--radius-md);
       font-weight: 700;
-      font-size: 0.85rem;
+      font-size: 0.8125rem;
       text-decoration: none;
-      transition: all var(--transition-fast);
+      transition: all var(--transition);
       flex: 1;
     }
 
     .action-link.om { background: var(--fg); color: white; }
-    .action-link.om:hover { background: #2d2d30; }
+    .action-link.om:hover { background: #1a1a1a; }
     .action-link.listing { background: var(--accent); color: white; }
     .action-link.listing:hover { background: var(--accent-hover); }
 
     /* ========== MODAL ========== */
-    .modal-overlay {
+    #exportModal {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.4);
-      backdrop-filter: blur(6px);
-      z-index: 2000;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(4px);
+      z-index: 4000;
       display: flex;
       align-items: center;
       justify-content: center;
       opacity: 0;
       visibility: hidden;
-      transition: opacity var(--transition-base), visibility var(--transition-base);
+      transition: all var(--transition);
     }
 
-    .modal-overlay.show { opacity: 1; visibility: visible; }
+    #exportModal.show { opacity: 1; visibility: visible; }
 
     .modal {
-      background: var(--bg-card);
+      background: var(--bg-elevated);
       border-radius: var(--radius-xl);
       max-width: 400px;
       width: 90%;
-      box-shadow: var(--shadow-lg);
-      transform: translateY(16px) scale(0.96);
-      transition: transform 200ms ease;
+      box-shadow: var(--shadow-xl);
+      transform: translateY(20px) scale(0.95);
+      transition: all var(--transition);
+      border: 1px solid var(--border);
     }
 
-    .modal-overlay.show .modal { transform: translateY(0) scale(1); }
+    #exportModal.show .modal { transform: translateY(0) scale(1); }
 
-    .modal-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); }
-    .modal-title { font-size: 1.1rem; font-weight: 700; }
-    .modal-body { padding: 1.5rem; }
-    .modal-body p { color: var(--fg-muted); font-size: 0.9rem; line-height: 1.6; }
+    .modal-header { padding: 1.25rem; border-bottom: 1px solid var(--border); }
+    .modal-title { font-size: 1.0625rem; font-weight: 800; }
+    .modal-body { padding: 1.25rem; }
+    .modal-body p { color: var(--fg-secondary); font-size: 0.9375rem; line-height: 1.5; }
     .modal-body strong { color: var(--fg); }
-    .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border); display: flex; gap: 0.75rem; justify-content: flex-end; }
+    .modal-footer { padding: 0.875rem 1.25rem; border-top: 1px solid var(--border); display: flex; gap: 0.625rem; justify-content: flex-end; }
+
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-strong);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--fg-tertiary);
+    }
 
     /* ========== RESPONSIVE ========== */
-    @media (max-width: 900px) {
-      .property-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
-      .detail-sections { grid-template-columns: 1fr; }
+    @media (max-width: 1024px) {
+      .map-sidebar { width: 280px; }
     }
 
     @media (max-width: 768px) {
-      .app { padding: 0.875rem; }
-      .controls { padding: 0.875rem 1rem; gap: 0.75rem; }
+      .app { padding: 0.5rem; }
+      .controls { padding: 0.5rem; }
       .search-wrap { min-width: 100%; order: 1; }
       .filter-select { flex: 1; min-width: 0; }
-      .property-grid { grid-template-columns: 1fr; gap: 1rem; }
+      #propertyGrid { grid-template-columns: 1fr; }
       .detail-panel { max-width: 100%; }
-      .metrics-row { grid-template-columns: 1fr; }
-      .property-table th:nth-child(4), .property-table td:nth-child(4),
-      .property-table th:nth-child(6), .property-table td:nth-child(6) { display: none; }
       
-      .compact-view .property-card { height: auto; flex-direction: column; }
-      .compact-view .card-image-wrap { width: 100%; height: 140px; }
-    }
-
-    @media (max-width: 480px) {
-      .card-metrics { grid-template-columns: 1fr; gap: 0.5rem; text-align: left; }
-      .metric { display: flex; justify-content: space-between; align-items: center; text-align: left; }
-      .metric-label { margin-bottom: 0; }
+      #mapView {
+        flex-direction: column-reverse;
+      }
+      
+      .map-sidebar {
+        width: 100%;
+        height: 35%;
+        border-right: none;
+        border-top: 1px solid var(--border);
+      }
+      
+      .map-instructions {
+        display: none;
+      }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -1068,53 +1451,58 @@
         </select>
 
         <select class="filter-select" id="sortSelect" disabled>
-          <option value="date">Newest First</option>
-          <option value="price-high">Price: High to Low</option>
-          <option value="price-low">Price: Low to High</option>
-          <option value="cap-high">Cap Rate: High to Low</option>
+          <option value="date">Newest</option>
+          <option value="price-high">Price: High</option>
+          <option value="price-low">Price: Low</option>
+          <option value="cap-high">Cap: High</option>
         </select>
 
         <div class="view-toggle">
+          <button class="view-btn" id="mapViewBtn" title="Map View" aria-label="Map View">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+          </button>
           <button class="view-btn" id="tableViewBtn" title="Table View" aria-label="Table View">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="3" y="3" width="18" height="18" rx="2"/>
-              <line x1="3" y1="9" x2="21" y2="9"/>
-              <line x1="3" y1="15" x2="21" y2="15"/>
-              <line x1="9" y1="3" x2="9" y2="21"/>
+              <rect width="18" height="18" x="3" y="3" rx="2"/>
+              <path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>
             </svg>
           </button>
           <button class="view-btn" id="compactViewBtn" title="Compact View" aria-label="Compact View">
-             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="3" y="3" width="7" height="7" rx="1"/>
-              <rect x="14" y="3" width="7" height="7" rx="1"/>
-              <rect x="3" y="14" width="7" height="7" rx="1"/>
-              <rect x="14" y="14" width="7" height="7" rx="1"/>
-            </svg>
-          </button>
-          <button class="view-btn" id="mapViewBtn" title="Map View" aria-label="Map View">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-              <circle cx="12" cy="10" r="3"/>
+              <rect width="7" height="7" x="3" y="3" rx="1"/>
+              <rect width="7" height="7" x="14" y="3" rx="1"/>
+              <rect width="7" height="7" x="14" y="14" rx="1"/>
+              <path d="M3 14h8v7H3z"/>
             </svg>
           </button>
           <button class="view-btn active" id="gridViewBtn" title="Grid View" aria-label="Grid View">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="3" y="3" width="7" height="7" rx="1"/>
-              <rect x="14" y="3" width="7" height="7" rx="1"/>
-              <rect x="3" y="14" width="7" height="7" rx="1"/>
-              <rect x="14" y="14" width="7" height="7" rx="1"/>
+              <rect width="10" height="10" x="3" y="3" rx="2"/>
+              <rect width="10" height="10" x="11" y="11" rx="2"/>
+              <path d="M3 11V3h8v8H3zm10 10v-8h8v8h-8z"/>
             </svg>
           </button>
         </div>
 
         <button class="btn btn-secondary" id="exportBtn" disabled>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
             <polyline points="7 10 12 15 17 10"/>
             <line x1="12" y1="15" x2="12" y2="3"/>
           </svg>
           <span id="exportLabel">Export</span>
         </button>
+      </div>
+      
+      <div id="boundaryStatus" class="boundary-status">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        <span>Map boundary active</span>
+        <button onclick="window.clearBoundaryFilter()">Clear</button>
       </div>
 
       <button class="advanced-toggle" id="advancedToggle">
@@ -1127,7 +1515,7 @@
       <div class="advanced-panel" id="advancedPanel">
         <div class="filter-row">
           <div class="filter-group">
-            <label class="filter-label">Price Range</label>
+            <label class="filter-label">Price Range ($)</label>
             <div class="range-inputs">
               <input type="number" id="minPrice" placeholder="Min">
               <span>to</span>
@@ -1135,14 +1523,14 @@
             </div>
           </div>
           <div class="filter-group">
-            <label class="filter-label">Cap Rate Range (%)</label>
+            <label class="filter-label">Cap Rate (%)</label>
             <div class="range-inputs">
               <input type="number" step="0.1" id="minCap" placeholder="Min">
               <span>to</span>
               <input type="number" step="0.1" id="maxCap" placeholder="Max">
             </div>
           </div>
-          <button class="btn btn-secondary" id="clearFiltersBtn">Clear Filters</button>
+          <button class="btn btn-secondary" id="clearFiltersBtn">Clear All</button>
         </div>
       </div>
     </div>
@@ -1151,49 +1539,76 @@
       <div class="results-info">
         Showing <span class="results-count" id="resultsCount">0</span> properties
       </div>
-      <div class="selected-count" id="selectedCount" style="display: none;" title="Clear Selection"></div>
+      <div class="selected-count" id="selectedCount" style="display: none;">Clear Selection</div>
     </div>
 
-    <div id="mapFilterNotice" class="map-filter-notice">
-      <span>Filtering by drawn area</span>
-      <button class="map-clear-btn" id="clearMapFilterBtn">Clear Map Filter</button>
-    </div>
+    <div class="content-area" id="contentArea">
+      <div id="loadingState" class="active">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading properties...</div>
+      </div>
 
-    <div id="loadingState" class="loading-state">
-      <div class="spinner"></div>
-      <div class="loading-text">Loading properties...</div>
-    </div>
+      <div id="emptyState">
+        <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        <div class="empty-title">No properties found</div>
+        <div class="empty-text">Try adjusting your search or filters</div>
+      </div>
 
-    <div id="emptyState" class="empty-state" style="display: none;">
-      <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-        <polyline points="9 22 9 12 15 12 15 22"/>
-      </svg>
-      <div class="empty-title">No properties found</div>
-      <div class="empty-text">Try adjusting your search or filters</div>
+      <!-- Grid View -->
+      <div id="propertyGrid"></div>
+      
+      <!-- Table View -->
+      <table id="propertyTable">
+        <thead>
+          <tr>
+            <th class="table-checkbox"></th>
+            <th>Property</th>
+            <th>Type</th>
+            <th>Price</th>
+            <th>Cap</th>
+            <th>Tenancy</th>
+            <th>City</th>
+          </tr>
+        </thead>
+        <tbody id="propertyTableBody"></tbody>
+      </table>
+      
+      <!-- Map View -->
+      <div id="mapView">
+        <div class="map-sidebar">
+          <div class="map-sidebar-header">
+            <span id="mapSidebarCount">0 Properties</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+          </div>
+          <div class="map-sidebar-content" id="mapSidebarContent"></div>
+        </div>
+        <div id="propertyMap"></div>
+        
+        <!-- Layer Control -->
+        <div class="layer-control">
+          <button class="layer-btn" id="layerToggle">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+            <span id="currentLayer">Light</span>
+          </button>
+          <div class="layer-menu" id="layerMenu">
+            <div class="layer-option active" data-layer="light">Light</div>
+            <div class="layer-option" data-layer="hybrid">Hybrid</div>
+          </div>
+        </div>
+      </div>
     </div>
-
-    <div id="propertyGrid" class="property-grid"></div>
-    <table id="propertyTable" class="property-table">
-      <thead>
-        <tr>
-          <th class="table-checkbox"></th> <!-- Added Checkbox Column -->
-          <th>Property</th>
-          <th>Type</th>
-          <th>Price</th>
-          <th>Cap Rate</th>
-          <th>Tenancy</th>
-          <th>City</th>
-        </tr>
-      </thead>
-      <tbody id="propertyTableBody"></tbody>
-    </table>
-    
-    <div id="mapContainer"></div>
   </div>
 
   <!-- Detail Panel -->
-  <div id="detailOverlay" class="detail-overlay">
+  <div id="detailOverlay">
     <div class="detail-panel">
       <div class="detail-header">
         <img id="detailImage" class="detail-image" alt="Property">
@@ -1216,10 +1631,7 @@
         </div>
       </div>
 
-      <!-- Moved Action Buttons Here -->
-      <div id="detailTopActions" class="detail-top-actions">
-        <!-- Buttons injected via JS -->
-      </div>
+      <div id="detailTopActions" class="detail-top-actions"></div>
 
       <div class="detail-body">
         <div class="metrics-row">
@@ -1241,18 +1653,18 @@
           <div class="detail-section">
             <div class="section-header">Lease Details</div>
             <div class="kv-row"><span class="kv-key">Tenant</span><span id="kvTenant" class="kv-val"></span></div>
-            <div class="kv-row"><span class="kv-key">Term Remaining</span><span id="kvTerm" class="kv-val"></span></div>
+            <div class="kv-row"><span class="kv-key">Term</span><span id="kvTerm" class="kv-val"></span></div>
             <div class="kv-row"><span class="kv-key">Expiration</span><span id="kvExp" class="kv-val"></span></div>
             <div class="kv-row"><span class="kv-key">Rent Bumps</span><span id="kvBumps" class="kv-val accent"></span></div>
-            <div class="kv-row"><span class="kv-key">Renewal Options</span><span id="kvOpts" class="kv-val"></span></div>
+            <div class="kv-row"><span class="kv-key">Options</span><span id="kvOpts" class="kv-val"></span></div>
           </div>
 
           <div class="detail-section">
             <div class="section-header">Site Details</div>
-            <div class="kv-row"><span class="kv-key">Building Size</span><span id="kvRba" class="kv-val"></span></div>
-            <div class="kv-row"><span class="kv-key">Land Size</span><span id="kvLand" class="kv-val"></span></div>
-            <div class="kv-row"><span class="kv-key">Price / SF</span><span id="kvPriceSf" class="kv-val"></span></div>
-            <div class="kv-row"><span class="kv-key">Date Listed</span><span id="kvDate" class="kv-val"></span></div>
+            <div class="kv-row"><span class="kv-key">Building</span><span id="kvRba" class="kv-val"></span></div>
+            <div class="kv-row"><span class="kv-key">Land</span><span id="kvLand" class="kv-val"></span></div>
+            <div class="kv-row"><span class="kv-key">Price/SF</span><span id="kvPriceSf" class="kv-val"></span></div>
+            <div class="kv-row"><span class="kv-key">Listed</span><span id="kvDate" class="kv-val"></span></div>
           </div>
         </div>
 
@@ -1265,13 +1677,13 @@
   </div>
 
   <!-- Export Modal -->
-  <div id="exportModal" class="modal-overlay">
+  <div id="exportModal">
     <div class="modal">
       <div class="modal-header">
-        <h3 class="modal-title">Export Data</h3>
+        <h3 class="modal-title">Export Properties</h3>
       </div>
       <div class="modal-body">
-        <p>Export <strong id="exportCount">0</strong> properties to a CSV file containing all available data columns.</p>
+        <p>Export <strong id="exportCount">0</strong> properties to CSV.</p>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" id="cancelExportBtn">Cancel</button>
@@ -1290,10 +1702,20 @@
     let selectedIds = new Set();
     let currentRecord = null;
     let currentView = 'grid';
-    let map = null;
+    
+    // Map-related variables
+    let propertyMap = null;
+    let markerClusterGroup = null;
+    let drawnItems = null;
+    let drawControl = null;
+    let boundaryLayer = null;
     let mapMarkers = [];
-    let drawnPolygon = null;
-    let mapFilterActive = false;
+    let mapInitialized = false;
+    let currentBaseLayer = 'light';
+    
+    // Base layers
+    let lightLayer = null;
+    let hybridLayer = null;
 
     const $ = (id) => document.getElementById(id);
     const refs = {
@@ -1309,9 +1731,9 @@
       minCap: $('minCap'),
       maxCap: $('maxCap'),
       clearFiltersBtn: $('clearFiltersBtn'),
+      mapViewBtn: $('mapViewBtn'),
       tableViewBtn: $('tableViewBtn'),
       compactViewBtn: $('compactViewBtn'),
-      mapViewBtn: $('mapViewBtn'),
       gridViewBtn: $('gridViewBtn'),
       exportBtn: $('exportBtn'),
       exportLabel: $('exportLabel'),
@@ -1323,16 +1745,20 @@
       propertyGrid: $('propertyGrid'),
       propertyTable: $('propertyTable'),
       propertyTableBody: $('propertyTableBody'),
-      mapContainer: $('mapContainer'),
-      mapFilterNotice: $('mapFilterNotice'),
-      clearMapFilterBtn: $('clearMapFilterBtn'),
+      mapView: $('mapView'),
+      boundaryStatus: $('boundaryStatus'),
       detailOverlay: $('detailOverlay'),
       detailClose: $('detailClose'),
       detailTopActions: $('detailTopActions'),
       exportModal: $('exportModal'),
       exportCount: $('exportCount'),
       cancelExportBtn: $('cancelExportBtn'),
-      confirmExportBtn: $('confirmExportBtn')
+      confirmExportBtn: $('confirmExportBtn'),
+      mapSidebarContent: $('mapSidebarContent'),
+      mapSidebarCount: $('mapSidebarCount'),
+      layerToggle: $('layerToggle'),
+      layerMenu: $('layerMenu'),
+      currentLayer: $('currentLayer')
     };
 
     // ========== UTILITIES ==========
@@ -1348,6 +1774,7 @@
       if (val == null) return 'N/A';
       const n = Number(val);
       if (!Number.isFinite(n)) return 'N/A';
+      if (n >= 1000000) return '$' + (n/1000000).toFixed(2) + 'M';
       return '$' + n.toLocaleString('en-US', { maximumFractionDigits: 0 });
     };
 
@@ -1362,6 +1789,7 @@
       if (val == null) return 'N/A';
       const n = Number(val);
       if (!Number.isFinite(n)) return 'N/A';
+      if (n >= 1000) return (n/1000).toFixed(1) + 'k SF';
       return n.toLocaleString() + ' SF';
     };
 
@@ -1369,10 +1797,9 @@
       if (val == null || val === '') return 'N/A';
       const s = String(val).trim();
       const n = Number(s);
-      return Number.isFinite(n) ? n + ' Years' : s;
+      return Number.isFinite(n) ? n + ' Yrs' : s;
     };
 
-    // Smart Date Formatter
     const formatDate = (val) => {
       if (!val) return 'N/A';
       const n = Number(val);
@@ -1443,61 +1870,414 @@
     };
 
     function normalize(rec) {
-      const id = String(rec.id);
-      if (normCache.has(id)) return normCache.get(id);
+      try {
+        const id = String(rec.id);
+        if (normCache.has(id)) return normCache.get(id);
 
-      const src = getSource(rec);
+        const src = getSource(rec);
+        
+        const rawImages = getRawVal(src, 'photo_url');
+        const images = (typeof rawImages === 'string') ? rawImages.split(/[\s,]+/).filter(Boolean) : 
+                       (Array.isArray(rawImages) ? rawImages : []);
+
+        const price = processVal(getRawVal(src, 'Price'));
+        const cap = processVal(getRawVal(src, 'Cap_Rate'));
+        const rba = processVal(getRawVal(src, 'RBA'));
+        const noiVal = processVal(getRawVal(src, 'NOI'));
+        
+        const timestamp = getRawVal(src, 'Date_Listed');
+        const updated = getRawVal(src, 'Last_updated_at') || getRawVal(src, 'Created_at');
+        
+        const lat = processVal(getRawVal(src, 'Latitude'));
+        const lng = processVal(getRawVal(src, 'Longitude'));
+
+        const tenantsList = processList(getRawVal(src, 'Tenant_s_'));
+        
+        const tenancyRaw = processVal(getRawVal(src, 'Tenancy'));
+        const tenancy = tenancyRaw || 'Unknown';
+
+        const data = {
+          id,
+          name: processVal(getRawVal(src, 'Property_Name')) || 'Property',
+          address: processVal(getRawVal(src, 'Address')) || '',
+          city: processVal(getRawVal(src, 'City')) || '',
+          state: processVal(getRawVal(src, 'State')) || '',
+          zip: processVal(getRawVal(src, 'Zip')) || '',
+          price: price != null ? Number(price) : null,
+          capRate: cap != null ? Number(cap) : null,
+          noi: noiVal != null ? Number(noiVal) : (price != null && cap != null ? Number(price) * Number(cap) : null),
+          rba: rba != null ? Number(rba) : null,
+          landSize: processVal(getRawVal(src, 'Land_Size')),
+          landUnit: processVal(getRawVal(src, 'Land_Unit')) || '',
+          leaseTerm: processVal(getRawVal(src, 'Lease_Term')),
+          leaseType: processVal(getRawVal(src, 'Lease_Type')) || '',
+          leaseExp: getRawVal(src, 'Lease_Expiration'),
+          leaseOpts: processVal(getRawVal(src, 'Lease_Options')) || '',
+          rentBumps: processVal(getRawVal(src, 'Rent_Bumps')) || '',
+          tenantsList,
+          tenant: tenantsList.join(', '),
+          images,
+          omUrl: processVal(getRawVal(src, 'OM')),
+          listingUrl: processVal(getRawVal(src, 'Listing_URL')),
+          costarUrl: processVal(getRawVal(src, 'CoStar')),
+          crexiUrl: processVal(getRawVal(src, 'Crexi')),
+          tenancy: tenancy,
+          notes: processVal(getRawVal(src, 'Notes')),
+          dateListed: timestamp,
+          propertyType: processVal(getRawVal(src, 'Property_Type')),
+          updatedAt: updated,
+          lat: lat != null ? Number(lat) : null,
+          lng: lng != null ? Number(lng) : null
+        };
+
+        normCache.set(id, data);
+        return data;
+      } catch (e) {
+        console.error('Error normalizing record:', e);
+        return {
+          id: String(rec.id),
+          name: 'Error',
+          address: '',
+          city: '',
+          state: '',
+          zip: '',
+          images: [],
+          tenantsList: [],
+          tenancy: 'Unknown'
+        };
+      }
+    }
+
+    // ========== MAP FUNCTIONALITY ==========
+    function getMarkerColor(tenancy) {
+      if (!tenancy) return 'var(--accent)';
+      const t = tenancy.toString().trim().toLowerCase();
+      if (t === 'stnl') return '#10b981';
+      if (t === 'multi') return '#3b82f6';
+      if (t === 'center') return '#8b5cf6';
+      return 'var(--accent)';
+    }
+    
+    function getMarkerClass(tenancy) {
+      if (!tenancy) return 'marker-default';
+      const t = tenancy.toString().trim().toLowerCase();
+      if (t === 'stnl') return 'marker-stnl';
+      if (t === 'multi') return 'marker-multi';
+      if (t === 'center') return 'marker-center';
+      return 'marker-default';
+    }
+
+    function initMap() {
+      if (mapInitialized) {
+        setTimeout(() => propertyMap.invalidateSize(), 100);
+        return;
+      }
       
-      const rawImages = getRawVal(src, 'photo_url');
-      const images = (typeof rawImages === 'string') ? rawImages.split(/[\s,]+/).filter(Boolean) : 
-                     (Array.isArray(rawImages) ? rawImages : []);
-
-      const price = processVal(getRawVal(src, 'Price'));
-      const cap = processVal(getRawVal(src, 'Cap_Rate'));
-      const rba = processVal(getRawVal(src, 'RBA'));
-      const noiVal = processVal(getRawVal(src, 'NOI'));
+      propertyMap = L.map('propertyMap', {
+        zoomControl: false
+      }).setView([47.6062, -122.3321], 7);
       
-      const timestamp = getRawVal(src, 'Date_Listed');
-      const updated = getRawVal(src, 'Last_updated_at') || getRawVal(src, 'Created_at');
-
-      const tenantsList = processList(getRawVal(src, 'Tenant_s_'));
-
-      const data = {
-        id,
-        name: processVal(getRawVal(src, 'Property_Name')) || 'Property',
-        address: processVal(getRawVal(src, 'Address')) || '',
-        city: processVal(getRawVal(src, 'City')) || '',
-        state: processVal(getRawVal(src, 'State')) || '',
-        zip: processVal(getRawVal(src, 'Zip')) || '',
-        price: price != null ? Number(price) : null,
-        capRate: cap != null ? Number(cap) : null,
-        noi: noiVal != null ? Number(noiVal) : (price != null && cap != null ? Number(price) * Number(cap) : null),
-        rba: rba != null ? Number(rba) : null,
-        landSize: processVal(getRawVal(src, 'Land_Size')),
-        landUnit: processVal(getRawVal(src, 'Land_Unit')) || '',
-        leaseTerm: processVal(getRawVal(src, 'Lease_Term')),
-        leaseType: processVal(getRawVal(src, 'Lease_Type')) || '',
-        leaseExp: getRawVal(src, 'Lease_Expiration'),
-        leaseOpts: processVal(getRawVal(src, 'Lease_Options')) || '',
-        rentBumps: processVal(getRawVal(src, 'Rent_Bumps')) || '',
-        tenantsList,
-        tenant: tenantsList.join(', '),
-        images,
-        omUrl: processVal(getRawVal(src, 'OM')),
-        listingUrl: processVal(getRawVal(src, 'Listing_URL')),
-        costarUrl: processVal(getRawVal(src, 'CoStar')),
-        crexiUrl: processVal(getRawVal(src, 'Crexi')),
-        tenancy: processVal(getRawVal(src, 'Tenancy')),
-        notes: processVal(getRawVal(src, 'Notes')),
-        dateListed: timestamp,
-        propertyType: processVal(getRawVal(src, 'Property_Type')),
-        updatedAt: updated,
-        lat: Number(getRawVal(src, 'Latitude')),
-        lng: Number(getRawVal(src, 'Longitude'))
-      };
-
-      normCache.set(id, data);
-      return data;
+      L.control.zoom({
+        position: 'topright'
+      }).addTo(propertyMap);
+      
+      lightLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; CARTO',
+        subdomains: 'abcd',
+        maxZoom: 20
+      });
+      
+      hybridLayer = L.layerGroup([
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+          attribution: 'Tiles &copy; Esri',
+          maxZoom: 19
+        }),
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+          attribution: '&copy; Esri',
+          maxZoom: 19,
+          pane: 'labels'
+        })
+      ]);
+      
+      propertyMap.createPane('labels');
+      propertyMap.getPane('labels').style.zIndex = 650;
+      propertyMap.getPane('labels').style.pointerEvents = 'none';
+      
+      lightLayer.addTo(propertyMap);
+      
+      refs.layerToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        refs.layerMenu.classList.toggle('show');
+      });
+      
+      document.addEventListener('click', () => {
+        refs.layerMenu.classList.remove('show');
+      });
+      
+      refs.layerMenu.addEventListener('click', (e) => {
+        if (e.target.classList.contains('layer-option')) {
+          const layer = e.target.dataset.layer;
+          if (layer !== currentBaseLayer) {
+            if (layer === 'light') {
+              propertyMap.removeLayer(hybridLayer);
+              lightLayer.addTo(propertyMap);
+            } else {
+              propertyMap.removeLayer(lightLayer);
+              hybridLayer.addTo(propertyMap);
+            }
+            currentBaseLayer = layer;
+            refs.currentLayer.textContent = layer.charAt(0).toUpperCase() + layer.slice(1);
+            refs.layerMenu.querySelectorAll('.layer-option').forEach(opt => opt.classList.remove('active'));
+            e.target.classList.add('active');
+          }
+        }
+      });
+      
+      markerClusterGroup = L.markerClusterGroup({
+        chunkedLoading: true,
+        spiderfyOnMaxZoom: true,
+        showCoverageOnHover: false,
+        zoomToBoundsOnClick: true,
+        maxClusterRadius: 50,
+        iconCreateFunction: function(cluster) {
+          return L.divIcon({
+            html: '<div style="background-color: var(--accent); color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">' + cluster.getChildCount() + '</div>',
+            className: 'marker-cluster',
+            iconSize: L.point(32, 32)
+          });
+        }
+      });
+      
+      propertyMap.addLayer(markerClusterGroup);
+      
+      drawnItems = new L.FeatureGroup();
+      propertyMap.addLayer(drawnItems);
+      
+      drawControl = new L.Control.Draw({
+        position: 'topleft',
+        draw: {
+          polyline: false,
+          polygon: {
+            allowIntersection: false,
+            showArea: true,
+            drawError: { color: '#e1e4e8', timeout: 1000 },
+            shapeOptions: {
+              color: '#c9592b',
+              fillColor: '#c9592b',
+              fillOpacity: 0.2,
+              weight: 2
+            }
+          },
+          circle: {
+            shapeOptions: {
+              color: '#c9592b',
+              fillColor: '#c9592b',
+              fillOpacity: 0.2,
+              weight: 2
+            }
+          },
+          rectangle: {
+            shapeOptions: {
+              color: '#c9592b',
+              fillColor: '#c9592b',
+              fillOpacity: 0.2,
+              weight: 2
+            }
+          },
+          marker: false,
+          circlemarker: false
+        },
+        edit: {
+          featureGroup: drawnItems,
+          remove: true
+        }
+      });
+      
+      propertyMap.addControl(drawControl);
+      
+      propertyMap.on(L.Draw.Event.CREATED, function (e) {
+        drawnItems.clearLayers();
+        boundaryLayer = e.layer;
+        drawnItems.addLayer(boundaryLayer);
+        refs.boundaryStatus.classList.add('active');
+        applyFilters();
+        propertyMap.fitBounds(boundaryLayer.getBounds().pad(0.1));
+      });
+      
+      propertyMap.on(L.Draw.Event.DELETED, function () {
+        clearBoundaryFilter();
+      });
+      
+      mapInitialized = true;
+      setTimeout(() => propertyMap.invalidateSize(), 100);
+    }
+    
+    function clearBoundaryFilter() {
+      if (drawnItems) drawnItems.clearLayers();
+      boundaryLayer = null;
+      refs.boundaryStatus.classList.remove('active');
+      applyFilters();
+    }
+    
+    function isPointInBoundary(lat, lng) {
+      if (!boundaryLayer) return true;
+      const point = L.latLng(lat, lng);
+      if (boundaryLayer instanceof L.Circle) {
+        return point.distanceTo(boundaryLayer.getLatLng()) <= boundaryLayer.getRadius();
+      } else if (boundaryLayer instanceof L.Polygon || boundaryLayer instanceof L.Rectangle) {
+        return boundaryLayer.getBounds().contains(point);
+      }
+      return true;
+    }
+    
+    function updateMapMarkers(records) {
+      if (!propertyMap) return;
+      
+      markerClusterGroup.clearLayers();
+      mapMarkers = [];
+      
+      const bounds = L.latLngBounds();
+      let hasValidCoords = false;
+      
+      const sidebarContent = [];
+      
+      records.forEach(rec => {
+        try {
+          const d = normalize(rec);
+          
+          if (d.lat && d.lng && !isNaN(d.lat) && !isNaN(d.lng)) {
+            const markerColor = getMarkerColor(d.tenancy);
+            const markerClass = getMarkerClass(d.tenancy);
+            
+            // PNG icons for each tenancy type
+            const iconUrl = {
+              'stnl': 'https://cleanslatekickz.github.io/geojson/Images/STNL.png',
+              'multi': 'https://cleanslatekickz.github.io/geojson/Images/Multi-Tenant.png',
+              'center': 'https://cleanslatekickz.github.io/geojson/Images/Shopping-Center.png'
+            }[markerClass.replace('marker-', '')] || 'https://cleanslatekickz.github.io/geojson/Images/STNL.png';
+            
+            const marker = L.marker([d.lat, d.lng], {
+              icon: L.divIcon({
+                className: 'custom-marker',
+                html: `<div class="custom-marker-icon ${markerClass}"><img src="${iconUrl}"></div>`,
+                iconSize: [48, 48],
+                iconAnchor: [24, 24]
+              })
+            });
+            
+            const img = d.images[0] || '';
+            const popupContent = `
+              <div style="font-family: Inter, sans-serif;">
+                <div class="map-popup-img-container">
+                  ${img ? `<img src="${img}" class="map-popup-img" onerror="this.style.display='none'; this.parentElement.querySelector('.map-popup-fallback').style.display='flex';">` : ''}
+                  <div class="map-popup-fallback" style="display: ${img ? 'none' : 'flex'};">
+                    No Image
+                  </div>
+                  <div class="map-popup-overlay">
+                    <div class="map-popup-title">${esc(d.name)}</div>
+                    <div class="map-popup-address">${esc(d.address)}</div>
+                  </div>
+                </div>
+                <div class="map-popup-details">
+                  <div>
+                    <div style="font-size: 0.6875rem; color: var(--fg-tertiary); font-weight: 600; margin-bottom: 2px;">PRICE</div>
+                    <div class="map-popup-price">${formatPrice(d.price)}</div>
+                  </div>
+                  <div style="text-align: right;">
+                    <div style="font-size: 0.6875rem; color: var(--fg-tertiary); font-weight: 600; margin-bottom: 2px;">CAP</div>
+                    <div class="map-popup-cap">${formatCap(d.capRate)}</div>
+                  </div>
+                  <button class="map-popup-btn" onclick="window.openDetailFromMap('${d.id}')">View</button>
+                </div>
+              </div>
+            `;
+            
+            marker.bindPopup(popupContent, {
+              maxWidth: 260,
+              className: 'custom-popup',
+              offset: [0, -6]
+            });
+            
+            marker.on('click', () => {
+              document.querySelectorAll('.map-property-item').forEach(el => el.classList.remove('active'));
+              const item = document.getElementById(`map-item-${d.id}`);
+              if (item) {
+                item.classList.add('active');
+                try {
+                  item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                } catch (e) {
+                  try {
+                    item.scrollIntoView();
+                  } catch (e2) {
+                    console.log('Scroll failed:', e2);
+                  }
+                }
+              }
+            });
+            
+            markerClusterGroup.addLayer(marker);
+            bounds.extend([d.lat, d.lng]);
+            hasValidCoords = true;
+            
+            mapMarkers.push({ id: d.id, marker });
+            
+            sidebarContent.push({
+              id: d.id,
+              html: `
+                <div class="map-property-item" id="map-item-${d.id}" onclick="window.focusOnProperty('${d.id}')">
+                  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                    <span style="width: 8px; height: 8px; border-radius: 50%; background: ${markerColor}; flex-shrink: 0;"></span>
+                    <div class="map-prop-title">${esc(d.name)}</div>
+                  </div>
+                  <div class="map-prop-price">${formatPrice(d.price)} · ${formatCap(d.capRate)} Cap</div>
+                  <div class="map-prop-meta">${esc(d.address)}</div>
+                </div>
+              `
+            });
+          }
+        } catch (e) {
+          console.error('Error creating marker:', e);
+        }
+      });
+      
+      refs.mapSidebarCount.textContent = `${sidebarContent.length} Properties`;
+      refs.mapSidebarContent.innerHTML = sidebarContent.length ? 
+        sidebarContent.map(item => item.html).join('') : 
+        '<div style="padding: 2rem; text-align: center; color: var(--fg-tertiary); font-size: 0.875rem;">No properties with coordinates</div>';
+      
+      if (hasValidCoords) {
+        propertyMap.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
+      }
+    }
+    
+    function focusOnProperty(id) {
+      const markerObj = mapMarkers.find(m => m.id === id);
+      if (markerObj && propertyMap) {
+        const marker = markerObj.marker;
+        const latLng = marker.getLatLng();
+        propertyMap.setView(latLng, 16);
+        marker.openPopup();
+        
+        document.querySelectorAll('.map-property-item').forEach(el => el.classList.remove('active'));
+        const item = document.getElementById(`map-item-${id}`);
+        if (item) {
+          item.classList.add('active');
+          try {
+            item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          } catch (e) {
+            try {
+              item.scrollIntoView();
+            } catch (e2) {
+              console.log('Scroll failed:', e2);
+            }
+          }
+        }
+      }
+    }
+    
+    function openDetailFromMap(id) {
+      const rec = allRecords.find(r => String(r.id) === id);
+      if (rec) openDetail(rec);
     }
 
     // ========== RENDERING ==========
@@ -1512,80 +2292,88 @@
     }
 
     function createCard(rec) {
-      const d = normalize(rec);
-      const img = d.images[0] || '';
-      const placeholderImg = 'image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250"><rect fill="#e3e3e5" width="400" height="250"/><text x="50%" y="50%" fill="#9d9da3" font-family="sans-serif" font-size="14" text-anchor="middle" dy=".3em">No Image</text></svg>');
-      const days = daysOnMarket(d.dateListed);
-      const isNew = days !== null && days <= 14;
-      const selected = selectedIds.has(d.id);
-      
-      // Logic for Compact vs Grid
-      const isCompact = currentView === 'compact';
-      const addrText = isCompact ? `${d.city}, ${d.state}` : buildAddress(d);
+      try {
+        const d = normalize(rec);
+        const img = d.images[0] || '';
+        const placeholderImg = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250"><rect fill="#f0f0f0" width="400" height="250"/><text x="50%" y="50%" fill="#9d9da3" font-family="sans-serif" font-size="14" text-anchor="middle" dy=".3em">No Image</text></svg>');
+        const days = daysOnMarket(d.dateListed);
+        const isNew = days !== null && days <= 14;
+        const selected = selectedIds.has(d.id);
+        
+        const isCompact = currentView === 'compact';
+        const addrText = isCompact ? `${d.city}, ${d.state}` : buildAddress(d);
 
-      return `
-        <div class="property-card ${selected ? 'selected' : ''}" data-id="${d.id}" tabindex="0" role="button" aria-label="View details for ${esc(d.name)}">
-          <div class="card-image-wrap">
-            <div class="img-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></div>
-            <img class="card-image" src="${img || placeholderImg}" alt="${esc(d.name)}" loading="lazy" onload="this.previousElementSibling.classList.add('hidden')" onerror="this.src='${placeholderImg}';this.previousElementSibling.classList.add('hidden')">
-            <div class="card-badges">
-              ${isNew ? '<span class="badge badge-new">New</span>' : ''}
-              ${d.propertyType ? '<span class="badge badge-type">' + esc(d.propertyType) + '</span>' : ''}
+        return `
+          <div class="property-card ${selected ? 'selected' : ''}" data-id="${d.id}" tabindex="0" role="button" aria-label="View details for ${esc(d.name)}">
+            <div class="card-image-wrap">
+              <div class="img-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></div>
+              <img class="card-image" src="${img || placeholderImg}" alt="${esc(d.name)}" loading="lazy" onload="this.previousElementSibling.classList.add('hidden')" onerror="this.src='${placeholderImg}';this.previousElementSibling.classList.add('hidden')">
+              <div class="card-badges">
+                ${isNew ? '<span class="badge badge-new">New</span>' : ''}
+                ${d.propertyType ? '<span class="badge badge-type">' + esc(d.propertyType) + '</span>' : ''}
+              </div>
+              <div class="card-checkbox">
+                <input type="checkbox" ${selected ? 'checked' : ''} aria-label="Select ${esc(d.name)}">
+              </div>
             </div>
-            <div class="card-checkbox">
-              <input type="checkbox" ${selected ? 'checked' : ''} aria-label="Select ${esc(d.name)}">
+            <div class="card-body">
+              <div class="card-header">
+                <h3 class="card-title">${esc(d.name)}</h3>
+                <div class="card-price">${formatPrice(d.price)}</div>
+              </div>
+              <div class="card-address">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span>${esc(addrText)}</span>
+              </div>
+              <div class="compact-meta">
+                <span>${formatCap(d.capRate)} · ${d.tenancy || 'N/A'}</span>
+              </div>
+              <div class="card-metrics">
+                <div class="metric"><div class="metric-label">Cap</div><div class="metric-value highlight">${formatCap(d.capRate)}</div></div>
+                <div class="metric"><div class="metric-label">Size</div><div class="metric-value">${formatSF(d.rba)}</div></div>
+                <div class="metric"><div class="metric-label">Days</div><div class="metric-value">${days != null ? days : 'N/A'}</div></div>
+              </div>
             </div>
           </div>
-          <div class="card-body">
-            <div class="card-header">
-              <h3 class="card-title">${esc(d.name)}</h3>
-              <div class="card-price">${formatPrice(d.price)}</div>
-            </div>
-            <div class="card-address">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              <span>${esc(addrText)}</span>
-            </div>
-            <div class="compact-meta">
-              <span>${formatCap(d.capRate)} Cap</span>
-              <span>${d.tenancy || '-'}</span>
-            </div>
-            <div class="card-metrics">
-              <div class="metric"><div class="metric-label">Cap Rate</div><div class="metric-value highlight">${formatCap(d.capRate)}</div></div>
-              <div class="metric"><div class="metric-label">Building</div><div class="metric-value">${formatSF(d.rba)}</div></div>
-              <div class="metric"><div class="metric-label">Days Listed</div><div class="metric-value">${days != null ? days + ' days' : 'N/A'}</div></div>
-            </div>
-          </div>
-        </div>
-      `;
+        `;
+      } catch (e) {
+        console.error('Error creating card:', e);
+        return '';
+      }
     }
 
     function createTableRow(rec) {
-      const d = normalize(rec);
-      const img = d.images[0] || '';
-      const selected = selectedIds.has(d.id);
-      const placeholderImg = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 75"><rect fill="#e3e3e5" width="100" height="75"/><text x="50%" y="50%" fill="#9d9da3" font-size="10" text-anchor="middle">N/A</text></svg>');
+      try {
+        const d = normalize(rec);
+        const img = d.images[0] || '';
+        const selected = selectedIds.has(d.id);
+        const placeholderImg = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 75"><rect fill="#f0f0f0" width="100" height="75"/><text x="50%" y="50%" fill="#9d9da3" font-size="10" text-anchor="middle">N/A</text></svg>');
 
-      return `
-        <tr class="${selected ? 'selected' : ''}" data-id="${d.id}">
-          <td class="table-checkbox">
-             <input type="checkbox" class="table-cb" ${selected ? 'checked' : ''} aria-label="Select ${esc(d.name)}">
-          </td>
-          <td>
-            <div style="display:flex; align-items:center; gap:12px;">
-              <img src="${img || placeholderImg}" class="table-img" loading="lazy">
-              <div>
-                <div class="table-title">${esc(d.name)}</div>
-                <div class="table-address">${esc(d.address)}</div>
+        return `
+          <tr class="${selected ? 'selected' : ''}" data-id="${d.id}">
+            <td class="table-checkbox">
+               <input type="checkbox" class="table-cb" ${selected ? 'checked' : ''} aria-label="Select ${esc(d.name)}">
+            </td>
+            <td>
+              <div style="display:flex; align-items:center; gap:10px;">
+                <img src="${img || placeholderImg}" class="table-img" loading="lazy" onerror="this.style.display='none'">
+                <div>
+                  <div class="table-title">${esc(d.name)}</div>
+                  <div class="table-address">${esc(d.address)}</div>
+                </div>
               </div>
-            </div>
-          </td>
-          <td>${esc(d.propertyType) || '-'}</td>
-          <td style="font-weight:700; color:var(--success);">${formatPrice(d.price)}</td>
-          <td style="font-weight:600; color:var(--accent);">${formatCap(d.capRate)}</td>
-          <td>${esc(d.tenancy) || '-'}</td>
-          <td>${esc(d.city)}</td>
-        </tr>
-      `;
+            </td>
+            <td>${esc(d.propertyType) || '-'}</td>
+            <td style="font-weight:700; color:var(--success);">${formatPrice(d.price)}</td>
+            <td style="font-weight:700; color:var(--accent);">${formatCap(d.capRate)}</td>
+            <td>${esc(d.tenancy) || '-'}</td>
+            <td>${esc(d.city)}</td>
+          </tr>
+        `;
+      } catch (e) {
+        console.error('Error creating table row:', e);
+        return '';
+      }
     }
 
     function populateFilters(recs) {
@@ -1593,18 +2381,20 @@
       const cities = new Set();
 
       recs.forEach(r => {
-        const d = normalize(r);
-        if (d.propertyType) types.add(d.propertyType);
-        if (d.city) cities.add(d.city);
+        try {
+          const d = normalize(r);
+          if (d.propertyType) types.add(d.propertyType);
+          if (d.city) cities.add(d.city);
+        } catch (e) {
+          console.error('Error in populateFilters:', e);
+        }
       });
 
-      // Types
       refs.typeFilter.innerHTML = '<option value="all">All Types</option>';
       [...types].sort().forEach(t => {
         refs.typeFilter.innerHTML += '<option value="' + esc(t) + '">' + esc(t) + '</option>';
       });
 
-      // Cities
       refs.cityFilter.innerHTML = '<option value="all">All Cities</option>';
       [...cities].sort().forEach(c => {
         refs.cityFilter.innerHTML += '<option value="' + esc(c) + '">' + esc(c) + '</option>';
@@ -1618,59 +2408,51 @@
       const city = refs.cityFilter.value;
       const sort = refs.sortSelect.value;
 
-      // Range filters
       const minPrice = refs.minPrice.value ? Number(refs.minPrice.value) : null;
       const maxPrice = refs.maxPrice.value ? Number(refs.maxPrice.value) : null;
       const minCap = refs.minCap.value ? Number(refs.minCap.value) / 100 : null; 
       const maxCap = refs.maxCap.value ? Number(refs.maxCap.value) / 100 : null;
 
       filteredRecords = allRecords.filter(r => {
-        const d = normalize(r);
+        try {
+          const d = normalize(r);
 
-        const matchSearch = !search ||
-          d.name.toLowerCase().includes(search) ||
-          d.address.toLowerCase().includes(search) ||
-          d.city.toLowerCase().includes(search) ||
-          (d.tenant && d.tenant.toLowerCase().includes(search));
+          const matchSearch = !search ||
+            (d.name && d.name.toLowerCase().includes(search)) ||
+            (d.address && d.address.toLowerCase().includes(search)) ||
+            (d.city && d.city.toLowerCase().includes(search)) ||
+            (d.tenant && d.tenant.toLowerCase().includes(search));
 
-        const matchType = type === 'all' || d.propertyType === type;
-        
-        // FIX: Normalize tenancy for comparison (trim and lowercase)
-        const tenancyMatch = tenancy === 'all' || (d.tenancy && d.tenancy.trim().toLowerCase() === tenancy.toLowerCase());
+          const matchType = type === 'all' || d.propertyType === type;
+          const matchTenancy = tenancy === 'all' || 
+            (d.tenancy && d.tenancy.toString().trim().toLowerCase() === tenancy.toLowerCase());
+          const matchCity = city === 'all' || d.city === city;
+          const matchPrice = (!minPrice || (d.price && d.price >= minPrice)) && (!maxPrice || (d.price && d.price <= maxPrice));
+          const matchCap = (!minCap || (d.capRate && d.capRate >= minCap)) && (!maxCap || (d.capRate && d.capRate <= maxCap));
+          const matchBoundary = d.lat && d.lng ? isPointInBoundary(d.lat, d.lng) : true;
 
-        const matchCity = city === 'all' || d.city === city;
-
-        const matchPrice = (!minPrice || d.price >= minPrice) && (!maxPrice || d.price <= maxPrice);
-        const matchCap = (!minCap || d.capRate >= minCap) && (!maxCap || d.capRate <= maxCap);
-
-        // MAP FILTER LOGIC
-        let matchMap = true;
-        if (mapFilterActive && drawnPolygon && d.lat && d.lng) {
-            try {
-                const point = turf.point([d.lng, d.lat]);
-                const polygon = drawnPolygon.toGeoJSON();
-                matchMap = turf.booleanPointInPolygon(point, polygon);
-            } catch (e) {
-                console.error("Map filter error", e);
-                matchMap = true; // Fail open
-            }
+          return matchSearch && matchType && matchTenancy && matchCity && matchPrice && matchCap && matchBoundary;
+        } catch (e) {
+          console.error('Error filtering record:', e);
+          return false;
         }
-
-        return matchSearch && matchType && tenancyMatch && matchCity && matchPrice && matchCap && matchMap;
       });
 
-      // Sort
       filteredRecords.sort((a, b) => {
-        const da = normalize(a);
-        const db = normalize(b);
-        switch (sort) {
-          case 'price-high': return (db.price || 0) - (da.price || 0);
-          case 'price-low': return (da.price || 0) - (db.price || 0);
-          case 'cap-high': return (db.capRate || 0) - (da.capRate || 0);
-          default: 
-            const tA = da.updatedAt ? Number(da.updatedAt) : 0;
-            const tB = db.updatedAt ? Number(db.updatedAt) : 0;
-            return tB - tA; 
+        try {
+          const da = normalize(a);
+          const db = normalize(b);
+          switch (sort) {
+            case 'price-high': return (db.price || 0) - (da.price || 0);
+            case 'price-low': return (da.price || 0) - (db.price || 0);
+            case 'cap-high': return (db.capRate || 0) - (da.capRate || 0);
+            default: 
+              const tA = da.updatedAt ? Number(da.updatedAt) : 0;
+              const tB = db.updatedAt ? Number(db.updatedAt) : 0;
+              return tB - tA; 
+          }
+        } catch (e) {
+          return 0;
         }
       });
 
@@ -1678,46 +2460,46 @@
     }
 
     function render() {
-      refs.loadingState.style.display = 'none';
-
-      // Handle View Visibility
-      const isMap = currentView === 'map';
-      const isTable = currentView === 'table';
-      const isGrid = currentView === 'grid' || currentView === 'compact';
-
-      refs.propertyGrid.style.display = isGrid ? 'grid' : 'none';
-      refs.propertyTable.style.display = isTable ? 'table' : 'none';
-      refs.mapContainer.style.display = isMap ? 'block' : 'none';
-
-      if (isMap) {
-        initMap();
-        return;
-      }
+      console.log('Rendering view:', currentView, 'Records:', filteredRecords.length);
+      
+      // Hide everything first
+      refs.loadingState.classList.remove('active');
+      refs.emptyState.classList.remove('active');
+      refs.propertyGrid.classList.remove('active');
+      refs.propertyTable.classList.remove('active');
+      refs.mapView.classList.remove('active');
+      
+      // Reset compact view class
+      refs.propertyGrid.classList.remove('compact-view');
 
       if (filteredRecords.length === 0) {
-        refs.emptyState.style.display = 'flex';
+        refs.emptyState.classList.add('active');
         refs.resultsBar.style.display = 'none';
         return;
       }
 
-      refs.emptyState.style.display = 'none';
+      refs.emptyState.classList.remove('active');
       refs.resultsBar.style.display = 'flex';
       refs.resultsCount.textContent = filteredRecords.length;
 
       updateSelectedCount();
 
-      if (isTable) {
-        refs.propertyTable.classList.add('show');
+      if (currentView === 'table') {
+        refs.propertyTable.classList.add('active');
         refs.propertyTableBody.innerHTML = filteredRecords.map(createTableRow).join('');
+      } else if (currentView === 'map') {
+        refs.mapView.classList.add('active');
+        initMap();
+        updateMapMarkers(filteredRecords);
       } else {
-        refs.propertyTable.classList.remove('show');
-        refs.propertyGrid.classList.toggle('compact-view', currentView === 'compact');
-        
-        const fragment = document.createRange().createContextualFragment(
-          filteredRecords.map(createCard).join('')
-        );
-        refs.propertyGrid.innerHTML = '';
-        refs.propertyGrid.appendChild(fragment);
+        // Grid or Compact view
+        refs.propertyGrid.classList.add('active');
+        if (currentView === 'compact') {
+          refs.propertyGrid.classList.add('compact-view');
+        }
+        const html = filteredRecords.map(createCard).join('');
+        console.log('Generated HTML length:', html.length);
+        refs.propertyGrid.innerHTML = html;
       }
 
       updateExportBtn();
@@ -1725,7 +2507,7 @@
 
     function updateExportBtn() {
       const count = selectedIds.size;
-      refs.exportLabel.textContent = count > 0 ? 'Export (' + count + ')' : 'Export';
+      refs.exportLabel.textContent = count > 0 ? `Export (${count})` : 'Export';
       refs.exportBtn.disabled = filteredRecords.length === 0;
     }
 
@@ -1733,7 +2515,7 @@
       const count = selectedIds.size;
       if (count > 0) {
         refs.selectedCount.style.display = 'block';
-        refs.selectedCount.textContent = count + ' selected';
+        refs.selectedCount.textContent = `Clear ${count}`;
       } else {
         refs.selectedCount.style.display = 'none';
       }
@@ -1742,81 +2524,83 @@
     // ========== DETAIL PANEL ==========
     function openDetail(rec) {
       if (!rec) return;
-      currentRecord = rec;
-      const d = normalize(rec);
+      try {
+        currentRecord = rec;
+        const d = normalize(rec);
 
-      const img = d.images[0] || 'image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500"><rect fill="#e3e3e5" width="800" height="500"/><text x="50%" y="50%" fill="#9d9da3" font-family="sans-serif" font-size="18" text-anchor="middle" dy=".3em">No Image Available</text></svg>');
-      $('detailImage').src = img;
-      $('detailTypeBadge').textContent = d.leaseType || d.propertyType || 'Property';
-      $('detailTitle').textContent = d.name;
-      $('detailAddressText').textContent = buildAddress(d);
+        const img = d.images[0] || 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500"><rect fill="#f0f0f0" width="800" height="500"/><text x="50%" y="50%" fill="#9d9da3" font-family="sans-serif" font-size="18" text-anchor="middle" dy=".3em">No Image Available</text></svg>');
+        $('detailImage').src = img;
+        $('detailTypeBadge').textContent = d.leaseType || d.propertyType || 'Property';
+        $('detailTitle').textContent = d.name;
+        $('detailAddressText').textContent = buildAddress(d);
 
-      $('metricPrice').textContent = formatPrice(d.price);
-      $('metricCap').textContent = formatCap(d.capRate);
-      $('metricNoi').textContent = formatPrice(d.noi);
+        $('metricPrice').textContent = formatPrice(d.price);
+        $('metricCap').textContent = formatCap(d.capRate);
+        $('metricNoi').textContent = formatPrice(d.noi);
 
-      // Tenant Badges
-      const tenantContainer = $('kvTenant');
-      tenantContainer.innerHTML = '';
-      if (d.tenantsList.length > 0) {
-        const badgesDiv = document.createElement('div');
-        badgesDiv.className = 'tenant-badges-container';
-        d.tenantsList.forEach(t => {
-          const badge = document.createElement('span');
-          badge.className = 'tenant-badge';
-          badge.textContent = t;
-          badgesDiv.appendChild(badge);
-        });
-        tenantContainer.appendChild(badgesDiv);
-      } else {
-        tenantContainer.textContent = 'N/A';
+        const tenantContainer = $('kvTenant');
+        tenantContainer.innerHTML = '';
+        if (d.tenantsList.length > 0) {
+          const badgesDiv = document.createElement('div');
+          badgesDiv.className = 'tenant-badges-container';
+          d.tenantsList.forEach(t => {
+            const badge = document.createElement('span');
+            badge.className = 'tenant-badge';
+            badge.textContent = t;
+            badgesDiv.appendChild(badge);
+          });
+          tenantContainer.appendChild(badgesDiv);
+        } else {
+          tenantContainer.textContent = 'N/A';
+        }
+
+        $('kvTerm').textContent = formatTerm(d.leaseTerm);
+        $('kvExp').textContent = formatDate(d.leaseExp);
+        $('kvBumps').textContent = d.rentBumps || 'N/A';
+        $('kvOpts').textContent = d.leaseOpts || 'N/A';
+
+        $('kvRba').textContent = formatSF(d.rba);
+        $('kvLand').textContent = d.landSize ? (d.landSize + ' ' + d.landUnit).trim() : 'N/A';
+        $('kvPriceSf').textContent = (d.price && d.rba) ? formatPrice(d.price / d.rba) : 'N/A';
+        $('kvDate').textContent = formatDate(d.dateListed);
+
+        const highlightsSection = $('highlightsSection');
+        const highlightsText = $('highlightsText');
+        if (d.notes) {
+          highlightsSection.style.display = 'block';
+          highlightsText.innerHTML = marked.parse(d.notes);
+        } else {
+          highlightsSection.style.display = 'none';
+        }
+
+        const actionsContainer = $('detailTopActions');
+        actionsContainer.innerHTML = '';
+
+        if (d.omUrl) {
+          const a = document.createElement('a');
+          a.className = 'action-link om';
+          a.href = d.omUrl;
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+          a.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> View OM`;
+          actionsContainer.appendChild(a);
+        }
+
+        const listing = d.listingUrl || d.costarUrl || d.crexiUrl;
+        if (listing) {
+          const a = document.createElement('a');
+          a.className = 'action-link listing';
+          a.href = listing;
+          a.target = '_blank';
+          a.rel = 'noreferrer';
+          a.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg> View Listing`;
+          actionsContainer.appendChild(a);
+        }
+
+        refs.detailOverlay.classList.add('show');
+      } catch (e) {
+        console.error('Error opening detail:', e);
       }
-
-      $('kvTerm').textContent = formatTerm(d.leaseTerm);
-      $('kvExp').textContent = formatDate(d.leaseExp);
-      $('kvBumps').textContent = d.rentBumps || 'N/A';
-      $('kvOpts').textContent = d.leaseOpts || 'N/A';
-
-      $('kvRba').textContent = formatSF(d.rba);
-      $('kvLand').textContent = d.landSize ? (d.landSize + ' ' + d.landUnit).trim() : 'N/A';
-      $('kvPriceSf').textContent = (d.price && d.rba) ? formatPrice(d.price / d.rba) : 'N/A';
-      $('kvDate').textContent = formatDate(d.dateListed);
-
-      const highlightsSection = $('highlightsSection');
-      const highlightsText = $('highlightsText');
-      if (d.notes) {
-        highlightsSection.style.display = 'block';
-        highlightsText.innerHTML = marked.parse(d.notes);
-      } else {
-        highlightsSection.style.display = 'none';
-      }
-
-      // Actions (Moved to Top)
-      const actionsContainer = $('detailTopActions');
-      actionsContainer.innerHTML = '';
-
-      if (d.omUrl) {
-        const a = document.createElement('a');
-        a.className = 'action-link om';
-        a.href = d.omUrl;
-        a.target = '_blank';
-        a.rel = 'noopener noreferrer';
-        a.textContent = 'View Offering Memorandum';
-        actionsContainer.appendChild(a);
-      }
-
-      const listing = d.listingUrl || d.costarUrl || d.crexiUrl;
-      if (listing) {
-        const a = document.createElement('a');
-        a.className = 'action-link listing';
-        a.href = listing;
-        a.target = '_blank';
-        a.rel = 'noreferrer';
-        a.textContent = 'Visit Listing';
-        actionsContainer.appendChild(a);
-      }
-
-      refs.detailOverlay.classList.add('show');
     }
 
     function closeDetail() {
@@ -1846,44 +2630,35 @@
         return;
       }
 
-      // Identify all unique column headers from the raw data
       const allKeys = new Set();
-      allKeys.add('Grist_ID'); // Add Grist Record ID explicitly
+      allKeys.add('Grist_ID');
       
       const dataRows = recs.map(rec => {
         const src = getSource(rec);
-        // Add keys to set
         Object.keys(src).forEach(k => allKeys.add(k));
         return { id: rec.id, src };
       });
 
-      // Sort columns (ID first, then alphabetical)
       const columns = Array.from(allKeys).sort((a, b) => {
         if (a === 'Grist_ID') return -1;
         if (b === 'Grist_ID') return 1;
         return a.localeCompare(b);
       });
 
-      // Helper to format value for CSV (handle commas, quotes, newlines, and Grist lists)
       const formatCsvVal = (val) => {
         if (val == null) return '';
-        // Handle Grist Lists (['L', ...])
         if (Array.isArray(val)) {
           const list = (val.length > 0 && val[0] === 'L') ? val.slice(1) : val;
           val = list.join('; ');
         }
-        // Convert to string
         const s = String(val);
-        // If contains special chars, wrap in quotes and escape existing quotes
         if (s.includes(',') || s.includes('"') || s.includes('\n') || s.includes('\r')) {
           return '"' + s.replace(/"/g, '""') + '"';
         }
         return s;
       };
 
-      // Build CSV Content
       const header = columns.map(c => {
-        // Headers might also need escaping if they contain commas
         if (c.includes(',') || c.includes('"')) return '"' + c.replace(/"/g, '""') + '"';
         return c;
       }).join(',');
@@ -1897,7 +2672,6 @@
 
       const csvContent = header + '\r\n' + rows.join('\r\n');
 
-      // Download
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -1908,102 +2682,6 @@
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
       closeExportModal();
-    }
-
-    // ========== MAP VIEW LOGIC ==========
-    function initMap() {
-      if (!map) {
-        // Initialize Map with Voyager Tiles (Cleaner look)
-        map = L.map('mapContainer').setView([47.6062, -122.3321], 10); // Default to Seattle area
-        
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-          subdomains: 'abcd',
-          maxZoom: 20
-        }).addTo(map);
-
-        // Enable Geoman (Drawing Tools)
-        map.pm.addControls({
-          position: 'topleft',
-          drawCircleMarker: false,
-          drawCircle: false,
-          drawMarker: false,
-          drawPolyline: false,
-          drawRectangle: false,
-          drawText: false,
-          editMode: false,
-          dragMode: false,
-          cutPolygon: false,
-          removalMode: false
-        });
-
-        // Listen for Polygon Creation
-        map.on('pm:create', (e) => {
-          // Remove existing polygon if any
-          if (drawnPolygon) map.removeLayer(drawnPolygon);
-          drawnPolygon = e.layer;
-          mapFilterActive = true;
-          refs.mapFilterNotice.classList.add('show');
-          applyFilters(); // Re-filter based on polygon
-        });
-      } else {
-        map.invalidateSize();
-      }
-
-      // Add Markers
-      mapMarkers.forEach(m => map.removeLayer(m));
-      mapMarkers = [];
-
-      filteredRecords.forEach(rec => {
-        const d = normalize(rec);
-        if (d.lat && d.lng) {
-          // Create custom popup content
-          const popupContent = `
-            <div class="map-popup-wrapper">
-              <img src="${d.images[0] || 'https://via.placeholder.com/300x150?text=No+Image'}" class="map-popup-img" onerror="this.src='https://via.placeholder.com/300x150?text=Error'">
-              <div class="map-popup-body">
-                <div class="map-popup-title">${esc(d.name)}</div>
-                <div class="map-popup-price">${formatPrice(d.price)}</div>
-                <div class="map-popup-meta">
-                  <span>${formatCap(d.capRate)} Cap</span>
-                  <span>${formatSF(d.rba)}</span>
-                </div>
-                <a href="#" class="map-popup-btn" onclick="openDetailFromMap('${d.id}'); return false;">View Details</a>
-              </div>
-            </div>
-          `;
-
-          const marker = L.marker([d.lat, d.lng]).addTo(map);
-          marker.bindPopup(popupContent);
-          
-          // Store record ID on marker for easy retrieval
-          marker.recordId = d.id;
-          
-          mapMarkers.push(marker);
-        }
-      });
-
-      // Fit bounds to show all markers if no polygon exists
-      if (!mapFilterActive && mapMarkers.length > 0) {
-        const group = new L.featureGroup(mapMarkers);
-        map.fitBounds(group.getBounds().pad(0.1));
-      }
-    }
-
-    // Global function to be called from popup
-    window.openDetailFromMap = function(id) {
-      const rec = allRecords.find(r => String(r.id) === id);
-      if (rec) openDetail(rec);
-    };
-
-    function clearMapFilter() {
-      if (drawnPolygon) {
-        map.removeLayer(drawnPolygon);
-        drawnPolygon = null;
-      }
-      mapFilterActive = false;
-      refs.mapFilterNotice.classList.remove('show');
-      applyFilters();
     }
 
     // ========== EVENT HANDLERS ==========
@@ -2025,7 +2703,7 @@
       refs.maxPrice.value = '';
       refs.minCap.value = '';
       refs.maxCap.value = '';
-      applyFilters();
+      clearBoundaryFilter();
     });
 
     refs.advancedToggle.addEventListener('click', () => {
@@ -2035,22 +2713,22 @@
 
     function setView(view) {
       currentView = view;
+      refs.mapViewBtn.classList.remove('active');
       refs.tableViewBtn.classList.remove('active');
       refs.compactViewBtn.classList.remove('active');
-      refs.mapViewBtn.classList.remove('active');
       refs.gridViewBtn.classList.remove('active');
       
-      if(view === 'table') refs.tableViewBtn.classList.add('active');
+      if(view === 'map') refs.mapViewBtn.classList.add('active');
+      else if(view === 'table') refs.tableViewBtn.classList.add('active');
       else if(view === 'compact') refs.compactViewBtn.classList.add('active');
-      else if(view === 'map') refs.mapViewBtn.classList.add('active');
       else refs.gridViewBtn.classList.add('active');
       
       render();
     }
 
+    refs.mapViewBtn.addEventListener('click', () => setView('map'));
     refs.tableViewBtn.addEventListener('click', () => setView('table'));
     refs.compactViewBtn.addEventListener('click', () => setView('compact'));
-    refs.mapViewBtn.addEventListener('click', () => setView('map'));
     refs.gridViewBtn.addEventListener('click', () => setView('grid'));
 
     refs.exportBtn.addEventListener('click', openExportModal);
@@ -2062,14 +2740,11 @@
       if (e.target === refs.detailOverlay) closeDetail();
     });
     
-    // Clear Selection Helper
     refs.selectedCount.addEventListener('click', () => {
        selectedIds.clear();
        render();
        updateExportBtn();
     });
-
-    refs.clearMapFilterBtn.addEventListener('click', clearMapFilter);
 
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
@@ -2078,15 +2753,11 @@
       }
     });
 
-    // ========== MAIN EVENT LISTENERS FOR SELECTION ==========
-
-    // Grid/Compact View Listener
     refs.propertyGrid.addEventListener('click', (e) => {
       const card = e.target.closest('.property-card');
       if (!card) return;
       const id = card.dataset.id;
 
-      // Handle Checkbox Click
       if (e.target.closest('.card-checkbox')) {
         if (selectedIds.has(id)) {
           selectedIds.delete(id);
@@ -2096,27 +2767,23 @@
           card.classList.add('selected');
         }
         
-        // Force sync checkbox state
         const cb = card.querySelector('input');
         if (cb) cb.checked = selectedIds.has(id);
         
         updateExportBtn();
         updateSelectedCount();
-        return; // Stop propagation to opening detail
+        return;
       }
 
-      // Handle Card Click (Detail)
       const rec = filteredRecords.find(r => String(r.id) === id);
       if (rec) openDetail(rec);
     });
 
-    // Table View Listener
     refs.propertyTableBody.addEventListener('click', (e) => {
       const row = e.target.closest('tr');
       if (!row) return;
       const id = row.dataset.id;
 
-      // Handle Checkbox Click
       if (e.target.closest('.table-cb')) {
          if (selectedIds.has(id)) {
           selectedIds.delete(id);
@@ -2126,7 +2793,6 @@
           row.classList.add('selected');
         }
         
-        // Force sync checkbox state
         const cb = row.querySelector('.table-cb');
         if (cb) cb.checked = selectedIds.has(id);
         
@@ -2135,13 +2801,13 @@
         return;
       }
 
-      // Handle Row Click (Detail)
       const rec = filteredRecords.find(r => String(r.id) === id);
       if (rec) openDetail(rec);
     });
 
     // ========== GRIST DATA ==========
     grist.onRecords((records) => {
+      console.log('Received records:', records ? records.length : 0);
       allRecords = records || [];
       normCache.clear();
 
@@ -2155,6 +2821,10 @@
       populateFilters(allRecords);
       applyFilters();
     });
+    
+    window.focusOnProperty = focusOnProperty;
+    window.openDetailFromMap = openDetailFromMap;
+    window.clearBoundaryFilter = clearBoundaryFilter;
   </script>
 </body>
 </html>
