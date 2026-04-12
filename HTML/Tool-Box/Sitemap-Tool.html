@@ -8,24 +8,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0a0b0d;
-            --bg-elevated: #111216;
-            --bg-card: #16181d;
-            --border: #2a2d35;
-            --border-hover: #3d4150;
-            --fg: #e8eaed;
-            --fg-muted: #7a8194;
-            --accent: #22d3ee;
-            --accent-dim: rgba(34, 211, 238, 0.15);
-            --success: #34d399;
-            --warning: #fbbf24;
-            --danger: #f87171;
-        }
-
-        [data-theme="light"] {
             --bg: #f8fafc;
             --bg-elevated: #ffffff;
             --bg-card: #ffffff;
@@ -40,9 +25,24 @@
             --danger: #dc2626;
         }
 
+        [data-theme="dark"] {
+            --bg: #0a0b0d;
+            --bg-elevated: #111216;
+            --bg-card: #16181d;
+            --border: #2a2d35;
+            --border-hover: #3d4150;
+            --fg: #e8eaed;
+            --fg-muted: #7a8194;
+            --accent: #22d3ee;
+            --accent-dim: rgba(34, 211, 238, 0.15);
+            --success: #34d399;
+            --warning: #fbbf24;
+            --danger: #f87171;
+        }
+
         * { box-sizing: border-box; }
         body {
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: 'Inter', 'Space Grotesk', sans-serif;
             background: var(--bg);
             color: var(--fg);
             transition: background 0.3s, color 0.3s;
@@ -373,29 +373,29 @@
 
         // --- Init Theme ---
         const initTheme = () => {
-            if (localStorage.theme === 'light') {
-                document.documentElement.setAttribute('data-theme', 'light');
-                document.getElementById('sunIcon').classList.remove('hidden');
-                document.getElementById('moonIcon').classList.add('hidden');
-            } else {
+            if (localStorage.theme === 'dark') {
                 document.documentElement.setAttribute('data-theme', 'dark');
                 document.getElementById('sunIcon').classList.add('hidden');
                 document.getElementById('moonIcon').classList.remove('hidden');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                document.getElementById('sunIcon').classList.remove('hidden');
+                document.getElementById('moonIcon').classList.add('hidden');
             }
         }
         initTheme();
 
         function toggleTheme() {
-            if (document.documentElement.getAttribute('data-theme') === 'light') {
-                document.documentElement.setAttribute('data-theme', 'dark');
-                localStorage.theme = 'dark';
-                document.getElementById('sunIcon').classList.add('hidden');
-                document.getElementById('moonIcon').classList.remove('hidden');
-            } else {
+            if (document.documentElement.getAttribute('data-theme') === 'dark') {
                 document.documentElement.setAttribute('data-theme', 'light');
                 localStorage.theme = 'light';
                 document.getElementById('sunIcon').classList.remove('hidden');
                 document.getElementById('moonIcon').classList.add('hidden');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.theme = 'dark';
+                document.getElementById('sunIcon').classList.add('hidden');
+                document.getElementById('moonIcon').classList.remove('hidden');
             }
         }
 
@@ -416,26 +416,35 @@
 
             try {
                 const proxies = [
-                    `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-                    `https://corsproxy.io/?${encodeURIComponent(url)}`,
-                    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+                    { url: `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`, type: 'json' },
+                    { url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`, type: 'text' },
+                    { url: `https://corsproxy.io/?${encodeURIComponent(url)}`, type: 'text' },
+                    { url: `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`, type: 'text' }
                 ];
 
                 let text = null;
                 for(let proxy of proxies) {
                     try {
-                        const resp = await fetch(proxy);
+                        console.log(`Trying proxy: ${proxy.url}`);
+                        const resp = await fetch(proxy.url);
                         if(resp.ok) {
-                            text = await resp.text();
+                            if (proxy.type === 'json') {
+                                const json = await resp.json();
+                                text = json.contents;
+                            } else {
+                                text = await resp.text();
+                            }
                             if(text && text.length > 10) break;
                         }
-                    } catch(e) { /* Try next proxy */ }
+                    } catch(e) {
+                        console.warn(`Proxy failed: ${proxy.url}`, e);
+                    }
                 }
 
                 if(text) {
-                    parseInput(text);
+                    await parseInput(text);
                 } else {
-                    toast('Could not fetch URL. Use Paste or Manual Tools.', 'error');
+                    toast('Could not fetch URL. CORS block or site restricted. Use Paste or Manual Tools.', 'error');
                 }
             } catch(e) {
                 console.error(e);
@@ -446,16 +455,18 @@
             }
         }
 
-        function handlePaste() {
+        async function handlePaste() {
             const text = document.getElementById('pasteInput').value.trim();
             if(!text) return toast('Paste content first', 'error');
-            parseInput(text);
+            await parseInput(text);
         }
 
         // --- Robust Parsing Logic ---
-        function parseInput(text) {
+        async function parseInput(text) {
             rawUrls = [];
-            
+            let isIndex = false;
+            let subSitemaps = [];
+
             // 1. Try strict XML parsing
             try {
                 const parser = new DOMParser();
@@ -463,30 +474,103 @@
                 const errorNode = doc.querySelector('parsererror');
                 
                 if (!errorNode) {
-                    const locs = doc.getElementsByTagName('loc');
-                    if(locs.length > 0) {
-                        rawUrls = Array.from(locs).map(l => l.textContent.trim());
+                    // Check if it's a sitemap index
+                    const sitemaps = doc.getElementsByTagName('sitemap');
+                    if (sitemaps.length > 0) {
+                        isIndex = true;
+                        subSitemaps = Array.from(doc.getElementsByTagName('loc')).map(l => l.textContent.trim());
+                    } else {
+                        const locs = doc.getElementsByTagName('loc');
+                        if(locs.length > 0) {
+                            rawUrls = Array.from(locs).map(l => l.textContent.trim());
+                        }
                     }
                 }
             } catch(e) {}
 
-            // 2. Fallback: Regex for <loc> tags (handles broken XML)
-            if(rawUrls.length === 0) {
-                const matches = text.match(/<loc>\s*(https?:\/\/[^<]+)\s*<\/loc>/gi) || [];
-                rawUrls = matches.map(m => m.replace(/<\/?loc>/gi, '').trim());
+            // 2. Fallback: Regex for <sitemap> and <loc> tags (handles broken XML)
+            if(rawUrls.length === 0 && !isIndex) {
+                if (text.includes('<sitemap>')) {
+                    isIndex = true;
+                    const matches = text.match(/<loc>\s*(https?:\/\/[^<]+)\s*<\/loc>/gi) || [];
+                    subSitemaps = matches.map(m => m.replace(/<\/?loc>/gi, '').trim());
+                } else {
+                    const matches = text.match(/<loc>\s*(https?:\/\/[^<]+)\s*<\/loc>/gi) || [];
+                    rawUrls = matches.map(m => m.replace(/<\/?loc>/gi, '').trim());
+                }
             }
 
             // 3. Fallback: Generic URL extraction (handles plain text lists)
-            if(rawUrls.length === 0) {
+            if(rawUrls.length === 0 && !isIndex) {
                 const matches = text.match(/https?:\/\/[^\s<>"]+/g);
                 if(matches) {
                     rawUrls = matches.map(u => u.trim());
                 }
             }
 
+            if (isIndex) {
+                const proceed = confirm(`This is a Sitemap Index containing ${subSitemaps.length} sub-sitemaps. Do you want to fetch and merge all of them?`);
+                if (proceed) {
+                    return fetchAllSubSitemaps(subSitemaps);
+                } else {
+                    rawUrls = subSitemaps; // Just show the sub-sitemap URLs
+                }
+            }
+
             if(rawUrls.length === 0) return toast('No URLs found in input', 'error');
             
             toast(`Loaded ${rawUrls.length} URLs`, 'success');
+            detectPatterns();
+        }
+
+        async function fetchAllSubSitemaps(urls) {
+            toast(`Fetching ${urls.length} sitemaps...`, 'success');
+            let combinedUrls = [];
+            let failCount = 0;
+
+            for (let i = 0; i < urls.length; i++) {
+                const url = urls[i];
+                try {
+                    const proxies = [
+                        { url: `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`, type: 'json' },
+                        { url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`, type: 'text' }
+                    ];
+
+                    let text = null;
+                    for(let proxy of proxies) {
+                        try {
+                            const resp = await fetch(proxy.url);
+                            if(resp.ok) {
+                                if (proxy.type === 'json') {
+                                    const json = await resp.json();
+                                    text = json.contents;
+                                } else {
+                                    text = await resp.text();
+                                }
+                                if(text && text.length > 10) break;
+                            }
+                        } catch(e) {}
+                    }
+
+                    if (text) {
+                        // Extract URLs from sub-sitemap
+                        const matches = text.match(/<loc>\s*(https?:\/\/[^<]+)\s*<\/loc>/gi) || [];
+                        const extracted = matches.map(m => m.replace(/<\/?loc>/gi, '').trim());
+                        combinedUrls = combinedUrls.concat(extracted);
+                    } else {
+                        failCount++;
+                    }
+                } catch (e) {
+                    failCount++;
+                }
+            }
+
+            rawUrls = [...new Set(combinedUrls)]; // Unique URLs
+            if (failCount > 0) {
+                toast(`Loaded ${rawUrls.length} URLs. ${failCount} sitemaps failed.`, 'warning');
+            } else {
+                toast(`Loaded ${rawUrls.length} URLs from ${urls.length} sitemaps`, 'success');
+            }
             detectPatterns();
         }
 
