@@ -234,7 +234,10 @@
 
                 <!-- Paste XML -->
                 <div>
-                    <label class="block text-sm font-medium text-[var(--fg-muted)] mb-1">Paste XML or Raw URL List</label>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-sm font-medium text-[var(--fg-muted)]">Paste XML or Raw URL List</label>
+                        <button onclick="fillExample()" class="text-xs text-[var(--accent)] hover:underline">Load Example (Walgreens Style)</button>
+                    </div>
                     <textarea id="pasteInput" class="input-field w-full px-4 py-2 rounded-lg text-xs font-mono h-32" placeholder="Paste raw XML, or just a list of URLs (works with mixed text too)..."></textarea>
                     <button onclick="handlePaste()" class="btn-secondary px-6 py-2 rounded-lg text-sm mt-2">Parse Content</button>
                 </div>
@@ -440,8 +443,8 @@
                 const proxies = [
                     { name: 'AllOrigins (JSON)', url: `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`, type: 'json' },
                     { name: 'CodeTabs', url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`, type: 'text' },
+                    { name: 'YACDN', url: `https://yacdn.org/proxy/${url}`, type: 'text' },
                     { name: 'CorsProxy.io', url: `https://corsproxy.io/?${encodeURIComponent(url)}`, type: 'text' },
-                    { name: 'AllOrigins (Raw)', url: `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`, type: 'text' },
                     { name: 'ThingProxy', url: `https://thingproxy.freeboard.io/fetch/${url}`, type: 'text' }
                 ];
 
@@ -558,11 +561,11 @@
             let combinedUrls = [];
             let failCount = 0;
 
-            // Use a slightly more aggressive timeout for bulk fetches
             const bulkFetch = async (url) => {
                 const proxies = [
                     { url: `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`, type: 'json' },
                     { url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`, type: 'text' },
+                    { url: `https://yacdn.org/proxy/${url}`, type: 'text' },
                     { url: `https://corsproxy.io/?${encodeURIComponent(url)}`, type: 'text' }
                 ];
 
@@ -611,6 +614,7 @@
 
         function detectPatterns() {
             const pathCounts = {};
+            const prefixCounts = {};
             const hostCounts = {};
 
             rawUrls.forEach(url => {
@@ -619,14 +623,22 @@
                     const host = urlObj.hostname;
                     const pathParts = urlObj.pathname.split('/').filter(s => s.length > 0);
                     
-                    if(/location|store|shop|branch|restaurant|place/i.test(host)) {
+                    if(/location|store|shop|branch|restaurant|place|locator/i.test(host)) {
                         hostCounts['_host_root_'] = (hostCounts['_host_root_'] || 0) + 1;
                     }
 
                     pathParts.forEach((seg, i) => {
-                        if(/location|store|shop|branch|restaurant|place/i.test(seg)) {
-                            const key = seg.toLowerCase();
+                        const key = seg.toLowerCase();
+                        // Count exact segments
+                        if(/location|store|shop|branch|restaurant|place|locator|retail/i.test(key)) {
                             pathCounts[key] = (pathCounts[key] || 0) + 1;
+                        }
+
+                        // Count common prefixes (e.g., "walgreens-")
+                        const prefixMatch = key.match(/^([a-z0-9]+-)/i);
+                        if (prefixMatch) {
+                            const prefix = prefixMatch[1];
+                            prefixCounts[prefix] = (prefixCounts[prefix] || 0) + 1;
                         }
                     });
                 } catch(e) {}
@@ -636,17 +648,24 @@
             container.innerHTML = '';
             
             const sortedPathKeys = Object.keys(pathCounts).sort((a,b) => pathCounts[b] - pathCounts[a]);
-            
+            const sortedPrefixKeys = Object.keys(prefixCounts)
+                .filter(k => prefixCounts[k] > rawUrls.length * 0.05) // Must appear in at least 5% of URLs
+                .sort((a,b) => prefixCounts[b] - prefixCounts[a]);
+
             if(hostCounts['_host_root_']) {
-                createPatternButton(container, 'Root (Host Match)', '_host_root_', hostCounts['_host_root_']);
+                createPatternButton(container, 'Domain Match', '_host_root_', hostCounts['_host_root_']);
             }
 
             sortedPathKeys.forEach(key => {
-                createPatternButton(container, `/${key}`, key, pathCounts[key]);
+                createPatternButton(container, `/${key}`, { type: 'segment', val: key }, pathCounts[key]);
+            });
+
+            sortedPrefixKeys.forEach(key => {
+                createPatternButton(container, `${key}*`, { type: 'prefix', val: key }, prefixCounts[key]);
             });
 
             if(container.children.length === 0) {
-                 createPatternButton(container, 'Root Domain', '_root_', rawUrls.length);
+                 createPatternButton(container, 'All URLs', '_root_', rawUrls.length);
             }
 
             if(container.children.length > 0) {
@@ -657,14 +676,14 @@
             document.getElementById('resultsSection').classList.remove('hidden');
         }
 
-        function createPatternButton(container, label, key, count) {
+        function createPatternButton(container, label, keyData, count) {
             const btn = document.createElement('button');
             btn.className = 'pattern-segment px-4 py-2 text-sm font-mono border-r border-[var(--border)] last:border-r-0';
             btn.textContent = `${label} (${count})`;
             btn.onclick = () => {
                 Array.from(container.children).forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-                selectPattern(key);
+                selectPattern(keyData);
             };
             container.appendChild(btn);
         }
@@ -672,9 +691,13 @@
         function selectPattern(pattern) {
             currentPattern = pattern;
             
-            // Try to auto-detect best depth settings based on pattern counts
-            // Reset to safe defaults
-            document.getElementById('depthSliderMin').value = 1;
+            // Adjust depth defaults based on pattern type
+            if (pattern.type === 'prefix') {
+                 document.getElementById('depthSliderMin').value = 0;
+            } else {
+                 document.getElementById('depthSliderMin').value = 1;
+            }
+
             document.getElementById('depthSliderMax').value = 10;
             updateDepthLabels();
             processUrls();
@@ -691,7 +714,6 @@
             const excludeText = document.getElementById('excludeInput').value;
             const shouldAbbreviate = document.getElementById('abbreviateCheck').checked;
             
-            // Parse exclude keywords
             const excludeKeywords = excludeText.split(',').map(k => k.trim().toLowerCase()).filter(k => k);
 
             processedUrls = rawUrls.map(url => {
@@ -700,32 +722,50 @@
                     const parts = urlObj.pathname.split('/').filter(s => s.length > 0);
                     
                     let idx = -1;
-                    
+                    let targetSegments = parts;
+
                     if (currentPattern === '_host_root_' || currentPattern === '_root_') {
                         idx = -1;
-                    } else {
-                        idx = parts.findIndex(p => p.toLowerCase() === currentPattern);
+                        targetSegments = parts;
+                    } else if (currentPattern.type === 'segment') {
+                        idx = parts.findIndex(p => p.toLowerCase() === currentPattern.val);
+                        if (idx !== -1) targetSegments = parts.slice(idx + 1);
+                        else return { url, state: null, city: null, depth: 0, keep: false };
+                    } else if (currentPattern.type === 'prefix') {
+                        idx = parts.findIndex(p => p.toLowerCase().startsWith(currentPattern.val));
+                        if (idx !== -1) {
+                            // In prefix mode, the matching segment itself IS often the location leaf
+                            targetSegments = parts.slice(idx);
+                        } else return { url, state: null, city: null, depth: 0, keep: false };
                     }
 
-                    if(idx === -1 && currentPattern !== '_host_root_' && currentPattern !== '_root_') {
-                         return { url, state: null, city: null, depth: 0, keep: false };
+                    const depth = targetSegments.length;
+                    const leaf = targetSegments[targetSegments.length - 1] || '';
+
+                    // Improved State & City Detection
+                    let state = null;
+                    let city = null;
+
+                    // Strategy 1: Look in target segments
+                    targetSegments.forEach(seg => {
+                        const s = detectState(seg);
+                        if (s) state = s;
+                    });
+
+                    // Strategy 2: Look for city in segments. Prefer the longest non-ID segment.
+                    const cityCandidate = [...targetSegments].reverse().find(s => !s.includes('id=') && !/^\d+$/.test(s));
+                    if (cityCandidate) {
+                        city = formatCity(cityCandidate);
                     }
 
-                    const segments = parts.slice(idx + 1);
-                    const depth = segments.length;
-
-                    // Determine State
-                    let rawState = segments[0] ? segments[0].toLowerCase() : '';
-                    let stateDisplay = segments[0] ? segments[0].toUpperCase() : null;
-                    
-                    if (shouldAbbreviate && rawState && stateMap[rawState]) {
-                        stateDisplay = stateMap[rawState];
+                    if (shouldAbbreviate && state && state.length > 2) {
+                        state = stateMap[state.toLowerCase()] || state;
                     }
 
                     return {
                         url,
-                        state: stateDisplay,
-                        city: segments[1] ? toTitleCase(segments[1].replace(/-/g, ' ')) : null,
+                        state: state ? state.toUpperCase() : null,
+                        city: city,
                         depth,
                         keep: depth >= minDepth && depth <= maxDepth
                     };
@@ -846,9 +886,78 @@
             });
         }
 
+        function fillExample() {
+            const example = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://www.walgreens.com/locator/walgreens-13260+josey+ln-farmers+branch-tx-75234/id=5509</loc></url>
+  <url><loc>https://www.walgreens.com/locator/walgreens-611+burnt+store+rd+s-cape+coral-fl-33991/id=1234</loc></url>
+  <url><loc>https://www.walgreens.com/locator/walgreens-18993+munchy+branch+rd-rehoboth+beach-de-19971/id=5678</loc></url>
+  <url><loc>https://www.walgreens.com/about</loc></url>
+</urlset>`;
+            document.getElementById('pasteInput').value = example;
+            handlePaste();
+        }
+
         // --- Utils ---
 
+        function detectState(seg) {
+            const s = seg.toLowerCase();
+            const states = Object.values(stateMap);
+
+            // 1. Check for exact abbreviation matches (e.g. "/tx/")
+            if (s.length === 2 && states.includes(s.toUpperCase())) return s.toUpperCase();
+
+            // 2. Look for State-Zip pattern (e.g. "-tx-75234") - High Confidence
+            const zipMatch = s.match(/[-_+/]([a-z]{2})[-_+/]\d{5}/i);
+            if (zipMatch && states.includes(zipMatch[1].toUpperCase())) return zipMatch[1].toUpperCase();
+
+            // 3. Check for full names as whole words
+            for (let name in stateMap) {
+                const nameSlug = name.replace(/\s+/g, '-');
+                const regex = new RegExp(`(^|[-_+/. ])${nameSlug}($|[-_+/. ])`, 'i');
+                if (regex.test(s)) return stateMap[name];
+            }
+
+            // 4. Check for abbreviations surrounded by separators, prioritizing end of string
+            const parts = s.split(/[-_+/. ]/);
+            for (let i = parts.length - 1; i >= 0; i--) {
+                const part = parts[i].toUpperCase();
+                if (part.length === 2 && states.includes(part)) {
+                    // Filter out common false positives unless they look very much like a state
+                    if (!['LN', 'DR', 'ST', 'RD', 'ID', 'ME', 'IN', 'OR'].includes(part) || i > 0) {
+                        return part;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        function formatCity(seg) {
+            // Clean up common URL artifacts
+            let clean = seg.split('?')[0].split('#')[0]
+                .replace(/walgreens-|store-|location-/i, '')
+                .replace(/[+\-_]/g, ' ')
+                .trim();
+
+            // Remove state code/zip if it's at the end (e.g. "houston-tx-77001" or "houston-tx")
+            const parts = clean.split(' ');
+            const states = Object.values(stateMap);
+
+            // Pop Zip
+            if (parts.length > 0 && /^\d{5}(-\d{4})?$/.test(parts[parts.length - 1])) {
+                parts.pop();
+            }
+            // Pop State
+            if (parts.length > 0 && states.includes(parts[parts.length - 1].toUpperCase())) {
+                parts.pop();
+            }
+
+            return toTitleCase(parts.join(' '));
+        }
+
         function toTitleCase(str) {
+            if (!str) return '';
             return str.replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
         }
 
