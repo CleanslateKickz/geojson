@@ -153,12 +153,22 @@
     <div id="fallbackModal" class="modal-overlay" onclick="if(event.target === this) toggleModal(false)">
         <div class="modal-content">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-bold">External XML Converters</h3>
+                <h3 class="text-lg font-bold">Manual Fetch & Convert</h3>
                 <button onclick="toggleModal(false)" class="text-[var(--fg-muted)] hover:text-[var(--fg)]">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
-            <p class="text-sm text-[var(--fg-muted)] mb-4">If the automatic fetch fails, use these trusted tools to convert XML to CSV, then paste the URLs:</p>
+            <div class="p-3 mb-4 rounded-lg bg-[var(--accent-dim)] border border-[var(--accent)]">
+                <p class="text-xs font-semibold text-[var(--accent)] mb-1">CORS LIMITATION DETECTED</p>
+                <p class="text-xs text-[var(--fg-muted)]">Many enterprise sites (like Walgreens) block all standard CORS proxies. To proceed, please use one of these manual methods:</p>
+            </div>
+            <p class="text-sm font-bold mb-2">Option A: Direct Download</p>
+            <ol class="text-xs text-[var(--fg-muted)] space-y-2 mb-4 list-decimal ml-4">
+                <li>Open the sitemap URL in a new tab</li>
+                <li>Right-click > "Save As..." or Copy all text</li>
+                <li>Paste the content into the "Paste XML" box here</li>
+            </ol>
+            <p class="text-sm font-bold mb-2">Option B: External Converters</p>
             <div class="space-y-3">
                 <a href="https://tableconvert.com/xml-to-csv" target="_blank" class="flex items-center gap-3 p-3 rounded-lg bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--accent)] transition-colors">
                     <svg class="w-5 h-5 text-[var(--accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
@@ -407,6 +417,18 @@
         
         // --- Handlers ---
         
+        async function fetchWithTimeout(resource, options = {}) {
+            const { timeout = 8000 } = options;
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeout);
+            const response = await fetch(resource, {
+                ...options,
+                signal: controller.signal
+            });
+            clearTimeout(id);
+            return response;
+        }
+
         async function handleFetch() {
             const url = document.getElementById('urlInput').value.trim();
             if(!url) return toast('Enter a URL', 'error');
@@ -416,17 +438,20 @@
 
             try {
                 const proxies = [
-                    { url: `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`, type: 'json' },
-                    { url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`, type: 'text' },
-                    { url: `https://corsproxy.io/?${encodeURIComponent(url)}`, type: 'text' },
-                    { url: `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`, type: 'text' }
+                    { name: 'AllOrigins (JSON)', url: `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`, type: 'json' },
+                    { name: 'CodeTabs', url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`, type: 'text' },
+                    { name: 'CorsProxy.io', url: `https://corsproxy.io/?${encodeURIComponent(url)}`, type: 'text' },
+                    { name: 'AllOrigins (Raw)', url: `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`, type: 'text' },
+                    { name: 'ThingProxy', url: `https://thingproxy.freeboard.io/fetch/${url}`, type: 'text' }
                 ];
 
                 let text = null;
+                let successProxy = null;
+
                 for(let proxy of proxies) {
                     try {
-                        console.log(`Trying proxy: ${proxy.url}`);
-                        const resp = await fetch(proxy.url);
+                        console.log(`Trying ${proxy.name}: ${proxy.url}`);
+                        const resp = await fetchWithTimeout(proxy.url, { timeout: 10000 });
                         if(resp.ok) {
                             if (proxy.type === 'json') {
                                 const json = await resp.json();
@@ -434,21 +459,26 @@
                             } else {
                                 text = await resp.text();
                             }
-                            if(text && text.length > 10) break;
+                            if(text && text.length > 10) {
+                                successProxy = proxy.name;
+                                break;
+                            }
                         }
                     } catch(e) {
-                        console.warn(`Proxy failed: ${proxy.url}`, e);
+                        console.warn(`${proxy.name} failed:`, e);
                     }
                 }
 
                 if(text) {
+                    toast(`Success using ${successProxy}`, 'success');
                     await parseInput(text);
                 } else {
-                    toast('Could not fetch URL. CORS block or site restricted. Use Paste or Manual Tools.', 'error');
+                    toast('All fetch attempts failed. This site likely blocks all common CORS proxies.', 'error');
+                    toggleModal(true); // Show manual tools automatically on total failure
                 }
             } catch(e) {
                 console.error(e);
-                toast('Error fetching URL', 'error');
+                toast('Error during fetch process', 'error');
             } finally {
                 document.getElementById('fetchBtn').disabled = false;
                 document.getElementById('fetchBtn').textContent = 'Fetch';
@@ -528,29 +558,34 @@
             let combinedUrls = [];
             let failCount = 0;
 
+            // Use a slightly more aggressive timeout for bulk fetches
+            const bulkFetch = async (url) => {
+                const proxies = [
+                    { url: `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`, type: 'json' },
+                    { url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`, type: 'text' },
+                    { url: `https://corsproxy.io/?${encodeURIComponent(url)}`, type: 'text' }
+                ];
+
+                for(let proxy of proxies) {
+                    try {
+                        const resp = await fetchWithTimeout(proxy.url, { timeout: 15000 });
+                        if(resp.ok) {
+                            if (proxy.type === 'json') {
+                                const json = await resp.json();
+                                return json.contents;
+                            } else {
+                                return await resp.text();
+                            }
+                        }
+                    } catch(e) {}
+                }
+                return null;
+            };
+
             for (let i = 0; i < urls.length; i++) {
                 const url = urls[i];
                 try {
-                    const proxies = [
-                        { url: `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`, type: 'json' },
-                        { url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`, type: 'text' }
-                    ];
-
-                    let text = null;
-                    for(let proxy of proxies) {
-                        try {
-                            const resp = await fetch(proxy.url);
-                            if(resp.ok) {
-                                if (proxy.type === 'json') {
-                                    const json = await resp.json();
-                                    text = json.contents;
-                                } else {
-                                    text = await resp.text();
-                                }
-                                if(text && text.length > 10) break;
-                            }
-                        } catch(e) {}
-                    }
+                    const text = await bulkFetch(url);
 
                     if (text) {
                         // Extract URLs from sub-sitemap
