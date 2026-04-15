@@ -236,7 +236,11 @@
                 <div>
                     <div class="flex justify-between items-center mb-1">
                         <label class="block text-sm font-medium text-[var(--fg-muted)]">Paste XML or Raw URL List</label>
-                        <button onclick="fillExample()" class="text-xs text-[var(--accent)] hover:underline">Load Example (Walgreens Style)</button>
+                        <div class="flex gap-2">
+                            <button onclick="fillExample('walgreens')" class="text-xs text-[var(--accent)] hover:underline">Example: Walgreens</button>
+                            <span class="text-[var(--border)]">|</span>
+                            <button onclick="fillExample('directory')" class="text-xs text-[var(--accent)] hover:underline">Example: Sinclair</button>
+                        </div>
                     </div>
                     <textarea id="pasteInput" class="input-field w-full px-4 py-2 rounded-lg text-xs font-mono h-32" placeholder="Paste raw XML, or just a list of URLs (works with mixed text too)..."></textarea>
                     <button onclick="handlePaste()" class="btn-secondary px-6 py-2 rounded-lg text-sm mt-2">Parse Content</button>
@@ -323,7 +327,7 @@
                     <h2 class="text-lg font-semibold">Results</h2>
                 </div>
                 <div class="flex gap-2">
-                    <button id="viewToggle" onclick="toggleView()" class="btn-secondary px-4 py-2 rounded-lg text-sm">Show All URLs</button>
+                    <button id="viewToggle" onclick="toggleView()" class="btn-secondary px-4 py-2 rounded-lg text-sm">Show All URLs (Including Filtered)</button>
                     <button onclick="handleExport()" class="btn-primary px-4 py-2 rounded-lg text-sm">Export CSV</button>
                     <button onclick="handleCopy()" class="btn-secondary px-4 py-2 rounded-lg text-sm">Copy CSV Data</button>
                 </div>
@@ -560,41 +564,55 @@
             toast(`Fetching ${urls.length} sitemaps...`, 'success');
             let combinedUrls = [];
             let failCount = 0;
+            let currentSitemaps = [...urls];
+            let processedSitemaps = new Set();
 
             const bulkFetch = async (url) => {
                 const proxies = [
                     { url: `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`, type: 'json' },
                     { url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`, type: 'text' },
                     { url: `https://yacdn.org/proxy/${url}`, type: 'text' },
-                    { url: `https://corsproxy.io/?${encodeURIComponent(url)}`, type: 'text' }
+                    { url: `https://corsproxy.io/?${encodeURIComponent(url)}`, type: 'text' },
+                    { url: `https://thingproxy.freeboard.io/fetch/${url}`, type: 'text' }
                 ];
 
                 for(let proxy of proxies) {
                     try {
                         const resp = await fetchWithTimeout(proxy.url, { timeout: 15000 });
                         if(resp.ok) {
+                            let content = null;
                             if (proxy.type === 'json') {
                                 const json = await resp.json();
-                                return json.contents;
+                                content = json.contents;
                             } else {
-                                return await resp.text();
+                                content = await resp.text();
                             }
+                            if (content && content.length > 50) return content;
                         }
                     } catch(e) {}
                 }
                 return null;
             };
 
-            for (let i = 0; i < urls.length; i++) {
-                const url = urls[i];
+            // Recursive fetching for nested indexes
+            while (currentSitemaps.length > 0) {
+                const url = currentSitemaps.shift();
+                if (processedSitemaps.has(url)) continue;
+                processedSitemaps.add(url);
+
                 try {
                     const text = await bulkFetch(url);
-
                     if (text) {
-                        // Extract URLs from sub-sitemap
-                        const matches = text.match(/<loc>\s*(https?:\/\/[^<]+)\s*<\/loc>/gi) || [];
-                        const extracted = matches.map(m => m.replace(/<\/?loc>/gi, '').trim());
-                        combinedUrls = combinedUrls.concat(extracted);
+                        if (text.includes('<sitemapindex')) {
+                            const matches = text.match(/<loc>\s*(https?:\/\/[^<]+)\s*<\/loc>/gi) || [];
+                            const subSitemaps = matches.map(m => m.replace(/<\/?loc>/gi, '').trim());
+                            currentSitemaps.push(...subSitemaps);
+                            toast(`Found ${subSitemaps.length} more sitemaps in index`, 'success');
+                        } else {
+                            const matches = text.match(/<loc>\s*(https?:\/\/[^<]+)\s*<\/loc>/gi) || [];
+                            const extracted = matches.map(m => m.replace(/<\/?loc>/gi, '').trim());
+                            combinedUrls = combinedUrls.concat(extracted);
+                        }
                     } else {
                         failCount++;
                     }
@@ -607,7 +625,7 @@
             if (failCount > 0) {
                 toast(`Loaded ${rawUrls.length} URLs. ${failCount} sitemaps failed.`, 'warning');
             } else {
-                toast(`Loaded ${rawUrls.length} URLs from ${urls.length} sitemaps`, 'success');
+                toast(`Loaded ${rawUrls.length} URLs from ${processedSitemaps.size} sitemaps`, 'success');
             }
             detectPatterns();
         }
@@ -616,6 +634,7 @@
             const pathCounts = {};
             const prefixCounts = {};
             const hostCounts = {};
+            const topLevelCounts = {};
 
             rawUrls.forEach(url => {
                 try {
@@ -623,19 +642,24 @@
                     const host = urlObj.hostname;
                     const pathParts = urlObj.pathname.split('/').filter(s => s.length > 0);
                     
-                    if(/location|store|shop|branch|restaurant|place|locator/i.test(host)) {
+                    if(/location|store|shop|branch|restaurant|place|locator|station|gas|petrol/i.test(host)) {
                         hostCounts['_host_root_'] = (hostCounts['_host_root_'] || 0) + 1;
+                    }
+
+                    if (pathParts.length > 0) {
+                        const first = pathParts[0].toLowerCase();
+                        topLevelCounts[first] = (topLevelCounts[first] || 0) + 1;
                     }
 
                     pathParts.forEach((seg, i) => {
                         const key = seg.toLowerCase();
-                        // Count exact segments
-                        if(/location|store|shop|branch|restaurant|place|locator|retail/i.test(key)) {
+                        // Count exact segments that look like keywords
+                        if(/location|store|shop|branch|restaurant|place|locator|retail|station|service|gas|petrol|stop|find/i.test(key)) {
                             pathCounts[key] = (pathCounts[key] || 0) + 1;
                         }
 
                         // Count common prefixes (e.g., "walgreens-")
-                        const prefixMatch = key.match(/^([a-z0-9]+-)/i);
+                        const prefixMatch = key.match(/^([a-z0-9]{3,}-)/i); // At least 3 chars before dash
                         if (prefixMatch) {
                             const prefix = prefixMatch[1];
                             prefixCounts[prefix] = (prefixCounts[prefix] || 0) + 1;
@@ -647,28 +671,40 @@
             const container = document.getElementById('patternContainer');
             container.innerHTML = '';
             
-            const sortedPathKeys = Object.keys(pathCounts).sort((a,b) => pathCounts[b] - pathCounts[a]);
-            const sortedPrefixKeys = Object.keys(prefixCounts)
-                .filter(k => prefixCounts[k] > rawUrls.length * 0.05) // Must appear in at least 5% of URLs
-                .sort((a,b) => prefixCounts[b] - prefixCounts[a]);
+            // Add "All URLs" first
+            createPatternButton(container, 'Show Everything', '_root_', rawUrls.length);
 
             if(hostCounts['_host_root_']) {
                 createPatternButton(container, 'Domain Match', '_host_root_', hostCounts['_host_root_']);
             }
 
-            sortedPathKeys.forEach(key => {
+            // Add keyword matches
+            const sortedPathKeys = Object.keys(pathCounts).sort((a,b) => pathCounts[b] - pathCounts[a]);
+            sortedPathKeys.slice(0, 5).forEach(key => {
                 createPatternButton(container, `/${key}`, { type: 'segment', val: key }, pathCounts[key]);
             });
 
-            sortedPrefixKeys.forEach(key => {
+            // Add top-level directories if they appear in > 1% of URLs and aren't already there
+            const sortedTopKeys = Object.keys(topLevelCounts)
+                .filter(k => topLevelCounts[k] > rawUrls.length * 0.01 && !pathCounts[k])
+                .sort((a,b) => topLevelCounts[b] - topLevelCounts[a]);
+
+            sortedTopKeys.slice(0, 5).forEach(key => {
+                createPatternButton(container, `/${key}`, { type: 'segment', val: key }, topLevelCounts[key]);
+            });
+
+            // Add prefix matches
+            const sortedPrefixKeys = Object.keys(prefixCounts)
+                .filter(k => prefixCounts[k] > rawUrls.length * 0.02)
+                .sort((a,b) => prefixCounts[b] - prefixCounts[a]);
+
+            sortedPrefixKeys.slice(0, 5).forEach(key => {
                 createPatternButton(container, `${key}*`, { type: 'prefix', val: key }, prefixCounts[key]);
             });
 
-            if(container.children.length === 0) {
-                 createPatternButton(container, 'All URLs', '_root_', rawUrls.length);
-            }
-
-            if(container.children.length > 0) {
+            if(container.children.length > 1) {
+                container.children[1].click(); // Default to first detected pattern if any, else All
+            } else {
                 container.firstChild.click();
             }
             
@@ -745,17 +781,43 @@
                     // Improved State & City Detection
                     let state = null;
                     let city = null;
+                    let stateIdx = -1;
 
-                    // Strategy 1: Look in target segments
-                    targetSegments.forEach(seg => {
+                    // Strategy 1: Look for state in the WHOLE path
+                    parts.forEach((seg, i) => {
                         const s = detectState(seg);
-                        if (s) state = s;
+                        if (s) {
+                            state = s;
+                            stateIdx = i;
+                        }
                     });
 
-                    // Strategy 2: Look for city in segments. Prefer the longest non-ID segment.
-                    const cityCandidate = [...targetSegments].reverse().find(s => !s.includes('id=') && !/^\d+$/.test(s));
-                    if (cityCandidate) {
-                        city = formatCity(cityCandidate);
+                    // Strategy 2: Heuristic for State/City/Leaf structure (e.g. /ca/bishop/address)
+                    if (stateIdx !== -1 && stateIdx < parts.length - 1) {
+                        // The segment immediately after state is very often the city
+                        city = formatCity(parts[stateIdx + 1]);
+                    }
+
+                    // Strategy 3: Look in target segments if city not found yet
+                    if (!city) {
+                        if (targetSegments.length >= 2) {
+                            const firstIsState = detectState(targetSegments[0]);
+                            if (firstIsState) {
+                                city = formatCity(targetSegments[1]);
+                            }
+                        }
+                    }
+
+                    // Fallback for city: Prefer the longest non-ID segment that isn't the state
+                    if (!city) {
+                        const cityCandidate = [...targetSegments].reverse().find(s => {
+                            if (s.includes('id=') || /^\d+$/.test(s)) return false;
+                            if (detectState(s)) return false;
+                            return true;
+                        });
+                        if (cityCandidate) {
+                            city = formatCity(cityCandidate);
+                        }
                     }
 
                     if (shouldAbbreviate && state && state.length > 2) {
@@ -835,7 +897,7 @@
 
         function toggleView() {
             showAll = !showAll;
-            document.getElementById('viewToggle').textContent = showAll ? 'Show Locations Only' : 'Show All URLs';
+            document.getElementById('viewToggle').textContent = showAll ? 'Show Locations Only' : 'Show All URLs (Including Filtered)';
             page = 0;
             renderTable();
         }
@@ -886,14 +948,24 @@
             });
         }
 
-        function fillExample() {
-            const example = `<?xml version="1.0" encoding="UTF-8"?>
+        function fillExample(type = 'walgreens') {
+            let example = '';
+            if (type === 'walgreens') {
+                example = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://www.walgreens.com/locator/walgreens-13260+josey+ln-farmers+branch-tx-75234/id=5509</loc></url>
   <url><loc>https://www.walgreens.com/locator/walgreens-611+burnt+store+rd+s-cape+coral-fl-33991/id=1234</loc></url>
   <url><loc>https://www.walgreens.com/locator/walgreens-18993+munchy+branch+rd-rehoboth+beach-de-19971/id=5678</loc></url>
   <url><loc>https://www.walgreens.com/about</loc></url>
 </urlset>`;
+            } else {
+                example = `https://stations.sinclairoil.com/ca/bishop/586-n-main-st
+https://stations.sinclairoil.com/ca/paradise/8229-skyway-rd
+https://stations.sinclairoil.com/id/paul/9-east-ellis
+https://stations.sinclairoil.com/ia/swea-city/101-4th-ave-w
+https://stations.sinclairoil.com/ca/bishop
+https://stations.sinclairoil.com/ca/paradise`;
+            }
             document.getElementById('pasteInput').value = example;
             handlePaste();
         }
@@ -901,31 +973,29 @@
         // --- Utils ---
 
         function detectState(seg) {
+            if (!seg) return null;
             const s = seg.toLowerCase();
             const states = Object.values(stateMap);
 
-            // 1. Check for exact abbreviation matches (e.g. "/tx/")
-            if (s.length === 2 && states.includes(s.toUpperCase())) return s.toUpperCase();
-
-            // 2. Look for State-Zip pattern (e.g. "-tx-75234") - High Confidence
-            const zipMatch = s.match(/[-_+/]([a-z]{2})[-_+/]\d{5}/i);
+            // 1. Look for State-Zip pattern (e.g. "-tx-75234") - Very High Confidence
+            const zipMatch = s.match(/[-_+/]([a-z]{2})[-_+/]\d{5}/i) || s.match(/^([a-z]{2})[-_+/]\d{5}/i);
             if (zipMatch && states.includes(zipMatch[1].toUpperCase())) return zipMatch[1].toUpperCase();
 
-            // 3. Check for full names as whole words
+            // 2. Check for full names as whole words
             for (let name in stateMap) {
-                const nameSlug = name.replace(/\s+/g, '-');
-                const regex = new RegExp(`(^|[-_+/. ])${nameSlug}($|[-_+/. ])`, 'i');
+                const nameSlug = name.replace(/\s+/g, '[-_+ ]');
+                const regex = new RegExp(`(^|[-_+/.])${nameSlug}($|[-_+/.])`, 'i');
                 if (regex.test(s)) return stateMap[name];
             }
 
-            // 4. Check for abbreviations surrounded by separators, prioritizing end of string
-            const parts = s.split(/[-_+/. ]/);
-            for (let i = parts.length - 1; i >= 0; i--) {
-                const part = parts[i].toUpperCase();
-                if (part.length === 2 && states.includes(part)) {
-                    // Filter out common false positives unless they look very much like a state
-                    if (!['LN', 'DR', 'ST', 'RD', 'ID', 'ME', 'IN', 'OR'].includes(part) || i > 0) {
-                        return part;
+            // 3. Check for abbreviations as whole segments or surrounded by separators
+            const words = s.split(/[-_+/.]/);
+            for (let i = words.length - 1; i >= 0; i--) {
+                const word = words[i].toUpperCase();
+                if (word.length === 2 && states.includes(word)) {
+                    const skip = ['TO', 'BY', 'IS', 'OF', 'ON', 'AT', 'ST', 'RD', 'DR', 'LN', 'AV', 'US', 'WE', 'MY', 'NO', 'SO'];
+                    if (!skip.includes(word)) {
+                        return word;
                     }
                 }
             }
@@ -934,26 +1004,27 @@
         }
 
         function formatCity(seg) {
+            if (!seg) return null;
             // Clean up common URL artifacts
             let clean = seg.split('?')[0].split('#')[0]
-                .replace(/walgreens-|store-|location-/i, '')
+                .replace(/^(walgreens|store|location|station|branch|shop)-/i, '')
                 .replace(/[+\-_]/g, ' ')
                 .trim();
 
             // Remove state code/zip if it's at the end (e.g. "houston-tx-77001" or "houston-tx")
-            const parts = clean.split(' ');
+            const words = clean.split(' ');
             const states = Object.values(stateMap);
 
             // Pop Zip
-            if (parts.length > 0 && /^\d{5}(-\d{4})?$/.test(parts[parts.length - 1])) {
-                parts.pop();
+            if (words.length > 0 && /^\d{5}(-\d{4})?$/.test(words[words.length - 1])) {
+                words.pop();
             }
             // Pop State
-            if (parts.length > 0 && states.includes(parts[parts.length - 1].toUpperCase())) {
-                parts.pop();
+            if (words.length > 0 && states.includes(words[words.length - 1].toUpperCase())) {
+                words.pop();
             }
 
-            return toTitleCase(parts.join(' '));
+            return toTitleCase(words.join(' '));
         }
 
         function toTitleCase(str) {
