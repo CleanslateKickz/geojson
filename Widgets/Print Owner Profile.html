@@ -1,644 +1,875 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Owner Portfolio View</title>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-        <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-        <style>
-            :root {
-                --primary: #2563eb;
-                --primary-light: #dbeafe;
-                --text-main: #1f2937;
-                --text-muted: #6b7280;
-                --bg-body: #f3f4f6;
-                --bg-card: #ffffff;
-                --border: #e5e7eb;
-                --radius: 10px;
-                --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-            }
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owner Portfolio Report</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --accent: #3498db;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --bg-body: #f3f4f6;
+            --bg-card: #ffffff;
+            --border: #e5e7eb;
+        }
 
-            * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
-            /* FIX: Allow natural scrolling for Grist Widget */
-            html, body {
-                height: 100%;
-                overflow-y: auto; 
-                background-color: var(--bg-body);
-            }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-size: 13px;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+        }
 
-            body {
-                font-family: 'Inter', sans-serif;
-                color: var(--text-main);
-                font-size: 14px;
-            }
+        /* --- PDF Mode --- */
+        body.pdf-generating { background: white; }
+        body.pdf-generating .widget-container { box-shadow: none; border: none; margin: 0; max-width: 100%; }
+        body.pdf-generating .btn-action { display: none !important; }
+        body.pdf-generating .ai-modal { display: none !important; }
 
-            /* --- PDF Generation Mode --- */
-            body.pdf-generating {
-                overflow: visible !important;
-                height: auto !important;
-                background: white;
-            }
-            body.pdf-generating .app-shell {
-                height: auto !important;
-                box-shadow: none;
-                border: none;
-            }
-            body.pdf-generating .header-actions {
-                display: none !important; /* Hide button in PDF */
-            }
+        .widget-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+        }
 
-            .app-shell {
-                display: flex;
-                flex-direction: column;
-                min-height: 100vh;
-                background: var(--bg-card);
-                max-width: 100%;
-            }
+        /* --- Header --- */
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 24px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
 
-            /* --- Header --- */
-            .header {
-                background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-                color: white;
-                padding: 20px;
-                display: flex;
-                gap: 16px;
-                align-items: center;
-                flex-shrink: 0;
-                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            }
+        /* Animated Background Element */
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%);
+            animation: shimmer 6s linear infinite;
+            pointer-events: none;
+        }
+        @keyframes shimmer {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
 
-            .profile-img-container {
-                width: 80px;
-                height: 80px;
-                border-radius: 50%;
-                background: rgba(255,255,255,0.1);
-                border: 3px solid rgba(255,255,255,0.2);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                overflow: hidden;
-                flex-shrink: 0;
-                font-size: 32px;
-                color: white;
-            }
+        .profile-img-container {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            border: 3px solid rgba(255,255,255,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 2;
+            color: white;
+            font-weight: 700;
+            font-size: 24px;
+            backdrop-filter: blur(4px);
+        }
+        .profile-img { width: 100%; height: 100%; object-fit: cover; }
 
-            .profile-img { width: 100%; height: 100%; object-fit: cover; }
+        .header-info { flex: 1; position: relative; z-index: 2; }
+        .owner-name { font-size: 24px; font-weight: 700; margin-bottom: 4px; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+        .owner-sub { font-size: 14px; opacity: 0.9; }
 
-            .header-info { flex: 1; min-width: 0; }
-            .owner-name { font-size: 22px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-            .owner-sub { font-size: 14px; opacity: 0.8; margin-top: 4px; font-weight: 500; }
+        .header-actions { display: flex; gap: 10px; position: relative; z-index: 2; }
+        .btn-action {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.25);
+            color: white;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            backdrop-filter: blur(4px);
+        }
+        .btn-action:hover { background: rgba(255,255,255,0.3); transform: translateY(-1px); }
+        .btn-action.primary { background: white; color: var(--primary-dark); border-color: white; }
+        .btn-action.primary:hover { background: #f8fafc; }
 
-            .header-actions { display: flex; gap: 10px; }
-            .btn-action {
-                background: rgba(255,255,255,0.1);
-                border: 1px solid rgba(255,255,255,0.2);
-                color: white;
-                padding: 8px 16px;
-                border-radius: 6px;
-                cursor: pointer;
-                font-weight: 500;
-                display: flex;
-                align-items: center;
-                gap: 6px;
-                transition: all 0.2s;
-            }
-            .btn-action:hover { background: rgba(255,255,255,0.2); }
+        /* --- Content --- */
+        .content-area { padding: 24px; flex: 1; }
 
-            /* --- Content --- */
-            .content-area {
-                flex: 1;
-                padding: 20px;
-                background: var(--bg-body);
-                width: 100%;
-                max-width: 1200px;
-                margin: 0 auto;
-            }
+        /* --- Section --- */
+        .section { margin-bottom: 32px; }
+        .section-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.9px;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .section-badge {
+            background: #eff6ff;
+            color: var(--primary);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            text-transform: none;
+            letter-spacing: normal;
+            font-weight: 600;
+        }
 
-            /* --- Sections --- */
-            .section {
-                background: white;
-                border-radius: var(--radius);
-                box-shadow: var(--shadow);
-                padding: 16px;
-                margin-bottom: 20px;
-                border: 1px solid var(--border);
-                /* CRITICAL: Prevents section from splitting across pages */
-                break-inside: avoid; 
-                page-break-inside: avoid;
-            }
+        /* --- Badges --- */
+        .badges-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+        
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 11px;
+            font-weight: 600;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+            cursor: default;
+        }
+        .tag:hover { transform: translateY(-1px); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
-            .section-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 16px;
-            }
-            .section-title {
-                font-size: 14px;
-                font-weight: 700;
-                color: var(--text-main);
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-            }
-            .section-badge {
-                background: var(--primary-light);
-                color: var(--primary);
-                padding: 2px 8px;
-                border-radius: 12px;
-                font-size: 11px;
-                font-weight: 600;
-            }
+        .tag-neutral { background: #f3f4f6; color: #4b5563; border-color: #e5e7eb; }
+        .tag-success { background: #d1fae5; color: #065f46; border-color: #a7f3d0; }
+        .tag-danger { background: #fee2e2; color: #991b1b; border-color: #fecaca; }
+        .tag-dark { background: #1f2937; color: #f9fafb; }
+        .tag-info { background: #dbeafe; color: #1e40af; border-color: #bfdbfe; }
+        .tag-orange { background: #ffedd5; color: #9a3412; border-color: #fed7aa; }
+        .tag-purple { background: #ede9fe; color: #5b21b6; border-color: #ddd6fe; }
 
-            /* --- Badges --- */
-            .badges-wrap { display: flex; flex-wrap: wrap; gap: 6px; }
-            .tag {
-                padding: 4px 10px;
-                border-radius: 4px;
-                font-size: 11px;
-                font-weight: 600;
-                background: #f3f4f6;
-                color: #374151;
-                border: 1px solid #e5e7eb;
-                display: inline-block;
-                white-space: nowrap;
-            }
-            .tag-success { background: #ecfdf5 !important; color: #065f46 !important; border-color: #a7f3d0 !important; }
-            .tag-danger { background: #fef2f2 !important; color: #991b1b !important; border-color: #fecaca !important; }
-            .tag-info { background: #eff6ff !important; color: #1e40af !important; border-color: #bfdbfe !important; }
+        /* --- Stats Grid --- */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+        }
+        .stat-box {
+            background: #f9fafb;
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid #f3f4f6;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-box::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--primary);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .stat-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border-color: #e5e7eb;
+        }
+        .stat-box:hover::before { opacity: 1; }
+        
+        .stat-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 4px; }
+        .stat-value { font-size: 15px; font-weight: 600; color: var(--text-main); }
 
-            /* --- Stats --- */
-            .stats-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-                gap: 12px;
-            }
-            .stat-box {
-                background: #f9fafb;
-                padding: 12px;
-                border-radius: 6px;
-                border-left: 3px solid var(--primary);
-            }
-            .stat-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
-            .stat-value { font-size: 16px; font-weight: 700; color: var(--text-main); margin-top: 2px; }
+        /* --- Timeline --- */
+        .timeline-item { 
+            margin-bottom: 16px; 
+            padding-left: 16px;
+            border-left: 2px solid #e5e7eb;
+            transition: border-color 0.2s;
+        }
+        .timeline-item:hover { border-color: var(--primary); }
+        .time-label { font-size: 10px; font-weight: 700; color: var(--primary); margin-bottom: 2px; text-transform: uppercase; }
+        .time-text { font-size: 13px; color: var(--text-main); white-space: pre-wrap; background: white; padding: 8px; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
 
-            /* --- Timeline --- */
-            .timeline {
-                position: relative;
-                padding-left: 20px;
-            }
-            .timeline::before {
-                content: '';
-                position: absolute;
-                left: 6px;
-                top: 4px;
-                bottom: 4px;
-                width: 2px;
-                background: #e5e7eb;
-            }
-            .timeline-item {
-                position: relative;
-                margin-bottom: 16px;
-            }
-            .timeline-dot {
-                position: absolute;
-                left: -17px;
-                top: 4px;
-                width: 10px;
-                height: 10px;
-                background: white;
-                border: 2px solid var(--primary);
-                border-radius: 50%;
-            }
-            .time-date { font-size: 11px; font-weight: 600; color: var(--primary); margin-bottom: 2px; }
-            .time-text { font-size: 13px; color: var(--text-main); white-space: pre-wrap; }
+        /* --- Property Cards --- */
+        .property-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
 
-            /* --- Property Cards --- */
-            .property-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-                gap: 16px;
-            }
+        .property-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            break-inside: avoid; 
+            page-break-inside: avoid;
+        }
+        .property-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 20px rgba(0,0,0,0.08);
+            border-color: #d1d5db;
+        }
 
-            .property-card {
-                border: 1px solid #e5e7eb;
-                border-radius: 8px;
-                overflow: hidden;
-                background: white;
-                display: flex;
-                flex-direction: column;
-                break-inside: avoid;
-                page-break-inside: avoid;
-            }
+        .prop-img-container {
+            height: 180px;
+            background: #f3f4f6;
+            position: relative;
+            overflow: hidden;
+        }
+        .prop-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+        .property-card:hover .prop-img { transform: scale(1.03); }
+        
+        .prop-no-img {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: #9ca3af;
+            font-size: 32px;
+            background: #f8fafc;
+        }
+        .prop-no-img span { font-size: 12px; font-weight: 600; margin-top: 8px; }
 
-            .prop-img-container {
-                height: 160px;
-                background: #f3f4f6;
-                position: relative;
-                overflow: hidden;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-            .prop-img { width: 100%; height: 100%; object-fit: cover; }
-            
-            .prop-no-img {
-                height: 100%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: #9ca3af;
-                font-size: 24px;
-                flex-direction: column;
-                text-align: center;
-                padding: 10px;
-                background: #f3f4f6;
-            }
-            .prop-no-img span { font-size: 10px; margin-top: 5px; color: #6b7280; }
-            .prop-no-img a { 
-                font-size: 9px; 
-                margin-top: 8px; 
-                color: var(--primary); 
-                text-decoration: none;
-                max-width: 90%;
-                word-break: break-all;
-                font-weight: 600;
-            }
-            .prop-no-img a:hover { text-decoration: underline; }
+        .prop-body { padding: 16px; flex: 1; display: flex; flex-direction: column; }
+        
+        .prop-header { margin-bottom: 10px; }
+        .prop-name { font-size: 16px; font-weight: 700; color: var(--text-main); line-height: 1.2; margin-bottom: 4px; }
+        .prop-address { font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
 
-            .prop-body { padding: 12px; flex: 1; display: flex; flex-direction: column; }
-            .prop-address { font-size: 15px; font-weight: 600; margin-bottom: 4px; line-height: 1.3; }
-            .prop-tags { margin-bottom: 8px; display: flex; gap: 4px; flex-wrap: wrap; }
-            .prop-details {
-                display: flex;
-                justify-content: space-between;
-                align-items: flex-end;
-                margin-top: auto;
-                padding-top: 8px;
-                border-top: 1px solid #f3f4f6;
-            }
-            .prop-price { font-size: 14px; font-weight: 700; color: var(--primary); }
-            .prop-date { font-size: 11px; color: var(--text-muted); }
+        .prop-specs {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        .spec-tag {
+            font-size: 10px;
+            padding: 2px 8px;
+            background: #f3f4f6;
+            border-radius: 3px;
+            color: #4b5563;
+            font-weight: 600;
+        }
 
-            .empty-state {
-                text-align: center;
-                color: var(--text-muted);
-                padding: 40px 20px;
-                background: #f9fafb;
-                border-radius: 8px;
-                border: 1px dashed #d1d5db;
-            }
+        .prop-tenant-box {
+            background: #f0f9ff;
+            border-left: 3px solid var(--primary);
+            padding: 8px 10px;
+            font-size: 12px;
+            color: #1e40af;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
 
-            .loading-overlay {
-                position: fixed;
-                top: 0; left: 0; right: 0; bottom: 0;
-                background: rgba(255,255,255, 0.95);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: var(--primary);
-                font-size: 18px;
-                z-index: 99999;
-                flex-direction: column;
-                gap: 15px;
-            }
-            .spinner {
-                border: 4px solid #f3f3f3;
-                border-top: 4px solid var(--primary);
-                border-radius: 50%;
-                width: 40px;
-                height: 40px;
-                animation: spin 1s linear infinite;
-            }
-            @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .prop-footer {
+            margin-top: auto;
+            border-top: 1px solid #f3f4f6;
+            padding-top: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .prop-price { font-size: 16px; font-weight: 700; color: var(--primary-dark); }
+        .prop-date { font-size: 10px; color: var(--text-muted); font-weight: 500; }
 
-            .hidden { display: none !important; }
-        </style>
-    </head>
-    <body>
+        /* --- Modal --- */
+        .ai-modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s;
+        }
+        .ai-modal-overlay.active { opacity: 1; visibility: visible; }
+        .ai-modal {
+            background: white;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 700px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+            transform: translateY(20px);
+            transition: transform 0.2s;
+        }
+        .ai-modal-overlay.active .ai-modal { transform: translateY(0); }
+        .ai-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .ai-title { font-weight: 700; font-size: 16px; }
+        .ai-close {
+            background: #f3f4f6;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .ai-close:hover { background: #e5e7eb; }
+        .ai-body { padding: 20px; overflow-y: auto; flex: 1; }
+        .ai-content {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 16px;
+            font-family: 'monospace';
+            font-size: 11px;
+            white-space: pre-wrap;
+            line-height: 1.6;
+            color: #334155;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .ai-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border);
+            text-align: right;
+        }
+        .btn-copy {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+        .btn-copy:hover { background: var(--primary-dark); }
 
-        <div class="app-shell">
-            <!-- Header -->
-            <div class="header">
-                <div class="profile-img-container" id="profileContainer">
-                    <div id="profileInitial">?</div>
-                </div>
-                <div class="header-info">
-                    <div class="owner-name" id="ownerName">Select an Owner</div>
-                    <div class="owner-sub" id="ownerSub">Choose a row to view portfolio</div>
-                </div>
-                <div class="header-actions">
-                    <button id="btnExport" class="btn-action">💾 Export PDF</button>
-                </div>
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="widget-container" id="mainContent">
+        <!-- Header -->
+        <div class="header">
+            <div class="profile-img-container" id="profileContainer">
+                <div id="profileInitial">?</div>
             </div>
-
-            <!-- Content -->
-            <div class="content-area" id="mainContent">
-                <div id="noData" class="empty-state">
-                    <div style="font-size:32px; margin-bottom:8px;">📋</div>
-                    <div style="font-weight:600;">No Owner Selected</div>
-                </div>
-
-                <div id="activeView" class="hidden">
-                    <div class="section">
-                        <div class="badges-wrap" id="badgesContainer" style="margin-bottom:12px;"></div>
-                        <div class="stats-grid" id="statsGrid"></div>
-                    </div>
-
-                    <div class="section">
-                        <div class="section-header">
-                            <div class="section-title">🏘️ Property Portfolio</div>
-                            <div class="section-badge" id="propCount">0 Properties</div>
-                        </div>
-                        <div id="propertiesContainer">
-                            <div class="property-grid" id="propertyGrid"></div>
-                            <div id="noPropsMsg" class="hidden empty-state">No properties linked to this owner.</div>
-                        </div>
-                    </div>
-
-                    <div class="section">
-                        <div class="section-header">
-                            <div class="section-title">📝 Activity & Notes</div>
-                        </div>
-                        <div id="activityContent"></div>
-                    </div>
-                </div>
+            <div class="header-info">
+                <div class="owner-name" id="ownerName">Select an Owner</div>
+                <div class="owner-sub" id="ownerSub">Choose a row to view details</div>
+            </div>
+            <div class="header-actions">
+                <button id="btnAI" class="btn-action">AI Export</button>
+                <button id="btnExport" class="btn-action primary">Export PDF</button>
             </div>
         </div>
 
-        <!-- Loading Overlay -->
-        <div id="loadingOverlay" class="loading-overlay hidden">
-            <div class="spinner"></div>
-            <div>Generating PDF...</div>
-            <div style="font-size:12px; color:#666; max-width: 300px; text-align: center; margin-top:10px;">
-                Please wait. <br>
-                <span style="color:#d97706">Note: External images may appear as links due to security restrictions.</span>
+        <!-- Content -->
+        <div class="content-area">
+            <div id="noData" class="hidden" style="text-align:center; padding: 60px 40px; color: var(--text-muted);">
+                <div style="font-size: 40px; margin-bottom: 10px;">📋</div>
+                <div style="font-weight: 600; font-size: 15px;">No Owner Selected</div>
+                <div style="font-size: 12px; margin-top: 4px;">Select a record in Grist to view the portfolio.</div>
+            </div>
+
+            <div id="activeView" class="hidden">
+                <!-- Key Info Section -->
+                <div class="section">
+                    <div class="section-title">Overview</div>
+                    <div class="badges-wrap" id="badgesContainer"></div>
+                    <div class="stats-grid" id="statsGrid"></div>
+                </div>
+
+                <!-- Property Section -->
+                <div class="section">
+                    <div class="section-title">
+                        <span>Property Portfolio</span>
+                        <span class="section-badge" id="propCountBadge">0 Properties</span>
+                    </div>
+                    <div class="property-grid" id="propertyGrid"></div>
+                    <div id="noPropsMsg" class="hidden" style="color:var(--text-muted); font-size:13px; padding: 20px; text-align: center; background: #f9fafb; border-radius: 6px;">No properties linked to this owner.</div>
+                </div>
+
+                <!-- Activity Section -->
+                <div class="section">
+                    <div class="section-title">Activity Log</div>
+                    <div id="activityContent"></div>
+                </div>
             </div>
         </div>
+    </div>
 
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
+    <!-- AI Modal -->
+    <div id="aiModal" class="ai-modal-overlay">
+        <div class="ai-modal">
+            <div class="ai-header">
+                <div class="ai-title">AI Context Export</div>
+                <button class="ai-close" id="aiClose">&times;</button>
+            </div>
+            <div class="ai-body">
+                <div class="ai-content" id="aiContent"></div>
+            </div>
+            <div class="ai-footer">
+                <button class="btn-copy" id="btnCopy">Copy to Clipboard</button>
+            </div>
+        </div>
+    </div>
 
-                const CONFIG = {
-                    tableId: 'Owners_',
-                    propTable: 'Properties_'
-                };
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
 
-                const $ = id => document.getElementById(id);
-                const isEmpty = v => v === null || v === undefined || (typeof v==='string' && v.trim()==='') || (Array.isArray(v) && v.length===0);
+            const CONFIG = {
+                tableId: 'Owners_',
+                propTable: 'Properties_'
+            };
 
-                const formatMoney = (num) => {
-                    if(!num || isNaN(num)) return 'N/A';
-                    return '$' + Number(num).toLocaleString();
-                };
+            const $ = id => document.getElementById(id);
+            const isEmpty = v => v === null || v === undefined || (typeof v==='string' && v.trim()==='') || (Array.isArray(v) && v.length===0);
 
-                const formatDate = (d) => {
-                    if(!d) return '';
-                    try {
-                        const date = typeof d === 'number' ? new Date(d * 1000) : new Date(d);
-                        return date.toLocaleDateString('en-US', { month:'short', year:'numeric' });
-                    } catch(e) { return ''; }
-                };
+            function formatDate(d) {
+                if(!d) return '';
+                try {
+                    const date = typeof d === 'number' ? new Date(d * 1000) : new Date(d);
+                    return date.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+                } catch(e) { return ''; }
+            }
 
-                const getList = (val) => {
-                    if (isEmpty(val)) return [];
-                    if (Array.isArray(val) && val[0] === 'L') return val.slice(1);
-                    if (Array.isArray(val)) return val;
-                    if (typeof val === 'string') return [val];
-                    return [];
-                };
+            function formatMoney(num) {
+                if(!num || isNaN(num)) return 'N/A';
+                return '$' + Number(num).toLocaleString();
+            }
 
-                const firstItem = (v) => {
-                    const list = getList(v);
-                    return list.length > 0 ? list[0] : '';
-                };
+            function getList(val) {
+                if (isEmpty(val)) return [];
+                if (Array.isArray(val)) {
+                    if (val[0] === 'L') return val.slice(1);
+                    return val;
+                }
+                if (typeof val === 'string') return val.split(/[\s,]+/).map(s => s.trim()).filter(Boolean);
+                return [];
+            }
 
-                function columnarToRows(data) {
-                    if (!data || !data.id) return [];
-                    return data.id.map((id, index) => {
-                        const fields = {};
-                        Object.keys(data).forEach(key => {
-                            if (key !== 'id') fields[key] = data[key][index];
-                        });
-                        return { id, fields };
+            const firstItem = (v) => {
+                const list = getList(v);
+                return list.length > 0 ? list[0] : '';
+            };
+
+            function columnarToRows(data) {
+                if (!data || !data.id) return [];
+                return data.id.map((id, index) => {
+                    const fields = {};
+                    Object.keys(data).forEach(key => {
+                        if (key !== 'id') fields[key] = data[key][index];
                     });
+                    return { id, fields };
+                });
+            }
+
+            // Avatar Logic
+            function getInitials(name) {
+                if (!name) return '?';
+                return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+            }
+
+            function getProfilePlaceholderImage(genderRaw, ageRaw) {
+                let gender = typeof genderRaw === "string" ? genderRaw.trim().toLowerCase() : "";
+                let age = 0;
+                if (typeof ageRaw === "number") age = ageRaw;
+                if (typeof ageRaw === "string") {
+                    let parsed = parseInt(ageRaw.replace(/[^\d]/g, ""), 10);
+                    if (!isNaN(parsed)) age = parsed;
                 }
-
-                let currentRecord = null;
-                let ownerProperties = [];
-
-                const DOM = {
-                    profileContainer: $('profileContainer'),
-                    ownerName: $('ownerName'),
-                    ownerSub: $('ownerSub'),
-                    noData: $('noData'),
-                    activeView: $('activeView'),
-                    badges: $('badgesContainer'),
-                    stats: $('statsGrid'),
-                    propertyGrid: $('propertyGrid'),
-                    propCount: $('propCount'),
-                    noPropsMsg: $('noPropsMsg'),
-                    activityContent: $('activityContent'),
-                    btnExport: $('btnExport'),
-                    loadingOverlay: $('loadingOverlay')
+                const images = {
+                    man: "https://cleanslatekickz.github.io/geojson/Images/ManInvestor.png",
+                    olderMan: "https://cleanslatekickz.github.io/geojson/Images/olderMan.png",
+                    lady: "https://cleanslatekickz.github.io/geojson/Images/LadyInvestor.png",
+                    olderLady: "https://cleanslatekickz.github.io/geojson/Images/olderLady.png"
                 };
+                if (gender.startsWith("f")) return (age >= 60) ? images.olderLady : images.lady;
+                return (age >= 60) ? images.olderMan : images.man;
+            }
 
-                function renderOwner(record) {
-                    currentRecord = record;
-                    if(!record) {
-                        DOM.noData.classList.remove('hidden');
-                        DOM.activeView.classList.add('hidden');
-                        return;
-                    }
+            let currentRecord = null;
+            let ownerProperties = [];
 
-                    DOM.noData.classList.add('hidden');
-                    DOM.activeView.classList.remove('hidden');
+            const DOM = {
+                profile: $('profileContainer'),
+                name: $('ownerName'),
+                sub: $('ownerSub'),
+                noData: $('noData'),
+                active: $('activeView'),
+                badges: $('badgesContainer'),
+                stats: $('statsGrid'),
+                propGrid: $('propertyGrid'),
+                noProps: $('noPropsMsg'),
+                propCount: $('propCountBadge'),
+                activity: $('activityContent'),
+                btnAI: $('btnAI'),
+                btnExport: $('btnExport'),
+                aiModal: $('aiModal'),
+                aiContent: $('aiContent'),
+                btnCopy: $('btnCopy'),
+                aiClose: $('aiClose'),
+                main: $('mainContent')
+            };
 
-                    const name = record.Name || record.Owner_Full_Name || 'Unknown';
-                    DOM.ownerName.textContent = name;
-                    DOM.ownerSub.textContent = [firstItem(record.Accounts), record.Title].filter(Boolean).join(' • ');
-
-                    if(record.Profile_Image) {
-                        DOM.profileContainer.innerHTML = `<img src="${record.Profile_Image}" class="profile-img" onerror="this.parentNode.innerHTML='<div id=profileInitial>${name.charAt(0)}</div>'">`;
-                    } else {
-                        DOM.profileContainer.innerHTML = `<div id="profileInitial">${name.charAt(0)}</div>`;
-                    }
-
-                    renderBadges();
-                    renderStats();
-                    renderActivity();
-                    renderProperties();
+            function renderOwner(record) {
+                currentRecord = record;
+                if(!record) {
+                    DOM.noData.classList.remove('hidden');
+                    DOM.active.classList.add('hidden');
+                    DOM.btnAI.style.visibility = 'hidden';
+                    DOM.btnExport.style.visibility = 'hidden';
+                    return;
                 }
 
-                function renderBadges() {
-                    let html = '';
-                    const fields = ['Segment', 'Classify', 'Owner_Personality', 'Opportunity'];
-                    
-                    fields.forEach(f => {
-                        const items = getList(currentRecord[f]);
-                        items.forEach(val => {
-                            let cls = 'tag';
-                            if(/DNC|NOT INTERESTED|ANGRY|RUDE/i.test(val)) cls = 'tag-danger';
-                            else if(/FRIENDLY|TALKATIVE|CALL AGAIN/i.test(val)) cls = 'tag-success';
-                            else if(/BROKER|TIER/i.test(val)) cls = 'tag-info';
-                            html += `<span class="${cls}">${val}</span>`;
-                        });
-                    });
-                    DOM.badges.innerHTML = html;
+                DOM.noData.classList.add('hidden');
+                DOM.active.classList.remove('hidden');
+                DOM.btnAI.style.visibility = 'visible';
+                DOM.btnExport.style.visibility = 'visible';
+
+                const name = record.Name || record.Owner_Full_Name || 'Unknown';
+                DOM.name.textContent = name;
+                DOM.sub.textContent = [firstItem(record.Accounts), record.Title].filter(Boolean).join(' • ');
+
+                if(record.Profile_Image) {
+                    const url = firstItem(record.Profile_Image);
+                    DOM.profile.innerHTML = `<img src="${url}" class="profile-img" onerror="this.parentNode.innerHTML='<div id=profileInitial>${getInitials(name)}</div>'">`;
+                } else {
+                    const placeholder = getProfilePlaceholderImage(record.Gender, record.Age);
+                    DOM.profile.innerHTML = `<img src="${placeholder}" class="profile-img">`;
                 }
 
-                function renderStats() {
-                    let html = '';
-                    const addStat = (label, val) => {
-                        if(!isEmpty(val)) html += `<div class="stat-box"><div class="stat-label">${label}</div><div class="stat-value">${val}</div></div>`;
-                    };
-                    
-                    addStat('Age', currentRecord.Age);
-                    addStat('Relationship', firstItem(currentRecord.Call_Relationship));
-                    addStat('Last Segment', currentRecord.Last_Call_Segment);
-                    addStat('Tranche', firstItem(currentRecord.Tranche));
-                    
-                    DOM.stats.innerHTML = html || '<div style="color:var(--text-muted);">No stats available.</div>';
-                }
+                renderBadges();
+                renderStats();
+                renderActivity();
+                renderProperties();
+            }
 
-                function renderActivity() {
-                    let html = '<div class="timeline">';
-                    // Included Contact 4
-                    const notes = [
-                        { d: currentRecord.Date, t: currentRecord.Last_Call_Segment, l: 'Last Call' },
-                        { t: currentRecord.Contact_1, l: 'Contact 1' },
-                        { t: currentRecord.Contact_2, l: 'Contact 2' },
-                        { t: currentRecord.Contact_3, l: 'Contact 3' },
-                        { t: currentRecord.Contact_4, l: 'Contact 4' }, 
-                        { t: currentRecord.Extra_Notes, l: 'Extra Notes' }
-                    ];
-
-                    let hasContent = false;
-                    notes.forEach(n => {
-                        if(n.t) {
-                            hasContent = true;
-                            html += `
-                                <div class="timeline-item">
-                                    <div class="timeline-dot"></div>
-                                    <div class="time-date">${n.l} ${n.d ? ' - ' + formatDate(n.d) : ''}</div>
-                                    <div class="time-text">${n.t}</div>
-                                </div>`;
-                        }
-                    });
-
-                    html += '</div>';
-                    DOM.activityContent.innerHTML = hasContent ? html : '<div style="color:var(--text-muted); text-align:center;">No activity recorded.</div>';
-                }
-
-                async function renderProperties() {
-                    DOM.propertyGrid.innerHTML = '<div class="empty-state">Loading...</div>';
-                    try {
-                        const data = await grist.docApi.fetchTable(CONFIG.propTable);
-                        const allProps = columnarToRows(data);
+            function renderBadges() {
+                let html = '';
+                const fields = ['Opportunity'];
+                
+                fields.forEach(f => {
+                    getList(currentRecord[f]).forEach(val => {
+                        if(!val) return;
+                        const v = val.toUpperCase();
+                        let cls = 'tag-neutral';
+                        if (v.includes('HOT')) cls = 'tag-danger';
+                        else if (v.includes('WARM')) cls = 'tag-orange';
+                        else if (v.includes('COLD')) cls = 'tag-info';
                         
-                        ownerProperties = allProps.filter(p => {
-                            const refs = getList(p.fields.Name);
-                            return refs.includes(currentRecord.id);
-                        });
+                        html += `<span class="tag ${cls}">${val}</span>`;
+                    });
+                });
+                DOM.badges.innerHTML = html;
+            }
 
-                        DOM.propCount.textContent = `${ownerProperties.length} Properties`;
+            function renderStats() {
+                let html = '';
+                
+                // Standard add function - always shows
+                const addStat = (l, v) => {
+                    if(!isEmpty(v)) html += `<div class="stat-box"><div class="stat-label">${l}</div><div class="stat-value">${v}</div></div>`;
+                };
 
-                        if(ownerProperties.length === 0) {
-                            DOM.propertyGrid.innerHTML = '';
-                            DOM.noPropsMsg.classList.remove('hidden');
-                        } else {
-                            DOM.propertyGrid.innerHTML = ownerProperties.map(p => {
-                                const f = p.fields;
-                                const imgUrl = f.Pop_up_IMG || null;
-                                
-                                // IMPROVED: Shows clickable URL when image fails to load
-                                // This handles the CORS issue gracefully
-                                const imgHtml = imgUrl 
-                                    ? `<img src="${imgUrl}" class="prop-img" onerror="this.parentElement.innerHTML='<div class=prop-no-img><span>🖼️</span><span>Image Blocked by Server</span><a href=&quot;${imgUrl}&quot; target=&quot;_blank&quot;>🔗 View Image</a></div>'">` 
-                                    : `<div class="prop-no-img"><span>📷</span><span>No Image URL</span></div>`;
-                                
-                                const types = getList(f.Secondary_Type);
-                                const typeStr = [f.Property_Type, ...types].filter(Boolean).join(' / ') || 'N/A';
-                                const price = formatMoney(f.Last_Sale_Price);
-                                const date = formatDate(f.Last_Sale_Date);
+                // Conditional add function - only shows if value exists
+                const addStatIfPresent = (l, v) => {
+                    if(!isEmpty(v)) html += `<div class="stat-box"><div class="stat-label">${l}</div><div class="stat-value">${v}</div></div>`;
+                };
 
-                                return `
-                                    <div class="property-card">
-                                        <div class="prop-img-container">${imgHtml}</div>
-                                        <div class="prop-body">
-                                            <div class="prop-address">${f.Property_Address || 'No Address'}</div>
-                                            <div style="font-size:12px; color:var(--text-muted); margin-bottom:6px;">${f.City || ''}${f.City && f.State ? ', ' : ''}${f.State || ''}</div>
-                                            <div class="prop-tags"><span class="tag tag-info">${typeStr}</span></div>
-                                            <div class="prop-details">
-                                                <div>
-                                                    <div class="prop-price">${price}</div>
-                                                    <div class="prop-date">Last Sale: ${date || 'N/A'}</div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>`;
-                            }).join('');
-                        }
-                    } catch(e) {
-                        console.error(e);
-                        DOM.propertyGrid.innerHTML = '<div class="empty-state" style="color:red;">Error loading properties.</div>';
+                // Requested Owner Fields (Always show Segment/Classify/Color as they are key IDs)
+                addStat('Segment', firstItem(currentRecord.Segment));
+                addStat('Classify', firstItem(currentRecord.Classify));
+                addStat('Classify Color', firstItem(currentRecord.Classify_Color)); 
+                
+                // Demographics
+                addStat('Age / Gender', [currentRecord.Age, currentRecord.Gender].filter(Boolean).join(' / '));
+                
+                // Relationship & Intent (Hide if empty)
+                addStatIfPresent('Relationship', firstItem(currentRecord.Call_Relationship));
+                addStatIfPresent('Market Tranche', firstItem(currentRecord.Tranche));
+                addStatIfPresent('Plans to Sell', currentRecord.Plans_to_Sell);
+                addStatIfPresent('Plans to Buy', currentRecord.Plans_to_Buy);
+                addStatIfPresent('Objection', currentRecord.Objection);
+
+                DOM.stats.innerHTML = html;
+            }
+
+            function renderActivity() {
+                let html = '';
+                const notes = [
+                    { d: currentRecord.Date, t: currentRecord.Last_Call_Segment, l: 'Last Call' },
+                    { t: currentRecord.Contact_1, l: 'Contact 1' },
+                    { t: currentRecord.Contact_2, l: 'Contact 2' },
+                    { t: currentRecord.Contact_3, l: 'Contact 3' },
+                    { t: currentRecord.Contact_4, l: 'Contact 4' }, 
+                    { t: currentRecord.Extra_Notes, l: 'Extra Notes' },
+                    // Added VM fields
+                    { t: currentRecord.VM_s, l: "Voicemails (VM's)" },
+                    { t: currentRecord.Call_no_VM, l: "Calls (No VM)" }
+                ];
+                
+                let hasContent = false;
+                notes.forEach(n => {
+                    if(n.t) {
+                        hasContent = true;
+                        html += `
+                            <div class="timeline-item">
+                                <div class="time-label">${n.l} ${n.d ? ' - ' + formatDate(n.d) : ''}</div>
+                                <div class="time-text">${n.t}</div>
+                            </div>`;
                     }
+                });
+                DOM.activity.innerHTML = hasContent ? html : '<div style="color:var(--text-muted); font-size:12px; text-align:center; padding: 10px;">No activity recorded.</div>';
+            }
+
+            async function renderProperties() {
+                DOM.propGrid.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-muted); grid-column: 1/-1;"><div class="spinner"></div></div>';
+                
+                try {
+                    const data = await grist.docApi.fetchTable(CONFIG.propTable);
+                    const allProps = columnarToRows(data);
+                    
+                    ownerProperties = allProps.filter(p => {
+                        const refs = getList(p.fields.Name);
+                        return refs.includes(currentRecord.id) || refs.includes(currentRecord.Name);
+                    });
+
+                    DOM.propCount.textContent = `${ownerProperties.length} Properties`;
+
+                    if(ownerProperties.length === 0) {
+                        DOM.propGrid.innerHTML = '';
+                        DOM.noProps.classList.remove('hidden');
+                    } else {
+                        DOM.noProps.classList.add('hidden');
+                        DOM.propGrid.innerHTML = ownerProperties.map(p => {
+                            const f = p.fields;
+                            
+                            const rawUrls = getList(f.ImageURLs || f.Pop_up_IMG);
+                            const imgUrl = rawUrls.length > 0 ? rawUrls[0] : null;
+
+                            const imgHtml = imgUrl 
+                                ? `<img src="${imgUrl}" class="prop-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"><div class="prop-no-img" style="display:none;width:100%;height:100%;"><span>Image Unavailable</span></div>` 
+                                : `<div class="prop-no-img"><span>No Image</span></div>`;
+                            
+                            const street = f.Property_Address || '';
+                            const city = f.City || '';
+                            const state = f.State || '';
+                            const zip = f.Zip || '';
+                            const fullAddress = [street, city, state, zip].filter(Boolean).join(', ');
+
+                            const propName = f.Property_Name || '';
+                            const typeStr = [f.Property_Type, firstItem(f.Secondary_Type)].filter(Boolean).join(' / ');
+                            const rba = f.RBA ? Number(f.RBA).toLocaleString() + ' SF' : '';
+                            const year = f.YearB ? 'Built ' + f.YearB : '';
+                            const tenants = f.Tenants || '';
+                            
+                            const price = formatMoney(f.Last_Sale_Price);
+                            const date = formatDate(f.Last_Sale_Date);
+
+                            return `
+                                <div class="property-card">
+                                    <div class="prop-img-container">${imgHtml}</div>
+                                    <div class="prop-body">
+                                        <div class="prop-header">
+                                            ${propName ? `<div class="prop-name">${propName}</div>` : ''}
+                                            <div class="prop-address">${fullAddress || 'No Address'}</div>
+                                        </div>
+                                        <div class="prop-specs">
+                                            ${typeStr ? `<span class="spec-tag">${typeStr}</span>` : ''}
+                                            ${rba ? `<span class="spec-tag">${rba}</span>` : ''}
+                                            ${year ? `<span class="spec-tag">${year}</span>` : ''}
+                                        </div>
+                                        ${tenants ? `<div class="prop-tenant-box"><strong>Tenants:</strong> ${tenants}</div>` : ''}
+                                        <div class="prop-footer">
+                                            <div class="prop-price">${price}</div>
+                                            <div class="prop-date">Sold: ${date || 'N/A'}</div>
+                                        </div>
+                                    </div>
+                                </div>`;
+                        }).join('');
+                    }
+                } catch(e) {
+                    console.error(e);
+                    DOM.propGrid.innerHTML = '<div style="color:red; padding:20px; text-align:center; grid-column: 1/-1;">Error loading properties.</div>';
                 }
+            }
 
-                DOM.btnExport.addEventListener('click', async () => {
-                    if(!currentRecord) return;
+            // --- AI EXPORT ---
+            function generateAIContext() {
+                if(!currentRecord) return '';
+                
+                let md = `# OWNER PROFILE: ${currentRecord.Name || 'N/A'}\n\n`;
+                
+                md += `## Key Metrics\n`;
+                md += `- **Segment:** ${firstItem(currentRecord.Segment) || 'N/A'}\n`;
+                md += `- **Classify:** ${firstItem(currentRecord.Classify) || 'N/A'}\n`;
+                md += `- **Classify Color:** ${firstItem(currentRecord.Classify_Color) || 'N/A'}\n`;
+                md += `- **Opportunity:** ${currentRecord.Opportunity || 'N/A'}\n\n`;
+
+                md += `## Intent\n`;
+                md += `- **Plans to Sell:** ${currentRecord.Plans_to_Sell || 'None'}\n`;
+                md += `- **Plans to Buy:** ${currentRecord.Plans_to_Buy || 'None'}\n`;
+                md += `- **Objections:** ${currentRecord.Objection || 'None'}\n\n`;
+
+                md += `## Conversation History\n`;
+                const notes = [
+                    { t: currentRecord.Contact_4, l: 'Contact 4' },
+                    { t: currentRecord.Contact_3, l: 'Contact 3' },
+                    { t: currentRecord.Contact_2, l: 'Contact 2' },
+                    { t: currentRecord.Contact_1, l: 'Contact 1' },
+                    { t: currentRecord.VM_s, l: "Voicemails (VM's)" },
+                    { t: currentRecord.Call_no_VM, l: "Calls (No VM)" },
+                    { t: currentRecord.Extra_Notes, l: 'Extra Notes' }
+                ];
+                notes.forEach(n => {
+                    if(n.t) md += `### ${n.l}\n${n.t}\n\n`;
+                });
+
+                md += `## Property Portfolio (${ownerProperties.length} Properties)\n`;
+                ownerProperties.forEach((p, i) => {
+                    const f = p.fields;
+                    const street = f.Property_Address || '';
+                    const city = f.City || '';
+                    const state = f.State || '';
+                    const zip = f.Zip || '';
+                    const fullAddress = [street, city, state, zip].filter(Boolean).join(', ');
                     
-                    DOM.loadingOverlay.classList.remove('hidden');
-                    // We don't hide the button via CSS class here, we let the CSS handle it for pdf-generating
+                    md += `### ${i+1}. ${f.Property_Name || fullAddress || 'Unknown Property'}\n`;
+                    md += `- **Address:** ${fullAddress}\n`;
+                    if(f.Property_Type) md += `- **Type:** ${f.Property_Type}\n`;
+                    if(f.RBA) md += `- **Size:** ${Number(f.RBA).toLocaleString()} SF\n`;
+                    if(f.YearB) md += `- **Year Built:** ${f.YearB}\n`;
+                    if(f.Tenants) md += `- **Tenants:** ${f.Tenants}\n`;
+                    if(f.Last_Sale_Price) md += `- **Last Sale:** $${Number(f.Last_Sale_Price).toLocaleString()}\n`;
+                    md += `\n`;
+                });
 
-                    // 1. Prepare DOM for Capture
-                    document.body.classList.add('pdf-generating');
-                    
-                    // 2. Wait for images to attempt loading
-                    await new Promise(r => setTimeout(r, 1500));
+                return md;
+            }
 
-                    const element = document.querySelector('.app-shell');
-                    
-                    // 3. CRITICAL FIX: Calculate full height to prevent cut-off
-                    // We temporarily remove height restrictions to measure true scroll height
-                    const fullHeight = element.scrollHeight;
+            DOM.btnAI.addEventListener('click', () => {
+                DOM.aiContent.textContent = generateAIContext();
+                DOM.aiModal.classList.add('active');
+            });
 
-                    const opt = {
-                        margin:       0.5,
-                        filename:     `${currentRecord.Name || 'Owner'}_Portfolio.pdf`,
-                        image:        { type: 'jpeg', quality: 0.95 },
-                        html2canvas:  { 
-                            scale: 2, 
-                            useCORS: true, 
-                            allowTaint: true, 
-                            logging: false,
-                            scrollY: 0,
-                            // Force the canvas to be the size of the full content
-                            windowWidth: element.offsetWidth,
-                            windowHeight: fullHeight 
-                        },
-                        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' },
-                        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
-                    };
+            DOM.aiClose.addEventListener('click', () => DOM.aiModal.classList.remove('active'));
+            
+            DOM.btnCopy.addEventListener('click', () => {
+                navigator.clipboard.writeText(DOM.aiContent.textContent).then(() => {
+                    DOM.btnCopy.textContent = 'Copied!';
+                    setTimeout(() => DOM.btnCopy.textContent = 'Copy to Clipboard', 1500);
+                });
+            });
 
-                    try {
-                        await html2pdf().set(opt).from(element).save();
-                    } catch(e) {
-                        console.error("PDF Generation Error", e);
-                        alert("Could not generate PDF. Check console for details.");
-                    } finally {
-                        // 4. Cleanup
-                        document.body.classList.remove('pdf-generating');
-                        DOM.loadingOverlay.classList.add('hidden');
+            // --- PDF EXPORT WITH IMAGE FIX ---
+            DOM.btnExport.addEventListener('click', async () => {
+                if(!currentRecord) return;
+                
+                DOM.btnExport.textContent = 'Preparing...';
+                DOM.btnExport.disabled = true;
+
+                // Pre-Flight Check: Clean up broken images
+                const images = DOM.main.querySelectorAll('img');
+                images.forEach(img => {
+                    if (!img.complete || img.naturalHeight === 0) {
+                        const div = document.createElement('div');
+                        div.className = 'prop-no-img';
+                        div.style.height = '180px';
+                        div.innerHTML = '<span>Image Unavailable</span>';
+                        img.parentNode.replaceChild(div, img);
                     }
                 });
 
-                grist.ready({ requiredAccess: 'full' });
-                grist.onRecord(record => renderOwner(record));
+                document.body.classList.add('pdf-generating');
+                
+                await new Promise(r => setTimeout(r, 500));
 
+                const el = DOM.main;
+                const opt = {
+                    margin:       [0.4, 0.4, 0.4, 0.4],
+                    filename:     `${currentRecord.Name || 'Report'}.pdf`,
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { 
+                        scale: 2, 
+                        useCORS: true, 
+                        allowTaint: true, 
+                        logging: false,
+                        scrollY: 0,
+                        windowHeight: el.scrollHeight 
+                    },
+                    jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' },
+                    pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+                };
+
+                try {
+                    await html2pdf().set(opt).from(el).save();
+                } catch(e) {
+                    console.error("PDF Error", e);
+                    alert("Error generating PDF.");
+                } finally {
+                    document.body.classList.remove('pdf-generating');
+                    DOM.btnExport.textContent = 'Export PDF';
+                    DOM.btnExport.disabled = false;
+                    renderProperties(); // Restore images
+                }
             });
-        </script>
-    </body>
+
+            grist.ready({ requiredAccess: 'full' });
+            grist.onRecord(record => renderOwner(record));
+
+        });
+    </script>
+</body>
 </html>
