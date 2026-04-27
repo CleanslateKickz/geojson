@@ -4,25 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Owner Portfolio Report</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         :root {
             --primary: #2563eb;
-            --primary-dark: #1e40af;
-            --accent: #3498db;
-            --text-main: #1f2937;
-            --text-muted: #6b7280;
-            --bg-body: #f3f4f6;
+            --primary-dark: #1d4ed8;
+            --primary-darker: #1e3a8a;
+            --primary-light: #dbeafe;
+            --accent: #7c3aed;
+            --accent-light: #ede9fe;
+            --text-main: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --bg-body: #f1f5f9;
             --bg-card: #ffffff;
-            --border: #e5e7eb;
+            --bg-subtle: #f8fafc;
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+            --shadow-lg: 0 12px 24px rgba(0,0,0,0.08);
+            --radius: 10px;
+            --radius-sm: 6px;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
             background-color: var(--bg-body);
             color: var(--text-main);
             font-size: 13px;
@@ -33,12 +45,14 @@
 
         /* --- PDF Mode --- */
         body.pdf-generating { background: white; }
-        body.pdf-generating .widget-container { box-shadow: none; border: none; margin: 0; max-width: 100%; }
+        body.pdf-generating .widget-container { box-shadow: none !important; border: none !important; margin: 0; max-width: 100%; }
         body.pdf-generating .btn-action { display: none !important; }
         body.pdf-generating .ai-modal { display: none !important; }
+        body.pdf-generating .section-body { max-height: none !important; opacity: 1 !important; }
+        body.pdf-generating .header-orb { display: none !important; }
 
         .widget-container {
-            max-width: 1000px;
+            max-width: 960px;
             margin: 0 auto;
             background: white;
             min-height: 100vh;
@@ -46,23 +60,24 @@
             flex-direction: column;
             border-left: 1px solid var(--border);
             border-right: 1px solid var(--border);
-            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+            box-shadow: 0 0 60px rgba(0,0,0,0.04), 0 0 20px rgba(0,0,0,0.02);
         }
 
-        /* --- Header --- */
+        /* =========================================
+           HEADER — Animated Gradient + Floating Orbs
+           ========================================= */
         .header {
-            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 30%, #2563eb 70%, #7c3aed 100%);
             color: white;
-            padding: 24px;
+            padding: 18px 22px;
             display: flex;
-            gap: 20px;
+            gap: 16px;
             align-items: center;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
-        /* Animated Background Element */
+        /* Animated shimmer overlay */
         .header::before {
             content: '';
             position: absolute;
@@ -70,123 +85,271 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%);
-            animation: shimmer 6s linear infinite;
+            background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 55%);
+            animation: headerShimmer 8s linear infinite;
             pointer-events: none;
         }
-        @keyframes shimmer {
+        @keyframes headerShimmer {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
 
-        .profile-img-container {
-            width: 80px;
-            height: 80px;
+        /* Floating orbs */
+        .header-orb {
+            position: absolute;
             border-radius: 50%;
-            background: rgba(255,255,255,0.2);
-            border: 3px solid rgba(255,255,255,0.4);
+            pointer-events: none;
+            opacity: 0.15;
+            filter: blur(1px);
+        }
+        .header-orb.orb-1 {
+            width: 120px; height: 120px;
+            background: radial-gradient(circle, #60a5fa, transparent 70%);
+            top: -30px; right: 10%;
+            animation: orbFloat1 7s ease-in-out infinite;
+        }
+        .header-orb.orb-2 {
+            width: 80px; height: 80px;
+            background: radial-gradient(circle, #a78bfa, transparent 70%);
+            bottom: -20px; right: 30%;
+            animation: orbFloat2 9s ease-in-out infinite;
+        }
+        .header-orb.orb-3 {
+            width: 60px; height: 60px;
+            background: radial-gradient(circle, #38bdf8, transparent 70%);
+            top: 10px; left: 40%;
+            animation: orbFloat3 6s ease-in-out infinite;
+        }
+        @keyframes orbFloat1 {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-15px) scale(1.1); }
+        }
+        @keyframes orbFloat2 {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(12px) scale(1.05); }
+        }
+        @keyframes orbFloat3 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(8px, -8px) scale(1.08); }
+        }
+
+        /* Bottom accent line */
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #3b82f6);
+            background-size: 200% 100%;
+            animation: accentSlide 4s linear infinite;
+        }
+        @keyframes accentSlide {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+
+        .profile-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.2);
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
             flex-shrink: 0;
+            color: rgba(255,255,255,0.8);
+            font-weight: 700;
+            font-size: 20px;
             position: relative;
             z-index: 2;
-            color: white;
-            font-weight: 700;
-            font-size: 24px;
-            backdrop-filter: blur(4px);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
         .profile-img { width: 100%; height: 100%; object-fit: cover; }
 
-        .header-info { flex: 1; position: relative; z-index: 2; }
-        .owner-name { font-size: 24px; font-weight: 700; margin-bottom: 4px; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
-        .owner-sub { font-size: 14px; opacity: 0.9; }
+        .header-info { flex: 1; min-width: 0; position: relative; z-index: 2; }
+        .owner-name {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            letter-spacing: -0.01em;
+        }
+        .owner-sub {
+            font-size: 12px;
+            opacity: 0.6;
+            font-weight: 400;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
-        .header-actions { display: flex; gap: 10px; position: relative; z-index: 2; }
+        .header-actions { display: flex; gap: 8px; position: relative; z-index: 2; flex-shrink: 0; }
         .btn-action {
-            background: rgba(255,255,255,0.15);
-            border: 1px solid rgba(255,255,255,0.25);
-            color: white;
-            padding: 8px 14px;
-            border-radius: 6px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.18);
+            color: rgba(255,255,255,0.9);
+            padding: 7px 14px;
+            border-radius: var(--radius-sm);
             cursor: pointer;
             font-weight: 600;
-            font-size: 12px;
+            font-size: 11px;
+            font-family: inherit;
             transition: all 0.2s;
             display: flex;
             align-items: center;
-            gap: 6px;
-            backdrop-filter: blur(4px);
+            gap: 5px;
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
         }
-        .btn-action:hover { background: rgba(255,255,255,0.3); transform: translateY(-1px); }
-        .btn-action.primary { background: white; color: var(--primary-dark); border-color: white; }
-        .btn-action.primary:hover { background: #f8fafc; }
+        .btn-action:hover { background: rgba(255,255,255,0.22); transform: translateY(-1px); }
+        .btn-action.primary {
+            background: white;
+            color: var(--primary-dark);
+            border-color: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .btn-action.primary:hover { background: #f0f4ff; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
 
-        /* --- Content --- */
-        .content-area { padding: 24px; flex: 1; }
+        /* =========================================
+           CONTENT
+           ========================================= */
+        .content-area { padding: 16px 20px; flex: 1; }
 
-        /* --- Section --- */
-        .section { margin-bottom: 32px; }
-        .section-title {
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.9px;
-            margin-bottom: 16px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #f3f4f6;
+        /* =========================================
+           SECTIONS
+           ========================================= */
+        .section { margin-bottom: 14px; }
+
+        .section-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+            position: relative;
         }
-        .section-badge {
-            background: #eff6ff;
-            color: var(--primary);
-            padding: 2px 8px;
-            border-radius: 12px;
+
+        .section-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, var(--border), transparent 80%);
+        }
+
+        .section-header.collapsible { cursor: pointer; user-select: none; }
+        .section-header.collapsible:hover .section-title-text { color: var(--primary); }
+        .section-header.collapsible:hover .section-title-dot { background: var(--primary); }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+
+        .section-title-text {
             font-size: 10px;
-            text-transform: none;
-            letter-spacing: normal;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            transition: color 0.2s;
+        }
+
+        .section-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-badge {
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            padding: 2px 9px;
+            border-radius: 10px;
+            font-size: 10px;
             font-weight: 600;
         }
 
-        /* --- Badges --- */
-        .badges-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
-        
+        .collapse-icon {
+            display: inline-flex;
+            font-size: 14px;
+            color: var(--text-muted);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s;
+            line-height: 1;
+        }
+        .section-header.collapsible:hover .collapse-icon { color: var(--primary); }
+        .section.collapsed .collapse-icon { transform: rotate(-90deg); }
+
+        .section-body {
+            max-height: 5000px;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+            opacity: 1;
+        }
+        .section.collapsed .section-body {
+            max-height: 0;
+            opacity: 0;
+        }
+
+        /* =========================================
+           BADGES / TAGS
+           ========================================= */
+        .badges-wrap { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+
         .tag {
             display: inline-flex;
             align-items: center;
-            padding: 4px 12px;
-            border-radius: 16px;
+            padding: 3px 10px;
+            border-radius: 4px;
             font-size: 11px;
             font-weight: 600;
             border: 1px solid transparent;
-            transition: all 0.2s;
+            transition: all 0.15s;
             cursor: default;
         }
-        .tag:hover { transform: translateY(-1px); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-
-        .tag-neutral { background: #f3f4f6; color: #4b5563; border-color: #e5e7eb; }
-        .tag-success { background: #d1fae5; color: #065f46; border-color: #a7f3d0; }
+        .tag-neutral { background: #f1f5f9; color: #475569; border-color: #e2e8f0; }
+        .tag-success { background: #dcfce7; color: #166534; border-color: #bbf7d0; }
         .tag-danger { background: #fee2e2; color: #991b1b; border-color: #fecaca; }
-        .tag-dark { background: #1f2937; color: #f9fafb; }
+        .tag-dark { background: #1e293b; color: #f1f5f9; }
         .tag-info { background: #dbeafe; color: #1e40af; border-color: #bfdbfe; }
         .tag-orange { background: #ffedd5; color: #9a3412; border-color: #fed7aa; }
-        .tag-purple { background: #ede9fe; color: #5b21b6; border-color: #ddd6fe; }
+        .tag-purple { background: #f3e8ff; color: #6b21a8; border-color: #e9d5ff; }
 
-        /* --- Stats Grid --- */
+        /* =========================================
+           STATS GRID
+           ========================================= */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 16px;
+            grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
+            gap: 6px;
         }
+
         .stat-box {
-            background: #f9fafb;
-            padding: 16px;
-            border-radius: 8px;
-            border: 1px solid #f3f4f6;
+            background: var(--bg-subtle);
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-light);
             transition: all 0.2s;
             position: relative;
             overflow: hidden;
@@ -197,125 +360,271 @@
             left: 0;
             top: 0;
             bottom: 0;
-            width: 4px;
-            background: var(--primary);
+            width: 3px;
+            background: linear-gradient(180deg, var(--primary), var(--accent));
+            border-radius: 0 2px 2px 0;
             opacity: 0;
             transition: opacity 0.2s;
         }
         .stat-box:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            border-color: #e5e7eb;
+            border-color: var(--border);
+            background: white;
+            box-shadow: var(--shadow-sm);
         }
         .stat-box:hover::before { opacity: 1; }
-        
-        .stat-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 4px; }
-        .stat-value { font-size: 15px; font-weight: 600; color: var(--text-main); }
 
-        /* --- Timeline --- */
-        .timeline-item { 
-            margin-bottom: 16px; 
-            padding-left: 16px;
-            border-left: 2px solid #e5e7eb;
-            transition: border-color 0.2s;
+        .stat-label {
+            font-size: 9px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            margin-bottom: 2px;
         }
-        .timeline-item:hover { border-color: var(--primary); }
-        .time-label { font-size: 10px; font-weight: 700; color: var(--primary); margin-bottom: 2px; text-transform: uppercase; }
-        .time-text { font-size: 13px; color: var(--text-main); white-space: pre-wrap; background: white; padding: 8px; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .stat-value { font-size: 12px; font-weight: 600; color: var(--text-main); }
 
-        /* --- Property Cards --- */
+        /* =========================================
+           TIMELINE
+           ========================================= */
+        .timeline-item {
+            margin-bottom: 6px;
+            padding-left: 18px;
+            position: relative;
+            transition: all 0.15s;
+        }
+        .timeline-item:last-child { margin-bottom: 0; }
+
+        /* Timeline dot */
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 5px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--border);
+            border: 2px solid white;
+            box-shadow: 0 0 0 1px var(--border);
+            transition: all 0.2s;
+            z-index: 1;
+        }
+        .timeline-item:hover::before {
+            background: var(--primary);
+            box-shadow: 0 0 0 1px var(--primary), 0 0 0 4px rgba(37,99,235,0.15);
+        }
+
+        /* Timeline line */
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            left: 3.5px;
+            top: 16px;
+            bottom: -8px;
+            width: 1px;
+            background: var(--border);
+        }
+        .timeline-item:last-child::after { display: none; }
+
+        .time-label {
+            font-size: 9px;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-bottom: 2px;
+        }
+
+        .time-text {
+            font-size: 12px;
+            color: var(--text-secondary);
+            background: var(--bg-subtle);
+            padding: 8px 10px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-light);
+            line-height: 1.55;
+            transition: all 0.15s;
+        }
+        .timeline-item:hover .time-text {
+            border-color: var(--border);
+            background: white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Markdown rendered content inside timeline */
+        .time-text p { margin: 0 0 4px 0; }
+        .time-text p:last-child { margin-bottom: 0; }
+        .time-text a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            border-bottom: 1px solid rgba(37,99,235,0.3);
+            transition: border-color 0.15s;
+        }
+        .time-text a:hover { border-bottom-color: var(--primary); }
+        .time-text strong { font-weight: 600; color: var(--text-main); }
+        .time-text em { font-style: italic; }
+        .time-text ul, .time-text ol { margin: 4px 0; padding-left: 18px; }
+        .time-text li { margin-bottom: 2px; }
+        .time-text code {
+            background: #e2e8f0;
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+        }
+        .time-text hr { border: none; border-top: 1px solid var(--border); margin: 6px 0; }
+        .time-text h1, .time-text h2, .time-text h3, .time-text h4 {
+            font-weight: 600;
+            color: var(--text-main);
+            margin: 6px 0 3px 0;
+        }
+        .time-text h1 { font-size: 14px; }
+        .time-text h2 { font-size: 13px; }
+        .time-text h3 { font-size: 12px; }
+        .time-text h4 { font-size: 12px; }
+        .time-text blockquote {
+            border-left: 3px solid var(--primary-light);
+            padding-left: 10px;
+            margin: 4px 0;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* =========================================
+           PROPERTY CARDS
+           ========================================= */
         .property-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 10px;
         }
 
         .property-card {
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
             overflow: hidden;
             background: white;
             display: flex;
             flex-direction: column;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            break-inside: avoid; 
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            break-inside: avoid;
             page-break-inside: avoid;
         }
         .property-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 20px rgba(0,0,0,0.08);
-            border-color: #d1d5db;
+            box-shadow: var(--shadow-lg);
+            border-color: #cbd5e1;
+            transform: translateY(-2px);
         }
 
         .prop-img-container {
-            height: 180px;
-            background: #f3f4f6;
+            height: 140px;
+            background: var(--bg-subtle);
             position: relative;
             overflow: hidden;
         }
-        .prop-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
-        .property-card:hover .prop-img { transform: scale(1.03); }
-        
+        /* Gradient overlay on image */
+        .prop-img-container::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.04));
+            pointer-events: none;
+        }
+        .prop-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
+        .property-card:hover .prop-img { transform: scale(1.05); }
+
         .prop-no-img {
             height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-direction: column;
-            color: #9ca3af;
-            font-size: 32px;
-            background: #f8fafc;
+            color: #94a3b8;
+            font-size: 24px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
         }
-        .prop-no-img span { font-size: 12px; font-weight: 600; margin-top: 8px; }
+        .prop-no-img span { font-size: 11px; font-weight: 500; margin-top: 6px; }
 
-        .prop-body { padding: 16px; flex: 1; display: flex; flex-direction: column; }
-        
-        .prop-header { margin-bottom: 10px; }
-        .prop-name { font-size: 16px; font-weight: 700; color: var(--text-main); line-height: 1.2; margin-bottom: 4px; }
-        .prop-address { font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
+        .prop-body { padding: 12px; flex: 1; display: flex; flex-direction: column; }
 
-        .prop-specs {
+        .prop-header { margin-bottom: 6px; }
+        .prop-name { font-size: 14px; font-weight: 700; color: var(--text-main); line-height: 1.2; margin-bottom: 2px; }
+        .prop-address {
+            font-size: 11px;
+            color: var(--text-muted);
             display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-            margin-bottom: 10px;
+            align-items: center;
+            gap: 3px;
         }
+
+        .prop-specs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 6px; }
         .spec-tag {
             font-size: 10px;
-            padding: 2px 8px;
-            background: #f3f4f6;
+            padding: 2px 7px;
+            background: var(--bg-subtle);
             border-radius: 3px;
-            color: #4b5563;
+            color: var(--text-secondary);
             font-weight: 600;
+            border: 1px solid var(--border-light);
         }
 
         .prop-tenant-box {
-            background: #f0f9ff;
+            background: linear-gradient(135deg, #eff6ff, #f0f9ff);
             border-left: 3px solid var(--primary);
-            padding: 8px 10px;
-            font-size: 12px;
+            padding: 5px 8px;
+            font-size: 11px;
             color: #1e40af;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             font-weight: 500;
+            border-radius: 0 4px 4px 0;
         }
 
         .prop-footer {
             margin-top: auto;
-            border-top: 1px solid #f3f4f6;
-            padding-top: 12px;
+            border-top: 1px solid var(--border-light);
+            padding-top: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .prop-price { font-size: 16px; font-weight: 700; color: var(--primary-dark); }
+        .prop-price { font-size: 15px; font-weight: 700; color: var(--primary-dark); }
         .prop-date { font-size: 10px; color: var(--text-muted); font-weight: 500; }
 
-        /* --- Modal --- */
+        /* =========================================
+           EMPTY STATES
+           ========================================= */
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: var(--text-muted);
+        }
+        .empty-icon { font-size: 36px; margin-bottom: 10px; opacity: 0.4; }
+        .empty-title { font-weight: 600; font-size: 14px; color: var(--text-secondary); }
+        .empty-desc { font-size: 12px; margin-top: 3px; }
+
+        .no-props-msg {
+            color: var(--text-muted);
+            font-size: 12px;
+            padding: 16px;
+            text-align: center;
+            background: var(--bg-subtle);
+            border-radius: var(--radius-sm);
+            border: 1px dashed var(--border);
+        }
+
+        /* =========================================
+           AI MODAL
+           ========================================= */
         .ai-modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(4px);
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
             z-index: 1000;
             display: flex;
             align-items: center;
@@ -326,19 +635,21 @@
             transition: all 0.2s;
         }
         .ai-modal-overlay.active { opacity: 1; visibility: visible; }
+
         .ai-modal {
             background: white;
-            border-radius: 12px;
+            border-radius: 14px;
             width: 100%;
-            max-width: 700px;
-            max-height: 85vh;
+            max-width: 640px;
+            max-height: 80vh;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
-            transform: translateY(20px);
-            transition: transform 0.2s;
+            box-shadow: 0 24px 48px rgba(0,0,0,0.15);
+            transform: translateY(16px) scale(0.97);
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .ai-modal-overlay.active .ai-modal { transform: translateY(0); }
+        .ai-modal-overlay.active .ai-modal { transform: translateY(0) scale(1); }
+
         .ai-header {
             padding: 16px 20px;
             border-bottom: 1px solid var(--border);
@@ -346,62 +657,96 @@
             justify-content: space-between;
             align-items: center;
         }
-        .ai-title { font-weight: 700; font-size: 16px; }
+        .ai-title { font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 8px; }
+        .ai-title-dot { width: 8px; height: 8px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--accent)); }
+
         .ai-close {
-            background: #f3f4f6;
+            background: var(--bg-subtle);
             border: none;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            border-radius: var(--radius-sm);
             cursor: pointer;
             color: var(--text-muted);
-            font-size: 16px;
+            font-size: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.15s;
         }
-        .ai-close:hover { background: #e5e7eb; }
-        .ai-body { padding: 20px; overflow-y: auto; flex: 1; }
+        .ai-close:hover { background: var(--border); color: var(--text-main); }
+
+        .ai-body { padding: 16px 20px; overflow-y: auto; flex: 1; }
+
         .ai-content {
-            background: #f8fafc;
-            border: 1px solid var(--border);
-            border-radius: 6px;
+            background: #0f172a;
+            border: 1px solid #1e293b;
+            border-radius: var(--radius-sm);
             padding: 16px;
-            font-family: 'monospace';
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
             font-size: 11px;
             white-space: pre-wrap;
-            line-height: 1.6;
-            color: #334155;
-            max-height: 400px;
+            line-height: 1.65;
+            color: #94a3b8;
+            max-height: 380px;
             overflow-y: auto;
         }
+
         .ai-footer {
-            padding: 16px 20px;
+            padding: 14px 20px;
             border-top: 1px solid var(--border);
             text-align: right;
         }
+
         .btn-copy {
-            background: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
             border: none;
             padding: 8px 20px;
-            border-radius: 6px;
+            border-radius: var(--radius-sm);
             cursor: pointer;
             font-weight: 600;
-            font-size: 13px;
-            transition: background 0.2s;
+            font-size: 12px;
+            font-family: inherit;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(37,99,235,0.25);
         }
-        .btn-copy:hover { background: var(--primary-dark); }
+        .btn-copy:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,0.3); }
 
         .hidden { display: none !important; }
+
+        /* =========================================
+           SCROLLBAR
+           ========================================= */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* =========================================
+           SUBTLE ANIMATION — Page Load
+           ========================================= */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .section {
+            animation: fadeInUp 0.4s ease both;
+        }
+        .section:nth-child(1) { animation-delay: 0.05s; }
+        .section:nth-child(2) { animation-delay: 0.1s; }
+        .section:nth-child(3) { animation-delay: 0.15s; }
     </style>
 </head>
 <body>
 
     <div class="widget-container" id="mainContent">
         <!-- Header -->
-        <div class="header">
-            <div class="profile-img-container" id="profileContainer">
+        <header class="header">
+            <div class="header-orb orb-1"></div>
+            <div class="header-orb orb-2"></div>
+            <div class="header-orb orb-3"></div>
+            <div class="profile-avatar" id="profileContainer">
                 <div id="profileInitial">?</div>
             </div>
             <div class="header-info">
@@ -409,51 +754,78 @@
                 <div class="owner-sub" id="ownerSub">Choose a row to view details</div>
             </div>
             <div class="header-actions">
-                <button id="btnAI" class="btn-action">AI Export</button>
-                <button id="btnExport" class="btn-action primary">Export PDF</button>
+                <button id="btnAI" class="btn-action">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 0-4 4v2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2h-2V6a4 4 0 0 0-4-4z"/><circle cx="12" cy="15" r="2"/></svg>
+                    AI Export
+                </button>
+                <button id="btnExport" class="btn-action primary">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                    Export PDF
+                </button>
             </div>
-        </div>
+        </header>
 
         <!-- Content -->
-        <div class="content-area">
-            <div id="noData" class="hidden" style="text-align:center; padding: 60px 40px; color: var(--text-muted);">
-                <div style="font-size: 40px; margin-bottom: 10px;">📋</div>
-                <div style="font-weight: 600; font-size: 15px;">No Owner Selected</div>
-                <div style="font-size: 12px; margin-top: 4px;">Select a record in Grist to view the portfolio.</div>
+        <main class="content-area">
+            <div id="noData" class="empty-state hidden">
+                <div class="empty-icon">📋</div>
+                <div class="empty-title">No Owner Selected</div>
+                <div class="empty-desc">Select a record in Grist to view the portfolio.</div>
             </div>
 
             <div id="activeView" class="hidden">
-                <!-- Key Info Section -->
-                <div class="section">
-                    <div class="section-title">Overview</div>
+                <!-- Overview Section -->
+                <section class="section">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <div class="section-title-dot"></div>
+                            <h2 class="section-title-text">Overview</h2>
+                        </div>
+                    </div>
                     <div class="badges-wrap" id="badgesContainer"></div>
                     <div class="stats-grid" id="statsGrid"></div>
-                </div>
+                </section>
 
-                <!-- Property Section -->
-                <div class="section">
-                    <div class="section-title">
-                        <span>Property Portfolio</span>
-                        <span class="section-badge" id="propCountBadge">0 Properties</span>
+                <!-- Property Section (Collapsible) -->
+                <section class="section" id="propertySection">
+                    <div class="section-header collapsible" id="propertyToggle">
+                        <div class="section-title">
+                            <div class="section-title-dot"></div>
+                            <h2 class="section-title-text">Property Portfolio</h2>
+                        </div>
+                        <div class="section-controls">
+                            <span class="section-badge" id="propCountBadge">0 Properties</span>
+                            <span class="collapse-icon">▾</span>
+                        </div>
                     </div>
-                    <div class="property-grid" id="propertyGrid"></div>
-                    <div id="noPropsMsg" class="hidden" style="color:var(--text-muted); font-size:13px; padding: 20px; text-align: center; background: #f9fafb; border-radius: 6px;">No properties linked to this owner.</div>
-                </div>
+                    <div class="section-body" id="propertyBody">
+                        <div class="property-grid" id="propertyGrid"></div>
+                        <div id="noPropsMsg" class="no-props-msg hidden">No properties linked to this owner.</div>
+                    </div>
+                </section>
 
                 <!-- Activity Section -->
-                <div class="section">
-                    <div class="section-title">Activity Log</div>
+                <section class="section">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <div class="section-title-dot"></div>
+                            <h2 class="section-title-text">Activity Log</h2>
+                        </div>
+                    </div>
                     <div id="activityContent"></div>
-                </div>
+                </section>
             </div>
-        </div>
+        </main>
     </div>
 
     <!-- AI Modal -->
     <div id="aiModal" class="ai-modal-overlay">
         <div class="ai-modal">
             <div class="ai-header">
-                <div class="ai-title">AI Context Export</div>
+                <div class="ai-title">
+                    <div class="ai-title-dot"></div>
+                    AI Context Export
+                </div>
                 <button class="ai-close" id="aiClose">&times;</button>
             </div>
             <div class="ai-body">
@@ -466,6 +838,12 @@
     </div>
 
     <script>
+        // Configure marked for safe rendering
+        marked.setOptions({
+            breaks: true,
+            gfm: true
+        });
+
         document.addEventListener('DOMContentLoaded', () => {
 
             const CONFIG = {
@@ -539,6 +917,11 @@
                 return (age >= 60) ? images.olderMan : images.man;
             }
 
+            // --- Collapsible Section Toggle ---
+            $('propertyToggle').addEventListener('click', () => {
+                $('propertySection').classList.toggle('collapsed');
+            });
+
             let currentRecord = null;
             let ownerProperties = [];
 
@@ -580,7 +963,7 @@
 
                 const name = record.Name || record.Owner_Full_Name || 'Unknown';
                 DOM.name.textContent = name;
-                DOM.sub.textContent = [firstItem(record.Accounts), record.Title].filter(Boolean).join(' • ');
+                DOM.sub.textContent = [firstItem(record.Accounts), record.Title].filter(Boolean).join(' · ');
 
                 if(record.Profile_Image) {
                     const url = firstItem(record.Profile_Image);
@@ -599,7 +982,7 @@
             function renderBadges() {
                 let html = '';
                 const fields = ['Opportunity'];
-                
+
                 fields.forEach(f => {
                     getList(currentRecord[f]).forEach(val => {
                         if(!val) return;
@@ -608,7 +991,7 @@
                         if (v.includes('HOT')) cls = 'tag-danger';
                         else if (v.includes('WARM')) cls = 'tag-orange';
                         else if (v.includes('COLD')) cls = 'tag-info';
-                        
+
                         html += `<span class="tag ${cls}">${val}</span>`;
                     });
                 });
@@ -617,26 +1000,19 @@
 
             function renderStats() {
                 let html = '';
-                
-                // Standard add function - always shows
+
                 const addStat = (l, v) => {
                     if(!isEmpty(v)) html += `<div class="stat-box"><div class="stat-label">${l}</div><div class="stat-value">${v}</div></div>`;
                 };
 
-                // Conditional add function - only shows if value exists
                 const addStatIfPresent = (l, v) => {
                     if(!isEmpty(v)) html += `<div class="stat-box"><div class="stat-label">${l}</div><div class="stat-value">${v}</div></div>`;
                 };
 
-                // Requested Owner Fields (Always show Segment/Classify/Color as they are key IDs)
                 addStat('Segment', firstItem(currentRecord.Segment));
                 addStat('Classify', firstItem(currentRecord.Classify));
-                addStat('Classify Color', firstItem(currentRecord.Classify_Color)); 
-                
-                // Demographics
+                addStat('Classify Color', firstItem(currentRecord.Classify_Color));
                 addStat('Age / Gender', [currentRecord.Age, currentRecord.Gender].filter(Boolean).join(' / '));
-                
-                // Relationship & Intent (Hide if empty)
                 addStatIfPresent('Relationship', firstItem(currentRecord.Call_Relationship));
                 addStatIfPresent('Market Tranche', firstItem(currentRecord.Tranche));
                 addStatIfPresent('Plans to Sell', currentRecord.Plans_to_Sell);
@@ -653,34 +1029,35 @@
                     { t: currentRecord.Contact_1, l: 'Contact 1' },
                     { t: currentRecord.Contact_2, l: 'Contact 2' },
                     { t: currentRecord.Contact_3, l: 'Contact 3' },
-                    { t: currentRecord.Contact_4, l: 'Contact 4' }, 
+                    { t: currentRecord.Contact_4, l: 'Contact 4' },
                     { t: currentRecord.Extra_Notes, l: 'Extra Notes' },
-                    // Added VM fields
                     { t: currentRecord.VM_s, l: "Voicemails (VM's)" },
                     { t: currentRecord.Call_no_VM, l: "Calls (No VM)" }
                 ];
-                
+
                 let hasContent = false;
                 notes.forEach(n => {
                     if(n.t) {
                         hasContent = true;
+                        // Render markdown content as HTML
+                        const renderedContent = marked.parse(String(n.t));
                         html += `
                             <div class="timeline-item">
-                                <div class="time-label">${n.l} ${n.d ? ' - ' + formatDate(n.d) : ''}</div>
-                                <div class="time-text">${n.t}</div>
+                                <div class="time-label">${n.l}${n.d ? ' · ' + formatDate(n.d) : ''}</div>
+                                <div class="time-text">${renderedContent}</div>
                             </div>`;
                     }
                 });
-                DOM.activity.innerHTML = hasContent ? html : '<div style="color:var(--text-muted); font-size:12px; text-align:center; padding: 10px;">No activity recorded.</div>';
+                DOM.activity.innerHTML = hasContent ? html : '<div style="color:var(--text-muted); font-size:12px; text-align:center; padding: 12px;">No activity recorded.</div>';
             }
 
             async function renderProperties() {
-                DOM.propGrid.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-muted); grid-column: 1/-1;"><div class="spinner"></div></div>';
-                
+                DOM.propGrid.innerHTML = '<div style="padding:16px; text-align:center; color:var(--text-muted); grid-column: 1/-1; font-size:12px;">Loading...</div>';
+
                 try {
                     const data = await grist.docApi.fetchTable(CONFIG.propTable);
                     const allProps = columnarToRows(data);
-                    
+
                     ownerProperties = allProps.filter(p => {
                         const refs = getList(p.fields.Name);
                         return refs.includes(currentRecord.id) || refs.includes(currentRecord.Name);
@@ -695,14 +1072,14 @@
                         DOM.noProps.classList.add('hidden');
                         DOM.propGrid.innerHTML = ownerProperties.map(p => {
                             const f = p.fields;
-                            
+
                             const rawUrls = getList(f.ImageURLs || f.Pop_up_IMG);
                             const imgUrl = rawUrls.length > 0 ? rawUrls[0] : null;
 
-                            const imgHtml = imgUrl 
-                                ? `<img src="${imgUrl}" class="prop-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"><div class="prop-no-img" style="display:none;width:100%;height:100%;"><span>Image Unavailable</span></div>` 
+                            const imgHtml = imgUrl
+                                ? `<img src="${imgUrl}" class="prop-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"><div class="prop-no-img" style="display:none;width:100%;height:100%;"><span>Image Unavailable</span></div>`
                                 : `<div class="prop-no-img"><span>No Image</span></div>`;
-                            
+
                             const street = f.Property_Address || '';
                             const city = f.City || '';
                             const state = f.State || '';
@@ -714,7 +1091,7 @@
                             const rba = f.RBA ? Number(f.RBA).toLocaleString() + ' SF' : '';
                             const year = f.YearB ? 'Built ' + f.YearB : '';
                             const tenants = f.Tenants || '';
-                            
+
                             const price = formatMoney(f.Last_Sale_Price);
                             const date = formatDate(f.Last_Sale_Date);
 
@@ -742,16 +1119,16 @@
                     }
                 } catch(e) {
                     console.error(e);
-                    DOM.propGrid.innerHTML = '<div style="color:red; padding:20px; text-align:center; grid-column: 1/-1;">Error loading properties.</div>';
+                    DOM.propGrid.innerHTML = '<div style="color:red; padding:16px; text-align:center; grid-column: 1/-1; font-size:12px;">Error loading properties.</div>';
                 }
             }
 
             // --- AI EXPORT ---
             function generateAIContext() {
                 if(!currentRecord) return '';
-                
+
                 let md = `# OWNER PROFILE: ${currentRecord.Name || 'N/A'}\n\n`;
-                
+
                 md += `## Key Metrics\n`;
                 md += `- **Segment:** ${firstItem(currentRecord.Segment) || 'N/A'}\n`;
                 md += `- **Classify:** ${firstItem(currentRecord.Classify) || 'N/A'}\n`;
@@ -785,7 +1162,7 @@
                     const state = f.State || '';
                     const zip = f.Zip || '';
                     const fullAddress = [street, city, state, zip].filter(Boolean).join(', ');
-                    
+
                     md += `### ${i+1}. ${f.Property_Name || fullAddress || 'Unknown Property'}\n`;
                     md += `- **Address:** ${fullAddress}\n`;
                     if(f.Property_Type) md += `- **Type:** ${f.Property_Type}\n`;
@@ -805,7 +1182,12 @@
             });
 
             DOM.aiClose.addEventListener('click', () => DOM.aiModal.classList.remove('active'));
-            
+
+            // Close modal on overlay click
+            DOM.aiModal.addEventListener('click', (e) => {
+                if (e.target === DOM.aiModal) DOM.aiModal.classList.remove('active');
+            });
+
             DOM.btnCopy.addEventListener('click', () => {
                 navigator.clipboard.writeText(DOM.aiContent.textContent).then(() => {
                     DOM.btnCopy.textContent = 'Copied!';
@@ -813,12 +1195,16 @@
                 });
             });
 
-            // --- PDF EXPORT WITH IMAGE FIX ---
+            // --- PDF EXPORT ---
             DOM.btnExport.addEventListener('click', async () => {
                 if(!currentRecord) return;
-                
-                DOM.btnExport.textContent = 'Preparing...';
+
+                DOM.btnExport.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation: spin 1s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Preparing...`;
                 DOM.btnExport.disabled = true;
+
+                // Expand all collapsed sections for PDF
+                const sections = DOM.main.querySelectorAll('.section.collapsed');
+                sections.forEach(s => s.classList.remove('collapsed'));
 
                 // Pre-Flight Check: Clean up broken images
                 const images = DOM.main.querySelectorAll('img');
@@ -826,14 +1212,14 @@
                     if (!img.complete || img.naturalHeight === 0) {
                         const div = document.createElement('div');
                         div.className = 'prop-no-img';
-                        div.style.height = '180px';
+                        div.style.height = '140px';
                         div.innerHTML = '<span>Image Unavailable</span>';
                         img.parentNode.replaceChild(div, img);
                     }
                 });
 
                 document.body.classList.add('pdf-generating');
-                
+
                 await new Promise(r => setTimeout(r, 500));
 
                 const el = DOM.main;
@@ -841,13 +1227,13 @@
                     margin:       [0.4, 0.4, 0.4, 0.4],
                     filename:     `${currentRecord.Name || 'Report'}.pdf`,
                     image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { 
-                        scale: 2, 
-                        useCORS: true, 
-                        allowTaint: true, 
+                    html2canvas:  {
+                        scale: 2,
+                        useCORS: true,
+                        allowTaint: true,
                         logging: false,
                         scrollY: 0,
-                        windowHeight: el.scrollHeight 
+                        windowHeight: el.scrollHeight
                     },
                     jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' },
                     pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
@@ -860,9 +1246,9 @@
                     alert("Error generating PDF.");
                 } finally {
                     document.body.classList.remove('pdf-generating');
-                    DOM.btnExport.textContent = 'Export PDF';
+                    DOM.btnExport.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Export PDF`;
                     DOM.btnExport.disabled = false;
-                    renderProperties(); // Restore images
+                    renderProperties();
                 }
             });
 
