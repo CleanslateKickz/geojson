@@ -134,7 +134,7 @@
     .search-input:disabled { opacity: 0.5; cursor: not-allowed; }
 
     .filter-select {
-      padding: 0.5rem 1.75rem 0.5rem 0.625rem;
+      padding: 0.5rem 2rem 0.5rem 0.625rem;
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
       font-size: 0.8125rem;
@@ -144,17 +144,20 @@
       color: var(--fg);
       cursor: pointer;
       appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236b6b6b' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b6b6b' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
-      background-position: right 6px center;
+      background-position: right 10px center;
+      background-size: 10px;
       transition: all var(--transition);
-      min-width: 110px;
-      height: 34px;
+      min-width: 120px;
+      height: 36px;
+      padding-right: 2rem;
     }
 
-    .filter-select:hover { border-color: var(--border-strong); }
+    .filter-select:hover { border-color: var(--border-strong); background-color: var(--bg-subtle); }
     .filter-select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
     .filter-select:disabled { opacity: 0.5; cursor: not-allowed; }
+    .filter-select option { padding: 0.5rem; }
 
     .view-toggle {
       display: flex;
@@ -280,6 +283,127 @@
 
     .range-inputs input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
     .range-inputs span { color: var(--fg-tertiary); font-size: 0.75rem; }
+
+    /* Combo/Autocomplete Multi-Select */
+    .combo-filter {
+      position: relative;
+      min-width: 180px;
+    }
+
+    .combo-input {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      font-size: 0.8125rem;
+      font-family: inherit;
+      font-weight: 500;
+      background: var(--bg-elevated);
+      color: var(--fg);
+      transition: all var(--transition);
+      height: 36px;
+    }
+
+    .combo-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-light);
+    }
+
+    .combo-dropdown {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      margin-top: 4px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      max-height: 240px;
+      overflow-y: auto;
+      z-index: 100;
+    }
+
+    .combo-dropdown.open { display: block; }
+
+    .combo-option {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8125rem;
+      cursor: pointer;
+      transition: background var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .combo-option:hover { background: var(--bg-subtle); }
+    .combo-option.selected { background: var(--accent-light); color: var(--accent); font-weight: 600; }
+
+    .combo-option-mark {
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--border-strong);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all var(--transition);
+    }
+
+    .combo-option.selected .combo-option-mark {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .combo-option.selected .combo-option-mark::after {
+      content: '';
+      width: 10px;
+      height: 10px;
+      background: white;
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E") center/contain no-repeat;
+      -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E") center/contain no-repeat;
+    }
+
+    .combo-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 6px;
+      min-height: 0;
+    }
+
+    .combo-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      background: var(--accent-light);
+      color: var(--accent);
+      border-radius: 12px;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      border: 1px solid var(--accent);
+    }
+
+    .combo-tag-remove {
+      width: 14px;
+      height: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      opacity: 0.7;
+      transition: opacity var(--transition);
+      background: none;
+      border: none;
+      color: var(--accent);
+      padding: 0;
+    }
+
+    .combo-tag-remove:hover { opacity: 1; }
 
     /* Boundary Status */
     .boundary-status {
@@ -450,7 +574,7 @@
     }
 
     .badge-new { background: var(--accent); color: white; }
-    .badge-type { background: rgba(0,0,0,0.75); color: white; }
+    .badge-type { background: rgba(0,0,0,0.75); color: white; backdrop-filter: blur(8px); }
 
     .card-checkbox {
       position: absolute;
@@ -1120,7 +1244,7 @@
 
     .detail-panel {
       width: 100%;
-      max-width: 420px;
+      max-width: 600px;
       background: var(--bg-elevated);
       height: 100%;
       box-shadow: var(--shadow-xl);
@@ -1277,11 +1401,12 @@
       padding: 0.5rem 0.875rem;
       border-top: 1px solid var(--border);
       font-size: 0.8125rem;
+      gap: 0.5rem;
     }
 
     .kv-row:first-child { border-top: none; }
-    .kv-key { color: var(--fg-tertiary); margin-right: 8px; white-space: nowrap; font-weight: 500; font-size: 0.75rem; }
-    .kv-val { font-weight: 700; color: var(--fg); text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: normal; font-size: 0.8125rem; }
+    .kv-key { color: var(--fg-tertiary); white-space: nowrap; font-weight: 500; font-size: 0.75rem; flex-shrink: 0; }
+    .kv-val { font-weight: 700; color: var(--fg); text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.8125rem; min-width: 0; }
     .kv-val.accent { color: var(--accent); }
 
     .highlights-section {
@@ -1432,7 +1557,7 @@
             <circle cx="11" cy="11" r="8"/>
             <path d="m21 21-4.35-4.35"/>
           </svg>
-          <input type="text" class="search-input" id="searchInput" placeholder="Search by name, address, city, or tenant..." disabled>
+          <input type="text" class="search-input" id="searchInput" placeholder="Search by name, address, city, state, or tenant..." disabled>
         </div>
 
         <select class="filter-select" id="typeFilter" disabled>
@@ -1444,10 +1569,6 @@
           <option value="STNL">STNL</option>
           <option value="Multi">Multi</option>
           <option value="Center">Center</option>
-        </select>
-
-        <select class="filter-select" id="cityFilter" disabled>
-          <option value="all">All Cities</option>
         </select>
 
         <select class="filter-select" id="sortSelect" disabled>
@@ -1514,6 +1635,22 @@
 
       <div class="advanced-panel" id="advancedPanel">
         <div class="filter-row">
+          <div class="filter-group">
+            <label class="filter-label">State</label>
+            <div class="combo-filter" id="stateCombo">
+              <input type="text" class="combo-input" id="stateInput" placeholder="Filter states..." autocomplete="off">
+              <div class="combo-dropdown" id="stateDropdown"></div>
+              <div class="combo-tags" id="stateTags"></div>
+            </div>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">City</label>
+            <div class="combo-filter" id="cityCombo">
+              <input type="text" class="combo-input" id="cityInput" placeholder="Filter cities..." autocomplete="off">
+              <div class="combo-dropdown" id="cityDropdown"></div>
+              <div class="combo-tags" id="cityTags"></div>
+            </div>
+          </div>
           <div class="filter-group">
             <label class="filter-label">Price Range ($)</label>
             <div class="range-inputs">
@@ -1717,12 +1854,125 @@
     let lightLayer = null;
     let hybridLayer = null;
 
+    // Property type emoji/color mapping
+    const typeEmoji = {
+      'car wash': { emoji: '🫧', color: '#06b6d4', label: 'Car Wash' },
+      'gas station': { emoji: '⛽', color: '#f59e0b', label: 'Gas Station' },
+      'convenience': { emoji: '🏪', color: '#3b82f6', label: 'Convenience' },
+      'supermarket': { emoji: '🛒', color: '#10b981', label: 'Supermarket' },
+      'grocery': { emoji: '🛒', color: '#10b981', label: 'Grocery' },
+      'department': { emoji: '🏬', color: '#8b5cf6', label: 'Department' },
+      'fast food': { emoji: '🍔', color: '#ef4444', label: 'Fast Food' },
+      'qsr': { emoji: '🌮', color: '#ef4444', label: 'QSR' },
+      'quick service': { emoji: '🍔', color: '#ef4444', label: 'Quick Service' },
+      'bank': { emoji: '🏦', color: '#6366f1', label: 'Bank' },
+      'pharmacy': { emoji: '💊', color: '#ec4899', label: 'Pharmacy' },
+      'restaurant': { emoji: '🍽️', color: '#f97316', label: 'Restaurant' },
+      'auto repair': { emoji: '🚗', color: '#64748b', label: 'Auto Repair' },
+      'strip center': { emoji: '🏢', color: '#14b8a6', label: 'Strip Center' },
+      'shopping center': { emoji: '🏬', color: '#8b5cf6', label: 'Shopping Center' },
+      'office': { emoji: '🏛️', color: '#0ea5e9', label: 'Office' },
+      'industrial': { emoji: '🏭', color: '#78716c', label: 'Industrial' },
+      'warehouse': { emoji: '📦', color: '#78716c', label: 'Warehouse' },
+      'multifamily': { emoji: '🏢', color: '#14b8a6', label: 'Multifamily' },
+      'mixed use': { emoji: '🏗️', color: '#f59e0b', label: 'Mixed Use' },
+      'medical': { emoji: '🏥', color: '#ef4444', label: 'Medical' },
+      'retail': { emoji: '🏪', color: '#3b82f6', label: 'Retail' },
+      'hotel': { emoji: '🏨', color: '#8b5cf6', label: 'Hotel' },
+      'land': { emoji: '🏔️', color: '#84cc16', label: 'Land' },
+    };
+
+    const defaultTypeEmoji = { emoji: '🏠', color: '#6b6b6b', label: 'Property' };
+
+    function getTypeEmoji(type) {
+      if (!type) return defaultTypeEmoji;
+      const key = type.toLowerCase();
+      for (const [k, v] of Object.entries(typeEmoji)) {
+        if (key.includes(k)) return v;
+      }
+      return defaultTypeEmoji;
+    }
+
+    // Combo filter state
+    let stateSet = new Set();
+    let citySet = new Set();
+    let selectedStates = [];
+    let selectedCities = [];
+
+    function renderComboDropdown(inputEl, dropdownEl, items, selected, filter = '') {
+      const filterLower = filter.toLowerCase();
+      const filtered = [...items].filter(item => {
+        if (selected.includes(item)) return false;
+        return !filterLower || item.toLowerCase().includes(filterLower);
+      }).sort();
+
+      if (filtered.length === 0) {
+        dropdownEl.innerHTML = '<div class="combo-option" style="color: var(--fg-tertiary); cursor: default;">No matches</div>';
+        dropdownEl.classList.add('open');
+        return;
+      }
+
+      dropdownEl.innerHTML = filtered.map(item => `
+        <div class="combo-option" data-value="${esc(item)}">
+          <span class="combo-option-mark"></span>
+          <span>${esc(item)}</span>
+        </div>
+      `).join('');
+      dropdownEl.classList.add('open');
+    }
+
+    function renderComboTags(tagsEl, selected, removeFn) {
+      tagsEl.innerHTML = selected.map(item => `
+        <span class="combo-tag">
+          ${esc(item)}
+          <button class="combo-tag-remove" data-value="${esc(item)}">×</button>
+        </span>
+      `).join('');
+    }
+
+    function initComboFilter(inputEl, dropdownEl, tagsEl, items, selectedArray, onChange) {
+      inputEl.addEventListener('focus', () => {
+        renderComboDropdown(inputEl, dropdownEl, items, selectedArray, inputEl.value);
+      });
+
+      inputEl.addEventListener('input', () => {
+        renderComboDropdown(inputEl, dropdownEl, items, selectedArray, inputEl.value);
+      });
+
+      dropdownEl.addEventListener('click', (e) => {
+        const option = e.target.closest('.combo-option');
+        if (!option || option.textContent === 'No matches') return;
+        const value = option.dataset.value;
+        if (!selectedArray.includes(value)) {
+          selectedArray.push(value);
+          inputEl.value = '';
+          renderComboDropdown(inputEl, dropdownEl, items, selectedArray, '');
+          renderComboTags(tagsEl, selectedArray);
+          onChange();
+        }
+      });
+
+      tagsEl.addEventListener('click', (e) => {
+        const removeBtn = e.target.closest('.combo-tag-remove');
+        if (!removeBtn) return;
+        const value = removeBtn.dataset.value;
+        selectedArray = selectedArray.filter(s => s !== value);
+        renderComboTags(tagsEl, selectedArray);
+        onChange();
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest(`#${inputEl.id}`) && !e.target.closest(`#${dropdownEl.id}`)) {
+          dropdownEl.classList.remove('open');
+        }
+      });
+    }
+
     const $ = (id) => document.getElementById(id);
     const refs = {
       searchInput: $('searchInput'),
       typeFilter: $('typeFilter'),
       tenancyFilter: $('tenancyFilter'),
-      cityFilter: $('cityFilter'),
       sortSelect: $('sortSelect'),
       advancedToggle: $('advancedToggle'),
       advancedPanel: $('advancedPanel'),
@@ -1731,6 +1981,12 @@
       minCap: $('minCap'),
       maxCap: $('maxCap'),
       clearFiltersBtn: $('clearFiltersBtn'),
+      stateInput: $('stateInput'),
+      stateDropdown: $('stateDropdown'),
+      stateTags: $('stateTags'),
+      cityInput: $('cityInput'),
+      cityDropdown: $('cityDropdown'),
+      cityTags: $('cityTags'),
       mapViewBtn: $('mapViewBtn'),
       tableViewBtn: $('tableViewBtn'),
       compactViewBtn: $('compactViewBtn'),
@@ -1927,7 +2183,8 @@
           propertyType: processVal(getRawVal(src, 'Property_Type')),
           updatedAt: updated,
           lat: lat != null ? Number(lat) : null,
-          lng: lng != null ? Number(lng) : null
+          lng: lng != null ? Number(lng) : null,
+          forSaleStatus: getRawVal(src, 'For_Sale_Status')
         };
 
         normCache.set(id, data);
@@ -1943,7 +2200,8 @@
           zip: '',
           images: [],
           tenantsList: [],
-          tenancy: 'Unknown'
+          tenancy: 'Unknown',
+          forSaleStatus: true
         };
       }
     }
@@ -2302,6 +2560,7 @@
         
         const isCompact = currentView === 'compact';
         const addrText = isCompact ? `${d.city}, ${d.state}` : buildAddress(d);
+        const typeInfo = getTypeEmoji(d.propertyType);
 
         return `
           <div class="property-card ${selected ? 'selected' : ''}" data-id="${d.id}" tabindex="0" role="button" aria-label="View details for ${esc(d.name)}">
@@ -2310,7 +2569,7 @@
               <img class="card-image" src="${img || placeholderImg}" alt="${esc(d.name)}" loading="lazy" onload="this.previousElementSibling.classList.add('hidden')" onerror="this.src='${placeholderImg}';this.previousElementSibling.classList.add('hidden')">
               <div class="card-badges">
                 ${isNew ? '<span class="badge badge-new">New</span>' : ''}
-                ${d.propertyType ? '<span class="badge badge-type">' + esc(d.propertyType) + '</span>' : ''}
+                ${d.propertyType ? `<span class="badge badge-type" style="background:${typeInfo.color}20; color:${typeInfo.color}; border-color:${typeInfo.color}40;">${typeInfo.emoji} ${esc(d.propertyType)}</span>` : ''}
               </div>
               <div class="card-checkbox">
                 <input type="checkbox" ${selected ? 'checked' : ''} aria-label="Select ${esc(d.name)}">
@@ -2363,7 +2622,7 @@
                 </div>
               </div>
             </td>
-            <td>${esc(d.propertyType) || '-'}</td>
+            <td>${d.propertyType ? getTypeEmoji(d.propertyType).emoji + ' ' + esc(d.propertyType) : '-'}</td>
             <td style="font-weight:700; color:var(--success);">${formatPrice(d.price)}</td>
             <td style="font-weight:700; color:var(--accent);">${formatCap(d.capRate)}</td>
             <td>${esc(d.tenancy) || '-'}</td>
@@ -2378,13 +2637,15 @@
 
     function populateFilters(recs) {
       const types = new Set();
-      const cities = new Set();
+      stateSet = new Set();
+      citySet = new Set();
 
       recs.forEach(r => {
         try {
           const d = normalize(r);
           if (d.propertyType) types.add(d.propertyType);
-          if (d.city) cities.add(d.city);
+          if (d.city) citySet.add(d.city);
+          if (d.state) stateSet.add(d.state);
         } catch (e) {
           console.error('Error in populateFilters:', e);
         }
@@ -2392,20 +2653,18 @@
 
       refs.typeFilter.innerHTML = '<option value="all">All Types</option>';
       [...types].sort().forEach(t => {
-        refs.typeFilter.innerHTML += '<option value="' + esc(t) + '">' + esc(t) + '</option>';
+        const emoji = getTypeEmoji(t);
+        refs.typeFilter.innerHTML += `<option value="${esc(t)}" data-emoji="${emoji.emoji}" data-color="${emoji.color}">${emoji.emoji} ${esc(t)}</option>`;
       });
 
-      refs.cityFilter.innerHTML = '<option value="all">All Cities</option>';
-      [...cities].sort().forEach(c => {
-        refs.cityFilter.innerHTML += '<option value="' + esc(c) + '">' + esc(c) + '</option>';
-      });
+      renderComboDropdown(refs.stateInput, refs.stateDropdown, stateSet, selectedStates, '');
+      renderComboDropdown(refs.cityInput, refs.cityDropdown, citySet, selectedCities, '');
     }
 
     function applyFilters() {
       const search = refs.searchInput.value.toLowerCase().trim();
       const type = refs.typeFilter.value;
       const tenancy = refs.tenancyFilter.value;
-      const city = refs.cityFilter.value;
       const sort = refs.sortSelect.value;
 
       const minPrice = refs.minPrice.value ? Number(refs.minPrice.value) : null;
@@ -2417,21 +2676,25 @@
         try {
           const d = normalize(r);
 
+          if (d.forSaleStatus === false) return false;
+
           const matchSearch = !search ||
             (d.name && d.name.toLowerCase().includes(search)) ||
             (d.address && d.address.toLowerCase().includes(search)) ||
             (d.city && d.city.toLowerCase().includes(search)) ||
+            (d.state && d.state.toLowerCase().includes(search)) ||
             (d.tenant && d.tenant.toLowerCase().includes(search));
 
           const matchType = type === 'all' || d.propertyType === type;
           const matchTenancy = tenancy === 'all' || 
             (d.tenancy && d.tenancy.toString().trim().toLowerCase() === tenancy.toLowerCase());
-          const matchCity = city === 'all' || d.city === city;
+          const matchState = selectedStates.length === 0 || selectedStates.includes(d.state);
+          const matchCity = selectedCities.length === 0 || selectedCities.includes(d.city);
           const matchPrice = (!minPrice || (d.price && d.price >= minPrice)) && (!maxPrice || (d.price && d.price <= maxPrice));
           const matchCap = (!minCap || (d.capRate && d.capRate >= minCap)) && (!maxCap || (d.capRate && d.capRate <= maxCap));
           const matchBoundary = d.lat && d.lng ? isPointInBoundary(d.lat, d.lng) : true;
 
-          return matchSearch && matchType && matchTenancy && matchCity && matchPrice && matchCap && matchBoundary;
+          return matchSearch && matchType && matchTenancy && matchState && matchCity && matchPrice && matchCap && matchBoundary;
         } catch (e) {
           console.error('Error filtering record:', e);
           return false;
@@ -2690,7 +2953,6 @@
     refs.searchInput.addEventListener('input', debouncedFilter);
     refs.typeFilter.addEventListener('change', applyFilters);
     refs.tenancyFilter.addEventListener('change', applyFilters);
-    refs.cityFilter.addEventListener('change', applyFilters);
     refs.sortSelect.addEventListener('change', applyFilters);
 
     refs.minPrice.addEventListener('input', debouncedFilter);
@@ -2703,6 +2965,12 @@
       refs.maxPrice.value = '';
       refs.minCap.value = '';
       refs.maxCap.value = '';
+      refs.stateInput.value = '';
+      refs.cityInput.value = '';
+      selectedStates = [];
+      selectedCities = [];
+      renderComboTags(refs.stateTags, selectedStates);
+      renderComboTags(refs.cityTags, selectedCities);
       clearBoundaryFilter();
     });
 
@@ -2814,9 +3082,22 @@
       refs.searchInput.disabled = false;
       refs.typeFilter.disabled = false;
       refs.tenancyFilter.disabled = false;
-      refs.cityFilter.disabled = false;
       refs.sortSelect.disabled = false;
       refs.exportBtn.disabled = false;
+
+      selectedStates = [];
+      selectedCities = [];
+      renderComboTags(refs.stateTags, selectedStates);
+      renderComboTags(refs.cityTags, selectedCities);
+
+      initComboFilter(
+        refs.stateInput, refs.stateDropdown, refs.stateTags,
+        stateSet, selectedStates, applyFilters
+      );
+      initComboFilter(
+        refs.cityInput, refs.cityDropdown, refs.cityTags,
+        citySet, selectedCities, applyFilters
+      );
 
       populateFilters(allRecords);
       applyFilters();
