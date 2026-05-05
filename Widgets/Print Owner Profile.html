@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -96,7 +97,7 @@
            HEADER — Animated Gradient + Floating Orbs
            ========================================= */
         .header {
-            background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 30%, #2563eb 70%, #7c3aed 100%);
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
             color: white;
             padding: 18px 22px;
             display: flex;
@@ -104,9 +105,9 @@
             align-items: center;
             position: relative;
             overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
-        /* Animated shimmer overlay */
         .header::before {
             content: '';
             position: absolute;
@@ -114,8 +115,8 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 55%);
-            animation: headerShimmer 8s linear infinite;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%);
+            animation: headerShimmer 6s linear infinite;
             pointer-events: none;
         }
         @keyframes headerShimmer {
@@ -123,29 +124,28 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Floating orbs */
         .header-orb {
             position: absolute;
             border-radius: 50%;
             pointer-events: none;
-            opacity: 0.15;
+            opacity: 0.12;
             filter: blur(1px);
         }
         .header-orb.orb-1 {
             width: 120px; height: 120px;
-            background: radial-gradient(circle, #60a5fa, transparent 70%);
+            background: radial-gradient(circle, #7ec8e3, transparent 70%);
             top: -30px; right: 10%;
             animation: orbFloat1 7s ease-in-out infinite;
         }
         .header-orb.orb-2 {
             width: 80px; height: 80px;
-            background: radial-gradient(circle, #a78bfa, transparent 70%);
+            background: radial-gradient(circle, #a8d8ea, transparent 70%);
             bottom: -20px; right: 30%;
             animation: orbFloat2 9s ease-in-out infinite;
         }
         .header-orb.orb-3 {
             width: 60px; height: 60px;
-            background: radial-gradient(circle, #38bdf8, transparent 70%);
+            background: radial-gradient(circle, #87ceeb, transparent 70%);
             top: 10px; left: 40%;
             animation: orbFloat3 6s ease-in-out infinite;
         }
@@ -204,32 +204,33 @@
             text-overflow: ellipsis;
         }
 
-        .header-actions { display: flex; gap: 8px; position: relative; z-index: 2; flex-shrink: 0; }
+        .header-actions { display: flex; gap: 6px; position: relative; z-index: 2; flex-shrink: 0; }
         .btn-action {
+            width: 34px;
+            height: 34px;
             background: rgba(255,255,255,0.1);
             border: 1px solid rgba(255,255,255,0.18);
             color: rgba(255,255,255,0.9);
-            padding: 7px 14px;
+            padding: 0;
             border-radius: var(--radius-sm);
             cursor: pointer;
-            font-weight: 600;
-            font-size: 11px;
             font-family: inherit;
             transition: all 0.2s;
             display: flex;
             align-items: center;
-            gap: 5px;
+            justify-content: center;
             backdrop-filter: blur(6px);
             -webkit-backdrop-filter: blur(6px);
         }
         .btn-action:hover { background: rgba(255,255,255,0.22); transform: translateY(-1px); }
-        .btn-action.primary {
+        .btn-action.active {
             background: white;
             color: var(--primary-dark);
             border-color: white;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-        .btn-action.primary:hover { background: #f0f4ff; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+        .btn-action.active:hover { background: #f0f4ff; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+        .btn-action svg { width: 16px; height: 16px; }
 
         /* =========================================
            CONTENT
@@ -736,6 +737,189 @@
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
         /* =========================================
+           VIEW PANELS
+           ========================================= */
+        .view-panel { display: none; }
+        .view-panel.active { display: block; }
+
+        /* =========================================
+           PHONE MANAGER — Embedded Styles
+           ========================================= */
+        .pm-toolbar {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 10px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .pm-input-row { display: flex; gap: 8px; }
+        .pm-input {
+            flex: 1;
+            padding: 7px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 500;
+            font-family: inherit;
+            transition: border-color 0.15s, box-shadow 0.15s;
+            background: var(--bg-body);
+            color: var(--text-main);
+            min-width: 0;
+        }
+        .pm-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2.5px rgba(37,99,235,0.1); background: #fff; }
+        .pm-input::placeholder { color: var(--text-muted); font-weight: 400; }
+        .pm-btn-check {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0 16px;
+            border-radius: var(--radius-sm);
+            font-weight: 700;
+            font-size: 12px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.15s;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .pm-btn-check:hover { background: var(--primary-dark); }
+        .pm-action-row { display: flex; align-items: center; gap: 8px; }
+        .pm-action-label { font-size: 10px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; flex-shrink: 0; }
+        .pm-dial-group { display: flex; gap: 5px; }
+        .pm-btn-icon {
+            width: 28px; height: 28px;
+            border-radius: 5px;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: border-color 0.15s, transform 0.1s, box-shadow 0.15s;
+        }
+        .pm-btn-icon:hover { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37,99,235,0.1); }
+        .pm-btn-icon:active { transform: scale(0.95); }
+        .pm-btn-icon img { width: 15px; height: 15px; object-fit: contain; }
+        .pm-check-result {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 8px 10px;
+            font-size: 12px;
+            display: none;
+            animation: pmSlideDown 0.2s ease;
+        }
+        .pm-check-result.active { display: block; }
+        .pm-result-header { font-weight: 700; display: flex; align-items: center; gap: 5px; font-size: 12px; }
+        .pm-result-actions { margin-top: 8px; display: flex; gap: 6px; }
+        .pm-btn-sm {
+            padding: 5px 11px; border-radius: 5px; font-size: 11px; font-weight: 600;
+            font-family: inherit; cursor: pointer; transition: all 0.1s;
+            border: 1px solid var(--border); background: var(--bg-card);
+        }
+        .pm-btn-sm:hover { background: var(--bg-body); }
+        .pm-btn-sm.primary { background: var(--primary); color: white; border: none; }
+        .pm-btn-sm.primary:hover { background: var(--primary-dark); }
+        .pm-btn-sm.secondary { background: var(--bg-body); color: var(--text-secondary); }
+
+        .pm-list { padding: 10px 20px 14px; }
+        .pm-section { margin-bottom: 14px; }
+        .pm-section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; padding: 0 2px; }
+        .pm-section-title { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); }
+        .pm-section-badge { font-size: 9px; font-weight: 700; padding: 1px 7px; border-radius: 8px; background: var(--primary-light); color: var(--primary-dark); }
+        .pm-section-badge.danger { background: #fef2f2; color: #dc2626; }
+
+        .pm-phone-row {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: var(--radius-sm);
+            padding: 8px 12px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .pm-phone-row:hover { border-color: #cbd5e1; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+        .pm-phone-row.wrong { background: #fef2f2; border-color: #fecaca; border-left-color: #dc2626; }
+        .pm-phone-row.wrong:hover { box-shadow: 0 1px 4px rgba(220,38,38,0.06); }
+        .pm-row-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--primary); min-width: 24px; flex-shrink: 0; }
+        .pm-phone-row.wrong .pm-row-label { color: #dc2626; opacity: 0.8; }
+        .pm-row-number { font-size: 14px; font-weight: 700; color: var(--text-main); text-decoration: none; letter-spacing: -0.3px; white-space: nowrap; flex-shrink: 0; }
+        .pm-row-number:hover { color: var(--primary); }
+        .pm-phone-row.wrong .pm-row-number { color: #dc2626; text-decoration: line-through; text-decoration-thickness: 1.5px; }
+        .pm-row-note { font-size: 11px; color: var(--text-secondary); font-style: italic; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; flex: 1; }
+        .pm-phone-row.wrong .pm-row-note { color: #dc2626; opacity: 0.6; }
+        .pm-row-divider { width: 1px; height: 18px; background: var(--border); flex-shrink: 0; }
+        .pm-phone-row.wrong .pm-row-divider { background: #fecaca; }
+        .pm-row-actions { display: flex; gap: 5px; flex-shrink: 0; align-items: center; }
+        .pm-row-actions .pm-btn-icon { width: 26px; height: 26px; border-radius: 5px; }
+        .pm-row-actions .pm-btn-icon img { width: 13px; height: 13px; }
+        .pm-row-btn {
+            padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 600;
+            font-family: inherit; cursor: pointer; border: none; transition: opacity 0.1s, transform 0.1s; white-space: nowrap;
+        }
+        .pm-row-btn:hover { opacity: 0.85; }
+        .pm-row-btn:active { transform: scale(0.96); }
+        .pm-row-btn.mark-wrong { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+        .pm-row-btn.mark-wrong:hover { color: #dc2626; border-color: #fecaca; background: #fef2f2; }
+        .pm-row-btn.restore { background: var(--bg-card); color: var(--text-secondary); border: 1px solid #fecaca; }
+        .pm-row-btn.restore:hover { background: white; color: var(--text-main); }
+        .pm-row-tag { font-size: 8px; font-weight: 700; padding: 2px 6px; border-radius: 3px; background: #dc2626; color: white; text-transform: uppercase; letter-spacing: 0.3px; flex-shrink: 0; line-height: 1.3; }
+        .pm-empty-msg { text-align: center; padding: 16px 8px; color: var(--text-muted); font-size: 11px; font-style: italic; }
+
+        .pm-modal-overlay {
+            position: fixed; inset: 0; background: rgba(15,23,42,0.35);
+            backdrop-filter: blur(3px); display: none; align-items: center;
+            justify-content: center; z-index: 1001;
+        }
+        .pm-modal-overlay.active { display: flex; animation: pmFadeIn 0.15s ease; }
+        .pm-modal-box {
+            background: white; border-radius: 10px; padding: 18px;
+            max-width: 340px; width: calc(100% - 24px);
+            box-shadow: 0 16px 40px rgba(0,0,0,0.14); animation: pmModalIn 0.2s ease;
+        }
+        .pm-modal-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+        .pm-modal-desc { font-size: 12px; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.5; }
+        .pm-modal-input {
+            width: 100%; padding: 7px 10px; border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm); font-size: 13px; font-family: inherit;
+            margin-bottom: 14px; transition: border-color 0.15s, box-shadow 0.15s; color: var(--text-main);
+        }
+        .pm-modal-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2.5px rgba(37,99,235,0.1); }
+        .pm-modal-input.hidden { display: none; }
+        .pm-modal-actions { display: flex; gap: 6px; justify-content: flex-end; }
+
+        .pm-toast-container {
+            position: fixed; bottom: 10px; right: 10px; z-index: 2000;
+            display: flex; flex-direction: column; gap: 5px; pointer-events: none;
+        }
+        .pm-toast {
+            background: white; border-radius: var(--radius-sm); padding: 8px 12px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.1); font-size: 12px; font-weight: 600;
+            display: flex; align-items: center; gap: 6px; animation: pmToastIn 0.25s ease;
+            pointer-events: auto; border-left: 3px solid var(--primary); max-width: 260px; color: var(--text-main);
+        }
+        .pm-toast.error { border-left-color: #dc2626; }
+        .pm-toast.success { border-left-color: #059669; }
+        .pm-toast.warning { border-left-color: #b45309; }
+        .pm-toast.exiting { animation: pmToastOut 0.2s ease forwards; }
+
+        @keyframes pmSlideDown { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pmFadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pmModalIn { from { opacity: 0; transform: scale(0.97) translateY(4px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        @keyframes pmToastIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes pmToastOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(20px); } }
+
+        body.pdf-generating .view-panel.phone-manager-view { display: none !important; }
+        body.pdf-generating #btnPhone { display: none !important; }
+
+        /* =========================================
            SUBTLE ANIMATION — Page Load
            ========================================= */
         @keyframes fadeInUp {
@@ -766,18 +950,21 @@
                 <div class="owner-sub" id="ownerSub">Choose a row to view details</div>
             </div>
             <div class="header-actions">
-                <button id="btnAI" class="btn-action">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 0-4 4v2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2h-2V6a4 4 0 0 0-4-4z"/><circle cx="12" cy="15" r="2"/></svg>
-                    AI Export
+                <button id="btnPhone" class="btn-action" title="Phone Manager">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                 </button>
-                <button id="btnExport" class="btn-action primary">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                    Export PDF
+                <button id="btnAI" class="btn-action" title="AI Export">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 0-4 4v2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2h-2V6a4 4 0 0 0-4-4z"/><circle cx="12" cy="15" r="2"/></svg>
+                </button>
+                <button id="btnExport" class="btn-action active" title="Export PDF">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                 </button>
             </div>
         </header>
 
-        <!-- Content -->
+        <!-- Owner Profile View -->
+        <div class="view-panel active" id="profileView">
+
         <main class="content-area">
             <div id="noData" class="empty-state hidden">
                 <div class="empty-icon">📋</div>
@@ -828,6 +1015,37 @@
                 </section>
             </div>
         </main>
+
+        </div><!-- end profileView -->
+
+        <!-- Phone Manager View -->
+        <div class="view-panel phone-manager-view" id="phoneView">
+            <div class="pm-toolbar">
+                <div class="pm-input-row">
+                    <input type="text" id="pm-input-phone" class="pm-input" placeholder="Enter number to check or dial..." aria-label="Phone number input">
+                    <button class="pm-btn-check" id="pm-btn-check" aria-label="Check record">
+                        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        Check
+                    </button>
+                </div>
+                <div class="pm-action-row">
+                    <span class="pm-action-label">Dial</span>
+                    <div class="pm-dial-group">
+                        <button class="pm-btn-icon" id="pm-btn-webex" title="Webex" aria-label="Webex">
+                            <img src="https://img.icons8.com/fluent/512/webex.png" alt="">
+                        </button>
+                        <button class="pm-btn-icon" id="pm-btn-tel" title="Phone" aria-label="Phone">
+                            <img src="https://static.wikia.nocookie.net/logopedia/images/b/b2/Microsoft_Phone_Link_%282022%29.svg" alt="">
+                        </button>
+                        <button class="pm-btn-icon" id="pm-btn-sms" title="SMS" aria-label="SMS">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/IMessage_logo.svg/1280px-IMessage_logo.svg.png" alt="">
+                        </button>
+                    </div>
+                </div>
+                <div id="pm-check-result" class="pm-check-result"></div>
+            </div>
+            <div class="pm-list" id="pm-main-list"></div>
+        </div><!-- end phoneView -->
     </div>
 
     <!-- AI Modal -->
@@ -849,18 +1067,35 @@
         </div>
     </div>
 
+    <!-- Phone Manager Modal -->
+    <div class="pm-modal-overlay" id="pm-modal-overlay" role="dialog" aria-modal="true">
+        <div class="pm-modal-box">
+            <div class="pm-modal-title" id="pm-modal-title"></div>
+            <div class="pm-modal-desc" id="pm-modal-desc"></div>
+            <input type="text" class="pm-modal-input" id="pm-modal-input">
+            <div class="pm-modal-actions" id="pm-modal-actions"></div>
+        </div>
+    </div>
+
+    <!-- Phone Manager Toasts -->
+    <div class="pm-toast-container" id="pm-toast-container" aria-live="polite"></div>
+
     <script>
-        // Configure marked for safe rendering
-        marked.setOptions({
-            breaks: true,
-            gfm: true
-        });
+        marked.setOptions({ breaks: true, gfm: true });
 
         document.addEventListener('DOMContentLoaded', () => {
 
             const CONFIG = {
                 tableId: 'Owners_',
-                propTable: 'Properties_'
+                propTable: 'Properties_',
+                phoneColumns: ['Phone', 'Phone_2', 'Phone_3', 'Phone_4'],
+                noteMap: {
+                    'Phone':   'Phone_1_Notes',
+                    'Phone_2': 'Phone_2_Notes',
+                    'Phone_3': 'Phone_3_Notes',
+                    'Phone_4': 'Phone_4_Notes'
+                },
+                wrongCol: 'Wrong_Phone'
             };
 
             const $ = id => document.getElementById(id);
@@ -905,7 +1140,6 @@
                 });
             }
 
-            // Avatar Logic
             function getInitials(name) {
                 if (!name) return '?';
                 return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
@@ -929,7 +1163,6 @@
                 return (age >= 60) ? images.olderMan : images.man;
             }
 
-            // --- Collapsible Section Toggle ---
             $('propertyToggle').addEventListener('click', () => {
                 $('propertySection').classList.toggle('collapsed');
             });
@@ -957,6 +1190,25 @@
                 aiClose: $('aiClose'),
                 main: $('mainContent')
             };
+
+            // ── TAB SWITCHING ──
+            const btnPhone = $('btnPhone');
+            const profileView = $('profileView');
+            const phoneView = $('phoneView');
+            let activeTab = 'profile';
+
+            function switchTab(tab) {
+                activeTab = tab;
+                btnPhone.classList.toggle('active', tab === 'phone');
+                DOM.btnExport.classList.toggle('active', tab === 'profile');
+                profileView.classList.toggle('active', tab === 'profile');
+                phoneView.classList.toggle('active', tab === 'phone');
+                if (tab === 'phone') pmRender();
+            }
+
+            btnPhone.addEventListener('click', () => {
+                switchTab(activeTab === 'phone' ? 'profile' : 'phone');
+            });
 
             function renderOwner(record) {
                 currentRecord = record;
@@ -989,6 +1241,8 @@
                 renderStats();
                 renderActivity();
                 renderProperties();
+
+                if (activeTab === 'phone') pmRender();
             }
 
             function renderBadges() {
@@ -1051,7 +1305,6 @@
                 notes.forEach(n => {
                     if(n.t) {
                         hasContent = true;
-                        // Render markdown content as HTML
                         const renderedContent = marked.parse(String(n.t));
                         html += `
                             <div class="timeline-item">
@@ -1135,7 +1388,7 @@
                 }
             }
 
-            // --- AI EXPORT ---
+            // ── AI EXPORT ──
             function generateAIContext() {
                 if(!currentRecord) return '';
 
@@ -1195,7 +1448,6 @@
 
             DOM.aiClose.addEventListener('click', () => DOM.aiModal.classList.remove('active'));
 
-            // Close modal on overlay click
             DOM.aiModal.addEventListener('click', (e) => {
                 if (e.target === DOM.aiModal) DOM.aiModal.classList.remove('active');
             });
@@ -1207,20 +1459,20 @@
                 });
             });
 
-            // --- PDF EXPORT (Optimized for html2canvas compatibility) ---
+            // ── PDF EXPORT ──
             DOM.btnExport.addEventListener('click', async () => {
                 if(!currentRecord) return;
 
-                // Update button state
                 const originalBtnHTML = DOM.btnExport.innerHTML;
                 DOM.btnExport.innerHTML = 'Preparing...';
                 DOM.btnExport.disabled = true;
 
-                // Expand all collapsed sections for PDF
+                const prevTab = activeTab;
+                switchTab('profile');
+
                 const sections = DOM.main.querySelectorAll('.section.collapsed');
                 sections.forEach(s => s.classList.remove('collapsed'));
 
-                // Pre-Flight Check: Clean up broken images that might crash the canvas parser
                 const images = DOM.main.querySelectorAll('img');
                 images.forEach(img => {
                     if (!img.complete || img.naturalHeight === 0) {
@@ -1232,10 +1484,8 @@
                     }
                 });
 
-                // Add PDF generation class to resolve css animations/overflow/blur
                 document.body.classList.add('pdf-generating');
-                
-                // Allow the DOM to repaint and settle with the new PDF-specific styles
+
                 await new Promise(r => setTimeout(r, 600));
 
                 const el = DOM.main;
@@ -1243,10 +1493,10 @@
                     margin:       [0.3, 0.3, 0.3, 0.3],
                     filename:     `${currentRecord.Name || 'Report'}.pdf`,
                     image:        { type: 'jpeg', quality: 0.95 },
-                    html2canvas:  { 
-                        scale: 2, 
-                        useCORS: true, 
-                        allowTaint: true, 
+                    html2canvas:  {
+                        scale: 2,
+                        useCORS: true,
+                        allowTaint: true,
                         logging: false,
                         scrollY: 0,
                         scrollX: 0,
@@ -1263,14 +1513,392 @@
                     console.error("PDF Error", e);
                     alert("Error generating PDF: " + e.message);
                 } finally {
-                    // Restore standard UI states
                     document.body.classList.remove('pdf-generating');
                     DOM.btnExport.innerHTML = originalBtnHTML;
                     DOM.btnExport.disabled = false;
-                    renderProperties(); // Re-render to restore any replaced images
+                    renderProperties();
                 }
             });
 
+            // =====================================================
+            //  PHONE MANAGER — Full Integration
+            // =====================================================
+
+            const pmSanitize = (str) => (str && typeof str === 'string') ? str.replace(/\D/g, '') : '';
+
+            const pmFormatPhone = (str) => {
+                if (!str) return '';
+                const c = pmSanitize(str);
+                const m = c.match(/^(\d{3})(\d{3})(\d{4})$/);
+                return m ? `(${m[1]}) ${m[2]}-${m[3]}` : str;
+            };
+
+            const pmFormatInput = (e) => {
+                const input = e.target;
+                let v = input.value.replace(/\D/g, '').slice(0, 10);
+                if (v.length > 6)      input.value = `(${v.slice(0,3)}) ${v.slice(3,6)}-${v.slice(6)}`;
+                else if (v.length > 3) input.value = `(${v.slice(0,3)}) ${v.slice(3)}`;
+                else if (v.length > 0) input.value = `(${v}`;
+            };
+
+            const pmColLabel = (col) => col === 'Phone' ? 'Ph1' : col.replace('Phone_', 'Ph');
+
+            const pmParseWrongPhoneString = (str) => {
+                if (!str) return [];
+                return str.split(';').map(s => s.trim()).filter(s => s).map(item => {
+                    const i = item.lastIndexOf(' (');
+                    if (i !== -1 && item.endsWith(')')) {
+                        return { number: item.substring(0, i).trim(), note: item.substring(i + 2, item.length - 1).trim() };
+                    }
+                    return { number: item, note: '' };
+                });
+            };
+
+            async function pmUpdateRecord(updates) {
+                if (!currentRecord) return;
+                try {
+                    await grist.docApi.applyUserActions([['UpdateRecord', CONFIG.tableId, currentRecord.id, updates]]);
+                } catch (err) {
+                    console.error("Grist Update Error:", err);
+                    pmShowToast("Failed to save changes", "error", 4000);
+                }
+            }
+
+            // ── PM Modal ──
+            function pmShowModal({ title, description, placeholder = '', defaultValue = '', confirmText = 'Confirm', cancelText = 'Cancel', onConfirm, onCancel, showInput = true }) {
+                const modalOverlay = $('pm-modal-overlay');
+                const modalTitle = $('pm-modal-title');
+                const modalDesc = $('pm-modal-desc');
+                const modalInput = $('pm-modal-input');
+                const modalActions = $('pm-modal-actions');
+
+                modalTitle.textContent = title;
+                modalDesc.textContent = description || '';
+
+                if (showInput) {
+                    modalInput.classList.remove('hidden');
+                    modalInput.value = defaultValue;
+                    modalInput.placeholder = placeholder;
+                } else {
+                    modalInput.classList.add('hidden');
+                }
+
+                modalActions.innerHTML = '';
+
+                const cancelBtn = document.createElement('button');
+                cancelBtn.className = 'pm-btn-sm secondary';
+                cancelBtn.textContent = cancelText;
+                cancelBtn.onclick = () => { pmCloseModal(); if (onCancel) onCancel(); };
+
+                const confirmBtn = document.createElement('button');
+                confirmBtn.className = 'pm-btn-sm primary';
+                confirmBtn.textContent = confirmText;
+                confirmBtn.onclick = () => {
+                    const value = showInput ? modalInput.value : true;
+                    pmCloseModal();
+                    if (onConfirm) onConfirm(value);
+                };
+
+                modalActions.appendChild(cancelBtn);
+                modalActions.appendChild(confirmBtn);
+                modalOverlay.classList.add('active');
+
+                requestAnimationFrame(() => {
+                    if (showInput) modalInput.focus();
+                    else confirmBtn.focus();
+                });
+
+                modalInput.onkeydown = (e) => {
+                    if (e.key === 'Enter')  confirmBtn.click();
+                    if (e.key === 'Escape') cancelBtn.click();
+                };
+                modalOverlay.onkeydown = (e) => {
+                    if (e.key === 'Escape') cancelBtn.click();
+                };
+            }
+
+            function pmCloseModal() {
+                const modalOverlay = $('pm-modal-overlay');
+                const modalInput = $('pm-modal-input');
+                modalOverlay.classList.remove('active');
+                modalInput.onkeydown = null;
+                modalOverlay.onkeydown = null;
+            }
+
+            $('pm-modal-overlay').addEventListener('mousedown', (e) => {
+                if (e.target === $('pm-modal-overlay')) pmCloseModal();
+            });
+
+            // ── PM Toasts ──
+            function pmShowToast(message, type = 'info', duration = 3000) {
+                const toast = document.createElement('div');
+                toast.className = `pm-toast ${type}`;
+                const icons = {
+                    success: '<svg width="13" height="13" fill="none" stroke="#059669" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>',
+                    error:   '<svg width="13" height="13" fill="none" stroke="#dc2626" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>',
+                    warning: '<svg width="13" height="13" fill="none" stroke="#b45309" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>',
+                    info:    '<svg width="13" height="13" fill="none" stroke="#2563eb" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
+                };
+                toast.innerHTML = `${icons[type] || icons.info}<span>${message}</span>`;
+                $('pm-toast-container').appendChild(toast);
+                setTimeout(() => {
+                    toast.classList.add('exiting');
+                    setTimeout(() => toast.remove(), 220);
+                }, duration);
+            }
+
+            // ── PM Render ──
+            function pmRender() {
+                const mainList = $('pm-main-list');
+                if (!currentRecord) {
+                    mainList.innerHTML = '<div class="pm-empty-msg">Select a record to view numbers</div>';
+                    return;
+                }
+
+                let savedCount = 0;
+                let savedRows = '';
+
+                CONFIG.phoneColumns.forEach(col => {
+                    const val = currentRecord[col];
+                    if (val && String(val).trim()) {
+                        savedCount++;
+                        const note  = currentRecord[CONFIG.noteMap[col]] || '';
+                        const clean = pmSanitize(val);
+                        const fmt   = pmFormatPhone(val);
+                        const noteHtml = note
+                            ? `<span class="pm-row-note" title="${note}">${marked.parseInline(note)}</span>`
+                            : '';
+
+                        savedRows += `
+                        <div class="pm-phone-row">
+                            <span class="pm-row-label">${pmColLabel(col)}</span>
+                            <a href="tel:${clean}" class="pm-row-number">${fmt}</a>
+                            ${noteHtml}
+                            <span style="flex:1;min-width:4px;"></span>
+                            <div class="pm-row-divider"></div>
+                            <div class="pm-row-actions">
+                                <button class="pm-btn-icon" title="Webex" onclick="window.open('sip:${clean}')"><img src="https://img.icons8.com/fluent/512/webex.png" alt=""></button>
+                                <button class="pm-btn-icon" title="Call" onclick="window.open('tel:${clean}')"><img src="https://static.wikia.nocookie.net/logopedia/images/b/b2/Microsoft_Phone_Link_%282022%29.svg" alt=""></button>
+                                <button class="pm-btn-icon" title="SMS" onclick="window.open('sms:${clean}')"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/IMessage_logo.svg/1280px-IMessage_logo.svg.png" alt=""></button>
+                                <div class="pm-row-divider"></div>
+                                <button class="pm-row-btn mark-wrong" data-field="${col}">Wrong</button>
+                            </div>
+                        </div>`;
+                    }
+                });
+
+                const wrongList = pmParseWrongPhoneString(currentRecord[CONFIG.wrongCol]);
+                let wrongRows = '';
+
+                wrongList.forEach((w, i) => {
+                    const noteHtml = w.note
+                        ? `<span class="pm-row-note" title="${w.note}">${marked.parseInline(w.note)}</span>`
+                        : '';
+
+                    wrongRows += `
+                    <div class="pm-phone-row wrong">
+                        <span class="pm-row-label">Bad</span>
+                        <span class="pm-row-number">${pmFormatPhone(w.number)}</span>
+                        ${noteHtml}
+                        <span style="flex:1;min-width:4px;"></span>
+                        <div class="pm-row-divider"></div>
+                        <span class="pm-row-tag">Wrong</span>
+                        <button class="pm-row-btn restore" data-index="${i}">Restore</button>
+                    </div>`;
+                });
+
+                mainList.innerHTML = `
+                    <div class="pm-section">
+                        <div class="pm-section-head">
+                            <span class="pm-section-title">Active Numbers</span>
+                            <span class="pm-section-badge">${savedCount}</span>
+                        </div>
+                        ${savedRows || '<div class="pm-empty-msg">No active numbers</div>'}
+                    </div>
+                    <div class="pm-section">
+                        <div class="pm-section-head">
+                            <span class="pm-section-title">Do Not Call</span>
+                            ${wrongList.length ? `<span class="pm-section-badge danger">${wrongList.length}</span>` : ''}
+                        </div>
+                        ${wrongRows || '<div class="pm-empty-msg">None marked as wrong</div>'}
+                    </div>`;
+
+                pmAttachListeners();
+            }
+
+            function pmAttachListeners() {
+                document.querySelectorAll('.mark-wrong').forEach(btn => {
+                    btn.onclick = () => {
+                        const field = btn.dataset.field;
+                        const number = currentRecord[field];
+                        const noteField = CONFIG.noteMap[field];
+                        const existingNote = currentRecord[noteField] || '';
+
+                        pmShowModal({
+                            title: 'Mark as Wrong',
+                            description: `Remove ${pmFormatPhone(number)} from active numbers.`,
+                            placeholder: 'Reason (optional)',
+                            defaultValue: existingNote,
+                            confirmText: 'Mark Wrong',
+                            cancelText: 'Cancel',
+                            onConfirm: async (reason) => {
+                                const entry = `${pmFormatPhone(number)}${reason ? ` (${reason})` : ''}; `;
+                                const currentWrong = currentRecord[CONFIG.wrongCol] || '';
+                                const updates = {
+                                    [field]: null,
+                                    [noteField]: null,
+                                    [CONFIG.wrongCol]: currentWrong + entry
+                                };
+                                await pmUpdateRecord(updates);
+                                currentRecord[field] = null;
+                                currentRecord[noteField] = null;
+                                currentRecord[CONFIG.wrongCol] = (currentRecord[CONFIG.wrongCol] || '') + entry;
+                                pmRender();
+                                pmShowToast(`${pmFormatPhone(number)} marked wrong`, 'warning');
+                            }
+                        });
+                    };
+                });
+
+                document.querySelectorAll('.restore').forEach(btn => {
+                    btn.onclick = () => {
+                        const idx = parseInt(btn.dataset.index, 10);
+                        const list = pmParseWrongPhoneString(currentRecord[CONFIG.wrongCol]);
+                        const entry = list[idx];
+                        if (!entry) return;
+
+                        pmShowModal({
+                            title: 'Restore Number',
+                            description: `Remove ${pmFormatPhone(entry.number)} from Do Not Call?`,
+                            showInput: false,
+                            confirmText: 'Restore',
+                            cancelText: 'Cancel',
+                            onConfirm: async () => {
+                                const remaining = list.filter((_, i) => i !== idx);
+                                const newVal = remaining.map(w => `${w.number}${w.note ? ` (${w.note})` : ''}`).join('; ') + (remaining.length ? ';' : '');
+                                await pmUpdateRecord({ [CONFIG.wrongCol]: newVal });
+                                currentRecord[CONFIG.wrongCol] = newVal;
+                                pmRender();
+                                pmShowToast(`${pmFormatPhone(entry.number)} restored`, 'success');
+                            }
+                        });
+                    };
+                });
+            }
+
+            // ── PM Quick Dial ──
+            function pmHandleDial(type) {
+                const input = $('pm-input-phone');
+                const digits = pmSanitize(input.value);
+                if (digits.length < 10) { pmShowToast('Enter a 10-digit number first', 'error'); return; }
+                window.open(type === 'webex' ? `sip:${digits}` : type === 'sms' ? `sms:${digits}` : `tel:${digits}`, '_blank');
+            }
+
+            $('pm-btn-webex').addEventListener('click', () => pmHandleDial('webex'));
+            $('pm-btn-tel').addEventListener('click', () => pmHandleDial('tel'));
+            $('pm-btn-sms').addEventListener('click', () => pmHandleDial('sms'));
+            $('pm-input-phone').addEventListener('input', pmFormatInput);
+            $('pm-input-phone').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('pm-btn-check').click(); });
+
+            // ── PM Check ──
+            $('pm-btn-check').addEventListener('click', () => {
+                const input = $('pm-input-phone');
+                const checkResult = $('pm-check-result');
+                const digits = pmSanitize(input.value);
+
+                if (!currentRecord) { pmShowToast('Select a record first', 'error'); return; }
+                if (digits.length < 10) {
+                    checkResult.innerHTML = '<div style="color:#dc2626;font-weight:600;font-size:12px;">Enter a valid 10-digit number.</div>';
+                    checkResult.classList.add('active');
+                    return;
+                }
+
+                const existing = [];
+                CONFIG.phoneColumns.forEach(col => {
+                    if (pmSanitize(currentRecord[col]) === digits) existing.push(pmColLabel(col));
+                });
+                pmParseWrongPhoneString(currentRecord[CONFIG.wrongCol]).forEach(w => {
+                    if (pmSanitize(w.number) === digits) existing.push('Do Not Call');
+                });
+
+                if (existing.length > 0) {
+                    checkResult.innerHTML = `
+                        <div class="pm-result-header" style="color:#dc2626;">
+                            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                            Duplicate
+                        </div>
+                        <div style="font-size:11px;color:var(--text-secondary);">Found in: ${existing.join(', ')}</div>`;
+                    checkResult.classList.add('active');
+                    return;
+                }
+
+                const firstEmpty = CONFIG.phoneColumns.find(col => !currentRecord[col]);
+
+                let html = `
+                    <div class="pm-result-header" style="color:#059669;">
+                        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                        New Number
+                    </div>
+                    <div style="font-size:11px;color:var(--text-secondary);margin-top:2px;"><strong>${pmFormatPhone(digits)}</strong> not on file.</div>
+                    <div class="pm-result-actions">`;
+
+                if (firstEmpty) {
+                    html += `<button class="pm-btn-sm primary" id="pm-btn-add-saved">Add to ${pmColLabel(firstEmpty)}</button>`;
+                } else {
+                    html += `<span style="font-size:10px;color:var(--text-muted);line-height:28px;">All slots full</span>`;
+                }
+
+                html += `<button class="pm-btn-sm secondary" id="pm-btn-add-wrong">Mark Wrong</button></div>`;
+
+                checkResult.innerHTML = html;
+                checkResult.classList.add('active');
+
+                const addBtn = $('pm-btn-add-saved');
+                if (addBtn) {
+                    addBtn.onclick = () => {
+                        pmShowModal({
+                            title: 'Add Number',
+                            description: `Add ${pmFormatPhone(digits)} to ${pmColLabel(firstEmpty)}.`,
+                            placeholder: 'Note (optional)',
+                            confirmText: 'Add',
+                            cancelText: 'Cancel',
+                            onConfirm: async (note) => {
+                                const updates = { [firstEmpty]: pmFormatPhone(digits) };
+                                if (note) updates[CONFIG.noteMap[firstEmpty]] = note;
+                                await pmUpdateRecord(updates);
+                                currentRecord[firstEmpty] = pmFormatPhone(digits);
+                                if (note) currentRecord[CONFIG.noteMap[firstEmpty]] = note;
+                                checkResult.classList.remove('active');
+                                input.value = '';
+                                pmRender();
+                                pmShowToast(`${pmFormatPhone(digits)} added`, 'success');
+                            }
+                        });
+                    };
+                }
+
+                $('pm-btn-add-wrong').onclick = () => {
+                    pmShowModal({
+                        title: 'Mark as Wrong',
+                        description: `Add ${pmFormatPhone(digits)} to Do Not Call.`,
+                        placeholder: 'Reason (optional)',
+                        confirmText: 'Mark Wrong',
+                        cancelText: 'Cancel',
+                        onConfirm: async (reason) => {
+                            const entry = `${pmFormatPhone(digits)}${reason ? ` (${reason})` : ''}; `;
+                            const newVal = (currentRecord[CONFIG.wrongCol] || '') + entry;
+                            await pmUpdateRecord({ [CONFIG.wrongCol]: newVal });
+                            currentRecord[CONFIG.wrongCol] = newVal;
+                            checkResult.classList.remove('active');
+                            input.value = '';
+                            pmRender();
+                            pmShowToast(`${pmFormatPhone(digits)} marked wrong`, 'warning');
+                        }
+                    });
+                };
+            });
+
+            // ── GRIST INIT ──
             grist.ready({ requiredAccess: 'full' });
             grist.onRecord(record => renderOwner(record));
 
