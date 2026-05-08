@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,7 +6,6 @@
     <title>Owner Portfolio Report</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         :root {
@@ -45,40 +43,21 @@
         }
 
         /* =========================================
-           PDF MODE — Critical Fixes for html2canvas
+           PRINT STYLESHEET — Native Browser Print
            ========================================= */
-        body.pdf-generating { background: white; }
-        
-        /* Disable animations, transitions, and backdrop-filters during PDF render */
-        body.pdf-generating *, body.pdf-generating *::before, body.pdf-generating *::after {
-            animation: none !important;
-            transition: none !important;
-            backdrop-filter: none !important;
-            -webkit-backdrop-filter: none !important;
+        @media print {
+            @page { size: letter portrait; margin: 0.45in 0.4in; }
+            html, body { background: white !important; margin: 0 !important; padding: 0 !important; }
+            .header-actions, .header-orb, .header::before,
+            .ai-modal-overlay, .pm-modal-overlay, .pm-toast-container,
+            .view-panel.phone-manager-view, #btnPhone { display: none !important; }
+            .widget-container { max-width: 100% !important; box-shadow: none !important; border: none !important; margin: 0 !important; min-height: auto !important; }
+            .section-body { max-height: none !important; opacity: 1 !important; overflow: visible !important; }
+            .section, .property-card, .timeline-item { page-break-inside: avoid; break-inside: avoid; }
+            .property-grid { grid-template-columns: repeat(2, 1fr) !important; }
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            .content-area { padding: 12px 16px !important; }
         }
-
-        body.pdf-generating .widget-container { 
-            box-shadow: none !important; 
-            border: none !important; 
-            margin: 0; 
-            max-width: 100%; 
-            overflow: visible !important;
-        }
-        body.pdf-generating .content-area { overflow: visible !important; }
-        body.pdf-generating #activeView { overflow: visible !important; }
-        body.pdf-generating .btn-action { display: none !important; }
-        body.pdf-generating .ai-modal { display: none !important; }
-        
-        /* Ensure collapsible sections are forced open and visible */
-        body.pdf-generating .section-body { 
-            max-height: none !important; 
-            opacity: 1 !important; 
-            overflow: visible !important; 
-        }
-        
-        /* Hide animated orbs during PDF render */
-        body.pdf-generating .header-orb { display: none !important; }
-        body.pdf-generating .header::before { display: none !important; }
 
 
         .widget-container {
@@ -524,6 +503,7 @@
             break-inside: avoid;
             page-break-inside: avoid;
         }
+        .property-card { cursor: pointer; }
         .property-card:hover {
             box-shadow: var(--shadow-lg);
             border-color: #cbd5e1;
@@ -532,79 +512,86 @@
 
         .prop-img-container {
             height: 140px;
-            background: var(--bg-subtle);
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
             position: relative;
             overflow: hidden;
+            flex-shrink: 0;
         }
-        /* Gradient overlay on image */
-        .prop-img-container::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 40px;
-            background: linear-gradient(transparent, rgba(0,0,0,0.04));
-            pointer-events: none;
-        }
-        .prop-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
+        .prop-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; display: block; }
         .property-card:hover .prop-img { transform: scale(1.05); }
 
-        .prop-no-img {
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            color: #94a3b8;
-            font-size: 24px;
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        /* Dark gradient rising from bottom of image */
+        .prop-img-gradient {
+            position: absolute; inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.18) 55%, transparent 100%);
+            pointer-events: none;
         }
-        .prop-no-img span { font-size: 11px; font-weight: 500; margin-top: 6px; }
 
-        .prop-body { padding: 12px; flex: 1; display: flex; flex-direction: column; }
-
-        .prop-header { margin-bottom: 6px; }
-        .prop-name { font-size: 14px; font-weight: 700; color: var(--text-main); line-height: 1.2; margin-bottom: 2px; }
-        .prop-address {
-            font-size: 11px;
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            gap: 3px;
+        /* Name + city/state overlay text */
+        .prop-overlay {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            padding: 8px 10px;
+            pointer-events: none;
         }
+        .prop-overlay-name {
+            font-size: 12px; font-weight: 700; color: #fff;
+            line-height: 1.2; white-space: nowrap;
+            overflow: hidden; text-overflow: ellipsis;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+        }
+        .prop-overlay-sub {
+            font-size: 10px; color: rgba(255,255,255,0.85);
+            margin-top: 2px; font-weight: 500;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        }
+
+        /* Expand chevron badge */
+        .prop-expand-hint {
+            position: absolute; top: 7px; right: 7px;
+            width: 22px; height: 22px;
+            background: rgba(0,0,0,0.38);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            transition: transform 0.3s ease, background 0.2s;
+        }
+        .property-card.expanded .prop-expand-hint {
+            transform: rotate(180deg);
+            background: rgba(37,99,235,0.85);
+        }
+
+        /* Collapsible details panel */
+        .prop-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .property-card.expanded .prop-details { max-height: 400px; }
+
+        .prop-body { padding: 10px 12px; flex: 1; display: flex; flex-direction: column; }
+        .prop-address { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; }
 
         .prop-specs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 6px; }
         .spec-tag {
-            font-size: 10px;
-            padding: 2px 7px;
-            background: var(--bg-subtle);
-            border-radius: 3px;
-            color: var(--text-secondary);
-            font-weight: 600;
+            font-size: 10px; padding: 2px 7px;
+            background: var(--bg-subtle); border-radius: 3px;
+            color: var(--text-secondary); font-weight: 600;
             border: 1px solid var(--border-light);
         }
 
         .prop-tenant-box {
             background: linear-gradient(135deg, #eff6ff, #f0f9ff);
             border-left: 3px solid var(--primary);
-            padding: 5px 8px;
-            font-size: 11px;
-            color: #1e40af;
-            margin-bottom: 8px;
-            font-weight: 500;
+            padding: 5px 8px; font-size: 11px; color: #1e40af;
+            margin-bottom: 8px; font-weight: 500;
             border-radius: 0 4px 4px 0;
         }
 
         .prop-footer {
-            margin-top: auto;
-            border-top: 1px solid var(--border-light);
-            padding-top: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            margin-top: auto; border-top: 1px solid var(--border-light);
+            padding-top: 8px; display: flex;
+            justify-content: space-between; align-items: center;
         }
-        .prop-price { font-size: 15px; font-weight: 700; color: var(--primary-dark); }
+        .prop-price { font-size: 14px; font-weight: 700; color: var(--primary-dark); }
         .prop-date { font-size: 10px; color: var(--text-muted); font-weight: 500; }
 
         /* =========================================
@@ -916,8 +903,7 @@
         @keyframes pmToastIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
         @keyframes pmToastOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(20px); } }
 
-        body.pdf-generating .view-panel.phone-manager-view { display: none !important; }
-        body.pdf-generating #btnPhone { display: none !important; }
+        /* (print rules moved to @media print block above) */
 
         /* =========================================
            SUBTLE ANIMATION — Page Load
@@ -1341,42 +1327,53 @@
                             const rawUrls = getList(f.ImageURLs || f.Pop_up_IMG);
                             const imgUrl = rawUrls.length > 0 ? rawUrls[0] : null;
 
-                            const imgHtml = imgUrl
-                                ? `<img src="${imgUrl}" class="prop-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"><div class="prop-no-img" style="display:none;width:100%;height:100%;"><span>Image Unavailable</span></div>`
-                                : `<div class="prop-no-img"><span>No Image</span></div>`;
-
                             const street = f.Property_Address || '';
                             const city = f.City || '';
                             const state = f.State || '';
                             const zip = f.Zip || '';
+                            const cityState = [city, state].filter(Boolean).join(', ');
                             const fullAddress = [street, city, state, zip].filter(Boolean).join(', ');
 
-                            const propName = f.Property_Name || '';
-                            const typeStr = [f.Property_Type, firstItem(f.Secondary_Type)].filter(Boolean).join(' / ');
+                            const propName = f.Property_Name || cityState || 'Property';
+                            const typeStr = [firstItem(f.Property_Type), firstItem(f.Secondary_Type)].filter(Boolean).join(' / ');
                             const rba = f.RBA ? Number(f.RBA).toLocaleString() + ' SF' : '';
                             const year = f.YearB ? 'Built ' + f.YearB : '';
-                            const tenants = f.Tenants || '';
-
+                            const tenants = getList(f.Tenants).join(', ');
                             const price = formatMoney(f.Last_Sale_Price);
                             const date = formatDate(f.Last_Sale_Date);
+                            const capRate = f.Cap_Rate ? (parseFloat(f.Cap_Rate) * (parseFloat(f.Cap_Rate) < 1 ? 100 : 1)).toFixed(2) + '%' : '';
+                            const leaseType = firstItem(f.Lease_Type) || firstItem(f.Lease_Type_Detail) || '';
+                            const lotAC = f.Lot_Size_AC || f.Land_Area_AC;
+                            const lotSize = lotAC ? parseFloat(lotAC).toFixed(2) + ' AC' : '';
 
                             return `
-                                <div class="property-card">
-                                    <div class="prop-img-container">${imgHtml}</div>
-                                    <div class="prop-body">
-                                        <div class="prop-header">
-                                            ${propName ? `<div class="prop-name">${propName}</div>` : ''}
-                                            <div class="prop-address">${fullAddress || 'No Address'}</div>
+                                <div class="property-card" onclick="this.classList.toggle('expanded')">
+                                    <div class="prop-img-container">
+                                        ${imgUrl ? `<img src="${imgUrl}" class="prop-img" onerror="this.style.display='none'">` : ''}
+                                        <div class="prop-img-gradient"></div>
+                                        <div class="prop-overlay">
+                                            <div class="prop-overlay-name">${propName}</div>
+                                            <div class="prop-overlay-sub">${cityState || street || 'Unknown Location'}</div>
                                         </div>
-                                        <div class="prop-specs">
-                                            ${typeStr ? `<span class="spec-tag">${typeStr}</span>` : ''}
-                                            ${rba ? `<span class="spec-tag">${rba}</span>` : ''}
-                                            ${year ? `<span class="spec-tag">${year}</span>` : ''}
+                                        <div class="prop-expand-hint">
+                                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
                                         </div>
-                                        ${tenants ? `<div class="prop-tenant-box"><strong>Tenants:</strong> ${tenants}</div>` : ''}
-                                        <div class="prop-footer">
-                                            <div class="prop-price">${price}</div>
-                                            <div class="prop-date">Sold: ${date || 'N/A'}</div>
+                                    </div>
+                                    <div class="prop-details">
+                                        <div class="prop-body">
+                                            <div class="prop-address">📍 ${fullAddress || 'No Address'}</div>
+                                            <div class="prop-specs">
+                                                ${typeStr ? `<span class="spec-tag">${typeStr}</span>` : ''}
+                                                ${rba ? `<span class="spec-tag">${rba}</span>` : ''}
+                                                ${year ? `<span class="spec-tag">${year}</span>` : ''}
+                                                ${lotSize ? `<span class="spec-tag">${lotSize}</span>` : ''}
+                                                ${leaseType ? `<span class="spec-tag">${leaseType}</span>` : ''}
+                                            </div>
+                                            ${tenants ? `<div class="prop-tenant-box"><strong>Tenants:</strong> ${tenants}</div>` : ''}
+                                            <div class="prop-footer">
+                                                <div class="prop-price">${price}${capRate ? `<span style="font-size:10px;font-weight:500;color:var(--text-secondary);margin-left:6px;">${capRate} Cap</span>` : ''}</div>
+                                                <div class="prop-date">Sold: ${date || 'N/A'}</div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>`;
@@ -1430,7 +1427,7 @@
 
                     md += `### ${i+1}. ${f.Property_Name || fullAddress || 'Unknown Property'}\n`;
                     md += `- **Address:** ${fullAddress}\n`;
-                    if(f.Property_Type) md += `- **Type:** ${f.Property_Type}\n`;
+                    if(f.Property_Type) md += `- **Type:** ${firstItem(f.Property_Type)}\n`;
                     if(f.RBA) md += `- **Size:** ${Number(f.RBA).toLocaleString()} SF\n`;
                     if(f.YearB) md += `- **Year Built:** ${f.YearB}\n`;
                     if(f.Tenants) md += `- **Tenants:** ${f.Tenants}\n`;
@@ -1459,66 +1456,297 @@
                 });
             });
 
-            // ── PDF EXPORT ──
+            // ── PDF EXPORT — Native Browser Print (supports cross-origin images) ──
             DOM.btnExport.addEventListener('click', async () => {
-                if(!currentRecord) return;
+                if (!currentRecord) return;
 
                 const originalBtnHTML = DOM.btnExport.innerHTML;
-                DOM.btnExport.innerHTML = 'Preparing...';
+                DOM.btnExport.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>`;
                 DOM.btnExport.disabled = true;
 
-                const prevTab = activeTab;
-                switchTab('profile');
-
-                const sections = DOM.main.querySelectorAll('.section.collapsed');
-                sections.forEach(s => s.classList.remove('collapsed'));
-
-                const images = DOM.main.querySelectorAll('img');
-                images.forEach(img => {
-                    if (!img.complete || img.naturalHeight === 0) {
-                        const div = document.createElement('div');
-                        div.className = 'prop-no-img';
-                        div.style.height = '140px';
-                        div.innerHTML = '<span>Image Unavailable</span>';
-                        img.parentNode.replaceChild(div, img);
-                    }
-                });
-
-                document.body.classList.add('pdf-generating');
-
-                await new Promise(r => setTimeout(r, 600));
-
-                const el = DOM.main;
-                const opt = {
-                    margin:       [0.3, 0.3, 0.3, 0.3],
-                    filename:     `${currentRecord.Name || 'Report'}.pdf`,
-                    image:        { type: 'jpeg', quality: 0.95 },
-                    html2canvas:  {
-                        scale: 2,
-                        useCORS: true,
-                        allowTaint: true,
-                        logging: false,
-                        scrollY: 0,
-                        scrollX: 0,
-                        windowHeight: el.scrollHeight,
-                        windowWidth: el.scrollWidth
-                    },
-                    jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' },
-                    pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
-                };
-
                 try {
-                    await html2pdf().set(opt).from(el).save();
+                    // Build print HTML using current data (bypasses CORS — browser renders natively)
+                    const name = currentRecord.Name || currentRecord.Owner_Full_Name || 'Unknown';
+                    const printHTML = buildPrintDocument(name);
+
+                    const printWin = window.open('', '_blank', `width=${Math.min(screen.width, 1200)},height=${Math.min(screen.height, 900)},left=0,top=0`);
+                    if (!printWin) {
+                        alert('Pop-up blocked. Please allow pop-ups for this page and try again.');
+                        return;
+                    }
+
+                    printWin.document.write(printHTML);
+                    printWin.document.close();
+
+                    pmShowToast('Print preview opened — use "Save as PDF" in the print dialog', 'success', 4000);
+
+                    // Wait for images and fonts to load, then print
+                    printWin.addEventListener('load', () => {
+                        // Small delay to ensure all resources are painted
+                        setTimeout(() => {
+                            printWin.focus();
+                            printWin.print();
+                            // Close after print dialog is done (delayed to not interrupt)
+                            setTimeout(() => { try { printWin.close(); } catch(e) {} }, 3000);
+                        }, 400);
+                    });
+
+                    // Fallback if load event doesn't fire
+                    setTimeout(() => {
+                        try {
+                            if (!printWin.closed) {
+                                printWin.focus();
+                                printWin.print();
+                            }
+                        } catch(e) {}
+                    }, 2500);
+
                 } catch(e) {
-                    console.error("PDF Error", e);
-                    alert("Error generating PDF: " + e.message);
+                    console.error("Print Error", e);
+                    alert("Error generating print view: " + e.message);
                 } finally {
-                    document.body.classList.remove('pdf-generating');
                     DOM.btnExport.innerHTML = originalBtnHTML;
                     DOM.btnExport.disabled = false;
-                    renderProperties();
                 }
             });
+
+            // ── Build Print Document HTML ──
+            function buildPrintDocument(ownerName) {
+                const r = currentRecord;
+
+                // Profile image
+                let profileImgSrc = '';
+                if (r.Profile_Image) {
+                    profileImgSrc = firstItem(r.Profile_Image);
+                } else {
+                    profileImgSrc = getProfilePlaceholderImage(r.Gender, r.Age);
+                }
+
+                // Tags
+                const opportunityTags = getList(r.Opportunity).map(val => {
+                    const v = val.toUpperCase();
+                    let color = '#475569'; let bg = '#f1f5f9';
+                    if (v.includes('HOT')) { color = '#991b1b'; bg = '#fee2e2'; }
+                    else if (v.includes('WARM')) { color = '#9a3412'; bg = '#ffedd5'; }
+                    else if (v.includes('COLD')) { color = '#1e40af'; bg = '#dbeafe'; }
+                    return `<span style="display:inline-block;padding:3px 10px;border-radius:4px;font-size:11px;font-weight:600;background:${bg};color:${color};margin:0 4px 4px 0;">${val}</span>`;
+                }).join('');
+
+                // Stats
+                const statsData = [
+                    ['Segment', firstItem(r.Segment)],
+                    ['Classify', firstItem(r.Classify)],
+                    ['Classify Color', firstItem(r.Classify_Color)],
+                    ['Age / Gender', [r.Age, r.Gender].filter(Boolean).join(' / ')],
+                    ['Relationship', firstItem(r.Call_Relationship)],
+                    ['Market Tranche', firstItem(r.Tranche)],
+                    ['Plans to Sell', r.Plans_to_Sell],
+                    ['Plans to Buy', r.Plans_to_Buy],
+                    ['Objection', r.Objection],
+                ].filter(([, v]) => v);
+
+                const statsHTML = statsData.map(([l, v]) => `
+                    <div style="background:#f8fafc;padding:9px 11px;border-radius:6px;border:1px solid #f1f5f9;">
+                        <div style="font-size:9px;color:#94a3b8;text-transform:uppercase;font-weight:700;letter-spacing:0.3px;margin-bottom:2px;">${l}</div>
+                        <div style="font-size:12px;font-weight:600;color:#0f172a;">${v}</div>
+                    </div>`).join('');
+
+                // Activity notes
+                const notes = [
+                    { d: r.Date, t: r.Last_Call_Segment, l: 'Last Call' },
+                    { t: r.Contact_1, l: 'Contact 1' },
+                    { t: r.Contact_2, l: 'Contact 2' },
+                    { t: r.Contact_3, l: 'Contact 3' },
+                    { t: r.Contact_4, l: 'Contact 4' },
+                    { t: r.Extra_Notes, l: 'Extra Notes' },
+                    { t: r.VM_s, l: "Voicemails (VM's)" },
+                    { t: r.Call_no_VM, l: "Calls (No VM)" }
+                ].filter(n => n.t);
+
+                const activityHTML = notes.length ? notes.map(n => `
+                    <div style="margin-bottom:8px;padding-left:16px;position:relative;">
+                        <div style="position:absolute;left:0;top:5px;width:7px;height:7px;border-radius:50%;background:#cbd5e1;border:2px solid white;box-shadow:0 0 0 1px #cbd5e1;"></div>
+                        <div style="font-size:9px;font-weight:700;color:#2563eb;text-transform:uppercase;letter-spacing:0.3px;margin-bottom:3px;">${n.l}${n.d ? ' · ' + formatDate(n.d) : ''}</div>
+                        <div style="font-size:11px;color:#475569;background:#f8fafc;padding:7px 9px;border-radius:5px;border:1px solid #f1f5f9;line-height:1.55;white-space:pre-wrap;">${String(n.t)}</div>
+                    </div>`).join('') : '<div style="color:#94a3b8;font-size:12px;text-align:center;padding:12px;">No activity recorded.</div>';
+
+                // Properties
+                const propsHTML = ownerProperties.length === 0
+                    ? '<div style="color:#94a3b8;font-size:12px;text-align:center;padding:16px;border:1px dashed #e2e8f0;border-radius:6px;">No properties linked to this owner.</div>'
+                    : `<div class="props-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">` +
+                        ownerProperties.map(p => {
+                            const f = p.fields;
+                            const rawUrls = getList(f.ImageURLs || f.Pop_up_IMG);
+                            const imgUrl = rawUrls.length > 0 ? rawUrls[0] : null;
+                            const street = f.Property_Address || '';
+                            const city = f.City || '';
+                            const state = f.State || '';
+                            const zip = f.Zip || '';
+                            const cityState = [city, state].filter(Boolean).join(', ');
+                            const fullAddress = [street, city, state, zip].filter(Boolean).join(', ');
+                            const propName = f.Property_Name || fullAddress || 'Property';
+                            const typeStr = [firstItem(f.Property_Type), firstItem(f.Secondary_Type)].filter(Boolean).join(' / ');
+                            const rba = f.RBA ? Number(f.RBA).toLocaleString() + ' SF' : '';
+                            const year = f.YearB ? f.YearB : '';
+                            const tenants = getList(f.Tenants).join(', ');
+                            const price = formatMoney(f.Last_Sale_Price);
+                            const date = formatDate(f.Last_Sale_Date);
+                            const capRate = f.Cap_Rate ? (parseFloat(f.Cap_Rate) * (parseFloat(f.Cap_Rate) < 1 ? 100 : 1)).toFixed(2) + '%' : '';
+                            const leaseType = firstItem(f.Lease_Type) || firstItem(f.Lease_Type_Detail) || '';
+                            const lotAC = f.Lot_Size_AC || f.Land_Area_AC;
+                            const lotSize = lotAC ? parseFloat(lotAC).toFixed(2) + ' AC' : '';
+
+                            const imageBlock = imgUrl ? `
+                                <div style="position:relative;height:120px;overflow:hidden;background:#1e293b;">
+                                    <img src="${imgUrl}" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.parentNode.style.background='#334155';this.style.display='none';">
+                                    <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.72) 0%,rgba(0,0,0,0.18) 55%,transparent 100%);"></div>
+                                    <div style="position:absolute;bottom:0;left:0;right:0;padding:7px 9px;">
+                                        <div style="font-size:11px;font-weight:700;color:#fff;line-height:1.2;text-shadow:0 1px 3px rgba(0,0,0,0.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${propName}</div>
+                                        <div style="font-size:9px;color:rgba(255,255,255,0.82);font-weight:500;margin-top:2px;text-shadow:0 1px 2px rgba(0,0,0,0.5);">${cityState || street}</div>
+                                    </div>
+                                </div>` : `
+                                <div style="position:relative;height:120px;background:linear-gradient(135deg,#1e3a8a,#2563eb);display:flex;align-items:flex-end;">
+                                    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0.12;font-size:36px;">🏢</div>
+                                    <div style="position:relative;padding:7px 9px;width:100%;">
+                                        <div style="font-size:11px;font-weight:700;color:#fff;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${propName}</div>
+                                        <div style="font-size:9px;color:rgba(255,255,255,0.82);font-weight:500;margin-top:2px;">${cityState || street}</div>
+                                    </div>
+                                </div>`;
+
+                            return `
+                                <div style="border:1px solid #e2e8f0;border-radius:7px;overflow:hidden;background:white;break-inside:avoid;page-break-inside:avoid;">
+                                    ${imageBlock}
+                                </div>`;
+                        }).join('') + '</div>';
+
+                const subLine = [firstItem(r.Accounts), r.Title].filter(Boolean).join(' · ');
+                const reportDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+                return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>${ownerName} — Owner Profile</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+    @page { size: letter portrait; margin: 0.35in 0.35in; }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    body { font-family: 'Inter', system-ui, sans-serif; background: white; color: #0f172a; font-size: 13px; line-height: 1.5; }
+    
+    /* Ensure CSS grid prints correctly across browsers */
+    @media print {
+        .props-grid { display: grid !important; grid-template-columns: repeat(3,1fr) !important; gap: 8px !important; }
+    }
+    
+    .no-print { display: block; }
+    @media print { .no-print { display: none !important; } }
+    
+    /* Print prompt bar */
+    .print-bar {
+        background: #1e3a8a; color: white; padding: 10px 20px;
+        display: flex; align-items: center; justify-content: space-between;
+        font-size: 13px; font-weight: 600; gap: 12px;
+        position: sticky; top: 0; z-index: 100;
+    }
+    .print-bar-btn {
+        background: white; color: #1e3a8a; border: none; padding: 6px 16px;
+        border-radius: 5px; font-weight: 700; font-size: 12px; cursor: pointer;
+        font-family: inherit; flex-shrink: 0;
+    }
+    .print-bar-btn:hover { background: #dbeafe; }
+
+    /* Header */
+    .report-header {
+        background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+        color: white; padding: 18px 22px;
+        display: flex; gap: 16px; align-items: center;
+    }
+    .report-avatar {
+        width: 56px; height: 56px; border-radius: 12px;
+        background: rgba(255,255,255,0.12); border: 2px solid rgba(255,255,255,0.2);
+        overflow: hidden; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .report-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .report-avatar-initials { color: white; font-weight: 700; font-size: 20px; }
+    .report-name { font-size: 20px; font-weight: 800; letter-spacing: -0.01em; text-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+    .report-sub { font-size: 12px; opacity: 0.6; margin-top: 2px; }
+    .report-date { margin-left: auto; font-size: 11px; opacity: 0.55; flex-shrink: 0; text-align: right; line-height: 1.4; }
+
+    /* Content */
+    .report-body { padding: 16px 20px; }
+    .r-section { margin-bottom: 14px; }
+    .r-section-header { display: flex; align-items: center; gap: 8px; padding-bottom: 6px; margin-bottom: 8px; border-bottom: 1px solid #e2e8f0; }
+    .r-section-dot { width: 6px; height: 6px; border-radius: 50%; background: #94a3b8; flex-shrink: 0; }
+    .r-section-title { font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.8px; }
+    .r-section-badge { margin-left: auto; background: #dbeafe; color: #1e40af; padding: 2px 9px; border-radius: 10px; font-size: 10px; font-weight: 600; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 6px; }
+    
+    /* Footer */
+    .report-footer { border-top: 1px solid #e2e8f0; margin-top: 20px; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; }
+    .footer-brand { font-size: 9px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
+</style>
+</head>
+<body>
+<div class="no-print print-bar">
+    <span>📄 ${ownerName} — Owner Profile Report &nbsp;·&nbsp; ${reportDate}</span>
+    <button class="print-bar-btn" onclick="window.print()">⬇ Save as PDF</button>
+</div>
+
+<div class="report-header">
+    <div class="report-avatar">
+        ${profileImgSrc
+            ? `<img src="${profileImgSrc}" onerror="this.style.display='none';this.parentNode.innerHTML='<div class=report-avatar-initials>${(ownerName.split(' ').map(n=>n[0]).join('').toUpperCase().substring(0,2))}</div>'">`
+            : `<div class="report-avatar-initials">${ownerName.split(' ').map(n=>n[0]).join('').toUpperCase().substring(0,2)}</div>`}
+    </div>
+    <div>
+        <div class="report-name">${ownerName}</div>
+        <div class="report-sub">${subLine || 'Owner Profile'}</div>
+    </div>
+    <div class="report-date">Owner Portfolio Report<br>${reportDate}</div>
+</div>
+
+<div class="report-body">
+
+    ${opportunityTags ? `<div style="margin-bottom:10px;">${opportunityTags}</div>` : ''}
+
+    ${statsData.length ? `
+    <div class="r-section">
+        <div class="r-section-header">
+            <div class="r-section-dot"></div>
+            <div class="r-section-title">Overview</div>
+        </div>
+        <div class="stats-grid">${statsHTML}</div>
+    </div>` : ''}
+
+    <div class="r-section">
+        <div class="r-section-header">
+            <div class="r-section-dot"></div>
+            <div class="r-section-title">Property Portfolio</div>
+            <div class="r-section-badge">${ownerProperties.length} Properties</div>
+        </div>
+        ${propsHTML}
+    </div>
+
+    ${notes.length ? `
+    <div class="r-section">
+        <div class="r-section-header">
+            <div class="r-section-dot"></div>
+            <div class="r-section-title">Activity Log</div>
+        </div>
+        ${activityHTML}
+    </div>` : ''}
+
+</div>
+
+<div class="report-footer no-print">
+    <div class="footer-brand">Market Analytics Advisory</div>
+    <div style="font-size:10px;color:#94a3b8;">Generated ${reportDate}</div>
+</div>
+
+</body>
+</html>`;
+            }
 
             // =====================================================
             //  PHONE MANAGER — Full Integration
@@ -1899,8 +2127,14 @@
             });
 
             // ── GRIST INIT ──
-            grist.ready({ requiredAccess: 'full' });
-            grist.onRecord(record => renderOwner(record));
+            if (typeof grist !== 'undefined') {
+                grist.ready({ requiredAccess: 'full' });
+                grist.onRecord(record => renderOwner(record));
+            } else {
+                console.warn('Grist API not available — running in standalone mode.');
+                document.getElementById('noData').classList.remove('hidden');
+                document.getElementById('activeView').classList.add('hidden');
+            }
 
         });
     </script>
