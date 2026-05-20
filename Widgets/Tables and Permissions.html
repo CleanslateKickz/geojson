@@ -1,658 +1,1439 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Grist Schema & ACL Reporter</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Grist Schema & ACL Reporter Pro</title>
   <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
   <style>
     :root {
-      --primary-color: #16b378;
-      --text-color: #333;
-      --border-color: #ddd;
-      --bg-color: #f9f9f9;
-      --ai-bg: #2b303b;
+      --primary: #16b378;
+      --primary-hover: #129a65;
+      --primary-light: rgba(22, 179, 120, 0.08);
+      --primary-dark: #0d8a5a;
+      --bg: #f8f9fb;
+      --surface: #ffffff;
+      --surface-hover: #f6f8fa;
+      --text: #1a1a2e;
+      --text-muted: #6b7280;
+      --text-secondary: #656d76;
+      --border: #e2e5e9;
+      --danger: #dc2626;
+      --warning: #9a6700;
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+      --ai-bg: #1e293b;
+      --ai-border: #16b378;
+      --shadow: 0 1px 3px rgba(31,35,40,0.04), 0 1px 2px rgba(31,35,40,0.04);
+      --radius: 8px;
     }
+
+    [data-theme="dark"] {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --surface-hover: #21262d;
+      --text: #c9d1d9;
+      --text-muted: #8b949e;
+      --text-secondary: #8b949e;
+      --border: #30363d;
+      --code-bg: #0d1117;
+      --ai-bg: #010409;
+      --shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      padding: 15px;
-      color: var(--text-color);
-      background-color: white;
-    }
-    h1 { font-size: 1.4rem; margin-top: 0; }
-    .description { font-size: 0.9rem; color: #666; margin-bottom: 15px; }
-    
-    /* Controls */
-    .controls {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 15px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    button {
-      background-color: white;
-      border: 1px solid var(--border-color);
-      padding: 6px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      transition: all 0.2s;
-    }
-    button:hover { background-color: var(--bg-color); }
-    button.active {
-      background-color: var(--primary-color);
-      color: white;
-      border-color: var(--primary-color);
-    }
-    button.action-btn {
-      background-color: transparent;
-      color: var(--primary-color);
-      border: 1px solid var(--primary-color);
-      font-weight: bold;
-    }
-    button.action-btn:hover { background-color: #eef9f4; }
-    
-    .separator {
-      width: 1px;
-      height: 20px;
-      background-color: var(--border-color);
-      margin: 0 5px;
-    }
-
-    /* Tables */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 25px;
-      font-size: 13px;
-    }
-    th, td {
-      border: 1px solid var(--border-color);
-      padding: 8px;
-      text-align: left;
-      vertical-align: top;
-    }
-    th {
-      background-color: var(--bg-color);
-      font-weight: 600;
-    }
-    pre {
-      background-color: #f4f4f4;
-      padding: 6px;
-      margin: 0;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
-      font-size: 12px;
-      border-radius: 3px;
-    }
-    
-    /* Code View Styles */
-    .code-view-container {
-      background-color: #282c34;
-      color: #abb2bf;
-      padding: 15px;
-      border-radius: 5px;
-      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
-      font-size: 13px;
-      white-space: pre;
-      overflow-x: auto;
-    }
-    .code-keyword { color: #c678dd; }
-    .code-func { color: #61afef; }
-    .code-string { color: #98c379; }
-    .code-comment { color: #5c6370; font-style: italic; }
-
-    /* AI Mode Styles */
-    .ai-container {
-      background-color: var(--ai-bg);
-      color: #c0c5ce;
-      padding: 20px;
-      border-radius: 5px;
-      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
-      font-size: 13px;
-      white-space: pre-wrap;
-      word-wrap: break-word;
+      color: var(--text);
+      background: var(--bg);
       line-height: 1.5;
-      border: 2px solid var(--primary-color);
     }
 
-    /* Notifications */
-    #notification {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: #333;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 4px;
-      opacity: 0;
-      transition: opacity 0.3s;
-      pointer-events: none;
-      z-index: 1000;
+    .app { max-width: 1200px; margin: 0 auto; padding: 16px; }
+
+    /* Header */
+    header { margin-bottom: 14px; }
+    header h1 { font-size: 1.45rem; font-weight: 800; letter-spacing: -0.02em; }
+    header .sub { font-size: 0.82rem; color: var(--text-muted); margin-top: 2px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .badge {
+      display: inline-block; background: #fef3c7; color: #92400e;
+      padding: 1px 8px; border-radius: 3px; font-weight: 600; font-size: 0.72rem;
     }
-    #notification.show { opacity: 1; }
+    .badge-success { background: #d1fae5; color: #065f46; }
+    .badge-danger { background: #fee2e2; color: #991b1b; }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex; gap: 5px; flex-wrap: wrap; align-items: center;
+      padding: 9px 12px; background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); margin-bottom: 12px;
+    }
+    .tg { display: flex; gap: 4px; align-items: center; }
+    .sep { width: 1px; height: 22px; background: var(--border); margin: 0 5px; }
+    button {
+      background: var(--surface); border: 1px solid var(--border); padding: 5px 11px;
+      border-radius: 5px; cursor: pointer; font-size: 0.78rem; font-weight: 500;
+      color: var(--text); transition: all 0.15s; white-space: nowrap;
+    }
+    button:hover { background: var(--bg); border-color: #ccc; }
+    button.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    button.act { background: transparent; color: var(--primary); border-color: var(--primary); font-weight: 600; }
+    button.act:hover { background: var(--primary-light); }
+    button:disabled { opacity: 0.35; cursor: not-allowed; }
+    .search {
+      padding: 5px 10px; border: 1px solid var(--border); border-radius: 5px;
+      font-size: 0.78rem; width: 170px; outline: none; background: var(--surface); color: var(--text);
+    }
+    .search:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(22,179,120,0.15); }
+
+    /* Stats */
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin-bottom: 14px; }
+    .stat {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
+      padding: 8px 12px; text-align: center;
+    }
+    .stat .v { font-size: 1.3rem; font-weight: 700; color: var(--primary); }
+    .stat .l { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+    /* Output container */
+    #output {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 16px; min-height: 120px;
+    }
+    #loading { text-align: center; padding: 40px; color: var(--text-muted); font-style: italic; display: none; }
+    .empty { text-align: center; padding: 30px; color: var(--text-muted); font-style: italic; }
+
+    /* Collapsible section titles */
+    .stitle {
+      font-size: 1rem; font-weight: 700; margin: 18px 0 6px 0; padding: 5px 0;
+      border-bottom: 2px solid var(--primary); cursor: pointer; display: flex;
+      align-items: center; gap: 6px; user-select: none;
+    }
+    .stitle:first-child { margin-top: 0; }
+    .stitle .ch { transition: transform 0.2s; font-size: 0.65rem; display: inline-block; }
+    .stitle.collapsed .ch { transform: rotate(-90deg); }
+    .scontent.collapsed { display: none; }
+    .stitle .extra { font-weight: 400; font-size: 0.78rem; color: var(--text-muted); margin-left: auto; }
+    .summary-tag {
+      display: inline-block; background: #ede9fe; color: #6d28d9; padding: 0 6px;
+      border-radius: 3px; font-size: 0.65rem; font-weight: 600; margin-left: 6px; vertical-align: middle;
+    }
+
+    /* Data tables */
+    table.dt { width: 100%; border-collapse: collapse; font-size: 0.78rem; margin-bottom: 14px; }
+    table.dt th {
+      background: var(--bg); font-weight: 600; text-align: left; padding: 5px 8px;
+      border: 1px solid var(--border); white-space: nowrap; font-size: 0.68rem;
+      text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted);
+    }
+    table.dt td { padding: 4px 8px; border: 1px solid var(--border); vertical-align: top; }
+    table.dt tr:hover td { background: #f0f4ff; }
+    table.dt tr.dim td { color: var(--text-muted); }
+    table.dt tr.sep-row td { background: var(--bg); height: 4px; padding: 0; border-color: var(--bg); }
+
+    .fname { font-weight: 600; }
+    .fcolid { font-size: 0.68rem; color: var(--text-muted); font-family: monospace; }
+    .tdesc { font-size: 0.72rem; color: var(--text-muted); font-style: italic; max-width: 200px; }
+    .tbadge {
+      display: inline-block; padding: 1px 6px; border-radius: 3px;
+      font-size: 0.66rem; font-weight: 600;
+    }
+    .t-formula { background: #ede9fe; color: #6d28d9; }
+    .t-data { background: #dbeafe; color: #1d4ed8; }
+    .t-trigger { background: #fef3c7; color: #92400e; }
+    .t-ref { background: #d1fae5; color: #065f46; }
+    .t-reflist { background: #ccfbf1; color: #0f766e; }
+    .formula-box {
+      background: #f4f4f8; padding: 3px 7px; margin: 0; white-space: pre-wrap;
+      word-wrap: break-word; font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.72rem; border-radius: 3px; border: 1px solid #e5e5ea;
+    }
+    .p-allow { color: #16a34a; font-weight: 600; }
+    .p-deny { color: var(--danger); font-weight: 600; }
+
+    /* Code View */
+    .code-wrap {
+      background: var(--code-bg); color: var(--code-text); padding: 16px; border-radius: 6px;
+      font-family: "SFMono-Regular", Consolas, monospace; font-size: 0.78rem;
+      white-space: pre; overflow-x: auto; line-height: 1.6;
+    }
+    .ck { color: #cba6f7; }
+    .cf { color: #89b4fa; }
+    .cs { color: #a6e3a1; }
+    .cc { color: #6c7086; font-style: italic; }
+    .ct { color: #f9e2af; }
+    .cn { color: #fab387; }
+
+    /* AI Mode */
+    .ai-wrap {
+      background: var(--ai-bg); color: #e2e8f0; padding: 20px; border-radius: 6px;
+      font-family: "SFMono-Regular", Consolas, monospace; font-size: 0.78rem;
+      white-space: pre-wrap; word-wrap: break-word; line-height: 1.6;
+      border: 2px solid var(--primary);
+    }
+
+    /* JSON View */
+    .json-wrap {
+      background: var(--code-bg); color: var(--code-text); padding: 16px; border-radius: 6px;
+      font-family: "SFMono-Regular", Consolas, monospace; font-size: 0.78rem;
+      white-space: pre-wrap; overflow-x: auto; line-height: 1.5;
+    }
+    .j-key { color: #e06c75; }
+    .j-str { color: #98c379; }
+    .j-num { color: #d19a66; }
+    .j-bool { color: #c678dd; }
+
+    /* Relations */
+    .rel-item {
+      padding: 6px 12px; margin: 4px 0; background: var(--bg); border-radius: 4px;
+      border-left: 3px solid var(--primary); font-size: 0.82rem;
+    }
+    .rel-from { font-weight: 600; color: var(--primary-dark); }
+    .rel-arrow { color: var(--text-muted); margin: 0 5px; }
+    .rel-to { font-weight: 600; color: #2563eb; }
+    .rel-col { font-size: 0.75rem; color: var(--text-muted); }
+    .rel-type { font-size: 0.68rem; padding: 1px 5px; border-radius: 3px; background: #d1fae5; color: #065f46; font-weight: 600; }
+
+    /* Notification */
+    #notif {
+      position: fixed; bottom: 20px; right: 20px; background: #1e293b; color: #fff;
+      padding: 10px 20px; border-radius: 6px; font-size: 0.82rem; opacity: 0;
+      transition: opacity 0.3s; pointer-events: none; z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    #notif.show { opacity: 1; }
+
+    /* Access warning */
+    .access-banner {
+      background: #fff8c5; border: 1px solid #d4a72c; color: #7a5c00;
+      padding: 14px 16px; border-radius: var(--radius); margin-bottom: 12px;
+      font-size: 0.88rem; line-height: 1.5;
+    }
+    .access-banner.error {
+      background: #ffebe9; border-color: var(--danger); color: var(--danger);
+    }
+    [data-theme="dark"] .access-banner {
+      background: #4d4002; color: #d4a72c; border-color: #7a5c00;
+    }
+    [data-theme="dark"] .access-banner.error {
+      background: #3d0c0c; color: #f85149; border-color: #8e1519;
+    }
+    .access-banner button {
+      margin-top: 10px; background: rgba(0,0,0,0.06); border: 1px solid currentColor;
+      color: inherit; padding: 5px 14px; border-radius: 6px; font-weight: 600;
+    }
+    .access-banner button:hover { background: rgba(0,0,0,0.1); }
+
+    @media (max-width: 600px) {
+      .toolbar { padding: 8px; }
+      .search { width: 100%; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media print {
+      .toolbar { display: none; }
+      header .badge { display: none; }
+      #output { border: none; padding: 0; }
+    }
   </style>
 </head>
 <body>
+<div class="app">
+  <header>
+    <h1>Grist Document Reporter Pro</h1>
+    <p class="sub">
+      Inspect schemas, access rules, relationships, and validations.
+      <span class="badge">Requires Full Access</span>
+      <span id="last-updated" style="margin-left:8px; font-style:italic; opacity:0.6;"></span>
+    </p>
+  </header>
 
-  <h1>Grist Document Reporter</h1>
-  <p class="description">
-    Generate reports on Table Schemas and Access Control Lists (ACLs). 
-    Use <b>AI Mode</b> to format output for ChatGPT or Claude.
-    <br><span style="color:#b45309; font-weight:bold;">Requires Full Access.</span>
-  </p>
+  <div id="access-banner" class="access-banner" style="display:none;"></div>
 
-  <!-- Navigation -->
-  <div class="controls">
-    <button id="btn-tables">Tables</button>
-    <button id="btn-acl">ACLs</button>
-    <span class="separator"></span>
-    <button id="btn-code-view">Code View</button>
-    <button id="btn-ai-mode">AI Mode</button>
-  </div>
-
-  <!-- Action Buttons -->
-  <div class="controls" style="margin-bottom: 20px;">
-    <button id="btn-copy" class="action-btn">📋 Copy to Clipboard</button>
-    <button id="btn-csv" class="action-btn">📊 Download CSV</button>
-    <button id="btn-html" class="action-btn">💾 Download HTML</button>
-  </div>
-
-  <!-- Output Container -->
-  <div id="loading" style="display:none; font-style:italic; color:#888;">Loading data...</div>
-  <div id="output-container">
-    <div style="padding: 20px; text-align:center; color:#888;">
-      Click <b>Tables</b> or <b>ACLs</b> to generate a report.
+  <nav class="toolbar" role="toolbar" aria-label="Report controls">
+    <div class="tg">
+      <button id="btn-tables" title="Table schemas and column definitions">📑 Tables</button>
+      <button id="btn-acl" title="Access control rules">🔒 ACLs</button>
+      <button id="btn-relations" title="Reference relationships between tables">🔗 Relations</button>
     </div>
-  </div>
-  
-  <!-- Notification Element -->
-  <div id="notification">Copied!</div>
+    <div class="sep"></div>
+    <div class="tg">
+      <button id="btn-view-table" title="Tabular view">Table</button>
+      <button id="btn-view-code" title="Python-like code representation">Code</button>
+      <button id="btn-view-ai" title="Format for AI assistants">AI Mode</button>
+      <button id="btn-view-json" title="Raw JSON data">JSON</button>
+    </div>
+    <div class="sep"></div>
+    <input type="text" id="search" class="search" placeholder="Filter tables, columns..." aria-label="Search" />
+    <div class="sep"></div>
+    <div class="tg">
+      <button id="btn-copy" class="act" title="Copy current view to clipboard">📋 Copy</button>
+      <button id="btn-csv" class="act" title="Download as CSV">📊 CSV</button>
+      <button id="btn-json-export" class="act" title="Download as JSON">⬇️ JSON</button>
+      <button id="btn-html" class="act" title="Download as HTML report">💾 HTML</button>
+    </div>
+  </nav>
+
+  <div id="loading">Loading data from Grist...</div>
+  <main id="output">
+    <div class="empty">Select a view above to begin inspecting your document.</div>
+  </main>
+</div>
+<div id="notif"></div>
 
 <script>
-let currentMode = null; // Start as null so we don't auto-load
-let codeViewEnabled = false;
-let aiModeEnabled = false;
-let currentData = null; 
+// ═══════════════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════════════
+const App = {
+  mode: null,
+  view: 'table',
+  search: '',
+  darkMode: false,
+  raw: { schema: null, acl: null, relations: null },
+  filtered: { schema: null, acl: null, relations: null },
+  renderedText: '',
+  isLoading: false,
+  lastUpdated: null,
+  collapsed: new Set(),
+};
 
-// Utility: DOM Shortcuts
 const $ = id => document.getElementById(id);
 
-function ready(fn) {
-  if (document.readyState !== 'loading') fn();
-  else document.addEventListener('DOMContentLoaded', fn);
+// ═══════════════════════════════════════════════════════════════════════
+// THEME
+// ═══════════════════════════════════════════════════════════════════════
+function initTheme() {
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (prefersDark) setDark(true);
+}
+function toggleDark() { setDark(!App.darkMode); }
+function setDark(on) {
+  App.darkMode = on;
+  document.documentElement.setAttribute('data-theme', on ? 'dark' : 'light');
 }
 
-ready(function() {
-  // Button Listeners
-  $('btn-tables').onclick = () => switchMode('tables');
-  $('btn-acl').onclick = () => switchMode('acl');
-  $('btn-code-view').onclick = toggleCodeView;
-  $('btn-ai-mode').onclick = toggleAIMode;
-  
-  // Export Listeners
-  $('btn-copy').onclick = copyToClipboard;
-  $('btn-csv').onclick = downloadCSV;
-  $('btn-html').onclick = downloadHTML;
-
-  // Init Grist
-  // IMPORTANT: 'full' access is required to read _grist_Tables
+// ═══════════════════════════════════════════════════════════════════════
+// GRIST INITIALIZATION
+// ═══════════════════════════════════════════════════════════════════════
+function initGrist() {
   grist.ready({ requiredAccess: 'full' });
-  
-  // We do NOT call refreshView() here. 
-  // We wait for the user to click a button.
-});
+  grist.onOptions((options, interaction) => {
+    if (interaction && interaction.access_level) {
+      console.log('Grist access level:', interaction.access_level);
+    }
+  });
+}
 
+function showAccessError(errMsg) {
+  const banner = $('access-banner');
+  banner.style.display = 'block';
+  banner.className = 'access-banner error';
+  banner.innerHTML =
+    '⚠️ <b>Full Access required.</b> This widget reads document metadata (<code>_grist_Tables</code> &amp; <code>_grist_ACLRules</code>).<<br>' +
+    'Open the widget menu (•••) → <b>Widget options</b> → set <b>Access Level</b> to <b>Full document access</b>, then click Retry.<br>' +
+    '<small>Error: ' + esc(errMsg || 'Permission denied') + '</small><br>' +
+    '<button id="retry-btn">🔄 Retry</button>';
+  
+  // Attach retry listener programmatically
+  const retryBtn = $('retry-btn');
+  if (retryBtn) retryBtn.addEventListener('click', refreshData);
+}
+
+function hideAccessError() {
+  $('access-banner').style.display = 'none';
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// MODE / VIEW / SEARCH HANDLERS
+// ═══════════════════════════════════════════════════════════════════════
 function switchMode(mode) {
-  currentMode = mode;
-  
-  // Update button active states
-  $('btn-tables').classList.toggle('active', mode === 'tables');
-  $('btn-acl').classList.toggle('active', mode === 'acl');
-  
-  // Trigger the data fetch
-  refreshView();
+  App.mode = mode;
+  updateActiveButtons();
+  refreshData();
 }
 
-function toggleCodeView() {
-  codeViewEnabled = !codeViewEnabled;
-  $('btn-code-view').classList.toggle('active', codeViewEnabled);
-  if (codeViewEnabled && aiModeEnabled) toggleAIMode(); // Turn off AI mode if Code View is on
-  if (currentMode) refreshView(); // Only refresh if data is already loaded
+function switchView(view) {
+  App.view = view;
+  updateActiveButtons();
+  const hasData = (App.mode === 'tables' && App.raw.schema) ||
+                  (App.mode === 'acl' && App.raw.acl) ||
+                  (App.mode === 'relations' && App.raw.relations);
+  if (hasData) {
+    applyFilter();
+    render();
+    updateStats();
+  }
 }
 
-function toggleAIMode() {
-  aiModeEnabled = !aiModeEnabled;
-  $('btn-ai-mode').classList.toggle('active', aiModeEnabled);
-  if (aiModeEnabled && codeViewEnabled) toggleCodeView(); // Turn off Code View if AI mode is on
-  if (currentMode) refreshView(); // Only refresh if data is already loaded
+function updateActiveButtons() {
+  ['tables','acl','relations'].forEach(m => {
+    const btn = $(`btn-${m}`);
+    if (btn) btn.classList.toggle('active', App.mode === m);
+  });
+  ['table','code','ai','json'].forEach(v => {
+    const btn = $(`btn-view-${v}`);
+    if (btn) btn.classList.toggle('active', App.view === v);
+  });
 }
 
-async function refreshView() {
-  if (!currentMode) return; // Safety check
+// Search with debounce
+let searchTimer;
+function onSearchInput(e) {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    App.search = e.target.value.toLowerCase().trim();
+    const hasData = (App.mode === 'tables' && App.raw.schema) ||
+                    (App.mode === 'acl' && App.raw.acl) ||
+                    (App.mode === 'relations' && App.raw.relations);
+    if (hasData) {
+      applyFilter();
+      render();
+      updateStats();
+    }
+  }, 200);
+}
 
-  $('output-container').innerHTML = '';
+// Collapsible section delegation
+function onOutputClick(e) {
+  const title = e.target.closest('.stitle');
+  if (!title) return;
+  const key = title.dataset.key;
+  if (!key) return;
+  title.classList.toggle('collapsed');
+  const content = title.nextElementSibling;
+  if (content && content.classList.contains('scontent')) {
+    content.classList.toggle('collapsed');
+  }
+  if (title.classList.contains('collapsed')) App.collapsed.add(key);
+  else App.collapsed.delete(key);
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// EVENT LISTENER ATTACHMENT (all programmatic, no inline onclick)
+// ═══════════════════════════════════════════════════════════════════════
+function attachEventListeners() {
+  // Mode buttons
+  $('btn-tables').addEventListener('click', () => switchMode('tables'));
+  $('btn-acl').addEventListener('click', () => switchMode('acl'));
+  $('btn-relations').addEventListener('click', () => switchMode('relations'));
+
+  // View buttons
+  $('btn-view-table').addEventListener('click', () => switchView('table'));
+  $('btn-view-code').addEventListener('click', () => switchView('code'));
+  $('btn-view-ai').addEventListener('click', () => switchView('ai'));
+  $('btn-view-json').addEventListener('click', () => switchView('json'));
+
+  // Export buttons
+  $('btn-copy').addEventListener('click', copyToClipboard);
+  $('btn-csv').addEventListener('click', downloadCSV);
+  $('btn-json-export').addEventListener('click', downloadJSON);
+  $('btn-html').addEventListener('click', downloadHTML);
+
+  // Search
+  $('search').addEventListener('input', onSearchInput);
+
+  // Output click delegation for collapsible sections
+  $('output').addEventListener('click', onOutputClick);
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// DATA FETCHING
+// ═══════════════════════════════════════════════════════════════════════
+async function refreshData() {
+  if (!App.mode) return;
+
+  hideAccessError();
+  App.isLoading = true;
   $('loading').style.display = 'block';
-  
+  $('output').innerHTML = '';
+  App.renderedText = '';
+
   try {
-    if (currentMode === 'tables') {
-      await showSchemaTables();
+    if (App.mode === 'tables' || App.mode === 'relations') {
+      await loadSchema();
+    }
+    if (App.mode === 'acl') {
+      await loadACL();
+    }
+    if (App.mode === 'relations') {
+      buildRelations();
+    }
+
+    App.lastUpdated = new Date();
+    $('last-updated').textContent = 'Updated ' + App.lastUpdated.toLocaleTimeString();
+    applyFilter();
+    render();
+    updateStats();
+  } catch (err) {
+    console.error('Refresh error:', err);
+    let msg = err.message || String(err);
+    const isPermissionError = /permission|access|denied|unauthorized|forbidden|no.*view/i.test(msg);
+    if (isPermissionError) {
+      showAccessError(msg);
     } else {
-      await showACL();
+      $('output').innerHTML = '<div class="access-banner error">Unexpected error: ' + esc(msg) + '</div>';
+      App.renderedText = 'Error: ' + msg;
     }
-  } catch (e) {
-    let errorMsg = e.message;
-    if (e.message && e.message.includes("No view")) {
-        errorMsg = "Waiting for access... Please click 'Grant Full Access' in the banner above or in widget settings.";
-    } else if (e.message.includes("permission")) {
-        errorMsg = "Permission denied. This widget requires 'Full Access' to read the schema.";
-    }
-    $('output-container').innerHTML = `<div style="color:red; padding: 10px; border: 1px solid red; background: #fff0f0;">Error: ${errorMsg}</div>`;
-    console.error(e);
+  } finally {
+    App.isLoading = false;
+    $('loading').style.display = 'none';
   }
-  
-  $('loading').style.display = 'none';
 }
 
-/* ---------------------------------------------------------------------
-   1. TABLES / SCHEMA LOGIC
---------------------------------------------------------------------- */
-async function showSchemaTables() {
-  const tablesData = await grist.docApi.fetchTable("_grist_Tables");
-  const colsData = await grist.docApi.fetchTable("_grist_Tables_column");
+// ═══════════════════════════════════════════════════════════════════════
+// SCHEMA LOADING
+// ═══════════════════════════════════════════════════════════════════════
+async function loadSchema() {
+  const tablesData = await grist.docApi.fetchTable('_grist_Tables');
+  const colsData = await grist.docApi.fetchTable('_grist_Tables_column');
 
-  let result = [];
-
-  const tableIdMap = {};
-  tablesData.id.forEach((id, i) => tableIdMap[id] = tablesData.tableId[i]);
-
-  for (let i = 0; i < colsData.id.length; i++) {
-    const tableNum = colsData.parentId[i];
-    const tableName = tableIdMap[tableNum];
-    const fieldName = colsData.label[i];
-    const fieldType = colsData.type[i];
-    const isFormula = colsData.isFormula[i];
-    const formula = colsData.formula[i] || "";
-    const widgetOpts = colsData.widgetOptions[i] ? JSON.parse(colsData.widgetOptions[i]) : {};
-
-    if (fieldType === "ManualSortPos" || fieldName.startsWith("gristHelper")) continue;
-
-    result.push({
-      tableName: tableName,
-      fieldName: fieldName,
-      type: fieldType,
-      isFormula: isFormula,
-      formula: formula,
-      choices: widgetOpts.choices || [],
-    });
-  }
-
-  result.sort((a, b) => (a.tableName + a.fieldName).localeCompare(b.tableName + b.fieldName));
-  
-  const grouped = {};
-  result.forEach(row => {
-    if (!grouped[row.tableName]) grouped[row.tableName] = [];
-    grouped[row.tableName].push(row);
+  const tableMap = {};
+  tablesData.id.forEach((id, i) => {
+    tableMap[id] = {
+      tableId: tablesData.tableId[i],
+      summarySourceTable: tablesData.summarySourceTable ? tablesData.summarySourceTable[i] : 0,
+    };
   });
 
-  currentData = { type: 'schema', data: grouped };
+  // Identify summary tables
+  const summaryTables = {};
+  tablesData.id.forEach((id, i) => {
+    const srcId = tablesData.summarySourceTable ? tablesData.summarySourceTable[i] : 0;
+    if (srcId && tableMap[srcId]) {
+      summaryTables[tableMap[id].tableId] = tableMap[srcId].tableId;
+    }
+  });
 
-  if (aiModeEnabled) {
-    renderAIMode(grouped);
-  } else if (codeViewEnabled) {
-    renderCodeView(grouped);
-  } else {
-    renderTableHTML(grouped);
-  }
-}
+  const tables = {};
+  for (let i = 0; i < colsData.id.length; i++) {
+    const parentId = colsData.parentId[i];
+    const tInfo = tableMap[parentId] || {};
+    const tableId = tInfo.tableId || '';
+    const colId = (colsData.colId && colsData.colId[i]) || colsData.label[i];
+    const label = colsData.label[i] || '';
+    const type = (colsData.type && colsData.type[i]) || '';
+    const isFormula = (colsData.isFormula && colsData.isFormula[i]) || false;
+    const formula = (colsData.formula && colsData.formula[i]) || '';
+    const description = (colsData.description && colsData.description[i]) || '';
+    const refTableId = (colsData.refTableId && colsData.refTableId[i]) || '';
+    const recalcWhen = (colsData.recalcWhen && colsData.recalcWhen[i]) || 0;
 
-function renderTableHTML(grouped) {
-  let html = `Date: ${getTodayDate()}`;
-  
-  for (const [tableName, rows] of Object.entries(grouped)) {
-    html += `<h2>${tableName}</h2>`;
-    html += `<table>
-      <thead><tr>
-        <th>Field</th><th>Type</th><th>Formula / Trigger</th><th>Config</th>
-      </tr></thead><tbody>`;
-    
-    rows.forEach(row => {
-      const typeLabel = row.isFormula ? "Formula" : row.type;
-      let formulaCell = "";
-      if (row.formula) formulaCell = `<pre>${escapeHtml(row.formula)}</pre>`;
-      let configCell = "";
-      if (row.choices.length) configCell += `<b>Choices:</b> ${row.choices.join(", ")}`;
-
-      html += `<tr>
-        <td><b>${row.fieldName}</b></td>
-        <td>${typeLabel}</td>
-        <td>${formulaCell}</td>
-        <td>${configCell}</td>
-      </tr>`;
-    });
-    html += `</tbody></table>`;
-  }
-  $('output-container').innerHTML = html;
-}
-
-function renderCodeView(grouped) {
-  let code = `# Grist Schema Export\n# Date: ${getTodayDate()}\n\n`;
-  
-  for (const [tableName, rows] of Object.entries(grouped)) {
-    code += `<span class="code-keyword">class</span> <span class="code-func">${tableName}</span>:\n`;
-    
-    rows.forEach(row => {
-      if (row.isFormula) {
-        const cleanFormula = escapeHtml(row.formula.replace(/\n/g, "\n    # "));
-        code += `  <span class="code-comment"># Formula</span>\n`;
-        code += `  <span class="code-keyword">def</span> <span class="code-func">${row.fieldName}</span>(self):\n`;
-        code += `    <span class="code-keyword">return</span> <span class="code-string">${cleanFormula}</span>\n\n`;
-      } else {
-        let typeDef = row.type;
-        if (row.choices.length) typeDef += ` [${row.choices.map(c=>`'${c}'`).join(', ')}]`;
-        
-        code += `  <span class="code-func">${row.fieldName}</span>: <span class="code-keyword">${typeDef}</span>\n`;
+    let widgetOpts = {};
+    try {
+      if (colsData.widgetOptions && colsData.widgetOptions[i]) {
+        widgetOpts = JSON.parse(colsData.widgetOptions[i]);
       }
+    } catch (_) {}
+
+    if (type === 'ManualSortPos' || colId.startsWith('gristHelper') || colId === 'newRec') continue;
+
+    if (!tables[tableId]) {
+      tables[tableId] = {
+        tableId,
+        tableName: tableId,
+        summarySourceTable: summaryTables[tableId] || null,
+        columns: []
+      };
+    }
+
+    tables[tableId].columns.push({
+      colId,
+      label,
+      type,
+      isFormula,
+      isTrigger: recalcWhen > 0,
+      formula,
+      description,
+      refTableId,
+      recalcWhen,
+      choices: widgetOpts.choices || widgetOpts.choiceList || [],
     });
-    code += `\n`;
   }
-  $('output-container').innerHTML = `<div class="code-view-container">${code}</div>`;
+
+  Object.values(tables).forEach(t => {
+    t.columns.sort((a, b) => (a.label || '').localeCompare(b.label || ''));
+  });
+
+  App.raw.schema = Object.values(tables).sort((a, b) => a.tableName.localeCompare(b.tableName));
 }
 
-/* ---------------------------------------------------------------------
-   2. AI MODE RENDERING
---------------------------------------------------------------------- */
-function renderAIMode(grouped) {
-  let markdown = generateAIMarkdown(grouped);
-  let visualHtml = `<div class="ai-container">${escapeHtml(markdown)}</div>`;
-  $('output-container').innerHTML = visualHtml;
-}
-
-function generateAIMarkdown(grouped) {
-  let text = `Here is the schema for the Grist data tables, followed by the code view of each table.\n\n`;
-  
-  for (const [tableName, rows] of Object.entries(grouped)) {
-    text += `## Table: ${tableName}\n`;
-    text += `| Field | Type | Formula |\n`;
-    text += `|---|---|---|\n`;
-    
-    rows.forEach(r => {
-      const type = r.isFormula ? "Formula" : r.type;
-      const formula = r.formula.replace(/\n/g, " ").replace(/"/g, "'");
-      text += `| ${r.fieldName} | ${type} | ${r.isFormula ? formula : ""} |\n`;
-    });
-
-    text += `\n### Code View\n`;
-    text += "```python\n";
-    text += `class ${tableName}:\n`;
-    
-    rows.forEach(r => {
-      if (r.isFormula) {
-        text += `    def ${r.fieldName}(self):\n`;
-        text += `        return ${r.formula}\n`;
-      } else {
-        text += `    ${r.fieldName} = ${r.type}\n`;
-      }
-    });
-    text += "```\n\n---\n\n";
+// ═══════════════════════════════════════════════════════════════════════
+// ACL LOADING — CRITICAL FIX: colIds parsing
+// ═══════════════════════════════════════════════════════════════════════
+function parseColIds(val) {
+  if (!val) return [];
+  if (Array.isArray(val)) return val;
+  if (typeof val === 'string') {
+    try {
+      const parsed = JSON.parse(val);
+      if (Array.isArray(parsed)) return parsed;
+      return [val];
+    } catch (e) {
+      return val.split(',').map(s => s.trim()).filter(Boolean);
+    }
   }
-  return text;
+  return [];
 }
 
-/* ---------------------------------------------------------------------
-   3. ACL LOGIC
---------------------------------------------------------------------- */
-async function showACL() {
-  const resources = await grist.docApi.fetchTable("_grist_ACLResources");
-  const rules = await grist.docApi.fetchTable("_grist_ACLRules");
-  
-  const rulesList = mapToObjects(rules);
-  const resourcesList = mapToObjects(resources);
+async function loadACL() {
+  const resources = await grist.docApi.fetchTable('_grist_ACLResources');
+  const rules = await grist.docApi.fetchTable('_grist_ACLRules');
 
-  let results = [];
+  const resList = mapToObjects(resources);
+  const ruleList = mapToObjects(rules);
 
-  rulesList.forEach(rule => {
-    const res = resourcesList.find(r => r.id === rule.resource) || {};
-    
+  // Normalize colIds from JSON strings to arrays
+  resList.forEach(res => {
+    res.colIds = parseColIds(res.colIds);
+  });
+
+  const results = [];
+  ruleList.forEach(rule => {
+    const res = resList.find(r => r.id === rule.resource) || {};
     const entry = {
       table: res.tableId || 'Document',
-      columns: (res.colIds || []).join(", "),
-      condition: rule.aclFormula || "All others",
-      permissions: rule.permissionsText || "",
-      memo: rule.memo || "",
+      columns: (res.colIds || []).join(', '),
+      condition: rule.aclFormula || 'All others',
+      permissions: decodePerms(rule.permissions),
+      permRaw: rule.permissions || 0,
+      memo: rule.memo || '',
       isUserAttr: false,
-      attrName: "",
-      attrTable: "",
-      attrCol: ""
+      attrName: '',
+      attrTable: '',
+      attrCol: ''
     };
 
     if (rule.userAttributes) {
       try {
         const ua = JSON.parse(rule.userAttributes);
         entry.isUserAttr = true;
-        entry.table = "User Attributes";
-        entry.attrName = ua.name || "";
-        entry.attrTable = ua.tableId || "";
-        entry.attrCol = ua.lookupColId || "";
-      } catch(e) {}
+        entry.table = 'User Attributes';
+        entry.attrName = ua.name || '';
+        entry.attrTable = ua.tableId || '';
+        entry.attrCol = ua.lookupColId || '';
+      } catch (_) {}
     }
 
     results.push(entry);
   });
 
   results.sort((a, b) => (a.table + a.columns).localeCompare(b.table + b.columns));
+  App.raw.acl = results;
+}
 
-  currentData = { type: 'acl', data: results };
-  
-  if (aiModeEnabled) {
-      renderACL_AI(results);
-  } else {
-      renderACL_HTML(results);
+/**
+ * Decode Grist permission bitfield into a human-readable string.
+ */
+function decodePerms(n) {
+  if (typeof n !== 'number' || n === 0) return 'inherit';
+  const names = ['read', 'create', 'update', 'delete'];
+  let s = '';
+  for (let i = 0; i < 4; i++) {
+    const allow = n & (1 << (i * 2 + 1));
+    const deny  = n & (1 << (i * 2));
+    if (allow) s += '+' + names[i];
+    else if (deny) s += '-' + names[i];
   }
+  return s || 'inherit';
 }
 
-function renderACL_HTML(results) {
-  let html = `Date: ${getTodayDate()}`;
-  
-  html += `<h2>User Attributes</h2><table>
-    <thead><tr><th>Name</th><th>Lookup Table</th><th>Lookup Column</th></tr></thead><tbody>`;
-  
-  results.filter(r => r.isUserAttr).forEach(r => {
-    html += `<tr><td>${r.attrName}</td><td>${r.attrTable}</td><td>${r.attrCol}</td></tr>`;
-  });
-  html += `</tbody></table>`;
-
-  html += `<h2>Permissions Rules</h2><table>
-    <thead><tr><th>Table</th><th>Columns</th><th>Condition</th><th>Permissions</th><th>Memo</th></tr></thead><tbody>`;
-  
-  let lastTable = "";
-  results.filter(r => !r.isUserAttr).forEach(r => {
-    if (r.table !== lastTable && lastTable !== "") {
-      html += `<tr style="background-color:#f2f2f2; height:5px;"><td colspan="5"></td></tr>`;
-    }
-    lastTable = r.table;
-    
-    const perms = colorizePerms(r.permissions);
-    html += `<tr>
-      <td><b>${r.table}</b></td>
-      <td>${r.columns}</td>
-      <td><pre>${escapeHtml(r.condition)}</pre></td>
-      <td>${perms}</td>
-      <td>${r.memo}</td>
-    </tr>`;
-  });
-  html += `</tbody></table>`;
-  $('output-container').innerHTML = html;
-}
-
-function renderACL_AI(results) {
-    let text = `Here are the Access Control Rules for the Grist document.\n\n`;
-    
-    text += `## User Attributes\n`;
-    results.filter(r => r.isUserAttr).forEach(r => {
-        text += `- Attribute: **${r.attrName}** looks up **${r.attrCol}** in table **${r.attrTable}**\n`;
-    });
-    text += `\n`;
-
-    text += `## Permissions Rules\n`;
-    results.filter(r => !r.isUserAttr).forEach(r => {
-        text += `### Table: ${r.table}\n`;
-        text += `- **Columns**: ${r.columns || 'All'}\n`;
-        text += `- **Condition**: ${r.condition}\n`;
-        text += `- **Permissions**: ${r.permissions}\n`;
-        if(r.memo) text += `- **Memo**: ${r.memo}\n`;
-        text += `\n`;
-    });
-
-    currentData.aiText = text; 
-    $('output-container').innerHTML = `<div class="ai-container">${escapeHtml(text)}</div>`;
-}
-
-/* ---------------------------------------------------------------------
-   4. EXPORT UTILITIES
---------------------------------------------------------------------- */
-
-function copyToClipboard() {
-  if (!currentData) {
-    notify("No data loaded yet.");
-    return;
-  }
-  
-  let textToCopy = "";
-
-  if (aiModeEnabled) {
-    if (currentData.type === 'schema') {
-        textToCopy = generateAIMarkdown(currentData.data); 
-    } else {
-        textToCopy = currentData.aiText || "";
-    }
-  } else {
-    if (currentData.type === 'schema') {
-      textToCopy = "Table\tField\tType\tFormula\n";
-      for (const [tbl, rows] of Object.entries(currentData.data)) {
-        rows.forEach(r => {
-          textToCopy += `${tbl}\t${r.fieldName}\t${r.type}\t${r.formula}\n`;
-        });
-      }
-    } else if (currentData.type === 'acl') {
-      textToCopy = "Table\tColumns\tCondition\tPermissions\tMemo\n";
-      currentData.data.forEach(r => {
-        if(!r.isUserAttr) textToCopy += `${r.table}\t${r.columns}\t${r.condition}\t${r.permissions}\t${r.memo}\n`;
+function buildRelations() {
+  if (!App.raw.schema) return;
+  const rels = [];
+  App.raw.schema.forEach(table => {
+    const outgoing = table.columns.filter(c => c.refTableId && c.refTableId !== table.tableId);
+    if (outgoing.length) {
+      rels.push({
+        fromTable: table.tableName,
+        fromTableId: table.tableId,
+        links: outgoing.map(c => ({
+          colId: c.colId,
+          label: c.label,
+          type: c.type,
+          toTable: c.refTableId
+        }))
       });
     }
+  });
+  App.raw.relations = rels;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// FILTERING
+// ═══════════════════════════════════════════════════════════════════════
+function applyFilter() {
+  const q = App.search;
+  if (!q) {
+    App.filtered.schema = App.raw.schema;
+    App.filtered.acl = App.raw.acl;
+    App.filtered.relations = App.raw.relations;
+    return;
   }
 
-  navigator.clipboard.writeText(textToCopy).then(() => notify("Copied to Clipboard!"));
+  if (App.raw.schema) {
+    App.filtered.schema = App.raw.schema.map(t => {
+      const cols = t.columns.filter(c =>
+        (c.label || '').toLowerCase().includes(q) ||
+        (c.colId || '').toLowerCase().includes(q) ||
+        (c.type || '').toLowerCase().includes(q) ||
+        (c.formula || '').toLowerCase().includes(q) ||
+        (c.refTableId || '').toLowerCase().includes(q) ||
+        (c.description || '').toLowerCase().includes(q)
+      );
+      if (cols.length || t.tableName.toLowerCase().includes(q)) {
+        return { ...t, columns: cols.length ? cols : t.columns };
+      }
+      return null;
+    }).filter(Boolean);
+  }
+
+  if (App.raw.acl) {
+    App.filtered.acl = App.raw.acl.filter(r =>
+      (r.table || '').toLowerCase().includes(q) ||
+      (r.columns || '').toLowerCase().includes(q) ||
+      (r.condition || '').toLowerCase().includes(q) ||
+      (r.permissions || '').toLowerCase().includes(q) ||
+      (r.memo || '').toLowerCase().includes(q)
+    );
+  }
+
+  if (App.raw.relations) {
+    App.filtered.relations = App.raw.relations.map(r => {
+      const links = r.links.filter(l =>
+        (l.label || '').toLowerCase().includes(q) ||
+        (l.toTable || '').toLowerCase().includes(q) ||
+        (l.type || '').toLowerCase().includes(q)
+      );
+      if (links.length || r.fromTable.toLowerCase().includes(q)) {
+        return { ...r, links };
+      }
+      return null;
+    }).filter(Boolean);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// RENDERING DISPATCH
+// ═══════════════════════════════════════════════════════════════════════
+function render() {
+  if (!App.mode) return;
+  let html = '';
+  let text = '';
+
+  try {
+    if (App.mode === 'tables') {
+      if (App.view === 'table') ({ html, text } = renderSchemaTable(App.filtered.schema));
+      else if (App.view === 'code') ({ html, text } = renderSchemaCode(App.filtered.schema));
+      else if (App.view === 'ai') ({ html, text } = renderSchemaAI(App.filtered.schema));
+      else if (App.view === 'json') ({ html, text } = renderSchemaJSON(App.filtered.schema));
+    } else if (App.mode === 'acl') {
+      if (App.view === 'table') ({ html, text } = renderACLTable(App.filtered.acl));
+      else if (App.view === 'code') ({ html, text } = renderACLCode(App.filtered.acl));
+      else if (App.view === 'ai') ({ html, text } = renderACLAI(App.filtered.acl));
+      else if (App.view === 'json') ({ html, text } = renderACLJSON(App.filtered.acl));
+    } else if (App.mode === 'relations') {
+      if (App.view === 'json') ({ html, text } = renderRelationsJSON(App.filtered.relations));
+      else ({ html, text } = renderRelations(App.filtered.relations));
+    }
+  } catch (err) {
+    console.error('Render error:', err);
+    html = '<div class="access-banner error">Render error: ' + esc(err.message) + '</div>';
+    text = 'Render error: ' + err.message;
+  }
+
+  $('output').innerHTML = html;
+  App.renderedText = text;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════════════════════════════════════
+function updateStats() {
+  let stats = [];
+  if (App.mode === 'tables' && App.filtered.schema) {
+    const totalFields = App.filtered.schema.reduce((a, t) => a + t.columns.length, 0);
+    const formulas = App.filtered.schema.reduce((a, t) => a + t.columns.filter(c => c.isFormula).length, 0);
+    const triggers = App.filtered.schema.reduce((a, t) => a + t.columns.filter(c => c.isTrigger).length, 0);
+    const refs = App.filtered.schema.reduce((a, t) => a + t.columns.filter(c => c.refTableId).length, 0);
+    stats = [
+      { v: App.filtered.schema.length, l: 'Tables' },
+      { v: totalFields, l: 'Columns' },
+      { v: formulas, l: 'Formulas' },
+      { v: triggers, l: 'Triggers' },
+      { v: refs, l: 'References' },
+    ];
+  } else if (App.mode === 'acl' && App.filtered.acl) {
+    const rules = App.filtered.acl.filter(r => !r.isUserAttr).length;
+    const attrs = App.filtered.acl.filter(r => r.isUserAttr).length;
+    const grantDelete = App.filtered.acl.filter(r => !r.isUserAttr && r.permissions.includes('+delete')).length;
+    const denyRead = App.filtered.acl.filter(r => !r.isUserAttr && r.permissions.includes('-read')).length;
+    stats = [
+      { v: attrs, l: 'User Attributes' },
+      { v: rules, l: 'Permission Rules' },
+      { v: grantDelete, l: 'Grant Delete' },
+      { v: denyRead, l: 'Deny Read' },
+    ];
+  } else if (App.mode === 'relations' && App.filtered.relations) {
+    const allLinks = App.filtered.relations.reduce((a, r) => a + r.links.length, 0);
+    const sourceTables = new Set(App.filtered.relations.map(r => r.fromTable)).size;
+    const targetTables = new Set(App.filtered.relations.flatMap(r => r.links.map(l => l.toTable))).size;
+    stats = [
+      { v: sourceTables, l: 'Source Tables' },
+      { v: targetTables, l: 'Target Tables' },
+      { v: allLinks, l: 'References' },
+    ];
+  }
+
+  if (stats.length) {
+    let html = '<div class="stats">';
+    stats.forEach(s => {
+      html += '<div class="stat"><div class="v">' + s.v + '</div><div class="l">' + s.l + '</div></div>';
+    });
+    html += '</div>';
+    $('output').insertAdjacentHTML('afterbegin', html);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// SCHEMA RENDERERS
+// ═══════════════════════════════════════════════════════════════════════
+function renderSchemaTable(schema) {
+  if (!schema || !schema.length) return { html: emptyState('No tables match your filter.'), text: '' };
+
+  let html = '';
+  let text = '# Grist Schema Report — ' + today() + '\n\n';
+
+  for (const t of schema) {
+    const formulaCount = t.columns.filter(c => c.isFormula).length;
+    const refCount = t.columns.filter(c => c.refTableId).length;
+    const key = 'schema-' + t.tableId;
+    const isCollapsed = App.collapsed.has(key);
+    const summaryTag = t.summarySourceTable ? '<span class="summary-tag">Summary of ' + esc(t.summarySourceTable) + '</span>' : '';
+
+    html += '<div class="stitle' + (isCollapsed ? ' collapsed' : '') + '" data-key="' + key + '">';
+    html += '<span class="ch">&#9660;</span> ' + esc(t.tableName) + summaryTag;
+    html += '<span class="extra">' + t.columns.length + ' column' + (t.columns.length !== 1 ? 's' : '') + (formulaCount ? ' · ' + formulaCount + ' formula' : '') + (refCount ? ' · ' + refCount + ' ref' : '') + '</span></div>';
+    html += '<div class="scontent' + (isCollapsed ? ' collapsed' : '') + '">';
+    html += '<table class="dt"><thead><tr>';
+    html += '<th>Field</th><th>Col ID</th><th>Type</th><th>Formula / Trigger</th><th>Ref</th><th>Description</th><th>Config</th>';
+    html += '</tr></thead><tbody>';
+
+    text += '## Table: ' + t.tableName + '\n';
+    if (t.summarySourceTable) text += '*(Summary of ' + t.summarySourceTable + ')*\n';
+    text += '\n| Field | Col ID | Type | Formula | Ref | Description | Config |\n';
+    text += '|---|---|---|---|---|---|---|\n';
+
+    for (const c of t.columns) {
+      const typeBadge = typeBadgeHTML(c);
+      const formulaCell = c.formula ? '<pre class="formula-box">' + esc(c.formula) + '</pre>' : '';
+      const refCell = c.refTableId ? '<span class="tbadge t-ref">' + esc(c.refTableId) + '</span>' : '';
+      const descCell = c.description ? '<div class="tdesc">' + esc(c.description) + '</div>' : '';
+      let configCell = '';
+      if (c.choices.length) configCell += '<b>Choices:</b> ' + c.choices.map(ch => esc(ch)).join(', ');
+
+      html += '<tr>';
+      html += '<td class="fname">' + esc(c.label) + '</td>';
+      html += '<td><span class="fcolid">' + esc(c.colId) + '</span></td>';
+      html += '<td>' + typeBadge + '</td>';
+      html += '<td>' + formulaCell + '</td>';
+      html += '<td>' + refCell + '</td>';
+      html += '<td>' + descCell + '</td>';
+      html += '<td>' + configCell + '</td>';
+      html += '</tr>';
+
+      const formulaText = c.formula ? c.formula.replace(/\|/g, '\\|').replace(/\n/g, ' ') : '';
+      const descText = c.description ? c.description.replace(/\|/g, '\\|') : '';
+      const configText = c.choices.length ? c.choices.join(', ') : '';
+      text += '| ' + c.label + ' | ' + c.colId + ' | ' + (c.isTrigger ? 'Trigger' : c.isFormula ? 'Formula' : c.type) + ' | ' + formulaText + ' | ' + (c.refTableId || '') + ' | ' + descText + ' | ' + configText + ' |\n';
+    }
+
+    html += '</tbody></table></div>';
+    text += '\n';
+  }
+
+  return { html, text };
+}
+
+function renderSchemaCode(schema) {
+  if (!schema || !schema.length) return { html: emptyState('No tables match your filter.'), text: '' };
+
+  let code = '<span class="cc"># Grist Schema Export — ' + today() + '</span>\n<span class="cc"># Total tables: ' + schema.length + '</span>\n\n';
+  let plain = '# Grist Schema Export — ' + today() + '\n# Total tables: ' + schema.length + '\n\n';
+
+  for (const t of schema) {
+    const summaryComment = t.summarySourceTable ? '  <span class="cc"># Summary of ' + esc(t.summarySourceTable) + '</span>\n' : '';
+    const plainSummary = t.summarySourceTable ? '  # Summary of ' + t.summarySourceTable + '\n' : '';
+
+    code += '<span class="ck">class</span> <span class="cf">' + esc(t.tableName) + '</span>:\n' + summaryComment;
+    plain += 'class ' + t.tableName + ':\n' + plainSummary;
+
+    for (const c of t.columns) {
+      if (c.isFormula || c.isTrigger) {
+        const f = c.formula || '';
+        const indented = f.split('\n').map((l, i) => i === 0 ? l : '    ' + l).join('\n');
+        const tag = c.isTrigger ? 'Trigger' : 'Formula';
+        code += '  <span class="cc"># ' + tag + ' (' + c.type + ')</span>\n';
+        code += '  <span class="ck">def</span> <span class="cf">' + esc(c.colId) + '</span>(self):\n';
+        code += '    <span class="ck">return</span> <span class="cs">' + esc(indented) + '</span>\n\n';
+        plain += '  # ' + tag + '\n  def ' + c.colId + '(self):\n    return ' + f + '\n\n';
+      } else {
+        let tdef = '<span class="ct">' + esc(c.type) + '</span>';
+        let plainTdef = c.type;
+        if (c.refTableId) {
+          tdef += ' <span class="cn">→ ' + esc(c.refTableId) + '</span>';
+          plainTdef += ' → ' + c.refTableId;
+        }
+        if (c.choices.length) {
+          tdef += ' [<span class="cs">' + c.choices.map(x => "'" + esc(x) + "'").join(', ') + '</span>]';
+          plainTdef += ' [' + c.choices.map(x => "'" + x + "'").join(', ') + ']';
+        }
+
+        code += '  <span class="cf">' + esc(c.colId) + '</span>: ' + tdef;
+        plain += '  ' + c.colId + ': ' + plainTdef;
+
+        if (c.description) {
+          code += '  <span class="cc"># ' + esc(c.description) + '</span>';
+          plain += '  # ' + c.description;
+        }
+        code += '\n';
+        plain += '\n';
+      }
+    }
+    code += '\n';
+    plain += '\n';
+  }
+
+  return { html: '<div class="code-wrap">' + code + '</div>', text: plain };
+}
+
+function renderSchemaAI(schema) {
+  if (!schema || !schema.length) return { html: emptyState('No tables match your filter.'), text: '' };
+
+  const totalFields = schema.reduce((a, t) => a + t.columns.length, 0);
+  const totalFormulas = schema.reduce((a, t) => a + t.columns.filter(c => c.isFormula).length, 0);
+  const totalTriggers = schema.reduce((a, t) => a + t.columns.filter(c => c.isTrigger).length, 0);
+  const totalRefs = schema.reduce((a, t) => a + t.columns.filter(c => c.refTableId).length, 0);
+
+  let md = '# Grist Document — Complete Schema Report\n\n';
+  md += '## Document Overview\n\n';
+  md += '- **Tables:** ' + schema.length + '\n';
+  md += '- **Total Fields:** ' + totalFields + '\n';
+  md += '- **Formula Columns:** ' + totalFormulas + '\n';
+  md += '- **Trigger Columns:** ' + totalTriggers + '\n';
+  md += '- **Reference Columns:** ' + totalRefs + '\n';
+  md += '- **Exported:** ' + new Date().toLocaleString() + '\n\n';
+  md += '---\n\n';
+
+  for (const t of schema) {
+    const formulaCount = t.columns.filter(c => c.isFormula).length;
+    const triggerCount = t.columns.filter(c => c.isTrigger).length;
+    const refCount = t.columns.filter(c => c.refTableId).length;
+
+    md += '## Table: ' + t.tableName + '\n\n';
+    md += '**Summary:** ' + t.columns.length + ' fields';
+    if (formulaCount) md += ' | ' + formulaCount + ' formulas';
+    if (triggerCount) md += ' | ' + triggerCount + ' triggers';
+    if (refCount) md += ' | ' + refCount + ' references';
+    if (t.summarySourceTable) md += ' | Summary of ' + t.summarySourceTable;
+    md += '\n\n';
+
+    // 1. Full Markdown Table
+    md += '### Field Definitions\n\n';
+    md += '| Column ID | Label | Type | Formula | Ref Table | Choices | Description |\n';
+    md += '|---|---|---|---|---|---|---|\n';
+    for (const c of t.columns) {
+      const type = c.isTrigger ? 'Trigger (' + c.type + ')' : c.isFormula ? 'Formula (' + c.type + ')' : c.type;
+      const formula = c.formula ? c.formula.replace(/\n/g, ' ').replace(/"/g, "'") : '';
+      const ref = c.refTableId || '';
+      const choices = c.choices.length ? c.choices.join(', ') : '';
+      const desc = c.description || '';
+      md += '| ' + c.colId + ' | ' + c.label + ' | ' + type + ' | ' + formula + ' | ' + ref + ' | ' + choices + ' | ' + desc + ' |\n';
+    }
+    md += '\n';
+
+    // 2. Code Representation
+    md += '### Code View\n\n';
+    md += '```python\nclass ' + t.tableName + ':\n';
+    for (const c of t.columns) {
+      if (c.isFormula || c.isTrigger) {
+        md += '    def ' + c.colId + '(self):\n';
+        const f = c.formula || '';
+        const lines = f.split('\n');
+        lines.forEach((l, i) => {
+          md += i === 0 ? '        return ' + l + '\n' : '        ' + l + '\n';
+        });
+      } else {
+        let decl = '    ' + c.colId + ' = ' + c.type;
+        if (c.refTableId) decl += '  # → ' + c.refTableId;
+        else if (c.choices.length) decl += '  # choices: [' + c.choices.join(', ') + ']';
+        if (c.description) decl += '  # ' + c.description;
+        md += decl + '\n';
+      }
+    }
+    md += '```\n\n';
+
+    // 3. Relationships
+    const refs = t.columns.filter(c => c.refTableId);
+    if (refs.length) {
+      md += '### Relationships\n\n';
+      for (const c of refs) {
+        md += '- **' + c.colId + '** (' + c.label + ') is a `' + c.type + '` referencing table **' + c.refTableId + '**\n';
+      }
+      md += '\n';
+    }
+
+    md += '---\n\n';
+  }
+
+  return { html: '<div class="ai-wrap">' + esc(md) + '</div>', text: md };
+}
+
+function renderSchemaJSON(schema) {
+  const payload = {
+    exportedAt: new Date().toISOString(),
+    tables: (schema || []).map(t => ({
+      tableId: t.tableId,
+      tableName: t.tableName,
+      summarySourceTable: t.summarySourceTable,
+      columns: t.columns.map(c => ({
+        colId: c.colId,
+        label: c.label,
+        type: c.type,
+        isFormula: c.isFormula,
+        isTrigger: c.isTrigger,
+        formula: c.formula,
+        choices: c.choices,
+        refTableId: c.refTableId,
+        description: c.description
+      }))
+    }))
+  };
+  const json = JSON.stringify(payload, null, 2);
+  return { html: '<div class="json-wrap">' + syntaxHighlightJSON(json) + '</div>', text: json };
+}
+
+function typeBadgeHTML(c) {
+  if (c.isTrigger) return '<span class="tbadge t-trigger">Trigger</span>';
+  if (c.isFormula) return '<span class="tbadge t-formula">Formula</span>';
+  if (c.type === 'Ref') return '<span class="tbadge t-ref">Ref</span>';
+  if (c.type === 'RefList') return '<span class="tbadge t-reflist">RefList</span>';
+  return '<span class="tbadge t-data">' + esc(c.type) + '</span>';
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// ACL RENDERERS
+// ═══════════════════════════════════════════════════════════════════════
+function renderACLTable(acl) {
+  if (!acl || !acl.length) return { html: emptyState('No ACL rules match your filter.'), text: '' };
+
+  let html = '';
+  let text = '# Grist ACL Report — ' + today() + '\n\n';
+
+  const userAttrs = acl.filter(r => r.isUserAttr);
+  if (userAttrs.length) {
+    const key = 'acl-ua';
+    const isCollapsed = App.collapsed.has(key);
+    html += '<div class="stitle' + (isCollapsed ? ' collapsed' : '') + '" data-key="' + key + '">';
+    html += '<span class="ch">&#9660;</span> User Attributes';
+    html += '<span class="extra">' + userAttrs.length + '</span></div>';
+    html += '<div class="scontent' + (isCollapsed ? ' collapsed' : '') + '">';
+    html += '<table class="dt"><thead><tr><th>Name</th><th>Lookup Table</th><th>Lookup Column</th></tr></thead><tbody>';
+
+    text += '## User Attributes\n\n| Name | Lookup Table | Lookup Column |\n|---|---|---|\n';
+
+    userAttrs.forEach(r => {
+      html += '<tr><td><b>' + esc(r.attrName) + '</b></td><td>' + esc(r.attrTable) + '</td><td>' + esc(r.attrCol) + '</td></tr>';
+      text += '| ' + r.attrName + ' | ' + r.attrTable + ' | ' + r.attrCol + ' |\n';
+    });
+    html += '</tbody></table></div>';
+    text += '\n';
+  }
+
+  // Permission Rules
+  const permRules = acl.filter(r => !r.isUserAttr);
+  if (permRules.length) {
+    const key = 'acl-pr';
+    const isCollapsed = App.collapsed.has(key);
+    html += '<div class="stitle' + (isCollapsed ? ' collapsed' : '') + '" data-key="' + key + '">';
+    html += '<span class="ch">&#9660;</span> Permission Rules';
+    html += '<span class="extra">' + permRules.length + '</span></div>';
+    html += '<div class="scontent' + (isCollapsed ? ' collapsed' : '') + '">';
+    html += '<table class="dt"><thead><tr><th>Table</th><th>Columns</th><th>Condition</th><th>Permissions</th><th>Memo</th></tr></thead><tbody>';
+
+    text += '## Permission Rules\n\n| Table | Columns | Condition | Permissions | Memo |\n|---|---|---|---|---|\n';
+
+    let lastTable = '';
+    permRules.forEach(r => {
+      if (r.table !== lastTable && lastTable !== '') {
+        html += '<tr class="sep-row"><td colspan="5"></td></tr>';
+      }
+      lastTable = r.table;
+
+      const perms = colorPermsHTML(r.permissions);
+      html += '<tr><td><b>' + esc(r.table) + '</b></td><td>' + esc(r.columns || 'All') + '</td>';
+      html += '<td><pre class="formula-box">' + esc(r.condition) + '</pre></td>';
+      html += '<td>' + perms + '</td><td>' + esc(r.memo) + '</td></tr>';
+
+      text += '| ' + r.table + ' | ' + (r.columns || 'All') + ' | ' + r.condition + ' | ' + r.permissions + ' | ' + r.memo + ' |\n';
+    });
+    html += '</tbody></table></div>';
+  }
+
+  return { html, text };
+}
+
+function renderACLCode(acl) {
+  if (!acl || !acl.length) return { html: emptyState('No ACL rules match your filter.'), text: '' };
+
+  let code = '<span class="cc"># Grist ACL Rules — ' + today() + '</span>\n\n';
+  let plain = '# Grist ACL Rules — ' + today() + '\n\n';
+
+  const userAttrs = acl.filter(r => r.isUserAttr);
+  if (userAttrs.length) {
+    code += '<span class="ck">user_attributes</span>:\n';
+    plain += 'user_attributes:\n';
+    userAttrs.forEach(r => {
+      code += '  <span class="cf">' + esc(r.attrName) + '</span>: <span class="ct">' + esc(r.attrTable) + '</span>.<<span class="cf">' + esc(r.attrCol) + '</span>\n';
+      plain += '  ' + r.attrName + ': ' + r.attrTable + '.' + r.attrCol + '\n';
+    });
+    code += '\n';
+    plain += '\n';
+  }
+
+  let lastTable = '';
+  acl.filter(r => !r.isUserAttr).forEach(r => {
+    if (r.table !== lastTable) {
+      if (lastTable !== '') { code += '\n'; plain += '\n'; }
+      code += '<span class="ck">table</span> <span class="cf">' + esc(r.table) + '</span>:\n';
+      plain += 'table ' + r.table + ':\n';
+      lastTable = r.table;
+    }
+
+    const permParts = r.permissions === 'inherit' ? ['inherit'] : r.permissions.match(/[+-]\w+/g) || ['inherit'];
+    const permStr = permParts.map(p => {
+      const sign = p[0] === '+' ? '<span class="p-allow">' : '<span class="p-deny">';
+      return sign + esc(p) + '</span>';
+    }).join(' ');
+
+    code += '  <span class="cc"># ' + esc(r.memo || 'rule') + '</span>\n';
+    code += '  <span class="ck">if</span> ' + esc(r.condition) + ': ' + permStr + '\n';
+    plain += '  # ' + (r.memo || 'rule') + '\n  if ' + r.condition + ': ' + permParts.join(' ') + '\n';
+  });
+
+  return { html: '<div class="code-wrap">' + code + '</div>', text: plain };
+}
+
+function renderACLAI(acl) {
+  if (!acl || !acl.length) return { html: emptyState('No ACL rules match your filter.'), text: '' };
+
+  let md = '# Grist Document — Complete Access Control Report\n\n';
+  md += '**Exported:** ' + new Date().toLocaleString() + '\n\n';
+  md += '---\n\n';
+
+  const userAttrs = acl.filter(r => r.isUserAttr);
+  if (userAttrs.length) {
+    md += '## User Attributes\n\n';
+    md += '| Name | Lookup Table | Lookup Column |\n|---|---|---|\n';
+    userAttrs.forEach(r => {
+      md += '| ' + r.attrName + ' | ' + r.attrTable + ' | ' + r.attrCol + ' |\n';
+    });
+    md += '\n';
+    userAttrs.forEach(r => {
+      md += '- **' + r.attrName + '** looks up column **' + r.attrCol + '** in table **' + r.attrTable + '**\n';
+    });
+    md += '\n---\n\n';
+  }
+
+  md += '## Permission Rules Summary\n\n';
+  md += '| Table | Columns | Condition | Permissions | Memo |\n|---|---|---|---|---|\n';
+  acl.filter(r => !r.isUserAttr).forEach(r => {
+    md += '| ' + r.table + ' | ' + (r.columns || 'All') + ' | ' + r.condition + ' | ' + r.permissions + ' | ' + (r.memo || '') + ' |\n';
+  });
+
+  md += '\n## Detailed Rules\n\n';
+  let lastTable = '';
+  acl.filter(r => !r.isUserAttr).forEach(r => {
+    if (r.table !== lastTable) {
+      md += '\n### ' + r.table + '\n\n';
+      lastTable = r.table;
+    }
+    md += '- **Columns:** ' + (r.columns || 'All') + '\n';
+    md += '- **Condition:** `' + r.condition + '`\n';
+    md += '- **Permissions:** ' + r.permissions + '\n';
+    if (r.memo) md += '- **Memo:** ' + r.memo + '\n';
+    md += '\n';
+  });
+
+  return { html: '<div class="ai-wrap">' + esc(md) + '</div>', text: md };
+}
+
+function renderACLJSON(acl) {
+  const payload = {
+    exportedAt: new Date().toISOString(),
+    userAttributes: acl.filter(r => r.isUserAttr).map(r => ({
+      name: r.attrName,
+      tableId: r.attrTable,
+      lookupColId: r.attrCol
+    })),
+    rules: acl.filter(r => !r.isUserAttr).map(r => ({
+      table: r.table,
+      columns: r.columns,
+      condition: r.condition,
+      permissions: r.permissions,
+      memo: r.memo
+    }))
+  };
+  const json = JSON.stringify(payload, null, 2);
+  return { html: '<div class="json-wrap">' + syntaxHighlightJSON(json) + '</div>', text: json };
+}
+
+function colorPermsHTML(permStr) {
+  if (!permStr || permStr === 'inherit') return '<span style="color:var(--text-muted)">inherit</span>';
+  return permStr.replace(/([+-])(\w+)/g, (_, sign, letters) => {
+    const cls = sign === '+' ? 'p-allow' : 'p-deny';
+    return '<span class="' + cls + '">' + sign + letters + '</span> ';
+  }).trim();
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// RELATIONS RENDERERS
+// ═══════════════════════════════════════════════════════════════════════
+function renderRelations(relations) {
+  if (!relations || !relations.length) return { html: emptyState('No reference columns found.'), text: '' };
+
+  let html = '';
+  let text = '# Grist Table Relationships — ' + today() + '\n\n';
+
+  for (const r of relations) {
+    const key = 'rel-' + r.fromTable;
+    const isCollapsed = App.collapsed.has(key);
+    html += '<div class="stitle' + (isCollapsed ? ' collapsed' : '') + '" data-key="' + key + '">';
+    html += '<span class="ch">&#9660;</span> ' + esc(r.fromTable);
+    html += '<span class="extra">' + r.links.length + ' reference' + (r.links.length !== 1 ? 's' : '') + '</span></div>';
+    html += '<div class="scontent' + (isCollapsed ? ' collapsed' : '') + '">';
+
+    text += '## ' + r.fromTable + '\n\n';
+
+    for (const l of r.links) {
+      const typeTag = l.type && l.type.startsWith('RefList')
+        ? '<span class="rel-type">RefList</span>'
+        : '<span class="rel-type">Ref</span>';
+      html += '<div class="rel-item">';
+      html += '<span class="rel-from">' + esc(r.fromTable) + '</span>.<<b>' + esc(l.colId) + '</b> <span style="color:var(--text-muted); font-size:0.75rem;">(' + esc(l.label) + ')</span>';
+      html += ' <span class="rel-arrow">&rarr;</span> ';
+      html += '<span class="rel-to">' + esc(l.toTable) + '</span> ' + typeTag;
+      html += '</div>';
+
+      text += '- ' + r.fromTable + '.' + l.colId + ' (' + l.label + ') [' + l.type + '] → ' + l.toTable + '\n';
+    }
+
+    html += '</div>';
+    text += '\n';
+  }
+
+  return { html, text };
+}
+
+function renderRelationsJSON(relations) {
+  const payload = {
+    exportedAt: new Date().toISOString(),
+    relations: relations || []
+  };
+  const json = JSON.stringify(payload, null, 2);
+  return { html: '<div class="json-wrap">' + syntaxHighlightJSON(json) + '</div>', text: json };
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// EXPORTS
+// ═══════════════════════════════════════════════════════════════════════
+function copyToClipboard() {
+  if (!App.renderedText) {
+    notify('Nothing to copy.');
+    return;
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(App.renderedText).then(
+      () => notify('Copied to clipboard!'),
+      () => fallbackCopy(App.renderedText)
+    );
+  } else {
+    fallbackCopy(App.renderedText);
+  }
+}
+
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.left = '-9999px';
+  document.body.appendChild(ta);
+  ta.select();
+  try {
+    document.execCommand('copy');
+    notify('Copied to clipboard!');
+  } catch (e) {
+    notify('Copy failed — please select and copy manually.');
+  }
+  document.body.removeChild(ta);
 }
 
 function downloadCSV() {
-  if (!currentData || aiModeEnabled) {
-    notify("Download as CSV not available in this view.");
+  if (App.mode === 'tables' && App.filtered.schema) {
+    let csv = 'Table,Col ID,Label,Type,Is Formula,Is Trigger,Formula,Ref Table,Description,Choices\n';
+    App.filtered.schema.forEach(t => {
+      t.columns.forEach(c => {
+        csv += qcsv(t.tableName) + ',' + qcsv(c.colId) + ',' + qcsv(c.label) + ',' + qcsv(c.type) + ',' + c.isFormula + ',' + c.isTrigger + ',' + qcsv(c.formula) + ',' + qcsv(c.refTableId) + ',' + qcsv(c.description) + ',' + qcsv(c.choices.join('; ')) + '\n';
+      });
+    });
+    download(csv, 'grist_schema_' + timestamp() + '.csv', 'text/csv');
+  } else if (App.mode === 'acl' && App.filtered.acl) {
+    let csv = 'Type,Table,Columns,Condition,Permissions,Memo\n';
+    App.filtered.acl.filter(r => !r.isUserAttr).forEach(r => {
+      csv += 'Rule,' + qcsv(r.table) + ',' + qcsv(r.columns) + ',' + qcsv(r.condition) + ',' + qcsv(r.permissions) + ',' + qcsv(r.memo) + '\n';
+    });
+    App.filtered.acl.filter(r => r.isUserAttr).forEach(r => {
+      csv += 'UserAttr,' + qcsv(r.attrTable) + ',' + qcsv(r.attrCol) + ',,' + qcsv(r.attrName) + ',\n';
+    });
+    download(csv, 'grist_acl_' + timestamp() + '.csv', 'text/csv');
+  } else if (App.mode === 'relations' && App.filtered.relations) {
+    let csv = 'Source Table,Column,Label,Target Table,Type\n';
+    App.filtered.relations.forEach(r => {
+      r.links.forEach(l => {
+        csv += qcsv(r.fromTable) + ',' + qcsv(l.colId) + ',' + qcsv(l.label) + ',' + qcsv(l.toTable) + ',' + qcsv(l.type) + '\n';
+      });
+    });
+    download(csv, 'grist_relations_' + timestamp() + '.csv', 'text/csv');
+  } else {
+    notify('CSV export not available for this view.');
+  }
+}
+
+function downloadJSON() {
+  let payload, filename;
+  if (App.mode === 'tables') {
+    filename = 'grist_schema_' + timestamp() + '.json';
+    payload = JSON.stringify({
+      exportedAt: new Date().toISOString(),
+      tables: (App.filtered.schema || []).map(t => ({
+        tableId: t.tableId,
+        tableName: t.tableName,
+        summarySourceTable: t.summarySourceTable,
+        columns: t.columns
+      }))
+    }, null, 2);
+  } else if (App.mode === 'acl') {
+    filename = 'grist_acl_' + timestamp() + '.json';
+    payload = JSON.stringify({
+      exportedAt: new Date().toISOString(),
+      rules: App.filtered.acl
+    }, null, 2);
+  } else if (App.mode === 'relations') {
+    filename = 'grist_relations_' + timestamp() + '.json';
+    payload = JSON.stringify({
+      exportedAt: new Date().toISOString(),
+      relations: App.filtered.relations
+    }, null, 2);
+  } else {
+    notify('JSON export not available.');
     return;
   }
-  let csv = "";
-  const sep = ",";
-
-  if (currentData.type === 'schema') {
-    csv = "Table,Field,Type,Formula\n";
-    for (const [tbl, rows] of Object.entries(currentData.data)) {
-      rows.forEach(r => {
-        csv += `${quoteCsv(tbl)}${sep}${quoteCsv(r.fieldName)}${sep}${quoteCsv(r.type)}${sep}${quoteCsv(r.formula)}\n`;
-      });
-    }
-    downloadFile(csv, "schema_export.csv", "text/csv");
-  } else {
-    csv = "Table,Columns,Condition,Permissions,Memo\n";
-    currentData.data.forEach(r => {
-      if(!r.isUserAttr) {
-        csv += `${quoteCsv(r.table)}${sep}${quoteCsv(r.columns)}${sep}${quoteCsv(r.condition)}${sep}${quoteCsv(r.permissions)}${sep}${quoteCsv(r.memo)}\n`;
-      }
-    });
-    downloadFile(csv, "acl_export.csv", "text/csv");
-  }
+  download(payload, filename, 'application/json');
 }
 
 function downloadHTML() {
-  if (aiModeEnabled) {
-    let text = (currentData.type === 'schema') ? generateAIMarkdown(currentData.data) : currentData.aiText;
-    downloadFile(text, "ai_prompt.txt", "text/plain");
-    notify("Downloaded AI Prompt");
+  if (!App.renderedText && !App.mode) {
+    notify('Nothing to export.');
     return;
   }
-  
-  if (!currentData) return;
-
-  const content = $('output-container').innerHTML;
-  const styles = document.querySelector('style').outerHTML;
-  const fullHtml = `<html><head>${styles}</head><body>${content}</body></html>`;
-  downloadFile(fullHtml, "report.html", "text/html");
+  const title = 'Grist Report — ' + App.mode.toUpperCase();
+  const full = '<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<title>' + title + '</title>\n<style>\n' + document.querySelector('style').textContent + '\nbody { padding: 24px; max-width: 1200px; margin: 0 auto; }\n</style>\n</head>\n<body>\n<h1>' + title + '</h1>\n<p>Exported on ' + new Date().toLocaleString() + '</p>\n' + $('output').innerHTML + '\n</body>\n</html>';
+  download(full, 'grist_report_' + App.mode + '_' + timestamp() + '.html', 'text/html');
 }
 
-/* ---------------------------------------------------------------------
-   5. HELPER FUNCTIONS
---------------------------------------------------------------------- */
+// ═══════════════════════════════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════════════════════════════
+function emptyState(msg) {
+  return '<div class="empty">' + esc(msg) + '</div>';
+}
 
 function mapToObjects(gristData) {
   if (!gristData || !gristData.id) return [];
   return gristData.id.map((_, i) => {
     const obj = {};
-    Object.keys(gristData).forEach(key => {
-      obj[key] = gristData[key][i];
-    });
+    Object.keys(gristData).forEach(key => { obj[key] = gristData[key][i]; });
     return obj;
   });
 }
 
-function escapeHtml(text) {
-  if (!text) return "";
+function esc(text) {
+  if (text == null) return '';
   return String(text)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
-function quoteCsv(text) {
-  if (!text) return "";
-  text = String(text);
-  if (text.includes(",") || text.includes("\"") || text.includes("\n")) {
-    return `"${text.replace(/"/g, '""')}"`;
-  }
+function qcsv(text) {
+  if (text == null) return '';
+  text = String(text).replace(/\r?\n/g, ' ');
+  if (/[",\n]/.test(text)) return '"' + text.replace(/"/g, '""') + '"';
   return text;
 }
 
-function colorizePerms(pStr) {
-  if (!pStr) return "";
-  return pStr.replace(/([+-])([a-zA-Z]+)/g, (match, sign, letters) => {
-    const color = sign === '+' ? 'green' : 'red';
-    return `<span style="color:${color}; font-weight:bold;">${sign}${letters}</span>`;
-  });
+function syntaxHighlightJSON(json) {
+  return esc(json)
+    .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?)/g, (m) => {
+      if (/:$/.test(m)) return '<span class="j-key">' + m + '</span>';
+      return '<span class="j-str">' + m + '</span>';
+    })
+    .replace(/\b(true|false|null)\b/g, '<span class="j-bool">$1</span>')
+    .replace(/\b(\d+\.?\d*)\b/g, '<span class="j-num">$1</span>');
 }
 
-function getTodayDate() {
-  const d = new Date();
-  return d.toLocaleDateString();
+function today() {
+  return new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
-function downloadFile(content, filename, type) {
-  const blob = new Blob([content], { type: type });
+function timestamp() {
+  return new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+}
+
+function download(content, filename, type) {
+  const blob = new Blob([content], { type });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
   a.download = filename;
+  document.body.appendChild(a);
   a.click();
+  document.body.removeChild(a);
   URL.revokeObjectURL(url);
+  notify('Downloaded ' + filename);
 }
 
 function notify(msg) {
-  const n = $('notification');
+  const n = $('notif');
   n.textContent = msg;
   n.classList.add('show');
-  setTimeout(() => n.classList.remove('show'), 2000);
+  clearTimeout(n._timer);
+  n._timer = setTimeout(() => n.classList.remove('show'), 2500);
 }
 
+// ═══════════════════════════════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════════════════════════════
+function boot() {
+  initTheme();
+  initGrist();
+  attachEventListeners();
+  updateActiveButtons();
+}
+
+if (document.readyState !== 'loading') boot();
+else document.addEventListener('DOMContentLoaded', boot);
 </script>
 </body>
 </html>
