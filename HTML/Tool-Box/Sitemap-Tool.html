@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -160,7 +159,7 @@
             </div>
             <div class="p-3 mb-4 rounded-lg bg-[var(--accent-dim)] border border-[var(--accent)]">
                 <p class="text-xs font-semibold text-[var(--accent)] mb-1">CORS LIMITATION DETECTED</p>
-                <p class="text-xs text-[var(--fg-muted)]">Many enterprise sites (like Walgreens) block all standard CORS proxies. To proceed, please use one of these manual methods:</p>
+                <p class="text-xs text-[var(--fg-muted)]">Many enterprise sites (like McDonald's or Walgreens) block all standard CORS proxies. To proceed, please use one of these manual methods:</p>
             </div>
             <p class="text-sm font-bold mb-2">Option A: Direct Download</p>
             <ol class="text-xs text-[var(--fg-muted)] space-y-2 mb-4 list-decimal ml-4">
@@ -237,9 +236,9 @@
                     <div class="flex justify-between items-center mb-1">
                         <label class="block text-sm font-medium text-[var(--fg-muted)]">Paste XML or Raw URL List</label>
                         <div class="flex gap-2">
-                            <button onclick="fillExample('walgreens')" class="text-xs text-[var(--accent)] hover:underline">Example: Walgreens</button>
+                            <button onclick="fillExample('mcdonalds')" class="text-xs text-[var(--accent)] hover:underline">Example: McDonald's</button>
                             <span class="text-[var(--border)]">|</span>
-                            <button onclick="fillExample('directory')" class="text-xs text-[var(--accent)] hover:underline">Example: Sinclair</button>
+                            <button onclick="fillExample('walgreens')" class="text-xs text-[var(--accent)] hover:underline">Example: Walgreens</button>
                         </div>
                     </div>
                     <textarea id="pasteInput" class="input-field w-full px-4 py-2 rounded-lg text-xs font-mono h-32" placeholder="Paste raw XML, or just a list of URLs (works with mixed text too)..."></textarea>
@@ -345,6 +344,7 @@
                             <th>URL</th>
                             <th class="w-20">State</th>
                             <th class="w-32">City</th>
+                            <th class="w-48">Address</th>
                             <th class="w-20 text-center">Depth</th>
                         </tr>
                     </thead>
@@ -445,6 +445,7 @@
 
             try {
                 const proxies = [
+                    { name: 'AllOrigins (Raw)', url: `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`, type: 'text' },
                     { name: 'AllOrigins (JSON)', url: `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`, type: 'json' },
                     { name: 'CodeTabs', url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`, type: 'text' },
                     { name: 'YACDN', url: `https://yacdn.org/proxy/${url}`, type: 'text' },
@@ -569,6 +570,7 @@
 
             const bulkFetch = async (url) => {
                 const proxies = [
+                    { url: `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`, type: 'text' },
                     { url: `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`, type: 'json' },
                     { url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`, type: 'text' },
                     { url: `https://yacdn.org/proxy/${url}`, type: 'text' },
@@ -766,21 +768,21 @@
                     } else if (currentPattern.type === 'segment') {
                         idx = parts.findIndex(p => p.toLowerCase() === currentPattern.val);
                         if (idx !== -1) targetSegments = parts.slice(idx + 1);
-                        else return { url, state: null, city: null, depth: 0, keep: false };
+                        else return { url, state: null, city: null, address: null, depth: 0, keep: false };
                     } else if (currentPattern.type === 'prefix') {
                         idx = parts.findIndex(p => p.toLowerCase().startsWith(currentPattern.val));
                         if (idx !== -1) {
                             // In prefix mode, the matching segment itself IS often the location leaf
                             targetSegments = parts.slice(idx);
-                        } else return { url, state: null, city: null, depth: 0, keep: false };
+                        } else return { url, state: null, city: null, address: null, depth: 0, keep: false };
                     }
 
                     const depth = targetSegments.length;
                     const leaf = targetSegments[targetSegments.length - 1] || '';
 
-                    // Improved State & City Detection
                     let state = null;
                     let city = null;
+                    let address = null;
                     let stateIdx = -1;
 
                     // Strategy 1: Look for state in the WHOLE path
@@ -792,10 +794,31 @@
                         }
                     });
 
-                    // Strategy 2: Heuristic for State/City/Leaf structure (e.g. /ca/bishop/address)
+                    // Strategy 2: Heuristic for State/City/Address structure (e.g. /ca/bishop/address)
                     if (stateIdx !== -1 && stateIdx < parts.length - 1) {
-                        // The segment immediately after state is very often the city
-                        city = formatCity(parts[stateIdx + 1]);
+                        let potentialCity = parts[stateIdx + 1];
+                        // Don't treat IDs as cities
+                        if (!/^id=/.test(potentialCity) && !/^\d+\.html$/.test(potentialCity) && !/^\d+$/.test(potentialCity)) {
+                            city = formatCity(potentialCity);
+                        }
+                        
+                        // Strategy for Address: Everything after city that isn't an ID
+                        if (stateIdx < parts.length - 2) {
+                            let addrParts = [];
+                            for (let i = stateIdx + 2; i < parts.length; i++) {
+                                let p = parts[i];
+                                // Skip common ID/extension patterns
+                                if (/^id=/.test(p) || /^id\d+/.test(p) || /^\d{3,}\.html$/.test(p) || /^p\d+/i.test(p) || /^store-\d+$/i.test(p)) {
+                                    break;
+                                }
+                                // Skip if purely a store ID (all numbers)
+                                if (/^\d+$/.test(p)) break;
+                                addrParts.push(p);
+                            }
+                            if (addrParts.length > 0) {
+                                address = formatCity(addrParts.join('-'));
+                            }
+                        }
                     }
 
                     // Strategy 3: Look in target segments if city not found yet
@@ -804,6 +827,18 @@
                             const firstIsState = detectState(targetSegments[0]);
                             if (firstIsState) {
                                 city = formatCity(targetSegments[1]);
+                                if (targetSegments.length > 2) {
+                                    let addrParts = [];
+                                    for (let i = 2; i < targetSegments.length; i++) {
+                                        let p = targetSegments[i];
+                                        if (/^id=/.test(p) || /^id\d+/.test(p) || /^\d{3,}\.html$/.test(p) || /^p\d+/i.test(p) || /^store-\d+$/i.test(p)) break;
+                                        if (/^\d+$/.test(p)) break;
+                                        addrParts.push(p);
+                                    }
+                                    if (addrParts.length > 0) {
+                                        address = formatCity(addrParts.join('-'));
+                                    }
+                                }
                             }
                         }
                     }
@@ -828,11 +863,12 @@
                         url,
                         state: state ? state.toUpperCase() : null,
                         city: city,
+                        address: address,
                         depth,
                         keep: depth >= minDepth && depth <= maxDepth
                     };
                 } catch(e) {
-                    return { url, state: null, city: null, depth: 0, keep: false };
+                    return { url, state: null, city: null, address: null, depth: 0, keep: false };
                 }
             })
             .filter(item => {
@@ -870,7 +906,8 @@
                 list = list.filter(u =>
                                    u.url.toLowerCase().includes(search) ||
                                    (u.state && u.state.toLowerCase().includes(search)) ||
-                                   (u.city && u.city.toLowerCase().includes(search))
+                                   (u.city && u.city.toLowerCase().includes(search)) ||
+                                   (u.address && u.address.toLowerCase().includes(search))
                                   );
             }
 
@@ -886,6 +923,7 @@
                     <td class="font-mono text-xs ${u.keep ? 'text-[var(--accent)]' : 'line-through'} break-all max-w-md">${u.url}</td>
                     <td class="font-mono text-xs">${u.state || '-'}</td>
                     <td class="text-xs">${u.city || '-'}</td>
+                    <td class="text-xs">${u.address || '-'}</td>
                     <td class="text-center text-xs font-mono">${u.depth}</td>
                 </tr>
             `).join('');
@@ -911,12 +949,13 @@
             const data = processedUrls.filter(u => u.keep);
             if(data.length === 0) return null;
 
-            let csv = 'URL,State,City\n';
+            let csv = 'URL,State,City,Address\n';
             data.forEach(u => {
                 const safeUrl = u.url.includes(',') ? `"${u.url}"` : u.url;
                 const safeState = u.state || '';
                 const safeCity = u.city ? (u.city.includes(',') ? `"${u.city}"` : u.city) : '';
-                csv += `${safeUrl},${safeState},${safeCity}\n`;
+                const safeAddress = u.address ? (u.address.includes(',') ? `"${u.address}"` : u.address) : '';
+                csv += `${safeUrl},${safeState},${safeCity},${safeAddress}\n`;
             });
             return csv;
         }
@@ -948,9 +987,20 @@
             });
         }
 
-        function fillExample(type = 'walgreens') {
+        function fillExample(type = 'mcdonalds') {
             let example = '';
-            if (type === 'walgreens') {
+            if (type === 'mcdonalds') {
+                example = `<url>
+<loc>https://www.mcdonalds.com/us/en-us/location/mi/standish/515-s-us-hwy-23/5568.html</loc>
+<changefreq>daily</changefreq>
+<priority>0.8</priority>
+</url>
+<url>
+<loc>https://www.mcdonalds.com/us/en-us/location/va/chesapeake/3212-western-branch-blvd/1384.html</loc>
+<changefreq>daily</changefreq>
+<priority>0.8</priority>
+</url>`;
+            } else if (type === 'walgreens') {
                 example = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://www.walgreens.com/locator/walgreens-13260+josey+ln-farmers+branch-tx-75234/id=5509</loc></url>
@@ -1029,7 +1079,10 @@ https://stations.sinclairoil.com/ca/paradise`;
 
         function toTitleCase(str) {
             if (!str) return '';
-            return str.replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+            return str.replace(/\w\S*/g, txt => {
+                if (txt.toUpperCase() === 'US') return 'US'; // Preserve US as an abbreviation
+                return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+            });
         }
 
         function toast(msg, type) {
