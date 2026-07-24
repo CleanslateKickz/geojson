@@ -1930,7 +1930,7 @@
     .report-body { padding: 0; }
 
     .summary-grid {
-        display: grid; grid-template-columns: repeat(4, 1fr);
+        display: grid; grid-template-columns: repeat(3, 1fr);
         gap: 10px; margin-bottom: 22px;
     }
     .summary-box {
@@ -2014,8 +2014,6 @@
     <div class="report-sub">${subLine || 'Real Estate Portfolio'}</div>
     <div class="report-meta">
         <span>Report Date: <strong>${reportDate}</strong></span>
-        ${segment ? `<span>Segment: <strong>${segment}</strong></span>` : ''}
-        ${classify ? `<span>Classify: <strong>${classify}</strong></span>` : ''}
     </div>
 </div>
 
@@ -2033,10 +2031,6 @@
         <div class="summary-box">
             <div class="summary-label">Accounts</div>
             <div class="summary-value">${getList(r.Accounts).length}</div>
-        </div>
-        <div class="summary-box">
-            <div class="summary-label">Avg. Per Property</div>
-            <div class="summary-value">${totalProperties > 0 ? '$' + Math.round(totalValue / totalProperties).toLocaleString() : '—'}</div>
         </div>
     </div>
 
