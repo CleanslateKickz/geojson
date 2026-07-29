@@ -1,84 +1,174 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sitemap Location Extractor</title>
+    <title>Sitemap Scout — Location Finder</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #f8fafc;
             --bg-elevated: #ffffff;
             --bg-card: #ffffff;
+            --bg-inset: #f1f5f9;
             --border: #e2e8f0;
             --border-hover: #cbd5e1;
+            --border-focus: #0891b2;
             --fg: #0f172a;
             --fg-muted: #64748b;
+            --fg-dim: #94a3b8;
             --accent: #0891b2;
-            --accent-dim: rgba(8, 145, 178, 0.1);
+            --accent-hover: #0e7490;
+            --accent-dim: rgba(8, 145, 178, 0.08);
+            --accent-glow: rgba(8, 145, 178, 0.15);
             --success: #059669;
+            --success-dim: rgba(5, 150, 105, 0.08);
             --warning: #d97706;
+            --warning-dim: rgba(217, 119, 6, 0.08);
             --danger: #dc2626;
+            --danger-dim: rgba(220, 38, 38, 0.08);
+            --radius: 12px;
+            --radius-sm: 8px;
+            --radius-xs: 6px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+            --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
         }
 
         [data-theme="dark"] {
-            --bg: #0a0b0d;
-            --bg-elevated: #111216;
-            --bg-card: #16181d;
-            --border: #2a2d35;
-            --border-hover: #3d4150;
-            --fg: #e8eaed;
-            --fg-muted: #7a8194;
+            --bg: #09090b;
+            --bg-elevated: #111113;
+            --bg-card: #18181b;
+            --bg-inset: #1e1e22;
+            --border: #27272a;
+            --border-hover: #3f3f46;
+            --border-focus: #22d3ee;
+            --fg: #fafafa;
+            --fg-muted: #a1a1aa;
+            --fg-dim: #71717a;
             --accent: #22d3ee;
-            --accent-dim: rgba(34, 211, 238, 0.15);
+            --accent-hover: #06b6d4;
+            --accent-dim: rgba(34, 211, 238, 0.08);
+            --accent-glow: rgba(34, 211, 238, 0.12);
             --success: #34d399;
+            --success-dim: rgba(52, 211, 153, 0.1);
             --warning: #fbbf24;
+            --warning-dim: rgba(251, 191, 36, 0.1);
             --danger: #f87171;
+            --danger-dim: rgba(248, 113, 113, 0.1);
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+            --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.5), 0 2px 4px -2px rgba(0,0,0,0.3);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.5), 0 4px 6px -4px rgba(0,0,0,0.3);
         }
 
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            font-family: 'Inter', 'Space Grotesk', sans-serif;
+            font-family: 'Inter', 'Space Grotesk', system-ui, sans-serif;
             background: var(--bg);
             color: var(--fg);
-            transition: background 0.3s, color 0.3s;
+            transition: background 0.3s ease, color 0.3s ease;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
         }
         .font-mono { font-family: 'JetBrains Mono', monospace; }
-        
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }
-        
-        .input-field {
-            background: var(--bg);
+
+        /* --- Card System --- */
+        .card {
+            background: var(--bg-card);
             border: 1px solid var(--border);
-            color: var(--fg);
-            transition: all 0.2s;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
-        .input-field:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
-        .input-field::placeholder { color: var(--fg-muted); }
-        
-        .btn-primary { background: var(--accent); color: white; font-weight: 600; transition: all 0.2s; }
-        .btn-primary:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); }
+        .card:hover { border-color: var(--border-hover); }
+
+        /* --- Inputs --- */
+        .input-field {
+            background: var(--bg-inset);
+            border: 1.5px solid var(--border);
+            color: var(--fg);
+            transition: all 0.2s ease;
+            border-radius: var(--radius-sm);
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px var(--accent-dim);
+        }
+        .input-field::placeholder { color: var(--fg-dim); }
+
+        /* --- Buttons --- */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            border-radius: var(--radius-sm);
+            padding: 10px 20px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+            white-space: nowrap;
+        }
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .btn-primary:hover:not(:disabled) {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+        .btn-primary:active:not(:disabled) { transform: translateY(0); }
         .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-        
-        .btn-secondary { background: var(--bg-elevated); border: 1px solid var(--border); color: var(--fg); transition: all 0.2s; }
-        .btn-secondary:hover { background: var(--bg-card); border-color: var(--border-hover); }
-        
+
+        .btn-secondary {
+            background: var(--bg-elevated);
+            border: 1.5px solid var(--border);
+            color: var(--fg);
+        }
+        .btn-secondary:hover { background: var(--bg-inset); border-color: var(--border-hover); }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--fg-muted);
+            padding: 8px 12px;
+        }
+        .btn-ghost:hover { background: var(--accent-dim); color: var(--accent); }
+
+        .btn-danger {
+            background: var(--danger-dim);
+            color: var(--danger);
+            border: 1px solid transparent;
+        }
+        .btn-danger:hover { border-color: var(--danger); }
+
+        /* --- Checkbox --- */
         .checkbox-custom {
             appearance: none;
             width: 1.25rem;
             height: 1.25rem;
-            border: 1px solid var(--border);
+            border: 1.5px solid var(--border);
             border-radius: 4px;
-            background: var(--bg);
+            background: var(--bg-inset);
             cursor: pointer;
             position: relative;
-            transition: all 0.2s;
+            transition: all 0.15s ease;
+            flex-shrink: 0;
         }
         .checkbox-custom:checked {
             background: var(--accent);
@@ -87,26 +177,58 @@
         .checkbox-custom:checked::after {
             content: '';
             position: absolute;
-            left: 5px;
-            top: 2px;
+            left: 4.5px;
+            top: 1.5px;
             width: 5px;
-            height: 10px;
+            height: 9px;
             border: solid white;
             border-width: 0 2px 2px 0;
             transform: rotate(45deg);
         }
+        .checkbox-custom:hover { border-color: var(--accent); }
 
+        /* --- Discovery Cards --- */
+        .discovery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+        }
+        .sitemap-card {
+            background: var(--bg-elevated);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .sitemap-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 1px var(--accent-dim), var(--shadow-md);
+            transform: translateY(-1px);
+        }
+        .sitemap-card.found { border-left: 3px solid var(--success); }
+        .sitemap-card.not-found { border-left: 3px solid var(--danger); opacity: 0.6; }
+        .sitemap-card.loading { border-left: 3px solid var(--warning); }
+        .sitemap-card.from-robots { border-left: 3px solid var(--accent); }
+        .sitemap-card.selected {
+            border-color: var(--accent);
+            background: var(--accent-dim);
+            box-shadow: 0 0 0 2px var(--accent-glow);
+        }
+
+        /* --- Pattern Segments --- */
         .pattern-segment {
             background: transparent;
-            border: 1px solid var(--border);
+            border: 1.5px solid var(--border);
             color: var(--fg-muted);
-            transition: all 0.2s;
+            transition: all 0.15s ease;
             cursor: pointer;
+            font-size: 0.8125rem;
+            padding: 8px 16px;
         }
-        .pattern-segment:hover {
-            border-color: var(--border-hover);
-            color: var(--fg);
-        }
+        .pattern-segment:hover { border-color: var(--border-hover); color: var(--fg); }
         .pattern-segment.active {
             background: var(--accent);
             border-color: var(--accent);
@@ -114,238 +236,534 @@
             font-weight: 600;
         }
 
+        /* --- Data Table --- */
         .data-table { width: 100%; border-collapse: collapse; }
-        .data-table th { background: var(--bg-elevated); position: sticky; top: 0; text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--border); z-index: 10; }
-        .data-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-        .data-table tr:hover td { background: var(--bg-elevated); }
-        
-        @keyframes fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .data-table th {
+            background: var(--bg-inset);
+            text-align: left;
+            padding: 12px 16px;
+            border-bottom: 1.5px solid var(--border);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--fg-muted);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .data-table td {
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.8125rem;
+            vertical-align: middle;
+        }
+        .data-table tbody tr { transition: background 0.1s ease; }
+        .data-table tbody tr:hover td { background: var(--accent-dim); }
+
+        /* --- Animations --- */
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slide-up {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); opacity: 1; }
+            50% { transform: scale(1); opacity: 0.6; }
+            100% { transform: scale(0.95); opacity: 1; }
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
         .animate-fade-in { animation: fade-in 0.4s ease-out; }
-        
-        .toast { position: fixed; bottom: 24px; right: 24px; padding: 12px 24px; border-radius: 6px; font-weight: 500; z-index: 9999; animation: fade-in 0.3s; color: white; }
+        .animate-slide-up { animation: slide-up 0.5s ease-out; }
+        .animate-pulse { animation: pulse-ring 1.5s ease-in-out infinite; }
+        .animate-spin { animation: spin 0.8s linear infinite; }
+
+        /* --- Toast --- */
+        .toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .toast {
+            padding: 12px 20px;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            font-size: 0.8125rem;
+            color: white;
+            box-shadow: var(--shadow-lg);
+            animation: fade-in 0.3s ease-out;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            max-width: 400px;
+        }
         .toast-success { background: var(--success); }
         .toast-error { background: var(--danger); }
+        .toast-warning { background: var(--warning); color: #1a1a1a; }
+        .toast-info { background: var(--accent); }
 
+        /* --- Badge --- */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 10px;
+            border-radius: 9999px;
+            font-size: 0.6875rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+        .badge-success { background: var(--success-dim); color: var(--success); }
+        .badge-danger { background: var(--danger-dim); color: var(--danger); }
+        .badge-warning { background: var(--warning-dim); color: var(--warning); }
+        .badge-accent { background: var(--accent-dim); color: var(--accent); }
+        .badge-muted { background: var(--bg-inset); color: var(--fg-muted); }
+
+        /* --- Modal --- */
         .modal-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
             display: flex; align-items: center; justify-content: center;
-            z-index: 100; opacity: 0; pointer-events: none;
-            transition: opacity 0.2s;
+            z-index: 100;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.2s ease;
         }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
         .modal-content {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 24px;
+            border-radius: var(--radius);
+            padding: 28px;
             width: 90%;
-            max-width: 400px;
-            transform: scale(0.95);
-            transition: transform 0.2s;
+            max-width: 480px;
+            box-shadow: var(--shadow-lg);
+            transform: scale(0.95) translateY(8px);
+            transition: transform 0.25s ease;
         }
-        .modal-overlay.active .modal-content { transform: scale(1); }
+        .modal-overlay.active .modal-content {
+            transform: scale(1) translateY(0);
+        }
+
+        /* --- Stat Card --- */
+        .stat-card {
+            background: var(--bg-inset);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            text-align: center;
+        }
+        .stat-card .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            line-height: 1.2;
+        }
+        .stat-card .stat-label {
+            font-size: 0.6875rem;
+            color: var(--fg-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 4px;
+        }
+
+        /* --- Progress Bar --- */
+        .progress-bar {
+            height: 4px;
+            background: var(--bg-inset);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .progress-bar .progress-fill {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        /* --- Tab System --- */
+        .tab-bar {
+            display: flex;
+            gap: 2px;
+            background: var(--bg-inset);
+            padding: 4px;
+            border-radius: var(--radius-sm);
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 8px 16px;
+            border: none;
+            background: transparent;
+            color: var(--fg-muted);
+            font-size: 0.8125rem;
+            font-weight: 500;
+            border-radius: var(--radius-xs);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .tab-btn:hover { color: var(--fg); }
+        .tab-btn.active {
+            background: var(--bg-card);
+            color: var(--fg);
+            box-shadow: var(--shadow-sm);
+            font-weight: 600;
+        }
+
+        /* --- Section Divider --- */
+        .section-step {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .section-step .step-num {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.875rem;
+            flex-shrink: 0;
+        }
+        .section-step h2 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        /* --- Robots.txt Display --- */
+        .robots-display {
+            background: var(--bg-inset);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            max-height: 200px;
+            overflow-y: auto;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .robots-display .sitemap-line {
+            color: var(--accent);
+            font-weight: 600;
+            cursor: pointer;
+            padding: 2px 4px;
+            border-radius: 3px;
+            transition: background 0.15s;
+        }
+        .robots-display .sitemap-line:hover {
+            background: var(--accent-dim);
+        }
+
+        /* --- URL Truncate --- */
+        .url-truncate {
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .discovery-grid { grid-template-columns: 1fr; }
+            .stat-grid { grid-template-columns: repeat(2, 1fr) !important; }
+        }
     </style>
 </head>
 <body class="min-h-screen">
 
-    <!-- Fallback Tools Modal -->
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Manual Fallback Modal -->
     <div id="fallbackModal" class="modal-overlay" onclick="if(event.target === this) toggleModal(false)">
         <div class="modal-content">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-bold">Manual Fetch & Convert</h3>
-                <button onclick="toggleModal(false)" class="text-[var(--fg-muted)] hover:text-[var(--fg)]">
+            <div class="flex justify-between items-center mb-5">
+                <h3 class="text-lg font-bold">CORS Block — Manual Fallback</h3>
+                <button onclick="toggleModal(false)" class="btn-ghost rounded-lg p-1">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
-            <div class="p-3 mb-4 rounded-lg bg-[var(--accent-dim)] border border-[var(--accent)]">
-                <p class="text-xs font-semibold text-[var(--accent)] mb-1">CORS LIMITATION DETECTED</p>
-                <p class="text-xs text-[var(--fg-muted)]">Many enterprise sites (like McDonald's or Walgreens) block all standard CORS proxies. To proceed, please use one of these manual methods:</p>
+            <div class="p-4 mb-5 rounded-lg" style="background:var(--warning-dim); border:1px solid var(--warning);">
+                <p class="text-xs font-bold mb-1" style="color:var(--warning);">CORS LIMITATION DETECTED</p>
+                <p class="text-xs" style="color:var(--fg-muted);">Many enterprise sites block all standard CORS proxies. Use one of these manual methods instead:</p>
             </div>
-            <p class="text-sm font-bold mb-2">Option A: Direct Download</p>
-            <ol class="text-xs text-[var(--fg-muted)] space-y-2 mb-4 list-decimal ml-4">
+            <p class="text-sm font-bold mb-3">Option A: Direct Download</p>
+            <ol class="text-xs space-y-2 mb-5 list-decimal ml-5" style="color:var(--fg-muted);">
                 <li>Open the sitemap URL in a new tab</li>
-                <li>Right-click > "Save As..." or Copy all text</li>
-                <li>Paste the content into the "Paste XML" box here</li>
+                <li>Right-click > "Save As..." or Ctrl+A to copy all text</li>
+                <li>Paste the content into the <strong>"Paste XML"</strong> tab below</li>
             </ol>
-            <p class="text-sm font-bold mb-2">Option B: External Converters</p>
-            <div class="space-y-3">
-                <a href="https://tableconvert.com/xml-to-csv" target="_blank" class="flex items-center gap-3 p-3 rounded-lg bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--accent)] transition-colors">
-                    <svg class="w-5 h-5 text-[var(--accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
-                    <span class="font-medium">TableConvert</span>
-                    <svg class="w-4 h-4 ml-auto text-[var(--fg-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+            <p class="text-sm font-bold mb-3">Option B: External Converters</p>
+            <div class="space-y-2">
+                <a href="https://tableconvert.com/xml-to-csv" target="_blank" class="flex items-center gap-3 p-3 rounded-lg border hover:border-[var(--accent)] transition-colors" style="background:var(--bg-inset);border-color:var(--border);">
+                    <svg class="w-5 h-5" style="color:var(--accent);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
+                    <span class="font-medium text-sm">TableConvert</span>
+                    <svg class="w-4 h-4 ml-auto" style="color:var(--fg-dim);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                 </a>
-                <a href="https://www.convertcsv.com/xml-to-csv.htm" target="_blank" class="flex items-center gap-3 p-3 rounded-lg bg-[var(--bg)] border border-[var(--border)] hover:border-[var(--accent)] transition-colors">
-                    <svg class="w-5 h-5 text-[var(--accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
-                    <span class="font-medium">ConvertCSV</span>
-                    <svg class="w-4 h-4 ml-auto text-[var(--fg-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                <a href="https://www.xml-sitemaps.com/" target="_blank" class="flex items-center gap-3 p-3 rounded-lg border hover:border-[var(--accent)] transition-colors" style="background:var(--bg-inset);border-color:var(--border);">
+                    <svg class="w-5 h-5" style="color:var(--accent);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
+                    <span class="font-medium text-sm">XML-Sitemaps.com</span>
+                    <svg class="w-4 h-4 ml-auto" style="color:var(--fg-dim);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                 </a>
             </div>
         </div>
     </div>
 
-    <div class="max-w-6xl mx-auto p-4 sm:p-6 space-y-6">
-        
-        <!-- Header -->
-        <header class="flex items-center justify-between mb-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+
+        <!-- ========== HEADER ========== -->
+        <header class="flex items-center justify-between">
             <div class="flex items-center gap-4">
-                <div class="p-3 rounded-lg bg-[var(--accent-dim)]">
-                    <svg class="w-6 h-6 text-[var(--accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+                <div class="p-3 rounded-xl" style="background:var(--accent-dim);">
+                    <svg class="w-7 h-7" style="color:var(--accent);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
                 </div>
                 <div>
-                    <h1 class="text-2xl font-bold">Sitemap Location Extractor</h1>
-                    <p class="text-[var(--fg-muted)] text-sm">Isolate specific location URLs from large sitemaps</p>
+                    <h1 class="text-2xl font-extrabold" style="font-family:'Space Grotesk',sans-serif; letter-spacing:-0.02em;">Sitemap Scout</h1>
+                    <p class="text-sm" style="color:var(--fg-muted);">Discover, parse & extract location URLs from any corporate website</p>
                 </div>
             </div>
-
-            <!-- Theme Toggle -->
-            <button onclick="toggleTheme()" id="themeToggleBtn" class="btn-secondary p-2 rounded-full" aria-label="Toggle theme">
-                <svg id="moonIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
-                <svg id="sunIcon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-            </button>
+            <div class="flex items-center gap-2">
+                <button onclick="handleReset()" class="btn btn-ghost rounded-lg text-xs" title="Reset Everything">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    Reset
+                </button>
+                <button onclick="toggleTheme()" class="btn btn-ghost rounded-lg" title="Toggle theme">
+                    <svg id="moonIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+                    <svg id="sunIcon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                </button>
+            </div>
         </header>
 
-        <!-- Step 1: Load Data -->
-        <section class="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-6 animate-fade-in shadow-sm">
-            <div class="flex items-center gap-2 mb-4">
-                <span class="w-7 h-7 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-sm font-bold">1</span>
-                <h2 class="text-lg font-semibold">Load Sitemap</h2>
+        <!-- ========== STEP 1: DISCOVER / LOAD ========== -->
+        <section class="card p-6 animate-fade-in">
+            <div class="section-step">
+                <span class="step-num">1</span>
+                <h2>Discover or Load Sitemap</h2>
             </div>
-            
-            <div class="space-y-4">
-                <!-- Fetch URL -->
-                <div>
-                    <label class="block text-sm font-medium text-[var(--fg-muted)] mb-1">Fetch from URL</label>
+
+            <!-- Tab Bar -->
+            <div class="tab-bar mb-5">
+                <button class="tab-btn active" onclick="switchTab('discover')" id="tab-discover">
+                    <span class="flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        Discover by Domain
+                    </span>
+                </button>
+                <button class="tab-btn" onclick="switchTab('direct')" id="tab-direct">
+                    <span class="flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                        Direct URL / Paste
+                    </span>
+                </button>
+            </div>
+
+            <!-- Tab: Discover -->
+            <div id="panel-discover">
+                <div class="mb-4">
+                    <label class="block text-xs font-semibold mb-2 uppercase tracking-wider" style="color:var(--fg-muted);">Enter a domain or URL</label>
                     <div class="flex gap-2">
-                        <input type="url" id="urlInput" class="input-field flex-1 px-4 py-2 rounded-lg text-sm font-mono" placeholder="https://example.com/sitemap.xml">
-                        <button id="fetchBtn" onclick="handleFetch()" class="btn-primary px-6 py-2 rounded-lg text-sm whitespace-nowrap">Fetch</button>
-                        <button onclick="toggleModal(true)" class="btn-secondary px-3 py-2 rounded-lg" title="Manual Fallback Tools">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <input type="text" id="domainInput" class="input-field flex-1 px-4 py-3 text-sm font-mono" placeholder="tacobell.com  |  https://www.walgreens.com  |  mcdonalds.com/robots.txt"
+                            onkeydown="if(event.key==='Enter') handleDiscover()">
+                        <button id="discoverBtn" onclick="handleDiscover()" class="btn btn-primary px-6">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                            Discover
                         </button>
                     </div>
-                    <p class="text-xs text-[var(--fg-muted)] mt-1">If fetch fails, click the <strong>?</strong> button for manual tools.</p>
+                    <p class="text-xs mt-2" style="color:var(--fg-dim);">Auto-checks robots.txt + 20+ common sitemap paths. Works with domains, full URLs, or robots.txt links.</p>
                 </div>
 
-                <div class="flex items-center gap-4">
-                    <div class="flex-1 h-px bg-[var(--border)]"></div>
-                    <span class="text-xs text-[var(--fg-muted)]">OR</span>
-                    <div class="flex-1 h-px bg-[var(--border)]"></div>
+                <!-- Discovery Results -->
+                <div id="discoveryResults" class="hidden animate-slide-up">
+                    <!-- Progress -->
+                    <div id="discoveryProgress" class="mb-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-medium" style="color:var(--fg-muted);" id="discoveryStatus">Scanning...</span>
+                            <span class="text-xs font-mono" style="color:var(--fg-dim);" id="discoveryCount">0/0</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="discoveryProgressBar" style="width:0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Robots.txt Section -->
+                    <div id="robotsSection" class="hidden mb-5">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4" style="color:var(--accent);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                                <span class="text-sm font-semibold">robots.txt</span>
+                                <span id="robotsBadge" class="badge badge-accent"></span>
+                            </div>
+                            <button onclick="toggleRobotsView()" class="btn btn-ghost rounded text-xs">Toggle Raw</button>
+                        </div>
+                        <div id="robotsRaw" class="robots-display hidden"></div>
+                    </div>
+
+                    <!-- Sitemap Grid -->
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-sm font-semibold">Discovered Sitemaps</span>
+                        <div class="flex items-center gap-2">
+                            <button onclick="loadAllFoundSitemaps()" class="btn btn-secondary rounded text-xs py-1.5 px-3">Load All Found</button>
+                            <button onclick="toggleModal(true)" class="btn btn-ghost rounded" title="CORS blocked?">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="sitemapGrid" class="discovery-grid"></div>
+                </div>
+            </div>
+
+            <!-- Tab: Direct -->
+            <div id="panel-direct" class="hidden">
+                <!-- Fetch URL -->
+                <div class="mb-5">
+                    <label class="block text-xs font-semibold mb-2 uppercase tracking-wider" style="color:var(--fg-muted);">Fetch from Sitemap URL</label>
+                    <div class="flex gap-2">
+                        <input type="url" id="urlInput" class="input-field flex-1 px-4 py-3 text-sm font-mono" placeholder="https://example.com/sitemap.xml"
+                            onkeydown="if(event.key==='Enter') handleDirectFetch()">
+                        <button id="fetchBtn" onclick="handleDirectFetch()" class="btn btn-primary px-6">Fetch</button>
+                    </div>
+                    <p class="text-xs mt-2" style="color:var(--fg-dim);">Paste a direct sitemap URL. Uses CORS proxies to fetch.</p>
+                </div>
+
+                <div class="flex items-center gap-4 my-5">
+                    <div class="flex-1 h-px" style="background:var(--border);"></div>
+                    <span class="text-xs font-semibold" style="color:var(--fg-dim);">OR</span>
+                    <div class="flex-1 h-px" style="background:var(--border);"></div>
                 </div>
 
                 <!-- Paste XML -->
                 <div>
-                    <div class="flex justify-between items-center mb-1">
-                        <label class="block text-sm font-medium text-[var(--fg-muted)]">Paste XML or Raw URL List</label>
-                        <div class="flex gap-2">
-                            <button onclick="fillExample('mcdonalds')" class="text-xs text-[var(--accent)] hover:underline">Example: McDonald's</button>
-                            <span class="text-[var(--border)]">|</span>
-                            <button onclick="fillExample('walgreens')" class="text-xs text-[var(--accent)] hover:underline">Example: Walgreens</button>
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="block text-xs font-semibold uppercase tracking-wider" style="color:var(--fg-muted);">Paste XML / URL List / robots.txt</label>
+                        <div class="flex gap-3">
+                            <button onclick="fillExample('mcdonalds')" class="text-xs hover:underline" style="color:var(--accent);">McDonald's Example</button>
+                            <button onclick="fillExample('walgreens')" class="text-xs hover:underline" style="color:var(--accent);">Walgreens Example</button>
                         </div>
                     </div>
-                    <textarea id="pasteInput" class="input-field w-full px-4 py-2 rounded-lg text-xs font-mono h-32" placeholder="Paste raw XML, or just a list of URLs (works with mixed text too)..."></textarea>
-                    <button onclick="handlePaste()" class="btn-secondary px-6 py-2 rounded-lg text-sm mt-2">Parse Content</button>
+                    <textarea id="pasteInput" class="input-field w-full px-4 py-3 rounded-lg text-xs font-mono" rows="5" placeholder="Paste raw XML sitemap, a list of URLs, or robots.txt content..."></textarea>
+                    <button onclick="handlePaste()" class="btn btn-secondary mt-3">Parse Content</button>
                 </div>
             </div>
         </section>
 
-        <!-- Step 2: Filter Logic -->
-        <section id="filterSection" class="hidden bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-6 animate-fade-in shadow-sm">
-            <div class="flex items-center gap-2 mb-4">
-                <span class="w-7 h-7 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-sm font-bold">2</span>
-                <h2 class="text-lg font-semibold">Filter Locations</h2>
+        <!-- ========== STEP 2: FILTER ========== -->
+        <section id="filterSection" class="card p-6 hidden animate-fade-in">
+            <div class="section-step">
+                <span class="step-num">2</span>
+                <h2>Filter & Refine Locations</h2>
             </div>
 
             <!-- Pattern Selection -->
             <div class="mb-6">
-                <label class="block text-sm font-medium text-[var(--fg-muted)] mb-3">1. Select Location Directory</label>
-                <div id="patternContainer" class="inline-flex flex-wrap rounded-lg overflow-hidden border border-[var(--border)] bg-[var(--bg)]">
-                    <!-- JS will inject buttons here -->
-                </div>
+                <label class="block text-xs font-semibold mb-3 uppercase tracking-wider" style="color:var(--fg-muted);">Select Location Directory</label>
+                <div id="patternContainer" class="inline-flex flex-wrap rounded-lg overflow-hidden border" style="border-color:var(--border);background:var(--bg-inset);"></div>
             </div>
 
             <!-- Depth Controls -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
-                    <label class="block text-sm font-medium text-[var(--fg-muted)] mb-2">2. Min URL Depth</label>
-                    <div class="flex items-center gap-4">
-                        <input type="range" id="depthSliderMin" min="1" max="10" value="1" class="w-full cursor-pointer" oninput="updateDepthLabels(); processUrls();">
-                        <span id="depthLabelMin" class="font-mono text-sm bg-[var(--bg)] px-3 py-1 rounded border border-[var(--border)] w-16 text-center">1</span>
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="text-xs font-semibold uppercase tracking-wider" style="color:var(--fg-muted);">Min URL Depth</label>
+                        <span id="depthLabelMin" class="font-mono text-xs px-2 py-0.5 rounded" style="background:var(--bg-inset);border:1px solid var(--border);">1</span>
                     </div>
-                    <p class="text-xs text-[var(--fg-muted)] mt-1">Filter out top-level pages (e.g. State indexes)</p>
+                    <input type="range" id="depthSliderMin" min="0" max="10" value="1" class="w-full cursor-pointer accent-[var(--accent)]" oninput="updateDepthLabels(); processUrls();">
+                    <p class="text-xs mt-1" style="color:var(--fg-dim);">Filter out shallow pages (e.g. state index pages)</p>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-[var(--fg-muted)] mb-2">3. Max URL Depth</label>
-                    <div class="flex items-center gap-4">
-                        <input type="range" id="depthSliderMax" min="1" max="10" value="10" class="w-full cursor-pointer" oninput="updateDepthLabels(); processUrls();">
-                        <span id="depthLabelMax" class="font-mono text-sm bg-[var(--bg)] px-3 py-1 rounded border border-[var(--border)] w-16 text-center">10</span>
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="text-xs font-semibold uppercase tracking-wider" style="color:var(--fg-muted);">Max URL Depth</label>
+                        <span id="depthLabelMax" class="font-mono text-xs px-2 py-0.5 rounded" style="background:var(--bg-inset);border:1px solid var(--border);">10</span>
                     </div>
-                    <p class="text-xs text-[var(--fg-muted)] mt-1">Filter out deep pages (e.g. /reviews, /menu)</p>
+                    <input type="range" id="depthSliderMax" min="1" max="15" value="10" class="w-full cursor-pointer accent-[var(--accent)]" oninput="updateDepthLabels(); processUrls();">
+                    <p class="text-xs mt-1" style="color:var(--fg-dim);">Filter out deep pages (e.g. /reviews, /menu)</p>
                 </div>
             </div>
 
-            <!-- Exclusion Filters -->
+            <!-- Exclusion -->
             <div class="mb-6">
-                <label class="block text-sm font-medium text-[var(--fg-muted)] mb-2">4. Exclude Keywords (in path)</label>
-                <input type="text" id="excludeInput" class="input-field w-full px-4 py-2 rounded-lg text-sm" placeholder="reviews, menu, photos" value="reviews, menu, photos" oninput="processUrls()">
-                <p class="text-xs text-[var(--fg-muted)] mt-1">Comma-separated list. URLs containing these path segments will be hidden.</p>
+                <label class="block text-xs font-semibold mb-2 uppercase tracking-wider" style="color:var(--fg-muted);">Exclude Keywords (in path)</label>
+                <input type="text" id="excludeInput" class="input-field w-full px-4 py-2.5 text-sm" placeholder="reviews, menu, photos" value="reviews, menu, photos" oninput="processUrls()">
+                <p class="text-xs mt-1" style="color:var(--fg-dim);">Comma-separated. URLs containing these path segments will be hidden.</p>
             </div>
 
-            <!-- Options -->
-            <div class="mb-6 flex items-center gap-6">
-                 <label class="flex items-center gap-2 cursor-pointer">
+            <!-- Options Row -->
+            <div class="flex flex-wrap items-center gap-6 mb-6">
+                <label class="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" id="abbreviateCheck" class="checkbox-custom" onchange="processUrls()">
-                    <span class="text-sm font-medium">Convert States to Abbreviations</span>
+                    <span class="text-sm font-medium">Abbreviate State Names</span>
                 </label>
             </div>
 
-            <!-- Stats -->
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-lg border border-[var(--border)] bg-[var(--bg)]">
-                <div>
-                    <div class="text-2xl font-bold font-mono" id="statTotal">0</div>
-                    <div class="text-xs text-[var(--fg-muted)]">Total URLs</div>
+            <!-- Stats Grid -->
+            <div class="stat-grid grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div class="stat-card">
+                    <div class="stat-value" id="statTotal">0</div>
+                    <div class="stat-label">Total URLs</div>
                 </div>
-                <div>
-                    <div class="text-2xl font-bold font-mono text-[var(--accent)]" id="statFound">0</div>
-                    <div class="text-xs text-[var(--fg-muted)]">Locations Found</div>
+                <div class="stat-card">
+                    <div class="stat-value" style="color:var(--accent);" id="statFound">0</div>
+                    <div class="stat-label">Locations Found</div>
                 </div>
-                <div>
-                    <div class="text-2xl font-bold font-mono" id="statFiltered">0</div>
-                    <div class="text-xs text-[var(--fg-muted)]">Filtered Out</div>
+                <div class="stat-card">
+                    <div class="stat-value" style="color:var(--fg-dim);" id="statFiltered">0</div>
+                    <div class="stat-label">Filtered Out</div>
                 </div>
-                <div>
-                    <div class="text-2xl font-bold font-mono text-[var(--success)]" id="statStates">0</div>
-                    <div class="text-xs text-[var(--fg-muted)]">Unique States</div>
+                <div class="stat-card">
+                    <div class="stat-value" style="color:var(--success);" id="statStates">0</div>
+                    <div class="stat-label">Unique States</div>
                 </div>
             </div>
         </section>
 
-        <!-- Step 3: Results -->
-        <section id="resultsSection" class="hidden bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-6 animate-fade-in shadow-sm">
-            <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
-                <div class="flex items-center gap-2">
-                    <span class="w-7 h-7 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-sm font-bold">3</span>
-                    <h2 class="text-lg font-semibold">Results</h2>
+        <!-- ========== STEP 3: RESULTS ========== -->
+        <section id="resultsSection" class="card p-6 hidden animate-fade-in">
+            <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
+                <div class="section-step mb-0">
+                    <span class="step-num">3</span>
+                    <h2>Results</h2>
                 </div>
-                <div class="flex gap-2">
-                    <button id="viewToggle" onclick="toggleView()" class="btn-secondary px-4 py-2 rounded-lg text-sm">Show All URLs (Including Filtered)</button>
-                    <button onclick="handleExport()" class="btn-primary px-4 py-2 rounded-lg text-sm">Export CSV</button>
-                    <button onclick="handleCopy()" class="btn-secondary px-4 py-2 rounded-lg text-sm">Copy CSV Data</button>
+                <div class="flex gap-2 flex-wrap">
+                    <button id="viewToggle" onclick="toggleView()" class="btn btn-secondary text-xs py-2">Show Filtered Out</button>
+                    <button onclick="handleCopy()" class="btn btn-secondary text-xs py-2">Copy CSV</button>
+                    <button onclick="handleExport()" class="btn btn-primary text-xs py-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        Export CSV
+                    </button>
                 </div>
             </div>
 
             <!-- Search -->
-            <input type="text" id="searchInput" class="input-field w-full px-4 py-2 rounded-lg text-sm mb-4" placeholder="Search..." oninput="renderTable()">
+            <div class="relative mb-4">
+                <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2" style="color:var(--fg-dim);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="text" id="searchInput" class="input-field w-full pl-10 pr-4 py-2.5 text-sm" placeholder="Search URLs, states, cities..." oninput="renderTable()">
+            </div>
 
             <!-- Table -->
-            <div class="overflow-auto max-h-[500px] rounded-lg border border-[var(--border)]">
-                <table class="data-table text-sm">
+            <div class="overflow-auto rounded-lg border" style="border-color:var(--border); max-height:520px;">
+                <table class="data-table">
                     <thead>
                         <tr>
-                            <th class="w-12">#</th>
+                            <th style="width:50px;">#</th>
                             <th>URL</th>
-                            <th class="w-20">State</th>
-                            <th class="w-32">City</th>
-                            <th class="w-48">Address</th>
-                            <th class="w-20 text-center">Depth</th>
+                            <th style="width:65px;">State</th>
+                            <th style="width:130px;">City</th>
+                            <th style="width:180px;">Address</th>
+                            <th style="width:55px;" class="text-center">Depth</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody"></tbody>
@@ -354,18 +772,21 @@
 
             <!-- Pagination -->
             <div class="flex justify-between items-center mt-4">
-                <span id="pageInfo" class="text-sm text-[var(--fg-muted)]">Showing 0-0 of 0</span>
+                <span id="pageInfo" class="text-xs" style="color:var(--fg-muted);">Showing 0-0 of 0</span>
                 <div class="flex gap-2">
-                    <button onclick="changePage(-1)" class="btn-secondary px-3 py-1 rounded text-sm">Prev</button>
-                    <button onclick="changePage(1)" class="btn-secondary px-3 py-1 rounded text-sm">Next</button>
+                    <button onclick="changePage(-1)" class="btn btn-secondary text-xs py-1.5 px-3">Prev</button>
+                    <button onclick="changePage(1)" class="btn btn-secondary text-xs py-1.5 px-3">Next</button>
                 </div>
             </div>
         </section>
 
     </div>
 
+    <!-- ========== SCRIPTS ========== -->
     <script>
-        // --- State Dictionary ---
+        // =============================================
+        // STATE DICTIONARY
+        // =============================================
         const stateMap = {
             'alabama': 'AL', 'alaska': 'AK', 'arizona': 'AZ', 'arkansas': 'AR', 'california': 'CA',
             'colorado': 'CO', 'connecticut': 'CT', 'delaware': 'DE', 'florida': 'FL', 'georgia': 'GA',
@@ -377,158 +798,587 @@
             'oklahoma': 'OK', 'oregon': 'OR', 'pennsylvania': 'PA', 'rhode island': 'RI', 'south carolina': 'SC',
             'south dakota': 'SD', 'tennessee': 'TN', 'texas': 'TX', 'utah': 'UT', 'vermont': 'VT',
             'virginia': 'VA', 'washington': 'WA', 'west virginia': 'WV', 'wisconsin': 'WI', 'wyoming': 'WY',
-            'district of columbia': 'DC'
+            'district of columbia': 'DC', 'puerto rico': 'PR'
         };
 
-        // --- App State ---
+        // =============================================
+        // COMMON SITEMAP PATHS TO CHECK
+        // =============================================
+        const COMMON_SITEMAP_PATHS = [
+            { path: '/robots.txt', label: 'robots.txt', priority: 0 },
+            { path: '/sitemap.xml', label: 'sitemap.xml', priority: 1 },
+            { path: '/sitemap_index.xml', label: 'sitemap_index.xml', priority: 2 },
+            { path: '/sitemap-index.xml', label: 'sitemap-index.xml', priority: 2 },
+            { path: '/sitemap1.xml', label: 'sitemap1.xml', priority: 3 },
+            { path: '/sitemap2.xml', label: 'sitemap2.xml', priority: 3 },
+            { path: '/sitemap.xml.gz', label: 'sitemap.xml.gz', priority: 4 },
+            // Location-specific
+            { path: '/location-sitemap.xml', label: 'location-sitemap.xml', priority: -1, isLocation: true },
+            { path: '/locations-sitemap.xml', label: 'locations-sitemap.xml', priority: -1, isLocation: true },
+            { path: '/sitemap-locations.xml', label: 'sitemap-locations.xml', priority: -1, isLocation: true },
+            { path: '/sitemap_locations.xml', label: 'sitemap_locations.xml', priority: -1, isLocation: true },
+            { path: '/sitemap-stores.xml', label: 'sitemap-stores.xml', priority: -1, isLocation: true },
+            { path: '/sitemap_stores.xml', label: 'sitemap_stores.xml', priority: -1, isLocation: true },
+            { path: '/stores-sitemap.xml', label: 'stores-sitemap.xml', priority: -1, isLocation: true },
+            { path: '/store-sitemap.xml', label: 'store-sitemap.xml', priority: -1, isLocation: true },
+            { path: '/sitemap-restaurant.xml', label: 'sitemap-restaurant.xml', priority: -1, isLocation: true },
+            { path: '/sitemap-restaurants.xml', label: 'sitemap-restaurants.xml', priority: -1, isLocation: true },
+            { path: '/sitemap-branches.xml', label: 'sitemap-branches.xml', priority: -1, isLocation: true },
+            { path: '/branch-sitemap.xml', label: 'branch-sitemap.xml', priority: -1, isLocation: true },
+            // Common CMS / platform patterns
+            { path: '/sitemap.jsp', label: 'sitemap.jsp', priority: 3 },
+            { path: '/sitemap.php', label: 'sitemap.php', priority: 3 },
+            { path: '/sitemap/sitemap.xml', label: 'sitemap/sitemap.xml', priority: 2 },
+            { path: '/sitemaps/sitemap.xml', label: 'sitemaps/sitemap.xml', priority: 2 },
+            { path: '/wp-sitemap.xml', label: 'wp-sitemap.xml', priority: 3 },
+            { path: '/post-sitemap.xml', label: 'post-sitemap.xml', priority: 4 },
+            { path: '/page-sitemap.xml', label: 'page-sitemap.xml', priority: 4 },
+            { path: '/sitemap-news.xml', label: 'sitemap-news.xml', priority: 4 },
+            { path: '/sitemap-images.xml', label: 'sitemap-images.xml', priority: 4 },
+            { path: '/video-sitemap.xml', label: 'video-sitemap.xml', priority: 4 },
+            { path: '/sitemap_index.xml.gz', label: 'sitemap_index.xml.gz', priority: 5 },
+        ];
+
+        // =============================================
+        // CORS PROXY CHAIN
+        // =============================================
+        const PROXY_CHAIN = [
+            { name: 'AllOrigins', url: (t) => `https://api.allorigins.win/raw?url=${encodeURIComponent(t)}`, type: 'text' },
+            { name: 'AllOrigins JSON', url: (t) => `https://api.allorigins.win/get?url=${encodeURIComponent(t)}`, type: 'json' },
+            { name: 'CodeTabs', url: (t) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(t)}`, type: 'text' },
+            { name: 'CORSProxy', url: (t) => `https://corsproxy.io/?${encodeURIComponent(t)}`, type: 'text' },
+            { name: 'ThingProxy', url: (t) => `https://thingproxy.freeboard.io/fetch/${t}`, type: 'text' },
+        ];
+
+        // =============================================
+        // APP STATE
+        // =============================================
         let rawUrls = [];
         let processedUrls = [];
         let currentPattern = '';
         let page = 0;
         const perPage = 100;
         let showAll = false;
+        let discoveredSitemaps = [];
+        let discoveredRobotsTxt = null;
 
-        // --- Init Theme ---
+        // =============================================
+        // THEME
+        // =============================================
         const initTheme = () => {
-            if (localStorage.theme === 'dark') {
-                document.documentElement.setAttribute('data-theme', 'dark');
-                document.getElementById('sunIcon').classList.add('hidden');
-                document.getElementById('moonIcon').classList.remove('hidden');
-            } else {
-                document.documentElement.setAttribute('data-theme', 'light');
-                document.getElementById('sunIcon').classList.remove('hidden');
-                document.getElementById('moonIcon').classList.add('hidden');
-            }
-        }
+            const isDark = localStorage.theme === 'dark';
+            document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+            document.getElementById('sunIcon').classList.toggle('hidden', !isDark);
+            document.getElementById('moonIcon').classList.toggle('hidden', isDark);
+        };
         initTheme();
 
         function toggleTheme() {
-            if (document.documentElement.getAttribute('data-theme') === 'dark') {
-                document.documentElement.setAttribute('data-theme', 'light');
-                localStorage.theme = 'light';
-                document.getElementById('sunIcon').classList.remove('hidden');
-                document.getElementById('moonIcon').classList.add('hidden');
-            } else {
-                document.documentElement.setAttribute('data-theme', 'dark');
-                localStorage.theme = 'dark';
-                document.getElementById('sunIcon').classList.add('hidden');
-                document.getElementById('moonIcon').classList.remove('hidden');
-            }
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            localStorage.theme = isDark ? 'light' : 'dark';
+            document.getElementById('sunIcon').classList.toggle('hidden', isDark);
+            document.getElementById('moonIcon').classList.toggle('hidden', !isDark);
         }
 
-        function toggleModal(show) {
-            const modal = document.getElementById('fallbackModal');
-            if(show) modal.classList.add('active');
-            else modal.classList.remove('active');
+        // =============================================
+        // TAB SYSTEM
+        // =============================================
+        function switchTab(tab) {
+            document.getElementById('panel-discover').classList.toggle('hidden', tab !== 'discover');
+            document.getElementById('panel-direct').classList.toggle('hidden', tab !== 'direct');
+            document.getElementById('tab-discover').classList.toggle('active', tab === 'discover');
+            document.getElementById('tab-direct').classList.toggle('active', tab === 'direct');
         }
-        
-        // --- Handlers ---
-        
+
+        // =============================================
+        // MODAL
+        // =============================================
+        function toggleModal(show) {
+            document.getElementById('fallbackModal').classList.toggle('active', show);
+        }
+
+        // =============================================
+        // TOAST
+        // =============================================
+        function toast(msg, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const el = document.createElement('div');
+            el.className = `toast toast-${type}`;
+            const icons = {
+                success: '<svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>',
+                error: '<svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>',
+                warning: '<svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>',
+                info: '<svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
+            };
+            el.innerHTML = `${icons[type] || icons.info}<span>${msg}</span>`;
+            container.appendChild(el);
+            setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateY(8px)'; el.style.transition = 'all 0.3s'; setTimeout(() => el.remove(), 300); }, 3500);
+        }
+
+        // =============================================
+        // FETCH WITH TIMEOUT + PROXY FALLBACK
+        // =============================================
         async function fetchWithTimeout(resource, options = {}) {
             const { timeout = 8000 } = options;
             const controller = new AbortController();
             const id = setTimeout(() => controller.abort(), timeout);
-            const response = await fetch(resource, {
-                ...options,
-                signal: controller.signal
-            });
-            clearTimeout(id);
-            return response;
-        }
-
-        async function handleFetch() {
-            const url = document.getElementById('urlInput').value.trim();
-            if(!url) return toast('Enter a URL', 'error');
-            
-            document.getElementById('fetchBtn').disabled = true;
-            document.getElementById('fetchBtn').textContent = 'Loading...';
-
             try {
-                const proxies = [
-                    { name: 'AllOrigins (Raw)', url: `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`, type: 'text' },
-                    { name: 'AllOrigins (JSON)', url: `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`, type: 'json' },
-                    { name: 'CodeTabs', url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`, type: 'text' },
-                    { name: 'YACDN', url: `https://yacdn.org/proxy/${url}`, type: 'text' },
-                    { name: 'CorsProxy.io', url: `https://corsproxy.io/?${encodeURIComponent(url)}`, type: 'text' },
-                    { name: 'ThingProxy', url: `https://thingproxy.freeboard.io/fetch/${url}`, type: 'text' }
-                ];
-
-                let text = null;
-                let successProxy = null;
-
-                for(let proxy of proxies) {
-                    try {
-                        console.log(`Trying ${proxy.name}: ${proxy.url}`);
-                        const resp = await fetchWithTimeout(proxy.url, { timeout: 10000 });
-                        if(resp.ok) {
-                            if (proxy.type === 'json') {
-                                const json = await resp.json();
-                                text = json.contents;
-                            } else {
-                                text = await resp.text();
-                            }
-                            if(text && text.length > 10) {
-                                successProxy = proxy.name;
-                                break;
-                            }
-                        }
-                    } catch(e) {
-                        console.warn(`${proxy.name} failed:`, e);
-                    }
-                }
-
-                if(text) {
-                    toast(`Success using ${successProxy}`, 'success');
-                    await parseInput(text);
-                } else {
-                    toast('All fetch attempts failed. This site likely blocks all common CORS proxies.', 'error');
-                    toggleModal(true); // Show manual tools automatically on total failure
-                }
+                const response = await fetch(resource, { ...options, signal: controller.signal });
+                clearTimeout(id);
+                return response;
             } catch(e) {
-                console.error(e);
-                toast('Error during fetch process', 'error');
-            } finally {
-                document.getElementById('fetchBtn').disabled = false;
-                document.getElementById('fetchBtn').textContent = 'Fetch';
+                clearTimeout(id);
+                throw e;
             }
         }
 
+        async function fetchViaProxy(targetUrl, timeout = 10000) {
+            for (const proxy of PROXY_CHAIN) {
+                try {
+                    const proxyUrl = proxy.url(targetUrl);
+                    const resp = await fetchWithTimeout(proxyUrl, { timeout });
+                    if (!resp.ok) continue;
+                    let text;
+                    if (proxy.type === 'json') {
+                        const json = await resp.json();
+                        text = json.contents;
+                    } else {
+                        text = await resp.text();
+                    }
+                    if (text && text.length > 5) return { text, proxy: proxy.name };
+                } catch(e) { continue; }
+            }
+            return null;
+        }
+
+        // =============================================
+        // DISCOVER ENGINE
+        // =============================================
+        function normalizeDomain(input) {
+            let raw = input.trim().toLowerCase();
+            // Remove protocol
+            raw = raw.replace(/^https?:\/\//, '');
+            // Handle robots.txt pasted directly
+            if (raw.endsWith('/robots.txt')) {
+                const domain = raw.replace(/\/robots\.txt.*$/, '');
+                return { base: `https://${domain}`, domain, isRobots: true };
+            }
+            // Remove trailing slashes and paths
+            const hostPart = raw.split('/')[0];
+            // Remove port
+            const host = hostPart.split(':')[0];
+            return { base: `https://${host}`, domain: host, isRobots: false };
+        }
+
+        function parseRobotsTxt(text) {
+            const sitemaps = [];
+            const lines = text.split('\n');
+            for (const line of lines) {
+                const match = line.match(/^Sitemap:\s*(.+)/i);
+                if (match) {
+                    sitemaps.push(match[1].trim());
+                }
+            }
+            return sitemaps;
+        }
+
+        async function handleDiscover() {
+            const input = document.getElementById('domainInput').value.trim();
+            if (!input) return toast('Enter a domain or URL', 'error');
+
+            const { base, domain, isRobots } = normalizeDomain(input);
+            const btn = document.getElementById('discoverBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Scanning...';
+
+            // Show discovery panel
+            const resultsEl = document.getElementById('discoveryResults');
+            resultsEl.classList.remove('hidden');
+            document.getElementById('discoveryProgress').classList.remove('hidden');
+            document.getElementById('robotsSection').classList.add('hidden');
+            document.getElementById('sitemapGrid').innerHTML = '';
+            discoveredSitemaps = [];
+            discoveredRobotsTxt = null;
+
+            // Build check list
+            const checks = [];
+            const seenUrls = new Set();
+
+            // 1. robots.txt (always first)
+            const robotsUrl = `${base}/robots.txt`;
+            checks.push({ url: robotsUrl, label: '/robots.txt', source: 'robots-check', isRobots: true });
+
+            // 2. All common paths
+            for (const entry of COMMON_SITEMAP_PATHS) {
+                if (entry.path === '/robots.txt') continue;
+                const fullUrl = `${base}${entry.path}`;
+                if (!seenUrls.has(fullUrl)) {
+                    seenUrls.add(fullUrl);
+                    checks.push({ url: fullUrl, label: entry.path, source: 'common-path', isLocation: entry.isLocation });
+                }
+            }
+
+            const total = checks.length;
+            let completed = 0;
+            const grid = document.getElementById('sitemapGrid');
+
+            function updateProgress() {
+                completed++;
+                const pct = Math.round((completed / total) * 100);
+                document.getElementById('discoveryProgressBar').style.width = pct + '%';
+                document.getElementById('discoveryCount').textContent = `${completed}/${total}`;
+                document.getElementById('discoveryStatus').textContent = completed < total ? `Scanning... ${checks[completed]?.label || ''}` : 'Scan complete';
+            }
+
+            // Fetch robots.txt first (higher timeout)
+            const robotsResult = await fetchViaProxy(robotsUrl, 12000);
+            updateProgress();
+
+            let robotsSitemaps = [];
+            if (robotsResult) {
+                discoveredRobotsTxt = robotsResult.text;
+                robotsSitemaps = parseRobotsTxt(robotsResult.text);
+
+                // Show robots section
+                document.getElementById('robotsSection').classList.remove('hidden');
+                document.getElementById('robotsBadge').textContent = robotsSitemaps.length > 0 ? `${robotsSitemaps.length} sitemap(s)` : 'No sitemaps';
+                document.getElementById('robotsBadge').className = `badge ${robotsSitemaps.length > 0 ? 'badge-accent' : 'badge-muted'}`;
+
+                // Render robots.txt raw content
+                renderRobotsContent(robotsResult.text, robotsSitemaps);
+
+                // Add robots.txt as a card
+                addSitemapCard(grid, {
+                    url: robotsUrl,
+                    label: '/robots.txt',
+                    source: 'robots.txt',
+                    status: 'found',
+                    detail: robotsSitemaps.length > 0 ? `${robotsSitemaps.length} Sitemap directive(s)` : 'No Sitemap directives',
+                    proxy: robotsResult.proxy,
+                    isRobots: true
+                });
+
+                // Add sitemaps from robots.txt
+                for (const sitemapUrl of robotsSitemaps) {
+                    const urlObj = new URL(sitemapUrl);
+                    const path = urlObj.pathname;
+                    // Check if we already have this URL in our checks
+                    const existing = checks.find(c => c.url === sitemapUrl);
+                    if (existing) {
+                        existing.source = 'robots.txt';
+                        existing.priority = -2; // Highest priority
+                    } else if (!seenUrls.has(sitemapUrl)) {
+                        seenUrls.add(sitemapUrl);
+                        checks.push({ url: sitemapUrl, label: path, source: 'robots.txt', priority: -2 });
+                    }
+                }
+            } else {
+                addSitemapCard(grid, {
+                    url: robotsUrl,
+                    label: '/robots.txt',
+                    source: 'robots.txt',
+                    status: 'not-found',
+                    detail: 'Could not fetch'
+                });
+            }
+
+            // Now fetch all remaining sitemap paths in parallel (with concurrency limit)
+            const remaining = checks.filter(c => !c.isRobots);
+            const CONCURRENCY = 5;
+
+            async function processBatch(batch) {
+                const promises = batch.map(async (check) => {
+                    const result = await fetchViaProxy(check.url, 8000);
+                    updateProgress();
+
+                    if (result) {
+                        const isXml = result.text.includes('<url') || result.text.includes('<sitemap') || result.text.includes('<?xml');
+                        if (isXml) {
+                            const isIndex = result.text.includes('<sitemapindex') || result.text.includes('<sitemap>');
+                            const urlCount = (result.text.match(/<loc>/gi) || []).length;
+                            addSitemapCard(grid, {
+                                url: check.url,
+                                label: check.label,
+                                source: check.source,
+                                status: 'found',
+                                detail: isIndex ? `Sitemap Index — ${urlCount} sub-sitemap(s)` : `${urlCount} URL(s)`,
+                                proxy: result.proxy,
+                                isLocation: check.isLocation,
+                                isIndex,
+                                content: result.text,
+                                contentLength: result.text.length
+                            });
+                            discoveredSitemaps.push({ url: check.url, label: check.label, source: check.source, isLocation: check.isLocation, content: result.text });
+                        } else {
+                            addSitemapCard(grid, {
+                                url: check.url,
+                                label: check.label,
+                                source: check.source,
+                                status: 'not-found',
+                                detail: 'Not valid XML/sitemap'
+                            });
+                        }
+                    } else {
+                        addSitemapCard(grid, {
+                            url: check.url,
+                            label: check.label,
+                            source: check.source,
+                            status: 'not-found',
+                            detail: 'Not found / blocked'
+                        });
+                    }
+                });
+                await Promise.allSettled(promises);
+            }
+
+            for (let i = 0; i < remaining.length; i += CONCURRENCY) {
+                await processBatch(remaining.slice(i, i + CONCURRENCY));
+            }
+
+            // Final summary
+            const foundCount = discoveredSitemaps.length;
+            if (foundCount > 0) {
+                toast(`Discovery complete: ${foundCount} sitemap(s) found`, 'success');
+            } else {
+                toast('No sitemaps found. Try the Direct URL tab or paste XML manually.', 'warning');
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg> Discover';
+        }
+
+        function addSitemapCard(container, info) {
+            const card = document.createElement('div');
+            card.className = `sitemap-card ${info.status === 'found' ? 'found' : 'not-found'} ${info.source === 'robots.txt' && !info.isRobots ? 'from-robots' : ''} animate-fade-in`;
+
+            const statusIcon = info.status === 'found'
+                ? '<svg class="w-4 h-4 flex-shrink-0" style="color:var(--success);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>'
+                : '<svg class="w-4 h-4 flex-shrink-0" style="color:var(--fg-dim);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>';
+
+            const sourceBadge = info.source === 'robots.txt'
+                ? '<span class="badge badge-accent">robots.txt</span>'
+                : info.isLocation
+                    ? '<span class="badge badge-success">location</span>'
+                    : '<span class="badge badge-muted">common path</span>';
+
+            const isClickable = info.status === 'found' && !info.isRobots;
+            const cursorClass = isClickable ? 'cursor-pointer' : 'cursor-default';
+            card.classList.add(cursorClass);
+
+            card.innerHTML = `
+                <div class="flex items-start gap-3">
+                    <div class="mt-0.5">${statusIcon}</div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 mb-1 flex-wrap">
+                            <span class="font-mono text-sm font-semibold" style="color:${info.status === 'found' ? 'var(--fg)' : 'var(--fg-dim)'};">${escapeHtml(info.label)}</span>
+                            ${sourceBadge}
+                        </div>
+                        <p class="text-xs mb-2" style="color:var(--fg-muted);">${info.detail || ''}</p>
+                        <p class="font-mono text-xs url-truncate" style="color:var(--fg-dim);" title="${escapeHtml(info.url)}">${escapeHtml(info.url)}</p>
+                    </div>
+                </div>
+            `;
+
+            if (isClickable) {
+                card.onclick = () => {
+                    // Remove selected from all
+                    container.querySelectorAll('.sitemap-card.selected').forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                    loadDiscoveredSitemap(info);
+                };
+            } else if (info.isRobots && info.status === 'found') {
+                card.onclick = () => {
+                    toggleRobotsView();
+                };
+                card.classList.add('cursor-pointer');
+            }
+
+            container.appendChild(card);
+        }
+
+        function renderRobotsContent(text, sitemaps) {
+            const el = document.getElementById('robotsRaw');
+            const lines = text.split('\n');
+            el.innerHTML = lines.map(line => {
+                const sitemapMatch = line.match(/^(Sitemap:\s*)(.+)/i);
+                if (sitemapMatch) {
+                    return `${escapeHtml(sitemapMatch[1])}<span class="sitemap-line" onclick="handleRobotsSitemapClick('${escapeHtml(sitemapMatch[2].trim())}')" title="Click to load this sitemap">${escapeHtml(sitemapMatch[2].trim())}</span>`;
+                }
+                return escapeHtml(line);
+            }).join('\n');
+        }
+
+        function toggleRobotsView() {
+            document.getElementById('robotsRaw').classList.toggle('hidden');
+        }
+
+        function handleRobotsSitemapClick(url) {
+            // Switch to direct tab and set URL
+            switchTab('direct');
+            document.getElementById('urlInput').value = url;
+            handleDirectFetch();
+        }
+
+        async function loadDiscoveredSitemap(info) {
+            toast(`Loading ${info.label}...`, 'info');
+
+            // If we have the content cached from discovery
+            if (info.content) {
+                await parseInput(info.content);
+                return;
+            }
+
+            // Otherwise fetch it
+            const result = await fetchViaProxy(info.url, 10000);
+            if (result) {
+                await parseInput(result.text);
+            } else {
+                toast('Failed to load sitemap — try the Direct URL tab', 'error');
+            }
+        }
+
+        async function loadAllFoundSitemaps() {
+            const found = discoveredSitemaps.filter(s => !s.isLocation);
+            // Prefer location sitemaps, fall back to any found
+            const targets = discoveredSitemaps.length > 0 ? discoveredSitemaps : found;
+            if (targets.length === 0) return toast('No sitemaps to load', 'error');
+
+            // If there's a location-specific one, load that first
+            const locationSitemaps = targets.filter(s => s.isLocation);
+            const toLoad = locationSitemaps.length > 0 ? locationSitemaps : targets;
+
+            toast(`Loading ${toLoad.length} sitemap(s)...`, 'info');
+            let allUrls = [];
+            let failCount = 0;
+
+            for (const sitemap of toLoad) {
+                try {
+                    let content = sitemap.content;
+                    if (!content) {
+                        const result = await fetchViaProxy(sitemap.url, 10000);
+                        content = result ? result.text : null;
+                    }
+                    if (content) {
+                        // Check if it's a sitemap index
+                        if (content.includes('<sitemapindex') || (content.includes('<sitemap>') && !content.includes('<url>'))) {
+                            const matches = content.match(/<loc>\s*(https?:\/\/[^<]+)\s*<\/loc>/gi) || [];
+                            // Only get sub-sitemaps (not the index URLs themselves)
+                            const subUrls = matches.map(m => m.replace(/<\/?loc>/gi, '').trim());
+                            // Fetch each sub-sitemap
+                            for (const subUrl of subUrls) {
+                                const subResult = await fetchViaProxy(subUrl, 10000);
+                                if (subResult) {
+                                    const locs = subResult.text.match(/<loc>\s*(https?:\/\/[^<]+)\s*<\/loc>/gi) || [];
+                                    allUrls.push(...locs.map(m => m.replace(/<\/?loc>/gi, '').trim()));
+                                } else {
+                                    failCount++;
+                                }
+                            }
+                        } else {
+                            // Regular sitemap
+                            const locs = content.match(/<loc>\s*(https?:\/\/[^<]+)\s*<\/loc>/gi) || [];
+                            allUrls.push(...locs.map(m => m.replace(/<\/?loc>/gi, '').trim()));
+                        }
+                    } else {
+                        failCount++;
+                    }
+                } catch(e) { failCount++; }
+            }
+
+            rawUrls = [...new Set(allUrls)];
+            if (rawUrls.length > 0) {
+                toast(`Loaded ${rawUrls.length.toLocaleString()} total URLs`, 'success');
+                detectPatterns();
+            } else {
+                toast('No URLs found in any sitemap', 'error');
+            }
+        }
+
+        // =============================================
+        // DIRECT FETCH (FIXED)
+        // =============================================
+        async function handleDirectFetch() {
+            const url = document.getElementById('urlInput').value.trim();
+            if (!url) return toast('Enter a URL', 'error');
+
+            const btn = document.getElementById('fetchBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Loading...';
+
+            const result = await fetchViaProxy(url, 12000);
+
+            if (result) {
+                toast(`Fetched via ${result.proxy}`, 'success');
+                await parseInput(result.text);
+            } else {
+                toast('All fetch attempts failed. Site may block CORS proxies.', 'error');
+                toggleModal(true);
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = 'Fetch';
+        }
+
+        // =============================================
+        // PASTE HANDLER
+        // =============================================
         async function handlePaste() {
             const text = document.getElementById('pasteInput').value.trim();
-            if(!text) return toast('Paste content first', 'error');
+            if (!text) return toast('Paste content first', 'error');
+
+            // Check if it's robots.txt content
+            if (/^(User-agent|Sitemap|Disallow|Allow):/im.test(text)) {
+                const sitemaps = parseRobotsTxt(text);
+                if (sitemaps.length > 0) {
+                    toast(`Found ${sitemaps.length} sitemap(s) in robots.txt`, 'info');
+                    // Auto-load the first sitemap
+                    const firstUrl = sitemaps[0];
+                    toast(`Loading: ${firstUrl}`, 'info');
+                    const result = await fetchViaProxy(firstUrl, 12000);
+                    if (result) {
+                        await parseInput(result.text);
+                    } else {
+                        toast('Failed to fetch sitemap from robots.txt. Try clicking the sitemap links manually.', 'error');
+                    }
+                    return;
+                }
+            }
+
             await parseInput(text);
         }
 
-        // --- Robust Parsing Logic ---
+        // =============================================
+        // ROBUST XML / URL PARSING
+        // =============================================
         async function parseInput(text) {
             rawUrls = [];
             let isIndex = false;
             let subSitemaps = [];
 
-            // 1. Try strict XML parsing
+            // 1. Strict XML parsing
             try {
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(text, 'text/xml');
                 const errorNode = doc.querySelector('parsererror');
-                
+
                 if (!errorNode) {
-                    // Check if it's a sitemap index
                     const sitemaps = doc.getElementsByTagName('sitemap');
                     if (sitemaps.length > 0) {
                         isIndex = true;
                         subSitemaps = Array.from(doc.getElementsByTagName('loc')).map(l => l.textContent.trim());
                     } else {
                         const locs = doc.getElementsByTagName('loc');
-                        if(locs.length > 0) {
+                        if (locs.length > 0) {
                             rawUrls = Array.from(locs).map(l => l.textContent.trim());
                         }
                     }
                 }
             } catch(e) {}
 
-            // 2. Fallback: Regex for <sitemap> and <loc> tags (handles broken XML)
-            if(rawUrls.length === 0 && !isIndex) {
-                if (text.includes('<sitemap>')) {
+            // 2. Regex fallback
+            if (rawUrls.length === 0 && !isIndex) {
+                if (text.includes('<sitemapindex') || text.includes('<sitemap>')) {
                     isIndex = true;
                     const matches = text.match(/<loc>\s*(https?:\/\/[^<]+)\s*<\/loc>/gi) || [];
                     subSitemaps = matches.map(m => m.replace(/<\/?loc>/gi, '').trim());
@@ -538,100 +1388,80 @@
                 }
             }
 
-            // 3. Fallback: Generic URL extraction (handles plain text lists)
-            if(rawUrls.length === 0 && !isIndex) {
-                const matches = text.match(/https?:\/\/[^\s<>"]+/g);
-                if(matches) {
-                    rawUrls = matches.map(u => u.trim());
+            // 3. Generic URL extraction
+            if (rawUrls.length === 0 && !isIndex) {
+                const matches = text.match(/https?:\/\/[^\s<>"']+/g);
+                if (matches) {
+                    rawUrls = matches.map(u => u.trim().replace(/['"]+$/, ''));
                 }
             }
 
-            if (isIndex) {
-                const proceed = confirm(`This is a Sitemap Index containing ${subSitemaps.length} sub-sitemaps. Do you want to fetch and merge all of them?`);
+            // Handle sitemap index
+            if (isIndex && subSitemaps.length > 0) {
+                const proceed = confirm(`This is a Sitemap Index with ${subSitemaps.length} sub-sitemaps.\n\nFetch and merge all of them? (Click Cancel to just view the list)`);
                 if (proceed) {
                     return fetchAllSubSitemaps(subSitemaps);
                 } else {
-                    rawUrls = subSitemaps; // Just show the sub-sitemap URLs
+                    rawUrls = subSitemaps;
                 }
             }
 
-            if(rawUrls.length === 0) return toast('No URLs found in input', 'error');
-            
-            toast(`Loaded ${rawUrls.length} URLs`, 'success');
+            if (rawUrls.length === 0) return toast('No URLs found in input', 'error');
+
+            toast(`Parsed ${rawUrls.length.toLocaleString()} URLs`, 'success');
             detectPatterns();
         }
 
         async function fetchAllSubSitemaps(urls) {
-            toast(`Fetching ${urls.length} sitemaps...`, 'success');
+            toast(`Fetching ${urls.length} sub-sitemaps...`, 'info');
             let combinedUrls = [];
             let failCount = 0;
-            let currentSitemaps = [...urls];
-            let processedSitemaps = new Set();
+            let queue = [...urls];
+            let processed = new Set();
 
-            const bulkFetch = async (url) => {
-                const proxies = [
-                    { url: `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`, type: 'text' },
-                    { url: `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`, type: 'json' },
-                    { url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`, type: 'text' },
-                    { url: `https://yacdn.org/proxy/${url}`, type: 'text' },
-                    { url: `https://corsproxy.io/?${encodeURIComponent(url)}`, type: 'text' },
-                    { url: `https://thingproxy.freeboard.io/fetch/${url}`, type: 'text' }
-                ];
+            while (queue.length > 0) {
+                const url = queue.shift();
+                if (processed.has(url)) continue;
+                processed.add(url);
 
-                for(let proxy of proxies) {
-                    try {
-                        const resp = await fetchWithTimeout(proxy.url, { timeout: 15000 });
-                        if(resp.ok) {
-                            let content = null;
-                            if (proxy.type === 'json') {
-                                const json = await resp.json();
-                                content = json.contents;
-                            } else {
-                                content = await resp.text();
-                            }
-                            if (content && content.length > 50) return content;
-                        }
-                    } catch(e) {}
-                }
-                return null;
-            };
-
-            // Recursive fetching for nested indexes
-            while (currentSitemaps.length > 0) {
-                const url = currentSitemaps.shift();
-                if (processedSitemaps.has(url)) continue;
-                processedSitemaps.add(url);
-
-                try {
-                    const text = await bulkFetch(url);
-                    if (text) {
-                        if (text.includes('<sitemapindex')) {
-                            const matches = text.match(/<loc>\s*(https?:\/\/[^<]+)\s*<\/loc>/gi) || [];
-                            const subSitemaps = matches.map(m => m.replace(/<\/?loc>/gi, '').trim());
-                            currentSitemaps.push(...subSitemaps);
-                            toast(`Found ${subSitemaps.length} more sitemaps in index`, 'success');
+                const result = await fetchViaProxy(url, 15000);
+                if (result && result.text) {
+                    if (result.text.includes('<sitemapindex') || result.text.includes('<sitemap>')) {
+                        if (result.text.includes('<url>')) {
+                            // Mixed: has both <sitemap> and <url>, extract <url> <loc>s
+                            const urlLocs = result.text.match(/<url>[\s\S]*?<loc>\s*(https?:\/\/[^<]+)\s*<\/loc>/gi) || [];
+                            const extracted = urlLocs.map(m => {
+                                const locMatch = m.match(/<loc>\s*(https?:\/\/[^<]+)\s*<\/loc>/i);
+                                return locMatch ? locMatch[1].trim() : null;
+                            }).filter(Boolean);
+                            combinedUrls.push(...extracted);
                         } else {
-                            const matches = text.match(/<loc>\s*(https?:\/\/[^<]+)\s*<\/loc>/gi) || [];
-                            const extracted = matches.map(m => m.replace(/<\/?loc>/gi, '').trim());
-                            combinedUrls = combinedUrls.concat(extracted);
+                            const matches = result.text.match(/<loc>\s*(https?:\/\/[^<]+)\s*<\/loc>/gi) || [];
+                            const subUrls = matches.map(m => m.replace(/<\/?loc>/gi, '').trim());
+                            queue.push(...subUrls);
+                            toast(`Found ${subUrls.length} more sub-sitemaps`, 'info');
                         }
                     } else {
-                        failCount++;
+                        const matches = result.text.match(/<loc>\s*(https?:\/\/[^<]+)\s*<\/loc>/gi) || [];
+                        combinedUrls.push(...matches.map(m => m.replace(/<\/?loc>/gi, '').trim()));
                     }
-                } catch (e) {
+                } else {
                     failCount++;
                 }
             }
 
-            rawUrls = [...new Set(combinedUrls)]; // Unique URLs
+            rawUrls = [...new Set(combinedUrls)];
             if (failCount > 0) {
-                toast(`Loaded ${rawUrls.length} URLs. ${failCount} sitemaps failed.`, 'warning');
+                toast(`Loaded ${rawUrls.length.toLocaleString()} URLs. ${failCount} sub-sitemap(s) failed.`, 'warning');
             } else {
-                toast(`Loaded ${rawUrls.length} URLs from ${processedSitemaps.size} sitemaps`, 'success');
+                toast(`Loaded ${rawUrls.length.toLocaleString()} URLs from ${processed.size} sitemaps`, 'success');
             }
             detectPatterns();
         }
 
+        // =============================================
+        // PATTERN DETECTION
+        // =============================================
         function detectPatterns() {
             const pathCounts = {};
             const prefixCounts = {};
@@ -643,8 +1473,8 @@
                     const urlObj = new URL(url);
                     const host = urlObj.hostname;
                     const pathParts = urlObj.pathname.split('/').filter(s => s.length > 0);
-                    
-                    if(/location|store|shop|branch|restaurant|place|locator|station|gas|petrol/i.test(host)) {
+
+                    if (/location|store|shop|branch|restaurant|place|locator|station|gas|petrol/i.test(host)) {
                         hostCounts['_host_root_'] = (hostCounts['_host_root_'] || 0) + 1;
                     }
 
@@ -655,13 +1485,10 @@
 
                     pathParts.forEach((seg, i) => {
                         const key = seg.toLowerCase();
-                        // Count exact segments that look like keywords
-                        if(/location|store|shop|branch|restaurant|place|locator|retail|station|service|gas|petrol|stop|find/i.test(key)) {
+                        if (/location|store|shop|branch|restaurant|place|locator|retail|station|service|gas|petrol|stop|find/i.test(key)) {
                             pathCounts[key] = (pathCounts[key] || 0) + 1;
                         }
-
-                        // Count common prefixes (e.g., "walgreens-")
-                        const prefixMatch = key.match(/^([a-z0-9]{3,}-)/i); // At least 3 chars before dash
+                        const prefixMatch = key.match(/^([a-z0-9]{3,}-)/i);
                         if (prefixMatch) {
                             const prefix = prefixMatch[1];
                             prefixCounts[prefix] = (prefixCounts[prefix] || 0) + 1;
@@ -672,52 +1499,49 @@
 
             const container = document.getElementById('patternContainer');
             container.innerHTML = '';
-            
-            // Add "All URLs" first
-            createPatternButton(container, 'Show Everything', '_root_', rawUrls.length);
 
-            if(hostCounts['_host_root_']) {
+            createPatternButton(container, 'All URLs', '_root_', rawUrls.length);
+
+            if (hostCounts['_host_root_']) {
                 createPatternButton(container, 'Domain Match', '_host_root_', hostCounts['_host_root_']);
             }
 
-            // Add keyword matches
-            const sortedPathKeys = Object.keys(pathCounts).sort((a,b) => pathCounts[b] - pathCounts[a]);
-            sortedPathKeys.slice(0, 5).forEach(key => {
+            const sortedPathKeys = Object.keys(pathCounts).sort((a, b) => pathCounts[b] - pathCounts[a]);
+            sortedPathKeys.slice(0, 6).forEach(key => {
                 createPatternButton(container, `/${key}`, { type: 'segment', val: key }, pathCounts[key]);
             });
 
-            // Add top-level directories if they appear in > 1% of URLs and aren't already there
             const sortedTopKeys = Object.keys(topLevelCounts)
                 .filter(k => topLevelCounts[k] > rawUrls.length * 0.01 && !pathCounts[k])
-                .sort((a,b) => topLevelCounts[b] - topLevelCounts[a]);
-
+                .sort((a, b) => topLevelCounts[b] - topLevelCounts[a]);
             sortedTopKeys.slice(0, 5).forEach(key => {
                 createPatternButton(container, `/${key}`, { type: 'segment', val: key }, topLevelCounts[key]);
             });
 
-            // Add prefix matches
             const sortedPrefixKeys = Object.keys(prefixCounts)
                 .filter(k => prefixCounts[k] > rawUrls.length * 0.02)
-                .sort((a,b) => prefixCounts[b] - prefixCounts[a]);
-
+                .sort((a, b) => prefixCounts[b] - prefixCounts[a]);
             sortedPrefixKeys.slice(0, 5).forEach(key => {
                 createPatternButton(container, `${key}*`, { type: 'prefix', val: key }, prefixCounts[key]);
             });
 
-            if(container.children.length > 1) {
-                container.children[1].click(); // Default to first detected pattern if any, else All
+            // Auto-select best pattern
+            if (container.children.length > 1) {
+                container.children[1].click();
             } else {
                 container.firstChild.click();
             }
-            
+
             document.getElementById('filterSection').classList.remove('hidden');
             document.getElementById('resultsSection').classList.remove('hidden');
+            // Smooth scroll to filter section
+            document.getElementById('filterSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         function createPatternButton(container, label, keyData, count) {
             const btn = document.createElement('button');
-            btn.className = 'pattern-segment px-4 py-2 text-sm font-mono border-r border-[var(--border)] last:border-r-0';
-            btn.textContent = `${label} (${count})`;
+            btn.className = 'pattern-segment';
+            btn.innerHTML = `${escapeHtml(label)} <span class="ml-1 opacity-60">(${count.toLocaleString()})</span>`;
             btn.onclick = () => {
                 Array.from(container.children).forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
@@ -728,14 +1552,11 @@
 
         function selectPattern(pattern) {
             currentPattern = pattern;
-            
-            // Adjust depth defaults based on pattern type
             if (pattern.type === 'prefix') {
-                 document.getElementById('depthSliderMin').value = 0;
+                document.getElementById('depthSliderMin').value = 0;
             } else {
-                 document.getElementById('depthSliderMin').value = 1;
+                document.getElementById('depthSliderMin').value = 1;
             }
-
             document.getElementById('depthSliderMax').value = 10;
             updateDepthLabels();
             processUrls();
@@ -746,19 +1567,22 @@
             document.getElementById('depthLabelMax').textContent = document.getElementById('depthSliderMax').value;
         }
 
+        // =============================================
+        // URL PROCESSING
+        // =============================================
         function processUrls() {
             const minDepth = parseInt(document.getElementById('depthSliderMin').value);
             const maxDepth = parseInt(document.getElementById('depthSliderMax').value);
             const excludeText = document.getElementById('excludeInput').value;
             const shouldAbbreviate = document.getElementById('abbreviateCheck').checked;
-            
+
             const excludeKeywords = excludeText.split(',').map(k => k.trim().toLowerCase()).filter(k => k);
 
             processedUrls = rawUrls.map(url => {
                 try {
                     const urlObj = new URL(url);
                     const parts = urlObj.pathname.split('/').filter(s => s.length > 0);
-                    
+
                     let idx = -1;
                     let targetSegments = parts;
 
@@ -772,7 +1596,6 @@
                     } else if (currentPattern.type === 'prefix') {
                         idx = parts.findIndex(p => p.toLowerCase().startsWith(currentPattern.val));
                         if (idx !== -1) {
-                            // In prefix mode, the matching segment itself IS often the location leaf
                             targetSegments = parts.slice(idx);
                         } else return { url, state: null, city: null, address: null, depth: 0, keep: false };
                     }
@@ -785,74 +1608,57 @@
                     let address = null;
                     let stateIdx = -1;
 
-                    // Strategy 1: Look for state in the WHOLE path
+                    // Strategy 1: Find state in whole path
                     parts.forEach((seg, i) => {
                         const s = detectState(seg);
-                        if (s) {
-                            state = s;
-                            stateIdx = i;
-                        }
+                        if (s) { state = s; stateIdx = i; }
                     });
 
-                    // Strategy 2: Heuristic for State/City/Address structure (e.g. /ca/bishop/address)
+                    // Strategy 2: State/City/Address heuristic
                     if (stateIdx !== -1 && stateIdx < parts.length - 1) {
                         let potentialCity = parts[stateIdx + 1];
-                        // Don't treat IDs as cities
                         if (!/^id=/.test(potentialCity) && !/^\d+\.html$/.test(potentialCity) && !/^\d+$/.test(potentialCity)) {
                             city = formatCity(potentialCity);
                         }
-                        
-                        // Strategy for Address: Everything after city that isn't an ID
+
                         if (stateIdx < parts.length - 2) {
                             let addrParts = [];
                             for (let i = stateIdx + 2; i < parts.length; i++) {
                                 let p = parts[i];
-                                // Skip common ID/extension patterns
-                                if (/^id=/.test(p) || /^id\d+/.test(p) || /^\d{3,}\.html$/.test(p) || /^p\d+/i.test(p) || /^store-\d+$/i.test(p)) {
-                                    break;
-                                }
-                                // Skip if purely a store ID (all numbers)
+                                if (/^id=/.test(p) || /^id\d+/.test(p) || /^\d{3,}\.html$/.test(p) || /^p\d+/i.test(p) || /^store-\d+$/i.test(p)) break;
                                 if (/^\d+$/.test(p)) break;
                                 addrParts.push(p);
                             }
-                            if (addrParts.length > 0) {
-                                address = formatCity(addrParts.join('-'));
-                            }
+                            if (addrParts.length > 0) address = formatCity(addrParts.join('-'));
                         }
                     }
 
-                    // Strategy 3: Look in target segments if city not found yet
-                    if (!city) {
-                        if (targetSegments.length >= 2) {
-                            const firstIsState = detectState(targetSegments[0]);
-                            if (firstIsState) {
-                                city = formatCity(targetSegments[1]);
-                                if (targetSegments.length > 2) {
-                                    let addrParts = [];
-                                    for (let i = 2; i < targetSegments.length; i++) {
-                                        let p = targetSegments[i];
-                                        if (/^id=/.test(p) || /^id\d+/.test(p) || /^\d{3,}\.html$/.test(p) || /^p\d+/i.test(p) || /^store-\d+$/i.test(p)) break;
-                                        if (/^\d+$/.test(p)) break;
-                                        addrParts.push(p);
-                                    }
-                                    if (addrParts.length > 0) {
-                                        address = formatCity(addrParts.join('-'));
-                                    }
+                    // Strategy 3: Look in target segments
+                    if (!city && targetSegments.length >= 2) {
+                        const firstIsState = detectState(targetSegments[0]);
+                        if (firstIsState) {
+                            city = formatCity(targetSegments[1]);
+                            if (targetSegments.length > 2) {
+                                let addrParts = [];
+                                for (let i = 2; i < targetSegments.length; i++) {
+                                    let p = targetSegments[i];
+                                    if (/^id=/.test(p) || /^id\d+/.test(p) || /^\d{3,}\.html$/.test(p) || /^p\d+/i.test(p) || /^store-\d+$/i.test(p)) break;
+                                    if (/^\d+$/.test(p)) break;
+                                    addrParts.push(p);
                                 }
+                                if (addrParts.length > 0) address = formatCity(addrParts.join('-'));
                             }
                         }
                     }
 
-                    // Fallback for city: Prefer the longest non-ID segment that isn't the state
+                    // Fallback: Longest non-ID segment
                     if (!city) {
                         const cityCandidate = [...targetSegments].reverse().find(s => {
                             if (s.includes('id=') || /^\d+$/.test(s)) return false;
                             if (detectState(s)) return false;
                             return true;
                         });
-                        if (cityCandidate) {
-                            city = formatCity(cityCandidate);
-                        }
+                        if (cityCandidate) city = formatCity(cityCandidate);
                     }
 
                     if (shouldAbbreviate && state && state.length > 2) {
@@ -862,8 +1668,8 @@
                     return {
                         url,
                         state: state ? state.toUpperCase() : null,
-                        city: city,
-                        address: address,
+                        city,
+                        address,
                         depth,
                         keep: depth >= minDepth && depth <= maxDepth
                     };
@@ -872,15 +1678,12 @@
                 }
             })
             .filter(item => {
-                if (!item.keep) return true; // Keep for stats but mark as filtered
-                
-                // Check exclusions
-                const path = new URL(item.url).pathname.toLowerCase();
-                const hasExcludedKeyword = excludeKeywords.some(k => path.includes(`/${k}`) || path.includes(`/${k}/`));
-                
-                if (hasExcludedKeyword) {
-                    item.keep = false;
-                }
+                if (!item.keep) return true;
+                try {
+                    const path = new URL(item.url).pathname.toLowerCase();
+                    const hasExcluded = excludeKeywords.some(k => path.includes(`/${k}`) || path.includes(`-${k}-`));
+                    if (hasExcluded) item.keep = false;
+                } catch(e) {}
                 return true;
             });
 
@@ -891,7 +1694,6 @@
         function updateStats() {
             const found = processedUrls.filter(u => u.keep);
             const states = new Set(found.map(u => u.state).filter(Boolean));
-
             document.getElementById('statTotal').textContent = rawUrls.length.toLocaleString();
             document.getElementById('statFound').textContent = found.length.toLocaleString();
             document.getElementById('statFiltered').textContent = (rawUrls.length - found.length).toLocaleString();
@@ -902,13 +1704,13 @@
             const search = document.getElementById('searchInput').value.toLowerCase();
             let list = processedUrls.filter(u => showAll || u.keep);
 
-            if(search) {
+            if (search) {
                 list = list.filter(u =>
-                                   u.url.toLowerCase().includes(search) ||
-                                   (u.state && u.state.toLowerCase().includes(search)) ||
-                                   (u.city && u.city.toLowerCase().includes(search)) ||
-                                   (u.address && u.address.toLowerCase().includes(search))
-                                  );
+                    u.url.toLowerCase().includes(search) ||
+                    (u.state && u.state.toLowerCase().includes(search)) ||
+                    (u.city && u.city.toLowerCase().includes(search)) ||
+                    (u.address && u.address.toLowerCase().includes(search))
+                );
             }
 
             const total = list.length;
@@ -919,134 +1721,158 @@
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = slice.map((u, i) => `
                 <tr class="${u.keep ? '' : 'opacity-40'}">
-                    <td class="font-mono text-[var(--fg-muted)] text-xs">${start+i+1}</td>
-                    <td class="font-mono text-xs ${u.keep ? 'text-[var(--accent)]' : 'line-through'} break-all max-w-md">${u.url}</td>
-                    <td class="font-mono text-xs">${u.state || '-'}</td>
-                    <td class="text-xs">${u.city || '-'}</td>
-                    <td class="text-xs">${u.address || '-'}</td>
-                    <td class="text-center text-xs font-mono">${u.depth}</td>
+                    <td class="font-mono text-xs" style="color:var(--fg-dim);">${start + i + 1}</td>
+                    <td class="font-mono text-xs ${u.keep ? '' : 'line-through'} break-all max-w-md" style="color:${u.keep ? 'var(--accent)' : 'var(--fg-dim)'};"><a href="${escapeHtml(u.url)}" target="_blank" rel="noopener" class="hover:underline">${escapeHtml(u.url)}</a></td>
+                    <td class="font-mono text-xs">${u.state ? `<span class="badge badge-accent">${u.state}</span>` : '<span style="color:var(--fg-dim);">—</span>'}</td>
+                    <td class="text-xs font-medium">${u.city || '<span style="color:var(--fg-dim);">—</span>'}</td>
+                    <td class="text-xs" style="color:var(--fg-muted);">${u.address || '<span style="color:var(--fg-dim);">—</span>'}</td>
+                    <td class="text-center font-mono text-xs" style="color:var(--fg-dim);">${u.depth}</td>
                 </tr>
             `).join('');
 
-            document.getElementById('pageInfo').textContent = `Showing ${start+1}-${end} of ${total}`;
+            document.getElementById('pageInfo').textContent = total > 0
+                ? `Showing ${start + 1}-${end} of ${total.toLocaleString()}`
+                : 'No results';
         }
 
-        // --- Actions ---
-
+        // =============================================
+        // ACTIONS
+        // =============================================
         function toggleView() {
             showAll = !showAll;
-            document.getElementById('viewToggle').textContent = showAll ? 'Show Locations Only' : 'Show All URLs (Including Filtered)';
+            document.getElementById('viewToggle').textContent = showAll ? 'Show Locations Only' : 'Show Filtered Out';
             page = 0;
             renderTable();
         }
 
         function changePage(dir) {
-            page += dir;
-            renderTable();
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            let list = processedUrls.filter(u => showAll || u.keep);
+            if (search) {
+                list = list.filter(u =>
+                    u.url.toLowerCase().includes(search) ||
+                    (u.state && u.state.toLowerCase().includes(search)) ||
+                    (u.city && u.city.toLowerCase().includes(search))
+                );
+            }
+            const maxPage = Math.floor(list.length / perPage);
+            const newPage = page + dir;
+            if (newPage >= 0 && newPage <= maxPage) {
+                page = newPage;
+                renderTable();
+            }
         }
 
         function generateCSV() {
             const data = processedUrls.filter(u => u.keep);
-            if(data.length === 0) return null;
-
+            if (data.length === 0) return null;
             let csv = 'URL,State,City,Address\n';
             data.forEach(u => {
-                const safeUrl = u.url.includes(',') ? `"${u.url}"` : u.url;
-                const safeState = u.state || '';
-                const safeCity = u.city ? (u.city.includes(',') ? `"${u.city}"` : u.city) : '';
-                const safeAddress = u.address ? (u.address.includes(',') ? `"${u.address}"` : u.address) : '';
-                csv += `${safeUrl},${safeState},${safeCity},${safeAddress}\n`;
+                csv += [
+                    u.url.includes(',') ? `"${u.url}"` : u.url,
+                    u.state || '',
+                    u.city ? (u.city.includes(',') ? `"${u.city}"` : u.city) : '',
+                    u.address ? (u.address.includes(',') ? `"${u.address}"` : u.address) : ''
+                ].join(',') + '\n';
             });
             return csv;
         }
 
         function handleExport() {
             const csv = generateCSV();
-            if(!csv) return toast('No locations to export', 'error');
-
+            if (!csv) return toast('No locations to export', 'error');
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = 'locations.csv';
+            const domain = rawUrls.length > 0 ? new URL(rawUrls[0]).hostname : 'sitemap';
+            link.download = `${domain}-locations.csv`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-
-            toast(`Exported ${processedUrls.filter(u=>u.keep).length} locations`, 'success');
+            toast(`Exported ${processedUrls.filter(u => u.keep).length.toLocaleString()} locations`, 'success');
         }
 
         function handleCopy() {
             const csv = generateCSV();
-            if(!csv) return toast('No locations to copy', 'error');
-
+            if (!csv) return toast('No locations to copy', 'error');
             navigator.clipboard.writeText(csv).then(() => {
-                toast('CSV data copied to clipboard!', 'success');
-            }).catch(err => {
-                console.error('Failed to copy:', err);
-                toast('Failed to copy', 'error');
-            });
+                toast('CSV copied to clipboard', 'success');
+            }).catch(() => toast('Failed to copy', 'error'));
         }
 
-        function fillExample(type = 'mcdonalds') {
-            let example = '';
-            if (type === 'mcdonalds') {
-                example = `<url>
-<loc>https://www.mcdonalds.com/us/en-us/location/mi/standish/515-s-us-hwy-23/5568.html</loc>
-<changefreq>daily</changefreq>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://www.mcdonalds.com/us/en-us/location/va/chesapeake/3212-western-branch-blvd/1384.html</loc>
-<changefreq>daily</changefreq>
-<priority>0.8</priority>
-</url>`;
-            } else if (type === 'walgreens') {
-                example = `<?xml version="1.0" encoding="UTF-8"?>
+        function handleReset() {
+            if (!confirm('Reset everything and start over?')) return;
+            rawUrls = [];
+            processedUrls = [];
+            discoveredSitemaps = [];
+            discoveredRobotsTxt = null;
+            currentPattern = '';
+            page = 0;
+            showAll = false;
+            document.getElementById('domainInput').value = '';
+            document.getElementById('urlInput').value = '';
+            document.getElementById('pasteInput').value = '';
+            document.getElementById('searchInput').value = '';
+            document.getElementById('filterSection').classList.add('hidden');
+            document.getElementById('resultsSection').classList.add('hidden');
+            document.getElementById('discoveryResults').classList.add('hidden');
+            document.getElementById('robotsSection').classList.add('hidden');
+            document.getElementById('sitemapGrid').innerHTML = '';
+            document.getElementById('tableBody').innerHTML = '';
+            toast('Reset complete', 'info');
+        }
+
+        // =============================================
+        // EXAMPLES
+        // =============================================
+        function fillExample(type) {
+            const examples = {
+                mcdonalds: `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<url><loc>https://www.mcdonalds.com/us/en-us/location/mi/standish/515-s-us-hwy-23/5568.html</loc></url>
+<url><loc>https://www.mcdonalds.com/us/en-us/location/va/chesapeake/3212-western-branch-blvd/1384.html</loc></url>
+<url><loc>https://www.mcdonalds.com/us/en-us/location/ca/los-angeles/1234-wilshire-blvd/9021.html</loc></url>
+<url><loc>https://www.mcdonalds.com/us/en-us/location/tx/houston/4567-main-st/3301.html</loc></url>
+<url><loc>https://www.mcdonalds.com/us/en-us/location/ny/new-york/89-times-square/1001.html</loc></url>
+<url><loc>https://www.mcdonalds.com/us/en-us/about</loc></url>
+</urlset>`,
+                walgreens: `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://www.walgreens.com/locator/walgreens-13260+josey+ln-farmers+branch-tx-75234/id=5509</loc></url>
   <url><loc>https://www.walgreens.com/locator/walgreens-611+burnt+store+rd+s-cape+coral-fl-33991/id=1234</loc></url>
   <url><loc>https://www.walgreens.com/locator/walgreens-18993+munchy+branch+rd-rehoboth+beach-de-19971/id=5678</loc></url>
   <url><loc>https://www.walgreens.com/about</loc></url>
-</urlset>`;
-            } else {
-                example = `https://stations.sinclairoil.com/ca/bishop/586-n-main-st
-https://stations.sinclairoil.com/ca/paradise/8229-skyway-rd
-https://stations.sinclairoil.com/id/paul/9-east-ellis
-https://stations.sinclairoil.com/ia/swea-city/101-4th-ave-w
-https://stations.sinclairoil.com/ca/bishop
-https://stations.sinclairoil.com/ca/paradise`;
-            }
-            document.getElementById('pasteInput').value = example;
+</urlset>`
+            };
+            document.getElementById('pasteInput').value = examples[type] || '';
             handlePaste();
         }
 
-        // --- Utils ---
-
+        // =============================================
+        // UTILITIES
+        // =============================================
         function detectState(seg) {
             if (!seg) return null;
             const s = seg.toLowerCase();
             const states = Object.values(stateMap);
 
-            // 1. Look for State-Zip pattern (e.g. "-tx-75234") - Very High Confidence
+            // State-Zip pattern
             const zipMatch = s.match(/[-_+/]([a-z]{2})[-_+/]\d{5}/i) || s.match(/^([a-z]{2})[-_+/]\d{5}/i);
             if (zipMatch && states.includes(zipMatch[1].toUpperCase())) return zipMatch[1].toUpperCase();
 
-            // 2. Check for full names as whole words
+            // Full state names
             for (let name in stateMap) {
                 const nameSlug = name.replace(/\s+/g, '[-_+ ]');
                 const regex = new RegExp(`(^|[-_+/.])${nameSlug}($|[-_+/.])`, 'i');
                 if (regex.test(s)) return stateMap[name];
             }
 
-            // 3. Check for abbreviations as whole segments or surrounded by separators
+            // 2-letter abbreviations
             const words = s.split(/[-_+/.]/);
             for (let i = words.length - 1; i >= 0; i--) {
                 const word = words[i].toUpperCase();
                 if (word.length === 2 && states.includes(word)) {
                     const skip = ['TO', 'BY', 'IS', 'OF', 'ON', 'AT', 'ST', 'RD', 'DR', 'LN', 'AV', 'US', 'WE', 'MY', 'NO', 'SO'];
-                    if (!skip.includes(word)) {
-                        return word;
-                    }
+                    if (!skip.includes(word)) return word;
                 }
             }
 
@@ -1055,24 +1881,16 @@ https://stations.sinclairoil.com/ca/paradise`;
 
         function formatCity(seg) {
             if (!seg) return null;
-            // Clean up common URL artifacts
             let clean = seg.split('?')[0].split('#')[0]
-                .replace(/^(walgreens|store|location|station|branch|shop)-/i, '')
+                .replace(/^(walgreens|store|location|station|branch|shop|mcdonalds|tacobell|burger-king)-/i, '')
                 .replace(/[+\-_]/g, ' ')
                 .trim();
 
-            // Remove state code/zip if it's at the end (e.g. "houston-tx-77001" or "houston-tx")
             const words = clean.split(' ');
             const states = Object.values(stateMap);
-
-            // Pop Zip
-            if (words.length > 0 && /^\d{5}(-\d{4})?$/.test(words[words.length - 1])) {
-                words.pop();
-            }
-            // Pop State
-            if (words.length > 0 && states.includes(words[words.length - 1].toUpperCase())) {
-                words.pop();
-            }
+            if (words.length > 0 && /^\d{5}(-\d{4})?$/.test(words[words.length - 1])) words.pop();
+            if (words.length > 0 && states.includes(words[words.length - 1].toUpperCase())) words.pop();
+            if (words.length > 0 && /^\d+\.html$/.test(words[words.length - 1])) words.pop();
 
             return toTitleCase(words.join(' '));
         }
@@ -1080,18 +1898,17 @@ https://stations.sinclairoil.com/ca/paradise`;
         function toTitleCase(str) {
             if (!str) return '';
             return str.replace(/\w\S*/g, txt => {
-                if (txt.toUpperCase() === 'US') return 'US'; // Preserve US as an abbreviation
+                if (txt.toUpperCase() === 'US') return 'US';
                 return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
             });
         }
 
-        function toast(msg, type) {
-            const el = document.createElement('div');
-            el.className = `toast toast-${type}`;
-            el.textContent = msg;
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 3000);
+        function escapeHtml(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
         }
     </script>
-    </body>
+</body>
 </html>
